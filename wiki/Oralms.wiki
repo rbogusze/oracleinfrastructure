@@ -4,4 +4,8 @@ ORALMS (ORacle ALert log Monitoring S?) Alert log monitoring. This is the real t
 
 It became a habit for me to constantly watch the alert log of the database I was responsible for. Simple {{{tail -f}}} was sufficient. As the nuber of databases has grown in time I needed a central console that will allow me to see the logs from many places in one console.
 
-This is how this project was born. To consolidate many 
+This is how this project was born. To consolidate many {{{tail -f}}} from lots of databases.
+
+The implementation is rather simple. I use low priviledged account that is able to login to host with database and do a remote {{{tail -f}}}, format the output and present it locally. Probably this should be done with syslog or other tool already there for the job.
+
+Anyway this is what works for me.
