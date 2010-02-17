@@ -1,5 +1,5 @@
 #summary Implementing LDAP for Oracle
 
-At the beginning there was tnsnames.ora. It was sufficient for few static databases. LDAP is for Oracle Database what DNS is for hosts. You ask for name and it gives you the connection description.
+At the beginning there was tnsnames.ora. It was sufficient for few static databases. LDAP is for Oracle Database what DNS is for /etc/hosts. You ask for name and it gives you the connection description.
 
 As an additional, but very importane feature you can store additional attributes that are related to the database. I extensively use this feature. Many projects that I use have its own attributes that are related to database.
