@@ -1,6 +1,10 @@
-dn: cn=TEST1,dc=orainf,dc=com
+dn: cn=OracleContext,dc=orainf,dc=com
+objectClass: orclContext
+cn: OracleContext
+
+dn: cn=TEST2,cn=OracleContext,dc=orainf,dc=com
 objectClass: orclService
-cn: TEST1
+cn: TEST2
 orclOracleHome: /TEST/u01/app/oracle/product/10.2
 orclNetDescString: (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))
 orclVersion: 10.2.0.4
