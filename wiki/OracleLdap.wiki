@@ -7,6 +7,7 @@ As an additional, but very importane feature you can store additional attributes
 =Install LDAP=
 Nice links:
  * http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-ldap-quickstart.html
+
 {{{
 # yum install openldap openldap-servers openldap-clients
 }}}
@@ -23,36 +24,39 @@ Include the main ldap configuration
 # ln -s /home/oi_ldap/slapd.conf .
 }}}
 Change the LDAP Password by editing
+{{{
 # vi /home/oi_ldap/slapd.conf
 rootpw          secret
 
 # /etc/init.d/ldap restart
 # cd /home/oi_ldap/
 # ldapadd -x -D "cn=Manager,dc=orainf,dc=com" -W -f orainf.ldif
-
+}}}
 See if it works
+{{{
 # ldapsearch -x -b 'dc=orainf,dc=com' '(objectclass=*)'
-
+}}}
 Add example entries
+{{{
 # ldapadd -x -D "cn=Manager,dc=orainf,dc=com" -W -f example.ldif
-
+}}}
 Download ldapvi to edit entries in ldap
+{{{
 # wget http://dag.wieers.com/rpm/packages/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.i386.rpm
 # rpm -i rpmforge-release-0.3.6-1.el4.rf.i386.rpm
 # yum install ldapvi
 
 # ldapvi -D "cn=Manager,dc=orainf,dc=com" --host orainf --discover
-
+}}}
 Or / And GUI browser, eg jxplorer
 
-
 Install java from
+{{{
 http://www.java.com/en/download/linux_manual.jsp
 # mkdir /usr/java/
 # cd /usr/java/
 # chmod 755 jre-6u18-linux-i586-rpm.bin
 # ./jre-6u18-linux-i586-rpm.bin
-
 
 http://jxplorer.org/
 # ./JXv3.2_install_linux.bin
@@ -65,14 +69,17 @@ Base DN: <leave empty>
 Level: User + Password
 User DN: cn=Manager,dc=orainf,dc=com
 Password: secret
-
+}}}
 Now you can use a GUI to edit LDAP attributes.
 
 Install oracle client on orainf host uder orainf user
+{{{
 # adduser orainf
 # passwd orainf
 
 Login as orainf, install oracle client
+{{{
+Download 10201_client_linux32.zip from Oracle
 
 $ ./runInstaller
 Select Installation Type -> Administrator
@@ -86,18 +93,22 @@ export ORACLE_HOME=$ORACLE_BASE/product/10.2.0
 export TNS_ADMIN=$ORACLE_HOME/network/admin
 export PATH=$PATH:$ORACLE_HOME/bin
 export LD_LIBRARY_PATH=$ORACLE_HOME/lib
-
+}}}
 
 Perform standard tnsnames configuration to make sure that networking is fine.
+{{{
 $ cd ~/oracle/product/10.2.0/network/admin/
 $ echo "TEST2=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))" >> tnsnames.ora
-
+}}}
 Try to connect to listener on host2
+{{{
 $ tnsping TEST2
 should be OK
-
+}}}
 Now if we are sure that we can connect, lets connect using LDAP as a provider for network description.
+{{{
 $ cd $TNS_ADMIN
+$ mv tnsnames.ora tnsnames.ora_before_ldap
 $ vi sqlnet.ora
 NAMES.DIRECTORY_PATH= (LDAP,TNSNAMES)
 
@@ -109,10 +120,10 @@ DIRECTORY_SERVER_TYPE = OID
 Try to connect to listener on host2
 $ tnsping TEST2
 should be OK
+}}}
 
-
-** troubleschooting
-*** slaptest: bad configuration file!
+==troubleschooting==
+===slaptest: bad configuration file!===
 # /etc/init.d/ldap restart
 Checking configuration files for slapd:  slaptest: bad configuration file! [FAILED]
 
@@ -122,7 +133,7 @@ config file testing succeeded
 
 Solution: make sure that the whole path to configuration file is accesible to ldap user
 
-*** tnsping does not work with ldap
+===tnsping does not work with ldap===
 $ tnsping TEST2
 TNS-03505: Failed to resolve name
 
