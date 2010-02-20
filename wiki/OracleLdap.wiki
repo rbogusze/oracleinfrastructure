@@ -76,7 +76,7 @@ Install oracle client on orainf host uder orainf user
 {{{
 # adduser orainf
 # passwd orainf
-
+}}}
 Login as orainf, install oracle client
 {{{
 Download 10201_client_linux32.zip from Oracle
