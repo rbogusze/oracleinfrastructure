@@ -1,0 +1,3 @@
+dn: cn=TEST1,dc=orainf,dc=com
+objectClass: orclService
+orclOracleHome: /HP_42_OL/u01/app/oracle/product/9.2.0
