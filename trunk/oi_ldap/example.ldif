@@ -1,5 +1,6 @@
 dn: cn=TEST1,dc=orainf,dc=com
 objectClass: orclService
+cn: TEST1
 orclOracleHome: /TEST/u01/app/oracle/product/10.2
 orclNetDescString: (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))
 orclVersion: 10.2.0.4
