@@ -1,3 +1,6 @@
 dn: cn=TEST1,dc=orainf,dc=com
 objectClass: orclService
-orclOracleHome: /HP_42_OL/u01/app/oracle/product/9.2.0
+orclOracleHome: /TEST/u01/app/oracle/product/10.2
+orclNetDescString: (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))
+orclVersion: 10.2.0.4
+orclSystemName: host2
