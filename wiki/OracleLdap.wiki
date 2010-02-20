@@ -3,3 +3,134 @@
 At the beginning there was tnsnames.ora. It was sufficient for few static databases. LDAP is for Oracle Database what DNS is for /etc/hosts. You ask for name and it gives you the connection description.
 
 As an additional, but very importane feature you can store additional attributes that are related to the database. I extensively use this feature. Many projects that I use have its own attributes that are related to database.
+
+=Install LDAP=
+Nice links:
+ * http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-ldap-quickstart.html
+{{{
+# yum install openldap openldap-servers openldap-clients
+}}}
+
+Configure ldap to be used as Oracle repository for service names
+{{{
+# cd /home
+# svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_ldap oi_ldap 
+}}}
+Include the main ldap configuration
+{{{
+# cd /etc/openldap/
+# mv slapd.conf slapd.conf_org
+# ln -s /home/oi_ldap/slapd.conf .
+}}}
+Change the LDAP Password by editing
+# vi /home/oi_ldap/slapd.conf
+rootpw          secret
+
+# /etc/init.d/ldap restart
+# cd /home/oi_ldap/
+# ldapadd -x -D "cn=Manager,dc=orainf,dc=com" -W -f orainf.ldif
+
+See if it works
+# ldapsearch -x -b 'dc=orainf,dc=com' '(objectclass=*)'
+
+Add example entries
+# ldapadd -x -D "cn=Manager,dc=orainf,dc=com" -W -f example.ldif
+
+Download ldapvi to edit entries in ldap
+# wget http://dag.wieers.com/rpm/packages/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.i386.rpm
+# rpm -i rpmforge-release-0.3.6-1.el4.rf.i386.rpm
+# yum install ldapvi
+
+# ldapvi -D "cn=Manager,dc=orainf,dc=com" --host orainf --discover
+
+Or / And GUI browser, eg jxplorer
+
+
+Install java from
+http://www.java.com/en/download/linux_manual.jsp
+# mkdir /usr/java/
+# cd /usr/java/
+# chmod 755 jre-6u18-linux-i586-rpm.bin
+# ./jre-6u18-linux-i586-rpm.bin
+
+
+http://jxplorer.org/
+# ./JXv3.2_install_linux.bin
+Install into /usr/JXplorer
+
+Connection:
+Host: orainf Port: 389
+Protocol: LDAP v3
+Base DN: <leave empty>
+Level: User + Password
+User DN: cn=Manager,dc=orainf,dc=com
+Password: secret
+
+Now you can use a GUI to edit LDAP attributes.
+
+Install oracle client on orainf host uder orainf user
+# adduser orainf
+# passwd orainf
+
+Login as orainf, install oracle client
+
+$ ./runInstaller
+Select Installation Type -> Administrator
+Path: /home/orainf/oracle/product/10.2.0
+Mark: Perform typical configuration on Net Conf Assistant
+
+Set environment
+$ vi .bash_profile
+export ORACLE_BASE=/home/orainf/oracle
+export ORACLE_HOME=$ORACLE_BASE/product/10.2.0
+export TNS_ADMIN=$ORACLE_HOME/network/admin
+export PATH=$PATH:$ORACLE_HOME/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+
+
+Perform standard tnsnames configuration to make sure that networking is fine.
+$ cd ~/oracle/product/10.2.0/network/admin/
+$ echo "TEST2=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))" >> tnsnames.ora
+
+Try to connect to listener on host2
+$ tnsping TEST2
+should be OK
+
+Now if we are sure that we can connect, lets connect using LDAP as a provider for network description.
+$ cd $TNS_ADMIN
+$ vi sqlnet.ora
+NAMES.DIRECTORY_PATH= (LDAP,TNSNAMES)
+
+$ vi ldap.ora
+DEFAULT_ADMIN_CONTEXT = "dc=orainf, dc=com"
+DIRECTORY_SERVERS = (orainf:389:636)
+DIRECTORY_SERVER_TYPE = OID
+
+Try to connect to listener on host2
+$ tnsping TEST2
+should be OK
+
+
+** troubleschooting
+*** slaptest: bad configuration file!
+# /etc/init.d/ldap restart
+Checking configuration files for slapd:  slaptest: bad configuration file! [FAILED]
+
+But
+# slaptest -f orainf.schema 
+config file testing succeeded
+
+Solution: make sure that the whole path to configuration file is accesible to ldap user
+
+*** tnsping does not work with ldap
+$ tnsping TEST2
+TNS-03505: Failed to resolve name
+
+You can try to enable network tracing using
+# netmgr
+
+In my case it turned out that 
+Quering the directory for dn: cn=TEST2,cn=OracleContext,dc=orainf, dc=com
+and I was prepared for cn=TEST2,dc=orainf, dc=com
+
+whis was caused by error in LDAP configuration
