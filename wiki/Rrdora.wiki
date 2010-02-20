@@ -1,0 +1,3 @@
+#summary Looking at the database waits - the easy way
+
+For a long time (since at least version 8) the Oracle RDBMS has provided valuable information that allowed 
