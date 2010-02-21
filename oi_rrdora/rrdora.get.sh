@@ -9,8 +9,7 @@
 # Oracle databases in the dblistfile
 #
 # Load the environment file
-#. /home/oracle9/rrdora.1.0/rrdora.env
-. /OEMREP/u01/app/oracle/product/9.2.0/rrdora.1.0/rrdora.env
+. /home/orainf/oi_rrdora/rrdora.env
 
 # Check for already running instance
 LOCKFILE=/tmp/rrdora.get.sh.lock
@@ -26,8 +25,8 @@ touch $LOCKFILE
 
 
 # Redirect output to logfile
-#exec 1>> $BASE/logs/rrdora.get.log 2>&1
-exec 1>> /dev/null 2>&1
+exec 1>> $BASE/logs/rrdora.get.log 2>&1
+#exec 1>> /dev/null 2>&1
 echo "(`date`) : Start"
 
 # Check if the dblistfile is passed
