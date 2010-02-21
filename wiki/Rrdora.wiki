@@ -1,6 +1,6 @@
 #summary Looking at the database waits - the easy way
 
-http://oracleinfrastructure.googlecode.com/files/rrdora.png
+<img src="http://oracleinfrastructure.googlecode.com/files/rrdora.png" width='648' height='506' />
 
 For a long time (since at least version 8) the Oracle RDBMS has provided the waits interface that allowed an administrator to actually see where the time is spend during the query execution. 
 
