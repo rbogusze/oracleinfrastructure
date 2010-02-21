@@ -47,7 +47,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2hour_downtime.gif --start -7200 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last 2 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -57,7 +56,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/4hour_downtime.gif --start -14400 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last 4 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime" 
@@ -67,7 +65,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/8hour_downtime.gif --start -28800 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last 8 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -77,7 +74,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/12hour_downtime.gif --start -43200 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last 12 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -87,7 +83,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/day_downtime.gif --start -86400 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last 24 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -97,7 +92,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/week_downtime.gif --start -604800 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last week (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime" 
@@ -107,7 +101,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2week_downtime.gif --start -1314000 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last 2 weeks (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -117,7 +110,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/month_downtime.gif --start -2628000 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last month (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -127,7 +119,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/6month_downtime.gif --start -15768000 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime 6 months (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -137,7 +128,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/year_downtime.gif --start -31536000 \
          --no-legend \
          --lower-limit 0 \
          --upper-limit 1 \
-         --unit 1 \
          --title="Downtime last year (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/downtime.rrd:downtime:AVERAGE \
          AREA:A\#FF0000:"Downtime"
@@ -146,7 +136,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/year_downtime.gif --start -31536000 \
 echo "(`date`) : .....sessions"
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2hour_sessions.gif --start -7200 \
          --lower-limit 0 \
-         --unit 1 \
          --vertical-label max=$MAXPROC \
          --title="Number of sessions last 2 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
@@ -157,7 +146,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2hour_sessions.gif --start -7200 \
          STACK:C\#330099:"Idle" 
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/4hour_sessions.gif --start -14400 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last 4 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
@@ -167,7 +155,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/4hour_sessions.gif --start -14400 \
          STACK:C\#330099:"Idle" 
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/8hour_sessions.gif --start -28800 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last 8 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          HRULE:${MAXPROC}\#FF0000:Maximum \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
@@ -178,7 +165,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/8hour_sessions.gif --start -28800 \
          STACK:C\#330099:"Idle" 
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/12hour_sessions.gif --start -43200 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last 12 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
@@ -188,7 +174,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/12hour_sessions.gif --start -43200 \
          STACK:C\#330099:"Idle" 
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/day_sessions.gif --start -86400 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last 24 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
@@ -198,7 +183,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/day_sessions.gif --start -86400 \
          STACK:C\#330099:"Idle" 
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/week_sessions.gif --start -604800 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last week (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
@@ -208,7 +192,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/week_sessions.gif --start -604800 \
          STACK:C\#330099:"Idle"
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2week_sessions.gif --start -1314000 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last 2 weeks (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
@@ -218,7 +201,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2week_sessions.gif --start -1314000 \
          STACK:C\#330099:"Idle"
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/month_sessions.gif --start -2628000 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last month (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
@@ -228,7 +210,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/month_sessions.gif --start -2628000 \
          STACK:C\#330099:"Idle" 
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/6month_sessions.gif --start -15768000 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) 6 months (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
@@ -238,7 +219,6 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/6month_sessions.gif --start -15768000 \
          STACK:C\#330099:"Idle" 
 $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/year_sessions.gif --start -31536000 \
          --lower-limit 0 \
-         --unit 1 \
          --title="Number of sessions (max=$MAXPROC) last year (`date '+%d-%m-%Y %H:%M:%S'`)" \
          DEF:A=${BASE}/${DBNAME}/sessions.rrd:system:AVERAGE \
          DEF:B=${BASE}/${DBNAME}/sessions.rrd:active:AVERAGE \
