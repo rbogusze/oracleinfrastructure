@@ -10,3 +10,138 @@ I modified a bit the rrdora:
   * added new page with selected statistics from all databases on one page
 
 I tried to contact the author but and discuss my additions, but received no response. Due to the GNU GPL license I provide the source code with my additions.
+
+Please note, it is assumed that the databases beeing monitored have a user that is able to connect to database and select instance statistics. For the sake of simplicity and previous experiences I use the user perfstat available after installing statspack. Althou superseeded in 10g by AWR reports can still be used simultaniusly.
+
+To install statspack do (in examples below I use password: perfstat):
+{{{
+$ sqlplus / as sysdba
+> @?/rdbms/admin/spcreate
+}}}
+
+Download the rrdora code
+{{{
+$ cd
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_rrdora oi_rrdora
+$ mkdir oi_rrdora/logs
+}}}
+
+Install the http server
+{{{
+# yum install httpd
+}}}
+
+To enable the httpd to see the web pages I put under /var/www edit /etc/httpd
+{{{
+/conf/httpd.conf and replace
+DocumentRoot "/var/www/html"
+with
+DocumentRoot "/var/www"
+
+# service httpd start
+# yum install rrdtool
+
+# mkdir /var/www/rrdora
+# chown orainf:orainf /var/www/rrdora
+}}}
+
+The provided rrdora.dblist contains a static TEST2 entry, lets try to run with that for to see if rrdora works in its simple configuration.
+
+To populate the round-robin database that stores the waits statistics run:
+{{{
+$ ./rrdora.rrd.sh rrdora.dblist
+}}}
+
+Lets run the statistics gathering
+{{{
+$ ./rrdora.get.sh rrdora.dblist
+}}}
+
+Lets generate the images for web page
+{{{
+$ ./rrdora.img.sh rrdora.dblist
+}}}
+
+Wait 5min and repeat the statistics images gathering.
+
+Note: each of the executables: rrdora.get.sh, rrdora.img.sh, rrdora.rrd.sh has by default logging to oi_rrdora/logs enabled. They can generate substantial amount of data. If you make sure that everything is fine turn the off. This can be done by editing each script.
+
+OK, now we should see a nice page uder
+http://orainf/rrdora/ - with scope for one database, and under
+http://orainf/rrdora/index2.html - with scope for one statistic through all databases
+
+So far we have only one database, so this may seem not usefull, but with dozens of databases to manage a fast first look at statistics here presented can give you and impression of where the problem lies and quickly point to right further investigation.
+
+Now we will add special LDAP attributes that will determine whether that certain database should be monitored using rrdora. Next step will be a generation of now static rrdora.dblist file that determines what databases are monitored. This will be done based on LDAP configuration.
+
+Adding rrdora specific LDAP attributes. This is why I like LDAP, I can add attributes that are connected to database and that allows me to control utilities that talk to databases.
+
+|| orainfDbRrdoraMonitoring = || TRUE/FALSE - determines whether we consider that DB for rrdora monitoring ||
+|| orainfDbRrdoraUser = || USERNAME - user used to connect to database ||
+
+{{{
+$ ldapvi -D "cn=Manager,dc=orainf,dc=com" --host orainf --discover
+Add two attributes to cn=TEST2,cn=OracleContext,dc=orainf,dc=com:
+orainfDbRrdoraMonitoring: TRUE
+orainfDbRrdoraUser: perfstat
+}}}
+
+Now we need to be able to generate dynamically the rrdora.dblist based on the info from LDAP. 
+
+To be able to ask the LDAP from bash I created a wrapper which contains the connection information to LDAP server. That way when the location changes I have change only one file.
+
+Install required perl module
+{{{
+# perl -MCPAN -e 'install Bundle::CPAN'
+# perl -MCPAN -e 'install Net::LDAP'
+}}}
+
+Download the scripto directory that contains many supporting scripts.
+{{{
+$ cd
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto 
+$ cd 
+$ $HOME/scripto/perl/ask_ldap.pl "orainfDbRrdoraMonitoring=TRUE" "['cn', 'orainfDbRrdoraUser']"
+TEST2 perfstat
+}}}
+
+The above command should return one row for now. See that we filter the LDAP entries for having orainfDbRrdoraMonitoring=TRUE and want to display the values of 'cn', 'orainfDbRrdoraUser' attributes. That is the beauty of LDAP.
+
+Now lets combine it all to a script that will output expected format for rrdora.dblist and put into crontab
+{{{
+$ crontab -e
+*/5 * * * *  cd $HOME/oi_rrdora; $HOME/scripto/perl/ask_ldap.pl "orainfDbRrdoraMonitoring=TRUE" "['cn', 'orainfDbRrdoraUser']" | awk '{ print $1 "#" $2 "#perfstat"}' > rrdora.dblist; ./rrdora.rrd.sh rrdora.dblist; ./rrdora.get.sh rrdora.dblist; ./rrdora.img.sh rrdora.dblist
+}}}
+
+As you see we provide a hardcoded password, for now lets assume we can afford that. We will deal with that later.
+
+As a result we have the statistics that are refresh every 5 min, and everytime we add a database to LDAP and set the required attribute the database will be monitored by rrdora.
+
+To see its power lets assume that we have created new database. The easy way to add a new database to LDAP is to copy the current entry and modify the required attributes. 
+{{{
+$ ldapsearch -x -b 'dc=orainf,dc=com' '(cn=TEST2)' > new.ldif
+}}}
+
+Modify requred attributes, delete the info messages and add new record to LDAP. Let us assume it called ZEBRA.
+{{{
+$ vim new.ldif
+$ ldapadd -x -D "cn=Manager,dc=orainf,dc=com" -W -f new.ldif
+}}}
+
+Make sure you can establish the connection
+{{{
+$ tnsping ZEBRA
+$ sqlplus perfstat@ZEBRA
+}}}
+
+After 10min the new database should be available to chose from the pop-up menu at our rrdora web site = http://orainf/rrdora/
+
+
+==troubleschooting==
+===ERROR: unknown option '--unit'===
+During image generation by rrdtool.
+
+rrdtool graph (...) --unit 1
+but this option is not present in current rrdtool - 
+http://oss.oetiker.ch/rrdtool/doc/rrdgraph.en.html
+removing it
