@@ -1,0 +1,74 @@
+o</option>
+</select>
+<select name="period" size="1" onchange="imgChg()">
+    <option value="2hour">Last 2 hours</option>
+    <option value="4hour">Last 4 hours</option>
+    <option value="8hour">Last 8 hours</option>
+    <option value="12hour">Last 12 hours</option>
+    <option value="day">Last day</option>
+    <option value="week">Last week</option>
+    <option value="2week">Last 2 weeks</option>
+    <option value="month">Last month</option>
+    <option value="6month">Last 6 months</option>
+    <option value="year">Last year</option>
+</option>
+</select>
+(measurements every 5 minutes)
+<table>
+<tr>
+    <td><img src="2hour_sessions.gif" name=sessions></td>
+    <td><img src="2hour_downtime.gif" name=downtime></td>
+</tr>
+<tr>
+    <td><img src="2hour_cpu.gif" name=cpu></td>
+    <td><img src="2hour_disk.gif" name=disk></td>
+</tr>
+<tr>
+    <td><img src="2hour_tpm.gif" name=tpm></td>
+    <td><img src="2hour_waits.gif" name=waits></td>
+</tr>
+<tr>
+    <td><img src="2hour_pio.gif" name=pio></td>
+</tr>
+</table>
+
+</h3>
+<script language="JavaScript">
+
+function imgChg()
+{
+   var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_sessions.gif"
+   document.sessions.src = fname
+   
+   var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_waits.gif"
+   document.waits.src = fname
+   
+   var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_cpu.gif"
+   document.cpu.src = fname
+   
+   var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_disk.gif"
+   document.disk.src = fname
+   
+   var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_pio.gif"
+   document.pio.src = fname
+   
+   var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_downtime.gif"
+   document.downtime.src = fname
+   
+   var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_tpm.gif"
+   document.tpm.src = fname
+}
+
+imgChg();
+</script>
+</form>
+</body>
+</html>
+
