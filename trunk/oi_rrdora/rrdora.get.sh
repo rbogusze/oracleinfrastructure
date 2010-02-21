@@ -139,14 +139,14 @@ else
 fi
 echo "(`date`) : ${STRING}"
 
-echo "(`date`) : .....tpm"
+echo "(`date`) : .....tps"
 STRING=`sqlplus -s $UN/$PW@$DBNAME <<EOF
-   @$BASE/sql/tpm.sql
+   @$BASE/sql/tps.sql
 EOF`
 echo "$STRING"|grep "^N:" >/dev/null 2>&1
 if [ $? = 0 ]
  then
-   $RRD/bin/rrdtool update $BASE/$DBNAME/tpm.rrd "$STRING"
+   $RRD/bin/rrdtool update $BASE/$DBNAME/tps.rrd "$STRING"
 else
    echo "${STRING}"
 fi

@@ -178,10 +178,10 @@ if [ ! -f $BASE/$DBNAME/waits.rrd ]
 fi
 
 
-# Create the rddfile for storing tpm information
-if [ ! -f $BASE/$DBNAME/tpm.rrd ]
+# Create the rddfile for storing tps information
+if [ ! -f $BASE/$DBNAME/tps.rrd ]
  then
-  $RRD/bin/rrdtool create $BASE/$DBNAME/tpm.rrd --step 60	\
+  $RRD/bin/rrdtool create $BASE/$DBNAME/tps.rrd --step 60	\
   RRA:AVERAGE:0.5:1:600                                                      \
   RRA:AVERAGE:0.5:6:700                                                      \
   RRA:AVERAGE:0.5:24:775                                                     \
@@ -194,11 +194,11 @@ if [ ! -f $BASE/$DBNAME/tpm.rrd ]
   RRA:MIN:0.5:6:700                                                          \
   RRA:MIN:0.5:24:775                                                         \
   RRA:MIN:0.5:288:797                                                        \
-  DS:tpm:DERIVE:650:0:U                                                   
+  DS:tps:DERIVE:650:0:U                                                   
 fi
 
-  #DS:tpm:DERIVE:650:0:U                                                   
-  #DS:tpm:GAUGE:650:0:U                                                   
+  #DS:tps:DERIVE:650:0:U                                                   
+  #DS:tps:GAUGE:650:0:U                                                   
 # Create the rddfile for storing physical i/o information
 
 
