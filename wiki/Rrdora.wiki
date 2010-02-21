@@ -1,5 +1,7 @@
 #summary Looking at the database waits - the easy way
 
+http://oracleinfrastructure.googlecode.com/files/rrdora.png
+
 For a long time (since at least version 8) the Oracle RDBMS has provided the waits interface that allowed an administrator to actually see where the time is spend during the query execution. 
 
 It is strange that we had to wait till version 10g for a usefull GUI interface for those waits. I started to use a nice, simple project called rrdora - http://members.tele2.nl/r.vermeer/rrdora/ when Oracle 9i was rulling and althou the performance view on 10g is much more than that (lets you split the waits by the users) I still use this simple tool.
