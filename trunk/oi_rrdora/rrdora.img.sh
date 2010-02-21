@@ -9,8 +9,7 @@
 # Oracle databases in the dblistfile
 #
 # Load the environment file
-#. /home/oracle9/rrdora.1.0/rrdora.env
-. /OEMREP/u01/app/oracle/product/9.2.0/rrdora.1.0/rrdora.env
+. /home/orainf/oi_rrdora/rrdora.env
 
 # Check if the dblistfile is passed 
 # as the first parameter
