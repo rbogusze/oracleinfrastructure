@@ -76,8 +76,8 @@ Now we will add special LDAP attributes that will determine whether that certain
 
 Adding rrdora specific LDAP attributes. This is why I like LDAP, I can add attributes that are connected to database and that allows me to control utilities that talk to databases.
 
-|| orainfDbRrdoraMonitoring = || TRUE/FALSE - determines whether we consider that DB for rrdora monitoring ||
-|| orainfDbRrdoraUser = || USERNAME - user used to connect to database ||
+|| orainfDbRrdoraMonitoring = || TRUE/FALSE || determines whether we consider that DB for rrdora monitoring ||
+|| orainfDbRrdoraUser = || <USERNAME> || user used to connect to database ||
 
 {{{
 $ ldapvi -D "cn=Manager,dc=orainf,dc=com" --host orainf --discover
