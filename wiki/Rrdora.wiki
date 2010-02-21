@@ -1,3 +1,12 @@
 #summary Looking at the database waits - the easy way
 
-For a long time (since at least version 8) the Oracle RDBMS has provided valuable information that allowed 
+For a long time (since at least version 8) the Oracle RDBMS has provided the waits interface that allowed an administrator to actually see where the time is spend during the query execution. 
+
+It is strange that we had to wait till version 10g for a usefull GUI interface for those waits. I started to use a nice, simple project called rrdora - http://members.tele2.nl/r.vermeer/rrdora/ when Oracle 9i was rulling and althou the performance view on 10g is much more than that (lets you split the waits by the users) I still use this simple tool.
+
+I modified a bit the rrdora:
+  * added the tps statistic (transactions per second)
+  * connected it to LDAP through intermediate script
+  * added new page with selected statistics from all databases on one page
+
+I tried to contact the author but and discuss my additions, but received no response. Due to the GNU GPL license I provide the source code with my additions.
