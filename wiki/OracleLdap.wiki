@@ -32,6 +32,7 @@ Change the LDAP Password by editing
 rootpw          secret
 
 # /etc/init.d/ldap restart
+# chkconfig ldap on
 # cd /home/oi_ldap/
 # ldapadd -x -D "cn=Manager,dc=orainf,dc=com" -W -f orainf.ldif
 }}}
