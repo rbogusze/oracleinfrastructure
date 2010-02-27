@@ -1,6 +1,6 @@
 #summary Oracle log file monitoring
 
-ORALMS (ORacle ALert log Monitoring S?) Alert log monitoring. This is the real time monitoring of all alertlogs, and some other logs that I find essential in day to day monitoring.
+ORALMS (ORacle ALert log Monitoring System) - Alert log monitoring. This is the real time monitoring of all alertlogs, and some other logs that I find essential in day to day monitoring.
 
 It became a habit for me to constantly watch the alert log of the database I was responsible for. Simple {{{tail -f}}} was sufficient. As the nuber of databases has grown in time I needed a central console that will allow me to see the logs from many places in one console.
 
