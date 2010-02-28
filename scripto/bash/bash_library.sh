@@ -803,7 +803,9 @@ case `uname` in
     #echo "I am running on Linux now"
     FIND=/usr/bin/find
     CVS=/usr/bin/cvs
-    GREP=grep
+    GREP=/bin/grep
+    ECHO=/bin/echo
+    SSH=/usr/bin/ssh
     #USERNAME=`who am I | awk '{print $1}'` - does not work from crontab
     # The next line is bizare, but I found no elegant way
     USERNAME=`id | awk -F"(" '{print $2}' |  awk -F")" '{print $1}'`
