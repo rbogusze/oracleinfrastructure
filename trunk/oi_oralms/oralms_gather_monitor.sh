@@ -1,14 +1,9 @@
 #!/bin/bash
-# $Header: /CVS/cvsadmin/cvsrepository/admin/projects/oralms/oralms_gather_monitor.sh,v 1.24 2010/02/23 15:03:47 remikcvs Exp $
 # This script should be run from crontab and monitor for existing connection for oralms_gather. If it finds a broken connection (eg. as a result of system reboot) it will span one.
-#set -x
 
 LOCKFILE=/tmp/oralms_gather_monitor.lock
 LOCKFILE_SPAN_DIR=/tmp/logwatch/oralms/all/locks
 LOCKFILE_SPAN=oralms_gather_span
-GREP=/bin/grep
-ECHO=/bin/echo
-SSH=/usr/bin/ssh
 GLOBAL_ALERT=/tmp/global_alert.log
 GLOBAL_ALERT_RAW=/tmp/global_alert_raw.log
 TMP_LOG_DIR=/tmp/oralms
@@ -25,7 +20,7 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='Remigiusz_Boguszewicz'
+RECIPIENTS='orainf@localhost'
 
 # Sanity check
 check_lock $LOCKFILE
@@ -41,11 +36,11 @@ fi
 
 msgd "Ask the ldap for all the alert logs to monitor"
 msgd " first pass, determine length of longest host, sid and tns name from ldap"
-$HOME/scripto/perl/ask_ldap.pl "(&(remikDbAlertLogFile=*)(remikDbAlertLogMonitoring=TRUE))" "['remikOsLogwatchUser', 'orclSystemName', 'remikDbAlertLogFile', 'orclSid','cn']" | awk '{ print $4}'         >  /tmp/conf4.list
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $4}'         >  /tmp/conf4.list
 
-$HOME/scripto/perl/ask_ldap.pl "(&(remikDbAlertLogFile=*)(remikDbAlertLogMonitoring=TRUE))" "['remikOsLogwatchUser', 'orclSystemName', 'remikDbAlertLogFile', 'orclSid','cn']" | awk '{ print $2}'         >  /tmp/conf2.list
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $2}'         >  /tmp/conf2.list
 
-$HOME/scripto/perl/ask_ldap.pl "(&(remikDbAlertLogFile=*)(remikDbAlertLogMonitoring=TRUE))" "['remikOsLogwatchUser', 'orclSystemName', 'remikDbAlertLogFile', 'orclSid','cn']" | awk '{ print $5}'         >  /tmp/conf5.list
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $5}'         >  /tmp/conf5.list
 
 LEN_4=`cat /tmp/conf4.list | wc -L`
 
@@ -56,7 +51,8 @@ LEN_5=`cat /tmp/conf5.list | wc -L`
 msgd "AWK_FILE: $AWK_FILE"
 echo '{ printf $1 " " $2 " " $3 " [" substr($5 "_____________________________",1,' $LEN_5 ') "_" substr($4 "_____________________________",1,' $LEN_4 ') "_" substr($2 "____________________________",1,' $LEN_2 '); v_spnr=split ($3, a, "/"); if (substr(a[v_spnr], 1, 3) == "ale") printf "_A"; if (substr(a[v_spnr], 1, 3) == "drc") printf "_D"; print "] dummy_parm"}' > $AWK_FILE
 
-$HOME/scripto/perl/ask_ldap.pl "(&(remikDbAlertLogFile=*)(remikDbAlertLogMonitoring=TRUE))" "['remikOsLogwatchUser', 'orclSystemName', 'remikDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"
 
 check_file $CONFIG_FILE
 
