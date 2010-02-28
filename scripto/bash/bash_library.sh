@@ -1,0 +1,818 @@
+#!/bin/ksh
+#$Id: bash_library.sh,v 1.64 2010/02/26 13:57:31 remikcvs Exp $
+#
+# This is the main script that is included in every bash script I write
+# This should be the central and one place to change things that should be centralised
+
+# if RECIPIENTS value is set, preserve it.
+
+[ -z "$RECIPIENTS" ] && RECIPIENTS='orainf'
+
+# Level of messages
+[ -z "$INFO_MODE" ] && INFO_MODE='INFO'
+# The default level of messages is INFO. It is active if no INFO_MODE is set.
+# Which function is printing the output
+# | INFO_MODE 	| 	|
+# | NONE      	|	|
+# | ERROR	| msge	|
+# | INFO	| msge, msga, msgb, msgw, msgi |
+# | DEBUG	| msge, msga, msgb, msgw, msgi, msgd |
+
+# Usefull Functions
+
+error_log()
+{
+  echo "[ error ]["`hostname`"]""["$0"]" $1
+  MSG=$1
+  shift
+  for i in $*
+  do
+    if `echo ${i} | grep "@" 1>/dev/null 2>&1`
+    then
+      echo "[ info ] Found @ in adress, sending above error to ${i}"
+      $MAILCMD -s "[error]["`hostname`"]""["$0"] ${MSG}" ${i} < /dev/null > /dev/null
+    else
+      echo "[ info ] Not found @ in adress, sending above error to ${i}@orainf.com"
+      $MAILCMD -s "[ error ]["`hostname`"]""["$0"] ${MSG}" ${i}@orainf.com < /dev/null > /dev/null
+    fi
+    shift
+  done
+}
+
+check_directory()
+{
+  # Sanity check. For writable logging directory
+  if [ ! -d $1 ]; then
+    error_log "Directory ${1} does not exists. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+
+  # Sanity checking: check for writable logging directory
+  if [ ! -w $1 ]; then
+    error_log "Directory ${1} is not writable. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+}
+
+check_file()
+{
+  if [ -z "$1" ]; then
+    error_log "[ check_file ] Provided parameter is empty. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+
+  if [ ! -f $1 ]; then
+    error_log "[ error ] $1 not found. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+}
+
+check_variable()
+{
+  if [ -z "$1" ]; then
+    error_log "[ check_variable ] Provided variable ${2} is empty. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+}
+
+check_parameter()
+{
+  check_variable "$1" "$2"
+}
+
+check_lock()
+{
+  if [ -z "$1" ]; then
+    error_log "[ check_lock ] Provided parameter is empty. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+
+  if [ -f $1 ]; then
+    error_log "[ error ] Lock file $1 found. Another process is already running. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+}
+
+
+
+msg()
+{
+  echo "| `/bin/date '+%Y%m%d %H:%M:%S'` $1"
+}
+
+# Fancy msg with prefix message and colors
+
+# [debug] in green
+msgd()
+{
+  if [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[32m'
+    echo -n "[debug] "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# [info] in green
+msgi()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[32m'
+    echo -n "[info] "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# raw output in green without end line character
+msgri()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -e -n '\E[32m'
+    echo -n "$1"
+    echo -e -n '\E[39m\E[49m'
+  fi
+}
+
+
+
+# [error] in red, and beep
+msge()
+{
+  if [ "$INFO_MODE" = "ERROR" ] || [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[31m\07'
+    echo -n "[error]  "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# [action] in blue
+msga()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[34m'
+    echo -n "[action] "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# [block] in magenta
+msgb()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[35m'
+    echo -n "[block] "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# [wait] in cyan
+msgw()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[36m'
+    echo -n "[wait]   "
+    echo -e -n '\E[39m\E[49m\07'
+    echo "$1"
+  fi
+}
+
+
+# Runs the command provided as parameter. 
+# Does NOT exit if the command fails.
+# Sends error message if the command fails.
+run_command()
+{
+  msg "\"$1\""
+  # Determining if we are running in a debug mode. If so wait for any key before eval
+  if [ -n "$DEBUG_MODE" ]; then
+    if [ "$DEBUG_MODE" -eq "1" ] ; then
+      echo "[debug wait] Press any key if ready to run the printed command"
+      read
+    fi  
+  fi
+
+  eval $1
+  if [ $? -ne 0 ]; then
+    error_log "[error] An error occured during: \"$1\"" ${RECIPIENTS}
+    return 1
+  fi
+  return 0
+}
+
+# Runs the command provided as parameter. 
+# Does exit if the command fails.
+# Sends error message if the command fails.
+run_command_e()
+{
+  msg "\"$1\""
+  # Determining if we are running in a debug mode. If so wait for any key before eval
+  if [ -n "$DEBUG_MODE" ]; then
+    if [ "$DEBUG_MODE" -eq "1" ] ; then
+      echo "[debug wait] Press any key if ready to run the printed command"
+      read
+    fi  
+  fi
+
+  eval $1
+  if [ $? -ne 0 ]; then
+    error_log "[critical] An error occured during: \"$1\". Exiting NOW." ${RECIPIENTS}
+    exit 1
+  fi
+  return 0
+}
+
+
+# eg. check_for_running_processes "FND"
+#     check_for_running_processes "ora_"
+check_for_running_processes()
+{
+  if [ -z "$1" ]; then
+    error_log "[ check_for_running_processes ] Provided parameter is empty. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+
+  msg "[check_for_running_processes] Checking for running $1 processess"
+  if [ `ps -ef |egrep -v '(grep|vppdc)'|egrep -c $1` -ne 0 ]; then
+    error_log "$1 [ check_for_running_processes ] processes are still running. Exiting." ${RECIPIENTS}
+    exit 1
+  fi
+  msg "[ check_for_running_processes ] no running $1 processess found"
+}
+
+# Check for free space on specified volume ($1) in GB ($2)
+# eg check_for_free_space "$DEST_VOLUME" "$DEST_VOLUME_FREE_NEEDED"
+#    check_for_free_space "/d8" "30"
+check_for_free_space()
+{
+
+  DEST_VOLUME=$1
+  DEST_VOLUME_FREE_NEEDED=$2
+
+  check_variable "$DEST_VOLUME"
+  check_variable "$DEST_VOLUME_FREE_NEEDED"
+
+  msg "[ check_for_free_space ] Checking for available free space."
+  msg "[ check_for_free_space ] on $DEST_VOLUME has to be at least $DEST_VOLUME_FREE_NEEDED G of free space"
+  DEST_VOLUME_FREE=`df -h $DEST_VOLUME | grep -v "capacity" | awk '{print $4}' | sed 's/G//'`
+  msg "[ check_for_free_space ] found $DEST_VOLUME_FREE G of free space"
+  if [ "$DEST_VOLUME_FREE" -lt "$DEST_VOLUME_FREE_NEEDED" ] ; then
+    error_log "[ check_for_free_space ] There is not enough space on $DEST_VOLUME. I need $DEST_VOLUME_FREE_NEEDED G" ${RECIPIENTS}
+    exit 1
+  fi
+}
+
+# Replaces all occurences of a string in a file
+#  to replace ola with zosia in a file laski.txt do
+#  replace_in_file "laski.txt" "ola" "zosia"
+replace_in_file()
+{
+  FILE_NAME=$1
+  OLD_STR=$2
+  NEW_STR=$3
+  check_file "$FILE_NAME"
+  check_variable "$OLD_STR"
+
+  sed -e "s/$OLD_STR/$NEW_STR/g" $FILE_NAME > $FILE_NAME.tmp
+  mv $FILE_NAME.tmp $FILE_NAME
+}
+
+remove_empty_lines_in_file()
+{
+  FILE_NAME=$1
+  check_file "$FILE_NAME"
+
+  grep -v "^$" $FILE_NAME > $FILE_NAME.tmp
+  mv $FILE_NAME.tmp $FILE_NAME
+}
+
+prepend_file_with_string()
+{
+  FILE_NAME=$1
+  NEW_STR=$2
+  check_file "$FILE_NAME"
+
+  echo "$NEW_STR" > $FILE_NAME.tmp
+  cat $FILE_NAME >> $FILE_NAME.tmp
+  mv $FILE_NAME.tmp $FILE_NAME
+}
+
+# Return random integer between FLOOR and RANGE (noninclusive)
+# example: RND_MM=`random_int "0" "60"`
+random_int()
+{
+  FLOOR=$1
+  RANGE=$2
+
+  number=0   #initialize
+  while [ "$number" -le $FLOOR ]
+  do
+    number=$RANDOM
+    let "number %= $RANGE"  # Scales $number down within $RANGE.
+  done
+  echo $number
+}
+
+
+# send_message "Probably the script" $SEND_MAIL_RECIPIENTS
+send_message()
+{
+  echo "[ send_message ]["`hostname`"]""["$0"]" $1
+  MSG=$1
+  if [ -z "$MSG" ]; then
+    msg "Not sending empty email."
+  else
+    shift
+    for i in $*
+    do
+      echo "[info] Sending email [msg]["`hostname`"]""["$0"] ${MSG} to ${i}"
+      echo "${MSG}" | $MAILCMD -s "[msg]["`hostname`"]""["$0"] ${MSG}" ${i}
+      shift
+    done
+  fi
+}
+
+# wait for confirmation before running the block
+# To be used in construction like:
+#b_template()
+#{
+#  msgb " "
+#  msgb " "
+#  f_confirm_block_run
+#  if [ "${CONFIRM_BLOCK_STATUS}" -eq 0 ]; then
+#    msgi "ala ma kota"
+#  fi #CONFIRM_BLOCK_STATUS
+#} #b_template
+f_confirm_block_run()
+{
+  CONFIRM_BLOCK_STATUS=0
+  if [ -n "$CONFIRM_BLOCK" ]; then
+    if [ "$CONFIRM_BLOCK" -eq "1" ] ; then
+      read -p "[ wait_for_block ] ${FUNCNAME[1]} - Press Enter key if ready (n/any)? " CONFIRM_BLOCK_REPLY
+
+      if [ "$CONFIRM_BLOCK_REPLY" = "n" ]; then
+        msgb "${FUNCNAME[1]} skipped by user request."
+        CONFIRM_BLOCK_STATUS=1
+      else
+        msgb "${FUNCNAME[1]} Proceeding with block."
+      fi
+
+    fi
+  fi
+} #f_confirm_block_run
+
+# Run the SQL provided as parameter, eg:
+# f_execute_sql "select count(*) from sys.deferror;"
+# The return value stored in variable V_EXECUTE_SQL, I can not return it by return x, becouse x has to be integer
+# - input as SQL to be executed
+f_execute_sql()
+{
+  check_parameter $ORACLE_HOME
+  SQLPLUS=$ORACLE_HOME/bin/sqlplus
+  check_file $SQLPLUS
+
+  F_EXECUTE_SQL=/tmp/sql_output.tmp_${USERNAME}_${ORACLE_SID}
+ 
+  msga "Executing SQL: $1"
+  $SQLPLUS -S "/ as sysdba" <<EOF > $F_EXECUTE_SQL
+set heading off
+$1
+EOF
+  V_EXECUTE_SQL=`cat $F_EXECUTE_SQL | grep -v '^ *$' | tr -d "\n" | tr "\t" " " | tr -s '[:blank:]'`
+
+  TMP_CHK=`echo $V_EXECUTE_SQL | grep "ORA-01034"`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ne 0 ]; then
+    echo $V_EXECUTE_SQL
+    msge "ORACLE not available. Exiting."
+    exit 1
+  fi
+} #f_execute_sql
+
+# Return error if any rows from query are returned
+f_execute_sql_no_rows_expected()
+{
+  check_parameter $ORACLE_HOME
+  SQLPLUS=$ORACLE_HOME/bin/sqlplus
+  check_file $SQLPLUS
+
+  F_EXECUTE_SQL=/tmp/sql_output.tmp_${USERNAME}_${ORACLE_SID}
+ 
+  msga "Executing SQL: $1"
+  $SQLPLUS -S "/ as sysdba" <<EOF > $F_EXECUTE_SQL
+set heading off
+$1
+EOF
+  V_EXECUTE_SQL=`cat $F_EXECUTE_SQL | grep -v '^ *$' | tr -d "\n" | tr "\t" " " | tr -s '[:blank:]'`
+
+  if [ ! "$V_EXECUTE_SQL" = "no rows selected" ]; then
+    echo $V_EXECUTE_SQL
+    msge "The query returned some rows, it should not. Exiting"
+    exit 1
+  fi
+} #f_execute_sql_no_rows_expected
+
+# Gather basic information aout db, version, invalids, etc.
+# eg. f_db_status "invalids_before_pre-upgrade_preparation"
+# - input as outbut file to store the results
+f_db_status()
+{
+  check_file $SQLPLUS
+  check_parameter $1
+  msgi "f_db_status, output into: $1"
+  $SQLPLUS -S "/ as sysdba" <<EOF > $1
+select * from v\$version;
+select name from v\$database;
+set pagesize 999
+column status format a15
+column version format a15
+column comp_name format a35
+column object_name format A30
+column owner format A20
+select object_name, owner, object_type from dba_objects where status != 'VALID' order by owner;
+SELECT comp_name, status, substr(version,1,10) as version from dba_registry order by modified;
+EOF
+} #f_db_status
+
+# Change memory parameter in init file if lower than provided value
+# The point is not to blindly set specufic values if they were already larger
+# $1 - init file (text)
+# $2 - parameter
+# $3 - desired minimal value
+# | parameter | current value | should be | Status |
+f_change_init_para()
+{
+  FILE=$1
+  INIT_PARAM=$2
+  MIN_VALUE=$3
+  check_parameter $FILE
+  check_parameter $INIT_PARAM
+  check_parameter $MIN_VALUE
+
+  msgd "Checking $1 for value of $2 which should be larger than $3"
+  INIT_VALUE=`cat $FILE | grep -i "$INIT_PARAM" | awk -F"=" '{ print $2 }'`
+  # If no value is returned it means that parameter is not set and I assume value 0
+  if [ -z "$INIT_VALUE" ]; then
+    INIT_VALUE=0
+  fi
+  msgd "Value from init file: INIT_VALUE: $INIT_VALUE"
+
+  # Nothing will change if the value is already in bytes
+  INIT_VALUE_BYTES=$INIT_VALUE
+
+  # Convert into bytes if value provided as xM or xG to ease comparison
+  if [ `echo $INIT_VALUE | grep -i "M"` ]; then
+    TMP_VAL=`echo $INIT_VALUE | sed -e s/[mM]//`
+    INIT_VALUE_BYTES=`expr $TMP_VAL \* 1024 \* 1024`
+    msgd "Convert into bytes if M: INIT_VALUE_BYTES: $INIT_VALUE_BYTES"
+  fi
+
+  if [ `echo $INIT_VALUE | grep -i "G"` ]; then
+    TMP_VAL=`echo $INIT_VALUE | sed -e s/[gG]//`
+    INIT_VALUE_BYTES=`expr $TMP_VAL \* 1024 \* 1024 \* 1024`
+    msgd "Convert into bytes if G: INIT_VALUE_BYTES: $INIT_VALUE_BYTES"
+  fi
+
+  MIN_VALUE_BYTES=$MIN_VALUE
+  if [ `echo $MIN_VALUE | grep -i "M"` ]; then
+    TMP_VAL=`echo $MIN_VALUE | sed -e s/[mM]//`
+    MIN_VALUE_BYTES=`expr $TMP_VAL \* 1024 \* 1024`
+  fi
+
+  if [ `echo $MIN_VALUE | grep -i "G"` ]; then
+    TMP_VAL=`echo $MIN_VALUE | sed -e s/[gG]//`
+    MIN_VALUE_BYTES=`expr $TMP_VAL \* 1024 \* 1024 \* 1024`
+  fi
+
+  msgd "Comparing $INIT_VALUE_BYTES $MIN_VALUE_BYTES"
+  check_parameter $INIT_VALUE_BYTES
+  check_parameter $MIN_VALUE_BYTES
+  if [ $INIT_VALUE_BYTES -ge $MIN_VALUE_BYTES ]; then
+    echo "| $INIT_PARAM | $INIT_VALUE | $MIN_VALUE | OK. |"
+  else
+    echo "| $INIT_PARAM | $INIT_VALUE | $MIN_VALUE | too small |"
+    echo "| [action] changing value of $INIT_PARAM to $MIN_VALUE |"
+    cat $FILE | grep -i -v "$INIT_PARAM" > /tmp/tmp_10g_init
+    echo "${INIT_PARAM}=${MIN_VALUE}" >> /tmp/tmp_10g_init
+    cp /tmp/tmp_10g_init $FILE
+  fi
+} #f_change_init_para
+
+
+# Perform checksum of the file provided as $1 with the digest provided as $2
+# If they do not match, exit
+f_checksum()
+{
+  check_file $1
+  check_parameter $2
+  msga "Computing checksum of $1"
+  run_command_e "V_CKSUM=`cksum $1 | awk '{ print $1}'`"
+  msgi "Computed digest: $V_CKSUM"
+  msgi "Provided digest: $2"
+  if [ "$V_CKSUM" -eq "$2" ]; then
+    msgi "Digest matches. OK"
+  else
+    msge "Digest does not match. Exiting"
+    exit 1
+  fi
+} #f_checksum
+
+# Run commands contained in a text file $3 on host $1@$2
+# it is assumed that connection is made without beeing asked for password
+f_run_sh_on_remote_host()
+{
+  OS_USER_NAME=$1
+  HOST_NAME=$2
+  SH_FILE=$3
+  check_parameter $OS_USER_NAME
+  check_parameter $HOST_NAME
+  check_parameter $SH_FILE
+
+  COMMANDS_TO_RUN=`cat ${SH_FILE}`
+  check_parameter $COMMANDS_TO_RUN
+  #echo "I will run: $COMMANDS_TO_RUN"
+
+  ping -c 1 $HOST_NAME >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    #msgi "System $OS_USER_NAME @ $HOST_NAME found (ping). Continuing."
+    echo -n ""
+  else
+    msge "Host $HOST_NAME not found (ping). Skipping."
+    exit 1
+  fi
+
+  echo $COMMANDS_TO_RUN | ssh -T -o BatchMode=yes -o ChallengeResponseAuthentication=no -o PasswordAuthentication=no -o PubkeyAuthentication=yes -o RSAAuthentication=no -2 -l $OS_USER_NAME $HOST_NAME
+} #f_run_sh_on_remote_host
+
+
+# Run SQL as sysdba contained in a text file $3 on host $1@$2
+# it is assumed that connection is made without beeing asked for password
+f_run_sql_on_remote_host()
+{
+  OS_USER_NAME=$1
+  HOST_NAME=$2
+  SQL_FILE=$3
+  check_parameter $OS_USER_NAME
+  check_parameter $HOST_NAME
+  check_parameter $SQL_FILE
+
+  TMP_FILE=$D_TMPDIR/prepare_to_failover.tmp_sql_output
+  COMMANDS_TO_RUN=`cat ${SQL_FILE}`
+  check_parameter $COMMANDS_TO_RUN
+
+  ping -c 1 $HOST_NAME >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    #msgi "System $OS_USER_NAME @ $HOST_NAME found (ping). Continuing."
+    echo -n ""
+  else
+    msge "Host $HOST_NAME not found (ping). Skipping."
+    exit 1
+  fi
+
+  echo "echo \"${COMMANDS_TO_RUN}\" | sqlplus -s '/ as sysdba'" | ssh -T -o BatchMode=yes -o ChallengeResponseAuthentication=no -o PasswordAuthentication=no -o PubkeyAuthentication=yes -o RSAAuthentication=no -2 -l $OS_USER_NAME $HOST_NAME > ${TMP_FILE} 2>&1
+
+  # If database is not available exit with error. Checking for ORA-01034: ORACLE not available
+  if [ `cat ${TMP_FILE} | grep ORA-01034 | wc -l` -ne 0 ]; then
+    msge "Database at $OS_USER_NAME @ $HOST_NAME not open. Exiting."
+    exit 0
+  fi
+
+  cat ${TMP_FILE} | grep -v "SQL>" | grep -v "Connected to" | grep -v "Enterprise Edition Release" | grep -v "With the Partitioning" | grep -v "JServer Release" | grep -v "Copyright (c)" | grep -v "SQL.Plus. Release" | grep -v "Sun Microsystems Inc" | grep -v "You have new mail" | grep -v "^$" | grep -v "You are now on" | grep -v "Setting up the" | grep -v "stty. . Invalid argument" | grep -v "Po<B3><B1>czenie z" | grep -v "With the OLAP option" | grep -v "You have mail"
+} #f_run_sql_on_remote_host
+
+# This is a very dirty function. It assumes that certain variables are present in environment
+# Switch logfile on primary and make sure it is applied on standby
+b_primary_standby_confirm_redo_application()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section
+  msgb "${FUNCNAME[0]} Beginning."
+  f_confirm_block_run
+  if [ "${CONFIRM_BLOCK_STATUS}" -eq 0 ]; then
+
+  check_parameter $V_USER_PRIMARY
+  check_parameter $V_HOST_PRIMARY
+  check_parameter $V_USER_STANDBY
+  check_parameter $V_HOST_STANDBY
+  check_directory $D_TMPDIR
+  check_parameter $F_SQL_CMND
+
+  msga "Switch logfile"
+  cat > $F_SQL_CMND << EOF
+alter system checkpoint;
+alter system archive log current;
+EOF
+  f_run_sql_on_remote_host $V_USER_PRIMARY $V_HOST_PRIMARY $F_SQL_CMND
+
+  msga "Record the last applied redo on primary"
+  cat > $F_SQL_CMND << EOF
+set heading off
+SELECT MAX(SEQUENCE#) AS "LAST_APPLIED_LOG" FROM V\\\$LOG_HISTORY GROUP BY THREAD#;
+EOF
+  f_run_sql_on_remote_host $V_USER_PRIMARY $V_HOST_PRIMARY $F_SQL_CMND > $D_TMPDIR/prepare_to_failover.value.primary_last_applied
+  cat $D_TMPDIR/prepare_to_failover.value.primary_last_applied
+
+  V_TMP1=`cat $D_TMPDIR/prepare_to_failover.value.primary_last_applied`
+  V_TMP2=0
+  while [ ${V_TMP1} -gt ${V_TMP2} ]
+  do
+    msgi "Sleeping 5sec waiting for redo to be applied on standby"
+    sleep 5
+    cat > $F_SQL_CMND << EOF
+set heading off
+SELECT MAX(SEQUENCE#) AS "LAST_APPLIED_LOG" FROM V\\\$LOG_HISTORY GROUP BY THREAD#;
+EOF
+    f_run_sql_on_remote_host $V_USER_STANDBY $V_HOST_STANDBY $F_SQL_CMND > $D_TMPDIR/prepare_to_failover.value.standby_last_applied
+    cat $D_TMPDIR/prepare_to_failover.value.standby_last_applied
+    V_TMP2=`cat $D_TMPDIR/prepare_to_failover.value.standby_last_applied`
+  done
+  msgb "${FUNCNAME[0]} Finished."
+  fi #CONFIRM_BLOCK_STATUS
+} #b_primary_standby_confirm_redo_application
+
+f_check_if_spfile_is_used()
+{
+  msgi "Check if spfile is used. It should."
+  f_execute_sql "select VALUE from v\$parameter where NAME='spfile';"
+  if [ "$V_EXECUTE_SQL" = "" ]; then
+    echo $V_EXECUTE_SQL
+    msge "Spfile NOT used. Exiting."
+    exit 1
+  fi
+} #f_check_if_spfile_is_used
+
+# Make sure that we have the min version of dependent files
+f_check_min_version_of_script()
+{
+  V_CHECK_FILE=$1
+  V_CHECK_VERSION=`echo $2 | awk -F"." '{ print $2 }'`
+  check_file $V_CHECK_FILE
+  check_parameter $V_CHECK_VERSION
+  V_FILENAME=`basename $V_CHECK_FILE`
+  V_FILEDIR=`dirname $V_CHECK_FILE`
+  check_directory $V_FILEDIR
+  msgi "Checking if file $V_CHECK_FILE is at least on version $V_CHECK_VERSION"
+  run_command_e "cd $V_FILEDIR"
+  V_CURRENT_VERSION=`cvs status $V_FILENAME | grep "Working revision" | tr -d "Working revision:" | tr -d "\t" | awk -F"." '{ print $2 }'`
+  msgd "Current version: $V_CURRENT_VERSION"
+  msgd "Expected min version: $V_CHECK_VERSION"
+
+  if [ "${V_CHECK_VERSION}" -le "${V_CURRENT_VERSION}" ]; then
+    msgi "OK, min expected version: $V_CHECK_VERSION curren version: $V_CURRENT_VERSION"
+  else
+    msge "min expected version: $V_CHECK_VERSION curren version: $V_CURRENT_VERSION"
+    msge "Consider updateing $V_CHECK_FILE to current version"
+    msge "Exiting."
+    exit 1
+  fi
+} #f_check_min_version_of_script
+
+# To warn eg about potential errors with cvs issue a warning when we are getting close 
+# to cvs shautdow on 23:00
+# $1 - hour HH:MM
+# $2 - nr of minutes
+f_issue_warning_when_getting_close_to_hour()
+{
+  msgd "${FUNCNAME[0]} Begin."
+  V_HOUR=$1
+  V_CLOSE=$2
+  check_parameter $V_HOUR
+  check_parameter $V_CLOSE
+
+  V_CURRENT_DATE_SEC=`$DATE +%s`
+  msgd "V_CURRENT_DATE_SEC: $V_CURRENT_DATE_SEC"
+
+  V_CURRENT_DATE=`$DATE -I`
+
+  V_FUTURE_DATE_SEC=`$DATE --date="$V_CURRENT_DATE $V_HOUR" +%s`
+  msgd "V_FUTURE_DATE_SEC : $V_FUTURE_DATE_SEC"
+
+  V_SEC_BETWEEN=`expr $V_FUTURE_DATE_SEC - $V_CURRENT_DATE_SEC`
+  msgd "V_SEC_BETWEEN: $V_SEC_BETWEEN"
+
+  if [ "${V_SEC_BETWEEN}" -lt 0 ]; then
+    msgd "V_SEC_BETWEEN negative, get an absolute value"
+    V_SEC_BETWEEN=`expr $V_SEC_BETWEEN \* -1`
+    msgd "V_SEC_BETWEEN: $V_SEC_BETWEEN"
+  fi
+
+  V_CLOSE_IN_SEC=`expr $V_CLOSE \* 60 `
+  msgd "V_CLOSE_IN_SEC: $V_CLOSE_IN_SEC"
+
+  if [ "${V_SEC_BETWEEN}" -lt "${V_CLOSE_IN_SEC}" ]; then
+    msge "We are getting close to provided hour. Issuing a warning"
+    ACTION_FINISHED=""
+    while [ ! "$ACTION_FINISHED" = "yes" ] && [ ! "$ACTION_FINISHED" = "no" ]
+    do
+      read  -p "[wait] Are you sure, that you want to continue? (yes/no)" ACTION_FINISHED
+    done
+
+    if [ "$ACTION_FINISHED" == "yes" ]; then
+      msgi "Continuing despite warning"
+    else
+      msge "Exiting"
+      exit 0
+    fi
+  else
+    msgi "OK, plenty of time"
+  fi
+
+  msgd "${FUNCNAME[0]} End."
+} #f_issue_warning_when_getting_close_to_hour
+
+
+# Setting some global variables. Now I take care of wheter I am on Linux or Solaris,
+# so that I do not need to bother any further
+
+# OS specific variables
+case `uname` in
+  "SunOS")
+    # echo "I am running on Solaris now"
+    # Find GNU find
+    if [ -f /opt/sfw/bin/gfind ]; then
+      FIND=/opt/sfw/bin/gfind
+    elif [ -f /opt/csw/bin/gfind ]; then
+      FIND=/opt/csw/bin/gfind
+    else
+      error_log "[ error ] Could not find suitable FIND executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU cvs
+    if [ -f /opt/sfw/bin/cvs ]; then
+      CVS=/opt/sfw/bin/cvs
+    elif [ -f /opt/csw/bin/cvs ]; then
+      CVS=/opt/csw/bin/cvs
+    else
+      error_log "[ error ] Could not find suitable CVS executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU rsync
+    if [ -f /opt/sfw/bin/rsync ]; then
+      RSYNC=/opt/sfw/bin/rsync
+    elif [ -f /opt/csw/bin/rsync ]; then
+      RSYNC=/opt/csw/bin/rsync
+    else
+      error_log "[ error ] Could not find suitable RSYNC executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU date
+    if [ -f /opt/sfw/bin/date ]; then
+      DATE=/opt/sfw/bin/date
+    elif [ -f /opt/csw/bin/date ]; then
+      DATE=/opt/csw/bin/date
+    elif [ -f /opt/sfw/bin/gdate ]; then
+      DATE=/opt/sfw/bin/gdate
+    elif [ -f /opt/csw/bin/gdate ]; then
+      DATE=/opt/csw/bin/gdate
+    else
+      error_log "[ error ] Could not find suitable DATE executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU grep
+    if [ -f /usr/sfw/bin/ggrep ]; then
+      GREP=/usr/sfw/bin/ggrep
+    else
+      error_log "[ error ] Could not find suitable GREP executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # So far, I find echo and ping from SUN suitable
+    ECHO=/usr/bin/echo
+    PING=/usr/sbin/ping
+
+    #USERNAME=`who am I | awk '{print $1}'` - does not work from crontab
+    # The next line is bizare, but I found no elegant way
+    USERNAME=`id | awk -F"(" '{print $2}' |  awk -F")" '{print $1}'`
+    MAILCMD=/bin/mailx
+    # Checking If I was able to setup the variables
+
+    ;;
+  "Linux")
+    #echo "I am running on Linux now"
+    FIND=/usr/bin/find
+    CVS=/usr/bin/cvs
+    GREP=grep
+    #USERNAME=`who am I | awk '{print $1}'` - does not work from crontab
+    # The next line is bizare, but I found no elegant way
+    USERNAME=`id | awk -F"(" '{print $2}' |  awk -F")" '{print $1}'`
+    MAILCMD=/usr/bin/mailx
+    ;;
+  *)
+    echo "Unknown OS!!! Exiting."
+    exit 1
+    ;;
+esac
+
+
