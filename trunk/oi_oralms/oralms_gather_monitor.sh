@@ -2,7 +2,7 @@
 # This script should be run from crontab and monitor for existing connection for oralms_gather. If it finds a broken connection (eg. as a result of system reboot) it will span one.
 
 LOCKFILE=/tmp/oralms_gather_monitor.lock
-LOCKFILE_SPAN_DIR=/tmp/logwatch/oralms/all/locks
+LOCKFILE_SPAN_DIR=/tmp/orainf/oralms/all/locks
 LOCKFILE_SPAN=oralms_gather_span
 GLOBAL_ALERT=/tmp/global_alert.log
 GLOBAL_ALERT_RAW=/tmp/global_alert_raw.log
@@ -60,7 +60,7 @@ check_file $CONFIG_FILE
 touch $LOCKFILE
 
 # Connect with ssh agent
-. /home/logwatch/.ssh-agent
+. /home/orainf/.ssh-agent
 
 # Direct all messages to a file
 exec >> $GLOBAL_ALERT 2>&1
