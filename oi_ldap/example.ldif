@@ -9,3 +9,4 @@ orclOracleHome: /TEST/u01/app/oracle/product/10.2
 orclNetDescString: (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))
 orclVersion: 10.2.0.4
 orclSystemName: host2
+orclSid: TEST2
