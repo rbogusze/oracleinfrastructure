@@ -1,5 +1,8 @@
 #summary Environment settings, some assumptions
 
+Host used to monitoring: logwatch, user: orainf
+Host with Oracle DB beeing monitored: dbhost, user: oracle, SID: TEST
+
 All the provided examples use !CentOs 4.7 minimall install.
 
 For the LDAP uniqe numbering I applied to IANA for Private Enterprise Number and received one. It is 35297.
@@ -7,4 +10,10 @@ For the LDAP uniqe numbering I applied to IANA for Private Enterprise Number and
 Some standard packages used
 {{{
 # yum install vim-common vim-enhanced gawk screen subversion xorg-x11-tools
+}}}
+
+Make sure that the hosts can see each other. Test on both logwatch and dbhost
+{{{
+# ping logwatch
+# ping dbhost
 }}}
