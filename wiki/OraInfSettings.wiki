@@ -1,6 +1,6 @@
 #summary Environment settings, some assumptions
 
-All the provided examples use CentOs 4.7 minimall install.
+All the provided examples use !CentOs 4.7 minimall install.
 
 For the LDAP uniqe numbering I applied to IANA for Private Enterprise Number and received one. It is 35297.
 
