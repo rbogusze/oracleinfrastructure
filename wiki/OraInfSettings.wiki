@@ -6,5 +6,5 @@ For the LDAP uniqe numbering I applied to IANA for Private Enterprise Number and
 
 Some standard packages used
 {{{
-# yum install vim-common vim-enhanced gawk screen
+# yum install vim-common vim-enhanced gawk screen subversion
 }}}
