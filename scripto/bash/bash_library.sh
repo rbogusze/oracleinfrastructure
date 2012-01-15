@@ -3,6 +3,7 @@
 #
 # This is the main script that is included in every bash script I write
 # This should be the central and one place to change things that should be centralised
+# ala ma kota
 
 # if RECIPIENTS value is set, preserve it.
 
