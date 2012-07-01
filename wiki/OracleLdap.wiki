@@ -87,7 +87,7 @@ Password: secret
 }}}
 Now you can use a GUI to edit LDAP attributes.
 
-Install oracle client on orainf host uder orainf user
+Install oracle client on logwatch host uder orainf user
 {{{
 # adduser orainf
 # passwd orainf
