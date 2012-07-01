@@ -78,7 +78,7 @@ http://jxplorer.org/
 Install into /usr/JXplorer
 
 Connection:
-Host: orainf Port: 389
+Host: logwatch Port: 389
 Protocol: LDAP v3
 Base DN: <leave empty>
 Level: User + Password
