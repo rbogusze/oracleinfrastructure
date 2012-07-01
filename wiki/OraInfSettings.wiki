@@ -1,11 +1,12 @@
 #summary Environment settings, some assumptions
 
 Host used to monitoring: logwatch, user: orainf
+
 Host with Oracle DB beeing monitored: dbhost, user: oracle, SID: TEST
 
-All the provided examples use !CentOs 4.7 minimall install.
+All the provided examples use !CentOs 5.8 install.
 
-For the LDAP uniqe numbering I applied to IANA for Private Enterprise Number and received one. It is 35297.
+
 
 Some standard packages used
 {{{
