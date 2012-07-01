@@ -61,7 +61,7 @@ For RHEL5
 
 # yum install ldapvi
 
-# ldapvi -D "cn=Manager,dc=orainf,dc=com" --host orainf --discover
+# ldapvi -D "cn=Manager,dc=orainf,dc=com" --host logwatch --discover
 }}}
 Or / And GUI browser, eg jxplorer
 
