@@ -73,9 +73,17 @@ http://www.java.com/en/download/linux_manual.jsp
 # chmod 755 jre-6u18-linux-i586-rpm.bin
 # ./jre-6u18-linux-i586-rpm.bin
 
+Create orainf user
+{{{
+# adduser orainf
+# passwd orainf
+}}}
+
+Login as orainf, install jxplorer if you want.
+
 http://jxplorer.org/
-# ./JXv3.2_install_linux.bin
-Install into /usr/JXplorer
+$ ./JXv3.2_install_linux.bin
+Install into home directory.
 
 Connection:
 Host: logwatch Port: 389
@@ -87,11 +95,6 @@ Password: secret
 }}}
 Now you can use a GUI to edit LDAP attributes.
 
-Install oracle client on logwatch host uder orainf user
-{{{
-# adduser orainf
-# passwd orainf
-}}}
 Login as orainf, install oracle client
 {{{
 Download 10201_client_linux32.zip from Oracle
