@@ -48,8 +48,17 @@ Add example entries
 }}}
 Download ldapvi to edit entries in ldap
 {{{
+
+For RHEL4
+# cd
 # wget http://dag.wieers.com/rpm/packages/rpmforge-release/rpmforge-release-0.3.6-1.el4.rf.i386.rpm
 # rpm -i rpmforge-release-0.3.6-1.el4.rf.i386.rpm
+
+For RHEL5
+# cd
+# wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm
+# rpm -i rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm
+
 # yum install ldapvi
 
 # ldapvi -D "cn=Manager,dc=orainf,dc=com" --host orainf --discover
