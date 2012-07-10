@@ -113,6 +113,48 @@ export PATH=$PATH:$ORACLE_HOME/bin
 export LD_LIBRARY_PATH=$ORACLE_HOME/lib
 }}}
 
+
+or
+
+
+{{{
+
+Yum repositories
+http://public-yum.oracle.com/
+
+# cd /etc/yum.repos.d
+# wget http://public-yum.oracle.com/public-yum-el5.repo
+# vim public-yum-el5.repo
+Change enabled=0 to enabled=1 in ol5_u7_base
+# yum update
+
+Prepare the OS for 11g client installation
+# yum install oracle-validated
+# service iptables stop
+
+
+Download linux_11gR2_client.zip from Oracle
+
+$ cksum linux.x64_11gR2_client.zip 
+3654981652 706187979 linux.x64_11gR2_client.zip
+$ unzip linux.x64_11gR2_client.zip
+$ cd client
+$ ./runInstaller
+Select Installation Type -> Administrator
+Oracle Base: /home/orainf/oracle
+Software Location: /home/orainf/oracle/product/11.2.0/client_1
+Mark: Perform typical configuration on Net Conf Assistant
+
+Set environment
+$ vi .bash_profile
+export ORACLE_BASE=/home/orainf/oracle
+export ORACLE_HOME=$ORACLE_BASE/product/10.2.0
+export TNS_ADMIN=$ORACLE_HOME/network/admin
+export PATH=$PATH:$ORACLE_HOME/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+}}}
+
+
 Perform standard tnsnames configuration to make sure that networking is fine.
 {{{
 $ cd ~/oracle/product/10.2.0/network/admin/
