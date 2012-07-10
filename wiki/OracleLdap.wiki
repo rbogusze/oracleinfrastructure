@@ -152,12 +152,26 @@ export ORACLE_HOME=$ORACLE_BASE/product/11.2.0/client_1
 export TNS_ADMIN=$ORACLE_HOME/network/admin
 export PATH=$PATH:$ORACLE_HOME/bin
 export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+
+}}}
+
+To avoid libclntsh.so.11.1: cannot restore segment prot after reloc: Permission denied
+{{{
+$ tnsping
+tnsping: error while loading shared libraries: /home/orainf/oracle/product/11.2.0/client_1/lib/libclntsh.so.11.1: cannot restore segment prot after reloc: Permission denied
+
+Disable SELinux
+http://www.crypt.gen.nz/selinux/disable_selinux.html
+
+# vi /etc/selinux/config
+SELINUX=disabled
+# reboot
 }}}
 
 
-Perform standard tnsnames configuration to make sure that networking is fine.
+Perform standard tnsnames configuration to make sure that networking is fine. 
 {{{
-$ cd ~/oracle/product/10.2.0/network/admin/
+$ cd $TNS_ADMIN
 $ echo "TEST2=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))" >> tnsnames.ora
 }}}
 Try to connect to listener on host2
