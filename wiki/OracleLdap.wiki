@@ -95,7 +95,9 @@ Password: secret
 }}}
 Now you can use a GUI to edit LDAP attributes.
 
-Login as orainf, install oracle client
+Login as orainf, install oracle 10g or 11g client
+
+Install 10g client
 {{{
 Download 10201_client_linux32.zip from Oracle
 
@@ -116,10 +118,8 @@ export LD_LIBRARY_PATH=$ORACLE_HOME/lib
 
 or
 
-
-{{{
 Install 11g client
-
+{{{
 Prepare the OS for 11g client installation
 
 Yum repositories
@@ -152,10 +152,9 @@ export ORACLE_HOME=$ORACLE_BASE/product/11.2.0/client_1
 export TNS_ADMIN=$ORACLE_HOME/network/admin
 export PATH=$PATH:$ORACLE_HOME/bin
 export LD_LIBRARY_PATH=$ORACLE_HOME/lib
-
 }}}
 
-To avoid libclntsh.so.11.1: cannot restore segment prot after reloc: Permission denied
+To avoid the error when running tnsping: libclntsh.so.11.1: cannot restore segment prot after reloc: Permission denied
 {{{
 $ tnsping
 tnsping: error while loading shared libraries: /home/orainf/oracle/product/11.2.0/client_1/lib/libclntsh.so.11.1: cannot restore segment prot after reloc: Permission denied
@@ -169,7 +168,7 @@ SELINUX=disabled
 }}}
 
 
-Perform standard tnsnames configuration to make sure that networking is fine. 
+Perform standard tnsnames configuration to make sure that networking is fine. Pick a database that you know is running fine and accepts connections. Make the required changes in connection description.
 {{{
 $ cd $TNS_ADMIN
 $ echo "TEST2=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=host2)(PORT=1521))(CONNECT_DATA=(SID=TEST2)))" >> tnsnames.ora
