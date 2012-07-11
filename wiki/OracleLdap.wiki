@@ -72,6 +72,7 @@ http://www.java.com/en/download/linux_manual.jsp
 # cd /usr/java/
 # chmod 755 jre-6u18-linux-i586-rpm.bin
 # ./jre-6u18-linux-i586-rpm.bin
+}}}
 
 Create orainf user
 {{{
@@ -79,9 +80,9 @@ Create orainf user
 # passwd orainf
 }}}
 
-Login as orainf, install jxplorer if you want.
+Login as orainf, install jxplorer if you want. http://jxplorer.org/
+{{{
 
-http://jxplorer.org/
 $ ./JXv3.2_install_linux.bin
 Install into home directory.
 
