@@ -65,8 +65,8 @@ Wait 5min and repeat the statistics images gathering.
 Note: each of the executables: rrdora.get.sh, rrdora.img.sh, rrdora.rrd.sh has by default logging to oi_rrdora/logs enabled. They can generate substantial amount of data. If you make sure that everything is fine turn the off. This can be done by editing each script.
 
 OK, now we should see a nice page uder
-http://orainf/rrdora/ - with scope for one database, and under
-http://orainf/rrdora/index2.html - with scope for one statistic through all databases
+http://logwatch/rrdora/ - with scope for one database, and under
+http://logwatch/rrdora/index2.html - with scope for one statistic through all databases
 
 So far we have only one database, so this may seem not usefull, but with dozens of databases to manage a fast first look at statistics here presented can give you and impression of where the problem lies and quickly point to right further investigation.
 
