@@ -78,7 +78,7 @@ Adding rrdora specific LDAP attributes. This is why I like LDAP, I can add attri
 || orainfDbRrdoraUser = || <USERNAME> || user used to connect to database ||
 
 {{{
-$ ldapvi -D "cn=Manager,dc=orainf,dc=com" --host orainf --discover
+$ ldapvi -D "cn=Manager,dc=orainf,dc=com" --host logwatch --discover
 Add two attributes to cn=TEST2,cn=OracleContext,dc=orainf,dc=com:
 orainfDbRrdoraMonitoring: TRUE
 orainfDbRrdoraUser: perfstat
@@ -90,8 +90,7 @@ To be able to ask the LDAP from bash I created a wrapper which contains the conn
 
 Install required perl module
 {{{
-# perl -MCPAN -e 'install Bundle::CPAN'
-# perl -MCPAN -e 'install Net::LDAP'
+# yum install perl-LDAP
 }}}
 
 Download the scripto directory that contains many supporting scripts.
