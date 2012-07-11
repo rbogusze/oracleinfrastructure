@@ -158,7 +158,8 @@ export LD_LIBRARY_PATH=$ORACLE_HOME/lib
 To avoid the error when running tnsping: libclntsh.so.11.1: cannot restore segment prot after reloc: Permission denied
 {{{
 $ tnsping
-tnsping: error while loading shared libraries: /home/orainf/oracle/product/11.2.0/client_1/lib/libclntsh.so.11.1: cannot restore segment prot after reloc: Permission denied
+tnsping: error while loading shared libraries: /home/orainf/oracle/product/11.2.0/client_1/lib/libclntsh.so.11.1: 
+cannot restore segment prot after reloc: Permission denied
 
 Disable SELinux
 http://www.crypt.gen.nz/selinux/disable_selinux.html
