@@ -10,8 +10,8 @@ $my_attributes = $ARGV[1];
 my $connection_status = 0;
 
 while (! $connection_status) { # Try to connect untill successfull
-  if ($ldap = Net::LDAP->new("orainf")) {
-    $ldap = Net::LDAP->new("orainf", timeout=>30);
+  if ($ldap = Net::LDAP->new("logwatch")) {
+    $ldap = Net::LDAP->new("logwatch", timeout=>30);
     $mesg = $ldap->bind;
     $mesg = $ldap->search(filter=>"$my_filter", base=>"dc=orainf,dc=com", attrs=>"$my_attributes");
     @entries = $mesg->entries;
