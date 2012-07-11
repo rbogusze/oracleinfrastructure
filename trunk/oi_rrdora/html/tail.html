@@ -24,7 +24,7 @@ o</option>
     <td><img src="2hour_disk.gif" name=disk></td>
 </tr>
 <tr>
-    <td><img src="2hour_tps.gif" name=tps></td>
+    <td><img src="2hour_tpm.gif" name=tpm></td>
     <td><img src="2hour_waits.gif" name=waits></td>
 </tr>
 <tr>
@@ -62,8 +62,8 @@ function imgChg()
    document.downtime.src = fname
    
    var fname = document.frm.dbname.options[document.frm.dbname.selectedIndex].value + "/" +
-               document.frm.period.options[document.frm.period.selectedIndex].value + "_tps.gif"
-   document.tps.src = fname
+               document.frm.period.options[document.frm.period.selectedIndex].value + "_tpm.gif"
+   document.tpm.src = fname
 }
 
 imgChg();
