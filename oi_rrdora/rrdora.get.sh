@@ -9,7 +9,7 @@
 # Oracle databases in the dblistfile
 #
 # Load the environment file
-. /home/orainf/rrdora/rrdora.env
+. /home/orainf/oi_rrdora/rrdora.env
 
 # Check for already running instance
 LOCKFILE=/tmp/rrdora.get.sh.lock
