@@ -189,7 +189,7 @@ NAMES.DIRECTORY_PATH= (LDAP,TNSNAMES)
 
 $ vi ldap.ora
 DEFAULT_ADMIN_CONTEXT = "dc=orainf, dc=com"
-DIRECTORY_SERVERS = (orainf:389:636)
+DIRECTORY_SERVERS = (logwatch:389:636)
 DIRECTORY_SERVER_TYPE = OID
 
 Try to connect to listener on host2
