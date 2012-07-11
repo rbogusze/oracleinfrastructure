@@ -9,7 +9,7 @@
 # Oracle databases in the dblistfile
 #
 # Load the environment file
-. /home/orainf/oi_rrdora/rrdora.env
+. /home/orainf/rrdora/rrdora.env
 
 # Check if the dblistfile is passed
 # as the first parameter
@@ -35,10 +35,14 @@ cat ${BASE}/html/head2.html > ${GIF}/index2.html
 
 # Here we go.......
 TABLE_ROW_COUNTER=0
-IFS=#
+IFS='|'
 cat $DBLIST|grep -v "^--"|while read DBNAME UN PW AUTO
 do
 [ ! -d $BASE/$DBNAME ] && mkdir -p $BASE/$DBNAME
+
+#echo "DBNAME: $DBNAME"
+#echo "UN: $UN"
+#echo "PW: $PW"
 
 # Create the rddfile for storing downtime information
 if [ ! -f $BASE/$DBNAME/downtime.rrd ]
@@ -178,10 +182,10 @@ if [ ! -f $BASE/$DBNAME/waits.rrd ]
 fi
 
 
-# Create the rddfile for storing tps information
-if [ ! -f $BASE/$DBNAME/tps.rrd ]
+# Create the rddfile for storing tpm information
+if [ ! -f $BASE/$DBNAME/tpm.rrd ]
  then
-  $RRD/bin/rrdtool create $BASE/$DBNAME/tps.rrd --step 60	\
+  $RRD/bin/rrdtool create $BASE/$DBNAME/tpm.rrd --step 60	\
   RRA:AVERAGE:0.5:1:600                                                      \
   RRA:AVERAGE:0.5:6:700                                                      \
   RRA:AVERAGE:0.5:24:775                                                     \
@@ -194,11 +198,11 @@ if [ ! -f $BASE/$DBNAME/tps.rrd ]
   RRA:MIN:0.5:6:700                                                          \
   RRA:MIN:0.5:24:775                                                         \
   RRA:MIN:0.5:288:797                                                        \
-  DS:tps:DERIVE:650:0:U                                                   
+  DS:tpm:DERIVE:650:0:U                                                   
 fi
 
-  #DS:tps:DERIVE:650:0:U                                                   
-  #DS:tps:GAUGE:650:0:U                                                   
+  #DS:tpm:DERIVE:650:0:U                                                   
+  #DS:tpm:GAUGE:650:0:U                                                   
 # Create the rddfile for storing physical i/o information
 
 

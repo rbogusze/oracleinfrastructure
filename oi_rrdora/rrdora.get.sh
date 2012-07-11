@@ -9,14 +9,14 @@
 # Oracle databases in the dblistfile
 #
 # Load the environment file
-. /home/orainf/oi_rrdora/rrdora.env
+. /home/orainf/rrdora/rrdora.env
 
 # Check for already running instance
 LOCKFILE=/tmp/rrdora.get.sh.lock
 
 # Sanity check
 if [ -f $LOCKFILE ]; then
-  echo "[alert] $LOCKFILE found, another instance of $0 is already running. Exiting. " | /usr/bin/logger -p local4.error
+  echo "[alert] $LOCKFILE found, another instance of $0 is already running. Exiting. " >> $BASE/logs/rrdora.get.log
 exit 1
 fi
 
@@ -25,8 +25,8 @@ touch $LOCKFILE
 
 
 # Redirect output to logfile
-exec 1>> $BASE/logs/rrdora.get.log 2>&1
-#exec 1>> /dev/null 2>&1
+#exec 1>> $BASE/logs/rrdora.get.log 2>&1
+exec 1>> /dev/null 2>&1
 echo "(`date`) : Start"
 
 # Check if the dblistfile is passed
@@ -43,12 +43,17 @@ fi
 [ ! -s $DBLIST ] && exit 0
 
 # Here we go.......
-IFS=#
+IFS='|'
 cat $DBLIST|grep -v "^--"|while read DBNAME UN PW AUTO
 do
 
 echo "(`date`) : $DBNAME"
 echo "(`date`) : .....up"
+
+#echo "DBNAME: $DBNAME"
+#echo "UN: $UN"
+#echo "PW: $PW"
+
 
 # Try to tnsping the server first before launching sqlplus queries
 tnsping ${DBNAME}
@@ -64,6 +69,7 @@ STRING=`sqlplus -s $UN/$PW@$DBNAME <<EOF
    @$BASE/sql/downtime.sql
 EOF`
 
+echo "(`date`) : .....Up or down"
 if [ "${STRING}" = 'UP' ]
  then
    STRING="N:0"
@@ -114,17 +120,18 @@ fi
 echo "(`date`) : ${STRING}"
 
 echo "(`date`) : .....disk"
-STRING=`sqlplus -s $UN/$PW@$DBNAME <<EOF
-   @$BASE/sql/disk.sql
-EOF`
-echo "$STRING"|grep "^N:" >/dev/null 2>&1
-if [ $? = 0 ]
- then
-   $RRD/bin/rrdtool update $BASE/$DBNAME/disk.rrd "$STRING"
-else
-   echo "${STRING}"
-fi
-echo "(`date`) : ${STRING}"
+echo "skipping, takes too much resources"
+#STRING=`sqlplus -s $UN/$PW@$DBNAME <<EOF
+#   @$BASE/sql/disk.sql
+#EOF`
+#echo "$STRING"|grep "^N:" >/dev/null 2>&1
+#if [ $? = 0 ]
+# then
+#   $RRD/bin/rrdtool update $BASE/$DBNAME/disk.rrd "$STRING"
+#else
+#   echo "${STRING}"
+#fi
+#echo "(`date`) : ${STRING}"
 
 echo "(`date`) : .....waits"
 STRING=`sqlplus -s $UN/$PW@$DBNAME <<EOF
@@ -139,14 +146,14 @@ else
 fi
 echo "(`date`) : ${STRING}"
 
-echo "(`date`) : .....tps"
+echo "(`date`) : .....tpm"
 STRING=`sqlplus -s $UN/$PW@$DBNAME <<EOF
-   @$BASE/sql/tps.sql
+   @$BASE/sql/tpm.sql
 EOF`
 echo "$STRING"|grep "^N:" >/dev/null 2>&1
 if [ $? = 0 ]
  then
-   $RRD/bin/rrdtool update $BASE/$DBNAME/tps.rrd "$STRING"
+   $RRD/bin/rrdtool update $BASE/$DBNAME/tpm.rrd "$STRING"
 else
    echo "${STRING}"
 fi
