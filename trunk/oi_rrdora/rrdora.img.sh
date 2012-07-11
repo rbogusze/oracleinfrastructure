@@ -9,7 +9,7 @@
 # Oracle databases in the dblistfile
 #
 # Load the environment file
-. /home/orainf/oi_rrdora/rrdora.env
+. /home/orainf/rrdora/rrdora.env
 
 # Check if the dblistfile is passed 
 # as the first parameter
@@ -22,15 +22,15 @@ else
 fi
 
 # Redirect output to logfile
-exec 1>> ${BASE}/logs/rrdora.img.log 2>&1
-#exec 1>> /dev/null 2>&1
+#exec 1>> ${BASE}/logs/rrdora.img.log 2>&1
+exec 1>> /dev/null 2>&1
 echo "(`date`) : Start"
 
 # Check if dblistfile contains any data
 [ ! -s $DBLIST ] && exit 0
 
 # Here we go.......
-IFS=\#
+IFS='|'
 cat $DBLIST|grep -v "^--"|while read DBNAME UN PW AUTO
 do
 echo "(`date`) : ${DBNAME}"
@@ -910,84 +910,84 @@ $RRD/bin/rrdtool graph ${GIF}/${DBNAME}/year_waits.gif --start -31536000 \
 
 
 ##########################################################################################
-echo "(`date`) : .....tps"
+echo "(`date`) : .....tpm"
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2hour_tps.gif --start -7200 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2hour_tpm.gif --start -7200 \
          --lower-limit 0 --units-exponent 0 \
-         --title="tps in last 2 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last 2 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/4hour_tps.gif --start -14400 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/4hour_tpm.gif --start -14400 \
          --lower-limit 0 \
-         --title="tps in last 4 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last 4 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
-         LINE2:A\#330099:"tp5min"
-
-
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/8hour_tps.gif --start -28800 \
-         --lower-limit 0 \
-         --title="tps in last 8 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
-         --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/12hour_tps.gif --start -43200 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/8hour_tpm.gif --start -28800 \
          --lower-limit 0 \
-         --title="tps in last 12 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last 8 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/day_tps.gif --start -86400 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/12hour_tpm.gif --start -43200 \
          --lower-limit 0 \
-         --title="tps in last 24 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last 12 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/week_tps.gif --start -604800 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/day_tpm.gif --start -86400 \
          --lower-limit 0 \
-         --title="tps in last week (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last 24 hours (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2week_tps.gif --start -1314000 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/week_tpm.gif --start -604800 \
          --lower-limit 0 \
-         --title="tps in last 2 weeks (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last week (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/month_tps.gif --start -2628000 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/2week_tpm.gif --start -1314000 \
          --lower-limit 0 \
-         --title="tps in last mont (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last 2 weeks (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/6month_tps.gif --start -15768000 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/month_tpm.gif --start -2628000 \
          --lower-limit 0 \
-         --title="tps in last 6 months (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last mont (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 
-$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/year_tps.gif --start -31536000 \
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/6month_tpm.gif --start -15768000 \
          --lower-limit 0 \
-         --title="tps in last year (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --title="tpm in last 6 months (`date '+%d-%m-%Y %H:%M:%S'`)" \
          --vertical-label "Nr" \
-         DEF:A=${BASE}/${DBNAME}/tps.rrd:tps:AVERAGE \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
+         LINE2:A\#330099:"tp5min"
+
+
+$RRD/bin/rrdtool graph ${GIF}/${DBNAME}/year_tpm.gif --start -31536000 \
+         --lower-limit 0 \
+         --title="tpm in last year (`date '+%d-%m-%Y %H:%M:%S'`)" \
+         --vertical-label "Nr" \
+         DEF:A=${BASE}/${DBNAME}/tpm.rrd:tpm:AVERAGE \
          LINE2:A\#330099:"tp5min"
 
 done
