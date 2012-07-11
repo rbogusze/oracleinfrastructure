@@ -34,18 +34,13 @@ Install the http server
 # chkconfig httpd on
 }}}
 
-To enable the httpd to see the web pages I put under /var/www edit /etc/httpd
-{{{
-/conf/httpd.conf and replace
-DocumentRoot "/var/www/html"
-with
-DocumentRoot "/var/www"
 
+{{{
 # service httpd start
 # yum install rrdtool
 
-# mkdir /var/www/rrdora
-# chown orainf:orainf /var/www/rrdora
+# mkdir /var/www/html/rrdora
+# chown orainf:orainf /var/www/html/rrdora
 }}}
 
 The provided rrdora.dblist contains a static TEST2 entry, lets try to run with that for to see if rrdora works in its simple configuration.
