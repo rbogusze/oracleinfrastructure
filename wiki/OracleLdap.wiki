@@ -166,6 +166,10 @@ http://www.crypt.gen.nz/selinux/disable_selinux.html
 
 # vi /etc/selinux/config
 SELINUX=disabled
+
+Disable firewall
+# service iptables stop
+# chkconfig iptables off
 # reboot
 }}}
 
