@@ -1,2 +1,0 @@
-*/5 * * * * cd /OEMREP/u01/app/oracle/product/9.2.0/rrdora.1.0; ./rrdora.get.sh rrdora.dblist; ./rrdora.img.sh rrdora.dblist
-0 18 * * * /OEMREP/u01/app/oracle/product/9.2.0/rrdora.1.0/rrdora_history.sh > /dev/null
