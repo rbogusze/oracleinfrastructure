@@ -106,8 +106,13 @@ The above command should return one row for now. See that we filter the LDAP ent
 
 Now lets combine it all to a script that will output expected format for rrdora.dblist and put into crontab
 {{{
+$ echo "V_PASS=perfstat" >> $HOME/.credentials
 $ crontab -e
-*/5 * * * *  cd $HOME/oi_rrdora; $HOME/scripto/perl/ask_ldap.pl "orainfDbRrdoraMonitoring=TRUE" "['cn', 'orainfDbRrdoraUser']" | awk '{ print $1 "#" $2 "#perfstat"}' > rrdora.dblist; ./rrdora.rrd.sh rrdora.dblist; ./rrdora.get.sh rrdora.dblist; ./rrdora.img.sh rrdora.dblist
+#
+# RRDORA - monitoring waitow bazodanowych
+#
+*/5 * * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_rrdora; ./prepare_rrdora.dblist.sh > rrdora.dblist; ./rrdora.rrd.sh rrdora.dblist; ./rrdora.get.sh rrdora.dblist; ./rrdora.img.sh rrdora.dblist
+
 }}}
 
 As you see we provide a hardcoded password, for now lets assume we can afford that. We will deal with that later.
