@@ -1,0 +1,5 @@
+#
+# RRDORA - monitoring waitow bazodanowych
+#
+*/5 * * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_rrdora; ./prepare_rrdora.dblist.sh > rrdora.dblist; ./rrdora.rrd.sh rrdora.dblist; ./rrdora.get.sh rrdora.dblist; ./rrdora.img.sh rrdora.dblist
+
