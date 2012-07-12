@@ -10,7 +10,7 @@ TMP_LOG_DIR=/tmp/oralms
 CONFIG_FILE=/tmp/oralms_ldap_list.txt
 AWK_FILE=/tmp/ldap_list.awk
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
