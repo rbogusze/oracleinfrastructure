@@ -9,3 +9,106 @@ This is how this project was born. To consolidate many {{{tail -f}}} from lots o
 The implementation is rather simple. I use low priviledged account that is able to login to host with database and do a remote {{{tail -f}}}, format the output and present it locally. Probably this should be done with syslog or other tool already there for the job.
 
 Anyway this is what works for me.
+
+We need to create an unpriviledged user that will be able to connect to database host for us, without beeing asked for password, and do the tail -f of database alert log.
+
+On the DB host that will be monitored create an unpriviledged user, for example named logwatch on each database host. We will connect as that user to tail the alert log from orainf host.
+{{{
+# adduser logwatch
+# passwd logwatch
+}}}
+
+Allow for others to read the alertlog file. E.g.
+{{{
+$ chmod o+r /TEST/u01/app/oracle/admin/TEST/bdump/alert_TEST2.log
+}}}
+
+I do not want to repeat the procedure that has been explained many times. For example use the procedure described in secion 'Configuring the Secure Shell'
+http://download.oracle.com/docs/cd/B19306_01/rac.102/b28759/preparing.htm#BABGFGBJ
+
+The final result should be the ability to login to remote hosts without beeing asked for password.
+
+From orainf host login to host2 and vmware10202 and make sure that you can read the alert log.
+{{{
+$ ssh -l logwatch dbhost
+logwatch@dbhost$ tail /TEST/u01/app/oracle/admin/TEST/bdump/alert_TEST.log
+}}}
+
+Again we use the LDAP to decide where are the alert logs located and which user should be used to login to remote host.
+
+Add three attributes to databases TEST
+{{{
+orainfOsLogwatchUser: logwatch
+orainfDbAlertLogFile: <provide actual locations>
+orainfDbAlertLogMonitoring: TRUE
+}}}
+
+Download the scripts that does the work
+{{{
+$ cd
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_oralms oi_oralms
+}}}
+
+Test the script responsible for gathering the logs
+{{{
+$ cd oi_oralms
+$ ./oralms_gather_monitor.sh
+}}}
+
+Now you should be able to see in /tmp/global_alert_raw.log that the logs are comming. Test it by logging to database host and add some test message to alert log. You should shortly see that on global_alert_raw.log.
+
+Few explanations about the format. Each line is preceeded with meta information describing from which database it is comming. I use the format [<LDAP name>_<SID>_<hostname>_<A for alertlog, D for dataguard log (later more about it)].
+
+As many of the messages recorded in alertlogs are informational in nature I decide to filter those I find useless. To do that I use the logsurfer package. 
+
+Install logsurfer
+{{{
+# cd /opt
+# wget https://distfiles.macports.org/logsurfer/logsurfer+-1.6b.tar.gz
+# tar xvzf logsurfer+-1.6b.tar.gz
+# cd logsurfer+-1.6b
+# ./configure
+# make
+# make install
+}}}
+
+To make life more colorful I use the package logmon
+
+Install logmon
+{{{
+# cd /opt
+# yum install ncurses-devel
+# wget http://www.edespot.com/code/LogMon/LogMon-0.4.3.src.tgz
+# tar xvzf LogMon-0.4.3.src.tgz
+# cd LogMon-0.4.3
+# ./configure
+# make
+# make install
+}}}
+
+Add to crontab oralms_gather_monitor.sh to refresh the broken tail connections.
+{{{
+$ crontab -e
+#
+# ORALMS
+#
+*/42 * * * * /home/orainf/oi_oralms/oralms_gather_monitor.sh
+}}}
+
+Now running the console can be done in two following steps
+{{{
+$ cd oi_oralms
+$ screen
+$ ./oralms_filter.sh filter_all.conf
+Now press 'Ctrl + a c' to open new console in screen
+$ ./oralms_view.sh
+Now press 'Ctrl + a c' to open new console in screen
+}}}
+
+This will print a timestamp every 15min
+{{{
+$ cd /tmp
+$ watch -n 900 'date >> ./global_alert_raw.log'
+}}}
+
+Go back to alert log view by pressing 'Ctr + a n' you should see some aler log messages. Try rebooting a database or causing an ORA-600 to see some nice colors :)
