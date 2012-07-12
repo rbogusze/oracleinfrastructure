@@ -3,7 +3,7 @@
 
 #set -x
 
-LOGMON_CONFIG=/home/orainf/oralms/logmon_global_alert.conf
+LOGMON_CONFIG=/home/orainf/oi_oralms/logmon_global_alert.conf
 
 # Make it more colorfull and add action to selected events
 cd /tmp
