@@ -57,7 +57,11 @@ $ ./oralms_gather_monitor.sh
 
 Now you should be able to see in /tmp/global_alert_raw.log that the logs are comming. Test it by logging to database host and add some test message to alert log. You should shortly see that on global_alert_raw.log.
 
-Few explanations about the format. Each line is preceeded with meta information describing from which database it is comming. I use the format [<LDAP name>_<SID>_<hostname>_<A for alertlog, D for dataguard log (later more about it)].
+Few explanations about the format. Each line is preceeded with meta information describing from which database it is comming. I use the format 
+{{{
+<LDAP name>_<SID>_<hostname>_<A for alertlog, D for dataguard log 
+}}}
+(later more about it).
 
 As many of the messages recorded in alertlogs are informational in nature I decide to filter those I find useless. To do that I use the logsurfer package. 
 
