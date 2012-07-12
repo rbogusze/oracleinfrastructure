@@ -60,7 +60,7 @@ check_file $CONFIG_FILE
 touch $LOCKFILE
 
 # Connect with ssh agent
-. /home/orainf/.ssh-agent
+#. /home/orainf/.ssh-agent
 
 # Direct all messages to a file
 exec >> $GLOBAL_ALERT 2>&1
@@ -91,7 +91,7 @@ do {
       if [ ! -f "${TMP_LOG_DIR}/${LOG_ID}" ] ; then
          touch "${TMP_LOG_DIR}/${LOG_ID}"
       fi
-      $SSH -o BatchMode=yes ${USERNAME}@${HOST} "tail -f ${LOGFILE_PATH}"  > ${TMP_LOG_DIR}/${LOG_ID} &
+      ssh -o BatchMode=yes ${USERNAME}@${HOST} "tail -f ${LOGFILE_PATH}"  > ${TMP_LOG_DIR}/${LOG_ID} &
       PID=$!
       touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
       msgd "Sleep 8"
