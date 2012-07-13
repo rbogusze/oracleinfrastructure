@@ -52,7 +52,6 @@ msgd "AWK_FILE: $AWK_FILE"
 echo '{ printf $1 " " $2 " " $3 " [" substr($5 "_____________________________",1,' $LEN_5 ') "_" substr($4 "_____________________________",1,' $LEN_4 ') "_" substr($2 "____________________________",1,' $LEN_2 '); v_spnr=split ($3, a, "/"); if (substr(a[v_spnr], 1, 3) == "ale") printf "_A"; if (substr(a[v_spnr], 1, 3) == "drc") printf "_D"; print "] dummy_parm"}' > $AWK_FILE
 
 $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"
 
 check_file $CONFIG_FILE
 
