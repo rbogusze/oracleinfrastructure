@@ -18,9 +18,9 @@ use Log::Log4perl qw(:easy);
 # For open ports monitoring
 use IO::Socket::INET; 
 
-#Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($DEBUG);
 #Log::Log4perl->easy_init($INFO);
-Log::Log4perl->easy_init($WARN);
+#Log::Log4perl->easy_init($WARN);
 #DEBUG
 #INFO
 #WARN
@@ -659,8 +659,8 @@ my @monitors_list = ($TablespaceMonitoring ,$FilesystemMonitoring ,$TnspingMonit
 #my @monitors_list = ($JobsPackagesMonitoring);
 
 # Prepare the LDAP connection
-my $ldap = Net::LDAP->new("smort.pgf.com.pl");
-$ldap = Net::LDAP->new("smort.pgf.com.pl", timeout=>30);
+my $ldap = Net::LDAP->new("logwatch");
+$ldap = Net::LDAP->new("logwatch", timeout=>30);
 my $ldap_mesg = $ldap->bind;
 
 
