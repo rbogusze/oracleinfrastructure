@@ -18,8 +18,8 @@ use Log::Log4perl qw(:easy);
 # For open ports monitoring
 use IO::Socket::INET; 
 
-Log::Log4perl->easy_init($DEBUG);
-#Log::Log4perl->easy_init($INFO);
+#Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($INFO);
 #Log::Log4perl->easy_init($WARN);
 #DEBUG
 #INFO
@@ -667,15 +667,16 @@ my $ldap_mesg = $ldap->bind;
 #print "$TablespaceMonitoring->{desc}\n";
 my $tmp; # for temp string manipulation
 my @entries; # array that stores answers from ldap server
-my $entry; # fingle row returne from ldap
+my $entry; # single row returne from ldap
 my @my_attributes_array; # attributes plit to allow for returning values of apecifuc atribute 
 my $attr_user; # single atribute
 
 # Pobierz temat z listy tematów
 foreach my $monitor (@monitors_list) {
   # Pobierz dane dotyczace konkretnego tematu z LDAP
-  $ldap_mesg = $ldap->search(filter=>$monitor->filter, base=>"dc=pgf,dc=com,dc=pl", attrs=>$monitor->attributes);
+  $ldap_mesg = $ldap->search(filter=>$monitor->filter, base=>"dc=orainf,dc=com,dc=pl", attrs=>$monitor->attributes);
   @entries = $ldap_mesg->entries;
+  $logger->info("-- " . $monitor->name . "\n");
 
   foreach $entry (@entries) {
     # Przypisz znalezione wartosci dla atrybutow do objektu
