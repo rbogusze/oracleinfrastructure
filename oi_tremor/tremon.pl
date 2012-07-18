@@ -99,7 +99,7 @@ sub action {
     eval {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
-                   ,$self->{ATTRIBUTES_VALUES}->get_value('remikDbRrdoraUser')
+                   ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
                    ,'perfhal',
                    { RaiseError => 1,AutoCommit => 0}
                    ) || die "Database connection not made : $DBI::errstr";
@@ -155,7 +155,7 @@ sub action {
     eval {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
-                   ,$self->{ATTRIBUTES_VALUES}->get_value('remikDbRrdoraUser')
+                   ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
                    ,'perfhal',
                    { RaiseError => 1,AutoCommit => 0}
                    ); 
@@ -280,7 +280,7 @@ sub action {
     eval {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
-                   ,$self->{ATTRIBUTES_VALUES}->get_value('remikDbRrdoraUser')
+                   ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
                    ,'perfhal',
                    { RaiseError => 1,AutoCommit => 0}
                    ) || die "Database connection not made : $DBI::errstr";
@@ -367,11 +367,11 @@ sub action {
     $logger->info("-- Doing stuff for TablespaceMonitoring ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
     
     # Check if the time has come to run this trigger
-    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('remikTremorTablespaceMonitoringFrequency'))) { return; }
+    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorTablespaceMonitoringFrequency'))) { return; }
     eval {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
-                   ,$self->{ATTRIBUTES_VALUES}->get_value('remikDbRrdoraUser')
+                   ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
                    ,'perfhal',
                    { RaiseError => 1,AutoCommit => 0}
                    ) || die "Database connection not made : $DBI::errstr";
@@ -411,10 +411,10 @@ sub action {
           $tbs_name,
           $self->{DESC},
           $self->{ATTRIBUTES_VALUES}->get_value('cn'),
-          $self->{ATTRIBUTES_VALUES}->get_value('remikTremorTablespaceMonitoringTresholdL1'),
-          $self->{ATTRIBUTES_VALUES}->get_value('remikTremorTablespaceMonitoringTresholdL2'),
-          $self->{ATTRIBUTES_VALUES}->get_value('remikTremorTablespaceMonitoringReceipientsL1'),
-          $self->{ATTRIBUTES_VALUES}->get_value('remikTremorTablespaceMonitoringReceipientsL2')
+          $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorTablespaceMonitoringTresholdL1'),
+          $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorTablespaceMonitoringTresholdL2'),
+          $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorTablespaceMonitoringReceipientsL1'),
+          $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorTablespaceMonitoringReceipientsL2')
         ); # monitor_treshold(
       } # Check if variable is numeric
     }
@@ -439,11 +439,11 @@ sub action {
   if ($self->{NAME} eq "FilesystemMonitoring") {
     $logger->info("Doing stuff for FilesystemMonitoring, ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
     # Check if the time has come to run this trigger
-    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('remikTremorFilesystemMonitoringFrequency'))) { return; }
+    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorFilesystemMonitoringFrequency'))) { return; }
     
     #my $ssh = Net::SSH::Perl->new("obsdb1", debug => 1); # Error check this
     my $ssh = Net::SSH::Perl->new($self->{ATTRIBUTES_VALUES}->get_value('orclSystemName')); # Error check this
-    eval { $ssh->login($self->{ATTRIBUTES_VALUES}->get_value('remikOsLogwatchUser')); }; # Error check this
+    eval { $ssh->login($self->{ATTRIBUTES_VALUES}->get_value('orainfOsLogwatchUser')); }; # Error check this
     warn $@ if $@;
 
     # Check df
@@ -473,10 +473,10 @@ sub action {
          $filesystem_name,
          $self->{DESC}, 
          $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'),
-         $self->{ATTRIBUTES_VALUES}->get_value('remikTremorFilesystemMonitoringTresholdL1'),
-         $self->{ATTRIBUTES_VALUES}->get_value('remikTremorFilesystemMonitoringTresholdL2'),
-         $self->{ATTRIBUTES_VALUES}->get_value('remikTremorFilesystemMonitoringReceipientsL1'),
-         $self->{ATTRIBUTES_VALUES}->get_value('remikTremorFilesystemMonitoringReceipientsL2')
+         $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorFilesystemMonitoringTresholdL1'),
+         $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorFilesystemMonitoringTresholdL2'),
+         $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorFilesystemMonitoringReceipientsL1'),
+         $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorFilesystemMonitoringReceipientsL2')
         );
         } # else { print "Skipping - $filesystem_name\n\n\n"; } # if (($filesystem_name !=
       } # if ($filesystem_use_prcnt)
@@ -616,14 +616,14 @@ sub check_frequency( ) {
 my $TablespaceMonitoring = TremorMonitoring->new();
 $TablespaceMonitoring->name("TablespaceMonitoring");
 $TablespaceMonitoring->desc("free_space_tablespaces");
-$TablespaceMonitoring->filter("(remikTremorTablespaceMonitoring=TRUE)");
-$TablespaceMonitoring->attributes("['orclSystemName', 'orclNetDescString', 'remikTremorTablespaceMonitoringTresholdL1', 'remikTremorTablespaceMonitoringTresholdL2', 'remikTremorTablespaceMonitoringReceipientsL1', 'remikTremorTablespaceMonitoringReceipientsL2']");
+$TablespaceMonitoring->filter("(orainfTremorTablespaceMonitoring=TRUE)");
+$TablespaceMonitoring->attributes("['orclSystemName', 'orclNetDescString', 'orainfTremorTablespaceMonitoringTresholdL1', 'orainfTremorTablespaceMonitoringTresholdL2', 'orainfTremorTablespaceMonitoringReceipientsL1', 'orainfTremorTablespaceMonitoringReceipientsL2']");
 
 my $FilesystemMonitoring= TremorMonitoring->new();
 $FilesystemMonitoring->name("FilesystemMonitoring");
 $FilesystemMonitoring->desc("free_space_filesystems");
-$FilesystemMonitoring->filter("(remikTremorFilesystemMonitoring=TRUE)");
-$FilesystemMonitoring->attributes("['orclSystemName', 'remikOsLogwatchUser']"); # He somehow does not care and returns everything
+$FilesystemMonitoring->filter("(orainfTremorFilesystemMonitoring=TRUE)");
+$FilesystemMonitoring->attributes("['orclSystemName', 'orainfOsLogwatchUser']"); # He somehow does not care and returns everything
 
 my $TnspingMonitoring= TremorMonitoring->new();
 $TnspingMonitoring->name("TnspingMonitoring");
