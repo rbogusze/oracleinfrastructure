@@ -81,6 +81,9 @@ attributetype ( 1.3.6.1.4.1.29758.1.2.25 NAME 'orainfDbMusas1xMonitoring' DESC '
 
 objectClass ( 1.3.6.1.4.1.6863.2.4.1 NAME 'orainfObjects' SUP top STRUCTURAL MUST cn MAY ( orainfDbCustomer ) )
 
+objectClass ( 2.16.840.1.113894.7.2.1001 NAME 'orclService'   SUP 'top'  STRUCTURAL MUST ( cn )  MAY (  orclOracleHome $ orclSystemName $ orclSid $ orclNetDescString $ orclVersion $ Description $ orainfDbRrdoraMonitoring $ orainfDbRrdoraUser $ orainfOsLogwatchUser $ orainfDbAlertLogFile $ orainfDbAlertLogMonitoring $ orainfDbTnspingMonitoring ) )
+
+
 #attributetype ( 2.16.840.1.113894.2.1.5 NAME 'orclDBServerRole' EQUALITY caseIgnoreMatch SYNTAX '1.3.6.1.4.1.1466.115.121.1.15' )
 
 #objectClass ( 2.16.840.1.113894.2.2.3 NAME 'orclDBEnterpriseRole' SUP top STRUCTURAL MUST cn MAY ( orclDBServerRole $ orclDBEntRoleAssigned $ description $ seeAlso $ o $ ou $ orclDBRoleOccupant ) )

@@ -20,5 +20,3 @@ attributetype ( 2.16.840.1.113894.3.1.12 NAME 'orclNetDescName' EQUALITY disting
 
 attributetype ( 2.16.840.1.113894.3.1.13 NAME 'orclNetDescString' EQUALITY caseIgnoreMatch SYNTAX '1.3.6.1.4.1.1466.115.121.1.15' SINGLE-VALUE )
 
-objectClass ( 2.16.840.1.113894.7.2.1001 NAME 'orclService'   SUP 'top'  STRUCTURAL MUST ( cn )  MAY (  orclServiceType $ orclOracleHome $ orclSystemName $ orclSid $ orclNetDescName $ orclNetDescString $ orclVersion $ Description ) )
-
