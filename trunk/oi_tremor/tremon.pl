@@ -95,7 +95,7 @@ sub action {
   if ($self->{NAME} eq "RmanCorruption") {
     $logger->info("--Doing stuff for RmanCorruption ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
     # Check if the time has come to run this trigger
-    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('pgfDbCheckRmanCorruptionFrequency'))) { return; }
+    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfDbCheckRmanCorruptionFrequency'))) { return; }
     eval {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
@@ -118,8 +118,8 @@ sub action {
         $self->{ATTRIBUTES_VALUES}->get_value('cn'),
         0,
         0,
-        $self->{ATTRIBUTES_VALUES}->get_value('pgfDbCheckRmanCorruptionReceipients'),
-        $self->{ATTRIBUTES_VALUES}->get_value('pgfDbCheckRmanCorruptionReceipients')
+        $self->{ATTRIBUTES_VALUES}->get_value('orainfDbCheckRmanCorruptionReceipients'),
+        $self->{ATTRIBUTES_VALUES}->get_value('orainfDbCheckRmanCorruptionReceipients')
       ); # monitor_treshold(
 
     } else {
@@ -151,7 +151,7 @@ sub action {
   if ($self->{NAME} eq "TnspingMonitoring") {
     $logger->info("--Doing stuff for TnspingMonitoring ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
     # Check if the time has come to run this trigger
-    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringFrequency'))) { return; }
+    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringFrequency'))) { return; }
     eval {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
@@ -182,19 +182,19 @@ sub action {
 	my $flag_L1_time = scalar $stat[9]; # File creation time in seconds since the epoch
 	$logger->debug("File mtime = ", $flag_L1_time,  "\n");
 	$logger->debug("Difference = ", time() - $flag_L1_time,  "\n");
-	if ((time() - $flag_L1_time) > ($self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringEscalation') * 60)) {
+	if ((time() - $flag_L1_time) > ($self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringEscalation') * 60)) {
 	  $logger->debug("Time to escalate to L2\n");
-	  monitor_treshold( 2, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringReceipientsL2'));
+	  monitor_treshold( 2, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringReceipientsL2'));
 	} else {
 	  $logger->debug("Not yet a time to escalate to L2. L1 actions for now.\n");
-	  monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringReceipientsL2'));
+	  monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringReceipientsL2'));
 	}
       } else {
         # Set the L1 flag and perform actions
         $logger->debug("L1 flag does not exists. Creating one.\n");
 	open(FH,">$flag_L1") or die "Can't create new.txt: $!";
 	close(FH);
-	monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('pgfDbTnspingMonitoringReceipientsL2'));
+	monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringReceipientsL2'));
       } # if (-e $flag_L1)
       
     } else {
@@ -214,11 +214,11 @@ sub action {
   if ($self->{NAME} eq "PortMonitoring") {
     $logger->info("--Doing stuff for PortMonitoring ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
     # Check if the time has come to run this trigger
-    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringFrequency'))) { return; }
+    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringFrequency'))) { return; }
     my $flag_L1 = "/tmp/PortMonitoringL1_".$self->{ATTRIBUTES_VALUES}->get_value('cn');
     my $flag_L2 = "/tmp/PortMonitoringL2_".$self->{ATTRIBUTES_VALUES}->get_value('cn');
     # Build an array of ports
-    my @peer_ports = split(',',$self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringPorts'));
+    my @peer_ports = split(',',$self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringPorts'));
     foreach my $peer_port (@peer_ports) {
       $logger->debug("PortMonitoring. Checking port ", $peer_port, " on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
    
@@ -245,19 +245,19 @@ sub action {
           my $flag_L1_time = scalar $stat[9]; # File creation time in seconds since the epoch
           $logger->debug("File mtime = ", $flag_L1_time,  "\n");
           $logger->debug("Difference = ", time() - $flag_L1_time,  "\n");
-          if ((time() - $flag_L1_time) > ($self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringEscalation') * 60)) {
+          if ((time() - $flag_L1_time) > ($self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringEscalation') * 60)) {
 	    $logger->debug("Time to escalate to L2\n");
-	    monitor_treshold( 2, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringReceipientsL2'));
+	    monitor_treshold( 2, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringReceipientsL2'));
 	  } else {
 	    $logger->debug("Not yet a time to escalate to L2. L1 actions for now.\n");
-	    monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringReceipientsL2'));
+	    monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringReceipientsL2'));
 	  }
         } else {
           # Set the L1 flag and perform actions
           $logger->debug("L1 flag does not exists. Creating one.\n");
 	  open(FH,">$flag_L1") or die "Can't create new.txt: $!";
 	  close(FH);
-	  monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('pgfPortMonitoringReceipientsL2'));
+	  monitor_treshold( 1, " ", $self->{DESC}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), 0, 1, $self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringReceipientsL1'), $self->{ATTRIBUTES_VALUES}->get_value('orainfPortMonitoringReceipientsL2'));
         } # if (-e $flag_L1)
       } # if (IO::Socket
     } # foreach my $peer_port
@@ -276,7 +276,7 @@ sub action {
     $logger->info("-- Doing stuff for JobsPackagesMonitoring ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
     
     # Check if the time has come to run this trigger
-    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('pgfDbCheckJobsPackagesFrequency'))) { return; }
+    if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfDbCheckJobsPackagesFrequency'))) { return; }
     eval {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
@@ -311,7 +311,7 @@ sub action {
         0,
         0,
         "file_append(/dev/null)",
-        $self->{ATTRIBUTES_VALUES}->get_value('pgfDbCheckJobsPackagesReceipients')
+        $self->{ATTRIBUTES_VALUES}->get_value('orainfDbCheckJobsPackagesReceipients')
       ); # monitor_treshold(
     } # while
 
@@ -336,7 +336,7 @@ sub action {
         0,
         0,
         "file_append(/dev/null)",
-        $self->{ATTRIBUTES_VALUES}->get_value('pgfDbCheckJobsPackagesReceipients')
+        $self->{ATTRIBUTES_VALUES}->get_value('orainfDbCheckJobsPackagesReceipients')
       ); # monitor_treshold(
     } # while
 
@@ -628,22 +628,22 @@ $FilesystemMonitoring->attributes("['orclSystemName', 'remikOsLogwatchUser']"); 
 my $TnspingMonitoring= TremorMonitoring->new();
 $TnspingMonitoring->name("TnspingMonitoring");
 $TnspingMonitoring->desc("tnsping could not reach");
-$TnspingMonitoring->filter("(pgfDbTnspingMonitoring=TRUE)");
+$TnspingMonitoring->filter("(orainfDbTnspingMonitoring=TRUE)");
 
 my $PortMonitoring= TremorMonitoring->new();
 $PortMonitoring->name("PortMonitoring");
 $PortMonitoring->desc("port could not be reached");
-$PortMonitoring->filter("(pgfPortMonitoring=TRUE)");
+$PortMonitoring->filter("(orainfPortMonitoring=TRUE)");
 
 my $RmanCorruption= TremorMonitoring->new();
 $RmanCorruption ->name("RmanCorruption");
 $RmanCorruption ->desc("RMAN has discovered corruptions");
-$RmanCorruption ->filter("(pgfDbCheckRmanCorruption=TRUE)");
+$RmanCorruption ->filter("(orainfDbCheckRmanCorruption=TRUE)");
 
 my $JobsPackagesMonitoring= TremorMonitoring->new();
 $JobsPackagesMonitoring->name("JobsPackagesMonitoring");
 $JobsPackagesMonitoring->desc("Broken jobs or invalid packages found");
-$JobsPackagesMonitoring->filter("(pgfDbCheckJobsPackages=TRUE)");
+$JobsPackagesMonitoring->filter("(orainfDbCheckJobsPackages=TRUE)");
 #my $str = "Ala ma kota.\n";
 #print "The answer is $str";
 
