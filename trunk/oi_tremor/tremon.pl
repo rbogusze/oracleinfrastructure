@@ -18,8 +18,8 @@ use Log::Log4perl qw(:easy);
 # For open ports monitoring
 use IO::Socket::INET; 
 
-#Log::Log4perl->easy_init($DEBUG);
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($DEBUG);
+#Log::Log4perl->easy_init($INFO);
 #Log::Log4perl->easy_init($WARN);
 #DEBUG
 #INFO
@@ -629,6 +629,7 @@ my $TnspingMonitoring= TremorMonitoring->new();
 $TnspingMonitoring->name("TnspingMonitoring");
 $TnspingMonitoring->desc("tnsping could not reach");
 $TnspingMonitoring->filter("(orainfDbTnspingMonitoring=TRUE)");
+$TnspingMonitoring->attributes("['cn']"); # He somehow does not care and returns everything
 
 my $PortMonitoring= TremorMonitoring->new();
 $PortMonitoring->name("PortMonitoring");
@@ -649,11 +650,11 @@ $JobsPackagesMonitoring->filter("(orainfDbCheckJobsPackages=TRUE)");
 
 #exit 0;
 
-my @monitors_list = ($TablespaceMonitoring ,$FilesystemMonitoring ,$TnspingMonitoring ,$PortMonitoring ,$RmanCorruption ,$JobsPackagesMonitoring);
+#my @monitors_list = ($TablespaceMonitoring ,$FilesystemMonitoring ,$TnspingMonitoring ,$PortMonitoring ,$RmanCorruption ,$JobsPackagesMonitoring);
 
 #my @monitors_list = ($TablespaceMonitoring);
 #my @monitors_list = ($FilesystemMonitoring);
-#my @monitors_list = ($TnspingMonitoring);
+my @monitors_list = ($TnspingMonitoring);
 #my @monitors_list = ($PortMonitoring);
 #my @monitors_list = ($RmanCorruption);
 #my @monitors_list = ($JobsPackagesMonitoring);
@@ -674,12 +675,21 @@ my $attr_user; # single atribute
 # Pobierz temat z listy tematów
 foreach my $monitor (@monitors_list) {
   # Pobierz dane dotyczace konkretnego tematu z LDAP
-  $ldap_mesg = $ldap->search(filter=>$monitor->filter, base=>"dc=orainf,dc=com,dc=pl", attrs=>$monitor->attributes);
+  $logger->info("- Section: " . $monitor->name . "\n");
+  $logger->info("-- Filter: " . $monitor->filter. "\n");
+  $logger->info("-- Looking for attributes: " . $monitor->attributes . "\n");
+  $ldap_mesg = $ldap->search(filter=>$monitor->filter, base=>"dc=orainf,dc=com", attrs=>$monitor->attributes);
   @entries = $ldap_mesg->entries;
-  $logger->info("-- " . $monitor->name . "\n");
+  #WIP 
+  print "Ala ma kota.\n";
+  print "aaa" . @entries . "\n";
+  print "ccc" . $ldap_mesg . "\n";
+  print "ddd" . $ldap_mesg->entries . "\n";
+
 
   foreach $entry (@entries) {
     # Przypisz znalezione wartosci dla atrybutow do objektu
+    $logger->info("---- " . $monitor->name . "\n");
     $monitor->attributes_values($entry);
 
     # Wykonaj dzialanie zwiazane z tematem
