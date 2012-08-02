@@ -2,21 +2,17 @@
 #$Header: /CVS/cvsadmin/cvsrepository/admin/projects/tremon/tremon.pl,v 1.69 2010/08/23 08:21:39 remikcvs Exp $
 # This script 
 #
-# To Do:
 # - I do not understand why do I have access to all atributes
 
 use strict;
-#use warnings;
 use Net::LDAP;
 use Net::SSH::Perl;
 use Math::BigInt::GMP;  # Don't forget this! sppedsup ssh connection
 use DBI;
 use File::stat;
 use Time::localtime;
-# http://www.perl.com/pub/a/2002/09/11/log4perl.html?page=1
-use Log::Log4perl qw(:easy);
-# For open ports monitoring
-use IO::Socket::INET; 
+use Log::Log4perl qw(:easy); # http://www.perl.com/pub/a/2002/09/11/log4perl.html?page=1
+use IO::Socket::INET;  # For open ports monitoring
 use DBD::Oracle;
 
 # Should be taken from environment
@@ -26,6 +22,9 @@ Log::Log4perl->easy_init($DEBUG);
 #Log::Log4perl->easy_init($INFO);
 #Log::Log4perl->easy_init($WARN);
 my $logger = get_logger();
+
+# Determining password for LDAP->orainfDbRrdoraUser user (I know, not elegant)
+
 
 package TremorMonitoring;
 #use strict;
@@ -650,9 +649,9 @@ $JobsPackagesMonitoring->filter("(orainfDbCheckJobsPackages=TRUE)");
 
 #my @monitors_list = ($TablespaceMonitoring ,$FilesystemMonitoring ,$TnspingMonitoring ,$PortMonitoring ,$RmanCorruption ,$JobsPackagesMonitoring);
 
-#my @monitors_list = ($TablespaceMonitoring);
+my @monitors_list = ($TablespaceMonitoring);
 #my @monitors_list = ($FilesystemMonitoring);
-my @monitors_list = ($TnspingMonitoring);
+#my @monitors_list = ($TnspingMonitoring);
 #my @monitors_list = ($PortMonitoring);
 #my @monitors_list = ($RmanCorruption);
 #my @monitors_list = ($JobsPackagesMonitoring);
