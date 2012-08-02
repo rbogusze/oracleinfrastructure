@@ -101,7 +101,10 @@ Login as orainf, install oracle 10g or 11g client
 Install 10g client
 {{{
 Download 10201_client_linux32.zip from Oracle
-
+$ cksum 10201_client_linux32.zip 
+579193942 478343213 10201_client_linux32.zip
+$ unzip 10201_client_linux32.zip
+$ cd client
 $ ./runInstaller
 Select Installation Type -> Administrator
 Path: /home/orainf/oracle/product/10.2.0
