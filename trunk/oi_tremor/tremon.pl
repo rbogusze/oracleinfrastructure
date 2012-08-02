@@ -17,19 +17,15 @@ use Time::localtime;
 use Log::Log4perl qw(:easy);
 # For open ports monitoring
 use IO::Socket::INET; 
+use DBD::Oracle;
+
+# Should be taken from environment
+#$ENV{'ORACLE_HOME'}='/home/orainf/oracle/product/11.2.0/client_1';
 
 Log::Log4perl->easy_init($DEBUG);
 #Log::Log4perl->easy_init($INFO);
 #Log::Log4perl->easy_init($WARN);
-#DEBUG
-#INFO
-#WARN
-#ERROR
-#FATAL
 my $logger = get_logger();
-
-#use Error qw(:try);
-$ENV{"ORACLE_HOME"} = "/OEMREP/u01/app/oracle/product/9.2.0";
 
 package TremorMonitoring;
 #use strict;
@@ -153,10 +149,12 @@ sub action {
     # Check if the time has come to run this trigger
     if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfDbTnspingMonitoringFrequency'))) { return; }
     eval {
+
+
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
                    ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
-                   ,'perfhal',
+                   ,'perfstat',
                    { RaiseError => 1,AutoCommit => 0}
                    ); 
     my $sql = qq{ SELECT * FROM dual };
@@ -680,12 +678,6 @@ foreach my $monitor (@monitors_list) {
   $logger->info("-- Looking for attributes: " . $monitor->attributes . "\n");
   $ldap_mesg = $ldap->search(filter=>$monitor->filter, base=>"dc=orainf,dc=com", attrs=>$monitor->attributes);
   @entries = $ldap_mesg->entries;
-  #WIP 
-  print "Ala ma kota.\n";
-  print "aaa" . @entries . "\n";
-  print "ccc" . $ldap_mesg . "\n";
-  print "ddd" . $ldap_mesg->entries . "\n";
-
 
   foreach $entry (@entries) {
     # Przypisz znalezione wartosci dla atrybutow do objektu
