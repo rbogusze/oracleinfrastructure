@@ -24,6 +24,18 @@ Log::Log4perl->easy_init($DEBUG);
 my $logger = get_logger();
 
 # Determining password for LDAP->orainfDbRrdoraUser user (I know, not elegant)
+# WIP
+open (MYFILE, '/home/orainf/.credentials') or die "Open of the file failed!";
+while (<MYFILE>) {
+  chomp;
+  print "$_\n";
+}
+close (MYFILE); 
+
+
+exit 0;
+
+
 
 
 package TremorMonitoring;
