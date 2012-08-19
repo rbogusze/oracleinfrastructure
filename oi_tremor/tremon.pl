@@ -23,21 +23,6 @@ Log::Log4perl->easy_init($DEBUG);
 #Log::Log4perl->easy_init($WARN);
 my $logger = get_logger();
 
-# Determining password for LDAP->orainfDbRrdoraUser user (I know, not elegant)
-# WIP
-open (MYFILE, '/home/orainf/.credentials') or die "Open of the file failed!";
-while (<MYFILE>) {
-  chomp;
-  print "$_\n";
-}
-close (MYFILE); 
-
-
-exit 0;
-
-
-
-
 package TremorMonitoring;
 #use strict;
 sub new {
@@ -381,7 +366,7 @@ sub action {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
                    ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
-                   ,'perfhal',
+                   ,$v_password,
                    { RaiseError => 1,AutoCommit => 0}
                    ) || die "Database connection not made : $DBI::errstr";
     my $sql = qq{ 
@@ -621,6 +606,23 @@ sub check_frequency( ) {
 1;
 
 # Actual Start of the Program
+# Determining password for LDAP->orainfDbRrdoraUser user (I know, not elegant)
+# WIP
+open (MYFILE, '/home/orainf/.credentials') or die "Open of the file failed!";
+while (<MYFILE>) {
+  chomp;
+  $logger->debug("$_\n");
+  if ($_ =~ m/V_PASS/) {
+    $logger->info("match\n");
+    my ($v_password);
+    $v_password = $_;
+    $v_password =~ s/V_PASS=//g;
+    $logger->info("v_password: " . $v_password . "\n");
+  } 
+}
+close (MYFILE); 
+
+
 
 my $TablespaceMonitoring = TremorMonitoring->new();
 $TablespaceMonitoring->name("TablespaceMonitoring");
