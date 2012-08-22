@@ -670,9 +670,9 @@ $JobsPackagesMonitoring->filter("(orainfDbCheckJobsPackages=TRUE)");
 #my @monitors_list = ($TablespaceMonitoring ,$FilesystemMonitoring ,$TnspingMonitoring ,$PortMonitoring ,$RmanCorruption ,$JobsPackagesMonitoring);
 
 #my @monitors_list = ($TablespaceMonitoring);
-my @monitors_list = ($FilesystemMonitoring);
+#my @monitors_list = ($FilesystemMonitoring);
 #my @monitors_list = ($TnspingMonitoring);
-#my @monitors_list = ($PortMonitoring);
+my @monitors_list = ($PortMonitoring);
 #my @monitors_list = ($RmanCorruption);
 #my @monitors_list = ($JobsPackagesMonitoring);
 
