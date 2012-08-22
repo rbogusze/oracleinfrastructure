@@ -24,7 +24,6 @@ Log::Log4perl->easy_init($DEBUG);
 my $logger = get_logger();
 
 package TremorMonitoring;
-#use strict;
 sub new {
         my $self  = {};
         $self->{NAME}    = undef;
