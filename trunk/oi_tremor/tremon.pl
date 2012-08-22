@@ -98,7 +98,7 @@ sub action {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
                    ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
-                   ,'perfhal',
+                   ,$self->{PASSWORD},
                    { RaiseError => 1,AutoCommit => 0}
                    ) || die "Database connection not made : $DBI::errstr";
     #my $sql = qq{ select sysdate from dual };
@@ -281,7 +281,7 @@ sub action {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
                    ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
-                   ,'perfhal',
+                   ,$self->{PASSWORD},
                    { RaiseError => 1,AutoCommit => 0}
                    ) || die "Database connection not made : $DBI::errstr";
     
@@ -437,12 +437,12 @@ sub action {
   # FilesystemMonitoring
   #
   if ($self->{NAME} eq "FilesystemMonitoring") {
-    $logger->info("Doing stuff for FilesystemMonitoring, ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), "\n");
+    $logger->info("Doing stuff for FilesystemMonitoring, ", $self->{ATTRIBUTES_VALUES}->get_value('cn'), " which is on ", $self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), " logging as user: ", $self->{ATTRIBUTES_VALUES}->get_value('orainfOsLogwatchUser'), "\n");
     # Check if the time has come to run this trigger
     if (check_frequency($self->{NAME}, $self->{ATTRIBUTES_VALUES}->get_value('cn'), $self->{ATTRIBUTES_VALUES}->get_value('orainfTremorFilesystemMonitoringFrequency'))) { return; }
     
     #my $ssh = Net::SSH::Perl->new("obsdb1", debug => 1); # Error check this
-    my $ssh = Net::SSH::Perl->new($self->{ATTRIBUTES_VALUES}->get_value('orclSystemName')); # Error check this
+    my $ssh = Net::SSH::Perl->new($self->{ATTRIBUTES_VALUES}->get_value('orclSystemName'), protocol=>'2,1'); # Error check this
     eval { $ssh->login($self->{ATTRIBUTES_VALUES}->get_value('orainfOsLogwatchUser')); }; # Error check this
     warn $@ if $@;
 
@@ -669,8 +669,8 @@ $JobsPackagesMonitoring->filter("(orainfDbCheckJobsPackages=TRUE)");
 
 #my @monitors_list = ($TablespaceMonitoring ,$FilesystemMonitoring ,$TnspingMonitoring ,$PortMonitoring ,$RmanCorruption ,$JobsPackagesMonitoring);
 
-my @monitors_list = ($TablespaceMonitoring);
-#my @monitors_list = ($FilesystemMonitoring);
+#my @monitors_list = ($TablespaceMonitoring);
+my @monitors_list = ($FilesystemMonitoring);
 #my @monitors_list = ($TnspingMonitoring);
 #my @monitors_list = ($PortMonitoring);
 #my @monitors_list = ($RmanCorruption);
