@@ -657,6 +657,7 @@ my $RmanCorruption= TremorMonitoring->new();
 $RmanCorruption ->name("RmanCorruption");
 $RmanCorruption ->desc("RMAN has discovered corruptions");
 $RmanCorruption ->filter("(orainfDbCheckRmanCorruption=TRUE)");
+$RmanCorruption ->password("$v_password");
 
 my $JobsPackagesMonitoring= TremorMonitoring->new();
 $JobsPackagesMonitoring->name("JobsPackagesMonitoring");
@@ -672,8 +673,8 @@ $JobsPackagesMonitoring->filter("(orainfDbCheckJobsPackages=TRUE)");
 #my @monitors_list = ($TablespaceMonitoring);
 #my @monitors_list = ($FilesystemMonitoring);
 #my @monitors_list = ($TnspingMonitoring);
-my @monitors_list = ($PortMonitoring);
-#my @monitors_list = ($RmanCorruption);
+#my @monitors_list = ($PortMonitoring);
+my @monitors_list = ($RmanCorruption);
 #my @monitors_list = ($JobsPackagesMonitoring);
 
 # Prepare the LDAP connection
