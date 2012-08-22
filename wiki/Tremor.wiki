@@ -4,12 +4,12 @@
 
 Some basic checks are possible with this module, like:
 
-|| TablespaceMonitoring || Check how much free space is left in tablespace ||
-|| FilesystemMonitoring || bbb ||
-|| TnspingMonitoring || vv ||
-|| PortMonitoring || assa ||
-|| RmanCorruption || aa ||
-|| JobsPackagesMonitoring || aa ||
+|| Tablespace Monitoring || Make sure there is free space in tablespace ||
+|| Filesystem Monitoring || Make sure there is free space in filesystem ||
+|| Tnsping Monitoring || Make sure that users can connect to DB ||
+|| Port Monitoring || Make sure that some ports are open ||
+|| Rman Corruption || Make sure there is no reported RMAN corruption ||
+|| Jobs Packages Monitoring || Make sure there are no invalid jobs / packages ||
 
 = Details =
 
