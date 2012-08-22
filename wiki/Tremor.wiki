@@ -11,9 +11,72 @@ Some basic checks are possible with this module, like:
 || Rman Corruption || Make sure there is no reported RMAN corruption ||
 || Jobs Packages Monitoring || Make sure there are no invalid jobs / packages ||
 
-= Details =
+Installation.
+{{{
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_tremor oi_tremor
+}}}
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Install required perl packages
+{{{
+# yum install perl-Net-SSH
+# yum install perl-Net-SSH-Perl
+# yum install perl-Math-BigInt-GMP
+# yum install perl-DBI
+# yum install perl-Log-Log4perl
+# yum install perl-Crypt-DSA perl-Crypt-OpenSSL-DSA
+
+# export LD_LIBRARY_PATH=/home/orainf/oracle/product/11.2.0/client_1/lib
+# export ORACLE_HOME=/home/orainf/oracle/product/11.2.0/client_1
+# perl -MCPAN -e 'install DBD::Oracle'
+# perl -MCPAN -e 'install Math::BigInt'
+# perl -MCPAN -e 'install Class::ErrorHandler'
+}}}
+
+All the details are of course configured by LDAP atributes. What the attributes do is pretty self-explaniatory.
+
+{{{
+TnspingMonitoring
+orainfDbTnspingMonitoring: TRUE
+orainfDbTnspingMonitoringEscalation: 15
+orainfDbTnspingMonitoringReceipientsL1: email(orainf@localhost)
+orainfDbTnspingMonitoringReceipientsL2: email(orainf@localhost)
+orainfDbTnspingMonitoringFrequency: 5
+
+TablespaceMonitoring
+orainfTremorTablespaceMonitoring: TRUE
+orainfTremorTablespaceMonitoringFrequency: 60
+orainfTremorTablespaceMonitoringTresholdL1: 80
+orainfTremorTablespaceMonitoringTresholdL2: 90
+orainfTremorTablespaceMonitoringReceipientsL1: email(orainf@localhost)
+orainfTremorTablespaceMonitoringReceipientsL2: email(orainf@localhost)
+
+FilesystemMonitoring
+orainfTremorFilesystemMonitoring=TRUE
+orainfTremorFilesystemMonitoringTresholdL1
+orainfTremorFilesystemMonitoringTresholdL2
+orainfTremorFilesystemMonitoringReceipientsL1
+orainfTremorFilesystemMonitoringReceipientsL2
+orainfTremorFilesystemMonitoringFrequency
+
+
+PortMonitoring
+orainfPortMonitoring=TRUE
+orainfPortMonitoringFrequency
+orainfPortMonitoringPorts
+orainfPortMonitoringEscalation
+orainfPortMonitoringReceipientsL1
+orainfPortMonitoringReceipientsL2
+
+RmanCorruption
+orainfDbCheckRmanCorruption=TRUE
+orainfDbCheckRmanCorruptionFrequency
+orainfDbCheckRmanCorruptionReceipients
+
+JobsPackagesMonitoring
+orainfDbCheckJobsPackages=TRUE
+orainfDbCheckJobsPackagesFrequency
+orainfDbCheckJobsPackagesReceipients
+}}}
+
+
+
