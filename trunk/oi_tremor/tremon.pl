@@ -29,6 +29,7 @@ sub new {
         $self->{NAME}    = undef;
         $self->{DESC}    = undef;
         $self->{FILTER}    = undef;
+        $self->{PASSWORD}    = undef;
         $self->{ATTRIBUTES}    = undef;
         $self->{PEERS}  = [];
         bless($self);           # but see below
@@ -51,6 +52,12 @@ sub filter {
         my $self = shift;
         if (@_) { $self->{FILTER} = shift }
         return $self->{FILTER};
+}
+
+sub password {
+        my $self = shift;
+        if (@_) { $self->{PASSWORD} = shift }
+        return $self->{PASSWORD};
 }
 
 sub attributes {
@@ -365,7 +372,7 @@ sub action {
     my $dbh = DBI->connect( 
                    'dbi:Oracle:'.$self->{ATTRIBUTES_VALUES}->get_value('cn')
                    ,$self->{ATTRIBUTES_VALUES}->get_value('orainfDbRrdoraUser')
-                   ,$v_password,
+                   ,$self->{PASSWORD},
                    { RaiseError => 1,AutoCommit => 0}
                    ) || die "Database connection not made : $DBI::errstr";
     my $sql = qq{ 
@@ -613,7 +620,7 @@ while (<MYFILE>) {
   $logger->debug("$_\n");
   if ($_ =~ m/V_PASS/) {
     $logger->info("match\n");
-    my ($v_password);
+    use vars qw($v_password);
     $v_password = $_;
     $v_password =~ s/V_PASS=//g;
     $logger->info("v_password: " . $v_password . "\n");
@@ -622,11 +629,11 @@ while (<MYFILE>) {
 close (MYFILE); 
 
 
-
 my $TablespaceMonitoring = TremorMonitoring->new();
 $TablespaceMonitoring->name("TablespaceMonitoring");
 $TablespaceMonitoring->desc("free_space_tablespaces");
 $TablespaceMonitoring->filter("(orainfTremorTablespaceMonitoring=TRUE)");
+$TablespaceMonitoring->password("$v_password");
 $TablespaceMonitoring->attributes("['orclSystemName', 'orclNetDescString', 'orainfTremorTablespaceMonitoringTresholdL1', 'orainfTremorTablespaceMonitoringTresholdL2', 'orainfTremorTablespaceMonitoringReceipientsL1', 'orainfTremorTablespaceMonitoringReceipientsL2']");
 
 my $FilesystemMonitoring= TremorMonitoring->new();
