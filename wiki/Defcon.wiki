@@ -1,0 +1,5 @@
+#summary Visualising the AWR / Statspack report
+
+This project as a prerequisite needs the [[Musas]] project running - to provide the raw AWR / Statspack reports. As we have those reports it is relatively easy to do some draws.
+
+This project was born from the need to somehow show developers a nice picture that will tell them more than the raw numbers.
