@@ -5,3 +5,44 @@ I find it beneficial to have an offsite location of AWR / Statspack reports toge
 Please note that using AWR reports requires a valid extra licence for Diagnostic Pack. Actually very similar report can be collected using a free old-style Statspack.
 
 This project simply collects the AWR reports once a day together with SQL report and stores them on logwatch host. 
+
+Installation
+{{{
+$ cd
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_musas_awr oi_musas_awr
+$ svn propset svn:keywords "Header" awr_reports.sh
+}}}
+
+Usual LDAP attributes
+{{{
+orainfDbMusasMonitoring: TRUE
+orainfDbMusasStart: 08:00
+orainfDbMusasEnd: 16:00
+}}}
+
+Rights for the orainfDbRrdoraUser
+{{{
+SQL> grant execute on sys.DBMS_WORKLOAD_REPOSITORY to perfstat;
+}}}
+
+Some packages and directory setup
+{{{
+# mkdir /var/www/html/awr_reports
+# chown orainf:orainf /var/www/html/awr_reports
+# yum install httpd
+# chkconfig httpd on
+# yum install php php-gd lynx
+}}}
+
+Basicaly the whole point is to issue a commands like:
+{{{
+$ ${HOME}/oi_musas_awr/awr_reports.sh TEST perfstat `date -I` 14:00 15:00
+}}}
+
+But as we have good old LDAP and configure there what we run on which database this is automated by a cron script:
+{{{
+#
+# MUSAS_AWR - Generate AWR reports
+#
+16 16 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_awr; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh
+}}}
