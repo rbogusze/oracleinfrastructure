@@ -11,7 +11,7 @@ else
 fi
 
 # Sourcing the password variables
-F_CRED_FILE=/home/orainf/musas_awr/.credentials
+F_CRED_FILE=~/.credentials
 check_file $F_CRED_FILE
 . $F_CRED_FILE
 
@@ -22,7 +22,7 @@ F_RAPORT_FILE=$1
 check_file $F_RAPORT_FILE
 F_HASH=/tmp/hash_reports.tmp
 
-S_RETREIVE_HASH=/home/orainf/musas_awr/retreive_hashes.php
+S_RETREIVE_HASH=/home/orainf/oi_musas_awr/retreive_hashes.php
 check_file $S_RETREIVE_HASH
 
 check_file `which php`
