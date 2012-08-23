@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Header:$
+# $Id$
 #
 # ./awr_reports.sh KSIPDBS1 `date -I` 08:00 16:00
 #
