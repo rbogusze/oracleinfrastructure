@@ -1,0 +1,7 @@
+#summary Store performance reports for future reference
+
+I find it beneficial to have an offsite location of AWR / Statspack reports together with SQL reports that allows me easily to see what was happening on the database yesterday, week ago, month ago, etc.
+
+Please note that using AWR reports requires a valid extra licence for Diagnostic Pack. Actually very similar report can be collected using a free old-style Statspack.
+
+This project simply collects the AWR reports once a day together with SQL report and stores them on logwatch host. 
