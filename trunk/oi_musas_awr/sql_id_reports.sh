@@ -20,6 +20,11 @@ INFO_MODE=DEBUG
 
 F_RAPORT_FILE=$1
 check_file $F_RAPORT_FILE
+
+V_USER=$2
+check_parameter $V_USER
+check_parameter $V_PASS
+
 F_HASH=/tmp/hash_reports.tmp
 
 S_RETREIVE_HASH=/home/orainf/oi_musas_awr/retreive_hashes.php
@@ -39,7 +44,8 @@ run_command_e "mkdir -p $D_HASH_HISTORY"
 run_command_e "cd $D_HASH_HISTORY"
 
 msgd "V_USER: $V_USER"
-#msgd "V_PASS: $V_PASS"
+msgd "V_PASS: $V_PASS"
+
 
 # Extract the Service name from file name. Not elegent, not the first time...
 msgd "F_RAPORT_FILE: $F_RAPORT_FILE"
