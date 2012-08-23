@@ -37,11 +37,11 @@ check_parameter $CN
 #exec > $LOG 2>&1
 
 # Sourcing the password variables
-F_CRED_FILE=~/musas_awr/.credentials
+F_CRED_FILE=~/.credentials
 check_file $F_CRED_FILE
 . $F_CRED_FILE
 
-S_SQL_ID_REPORTS=~/musas_awr/sql_id_reports.sh
+S_SQL_ID_REPORTS=~/oi_musas_awr/sql_id_reports.sh
 check_file $S_SQL_ID_REPORTS
 
 IFS="="
