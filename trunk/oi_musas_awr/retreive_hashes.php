@@ -10,8 +10,7 @@ require_once("/home/orainf/scripto/php/my_library.php");
 
 $filename = $argv[1];
 $output_filename = $argv[2];
-//$filename = "/var/www/musas/history/PRD_192.168.220.18/snap_2007-03-15--08:07_2007-03-15--18:07.lst";
-//$filename = "/var/www/html/awr_reports/KSIPDBP1/AWR_txt_hour/2012-05-15/awr_KSIPDBP1_14498_14499_2012-05-15_07:00_2012-05-15_08:00.txt";
+//$filename = "/var/www/musas/history/TEST/snap_2007-03-15--08:07_2007-03-15--18:07.lst";
 //$output_filename = "/tmp/hash_table.txt";
 
 $hash_array = array();

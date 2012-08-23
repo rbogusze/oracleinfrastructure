@@ -1,7 +1,7 @@
 #!/bin/bash
 # $Header$
 #
-# ./awr_reports.sh KSIPDBS1 `date -I` 08:00 16:00
+# ./awr_reports.sh TEST `date -I` 08:00 16:00
 #
 
 LOCKFILE=/tmp/awr_reports.lock

@@ -1,5 +1,5 @@
 #!/bin/bash
-#$Id: bulk_generate.sh,v 1.4 2012-06-06 08:01:25 orainf Exp $
+#$Id$
 #
 # Generate the statspack and hash reports for the long range of days
 #
@@ -39,13 +39,7 @@ do
   if [ "$DAY_OF_WEEK" == "7" ] || [ "$DAY_OF_WEEK" == "6" ]; then
     echo "This is Sunday or Saturday, skiping statspack report generation"
   else
-    run_command "./awr_reports.sh KSIPDBP1 ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
-    run_command "./awr_reports.sh KSIPDBS1 ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
-    run_command "./awr_reports.sh KSIPDBD1 ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
-    run_command "./awr_reports.sh KSIP1 ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
-    run_command "./awr_reports.sh KSIP2 ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
-    run_command "./awr_reports.sh KSIP3 ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
-    run_command "./awr_reports.sh KSIP4 ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
+    run_command "./awr_reports.sh TEST ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
   fi #if [ "$DAY_OF_WEEK" == "0" ];
 
   myvar=$(( $myvar + 1 ))
