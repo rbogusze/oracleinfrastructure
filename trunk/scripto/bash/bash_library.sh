@@ -62,7 +62,7 @@ check_file()
     exit 1
   fi
 
-  if [ ! -f $1 ]; then
+  if [ ! -f "$1" ]; then
     error_log "[ error ] $1 not found. Exiting. " ${RECIPIENTS}
     exit 1
   fi
@@ -109,7 +109,7 @@ msgd()
   if [ "$INFO_MODE" = "DEBUG" ] ; then
     echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
     echo -e -n '\E[32m'
-    echo -n "[debug] "
+    echo -n "[debug]    "
     echo -e -n '\E[39m\E[49m'
     echo "$1"
   fi
@@ -121,7 +121,7 @@ msgi()
   if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
     echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
     echo -e -n '\E[32m'
-    echo -n "[info] "
+    echo -n "[info]     "
     echo -e -n '\E[39m\E[49m'
     echo "$1"
   fi
@@ -187,13 +187,59 @@ msgw()
   fi
 }
 
+# [continue] in yellow
+# print text $1 and wait for user reply $2 / $3
+# $2 continue, $3 exit, default yes no
+# msgc "Are You sure to continue" "yes" "no"
+msgc()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    
+    RET_TMP=""
+	LOOP=1
+	YY=$2
+	NN=$3
+	[ -z "$YY" ] &&  YY="yes"
+	[ -z "$NN" ] &&  NN="no"
+    # echo "$1 ($2/$3) ?"
+	## while proper reply
+	
+	while [ "$LOOP" ] ; do
+	    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+        echo -e -n '\E[33m'
+        echo -n "[continue] "
+        echo -e -n '\E[33m\E[49m\07'
+        read -p  "$1 ($YY/$NN) ?  "   RET_TMP
+	
+	    if [ "$RET_TMP" == "$YY"  ] ; then
+	         echo -e -n '\E[39m\E[49m\07'
+	         return 0
+	    elif [ "$RET_TMP" == "$NN" ] ; then
+		     echo -e -n '\E[39m\E[49m\07'
+	         exit 1
+	    else 
+		     echo
+			 echo -e -n '\E[31m\07'
+	         echo " Please respond $YY or $NN "
+			 echo -e -n '\E[39m\E[49m\07'
+			 echo
+			 
+	    fi
+	done
+	
+  fi
+}
+
 
 # Runs the command provided as parameter. 
 # Does NOT exit if the command fails.
 # Sends error message if the command fails.
 run_command()
 {
-  msg "\"$1\""
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    msg "\"$1\""
+  fi
+
   # Determining if we are running in a debug mode. If so wait for any key before eval
   if [ -n "$DEBUG_MODE" ]; then
     if [ "$DEBUG_MODE" -eq "1" ] ; then
@@ -208,14 +254,29 @@ run_command()
     return 1
   fi
   return 0
-}
+} #run_command
+
+# run command only when INFO_MODE=debug
+run_command_d()
+{
+  if [ -n "$INFO_MODE" ]; then
+    if [ "$INFO_MODE" = "DEBUG" ] ; then
+      msg "\"$1\""
+      eval $1
+    fi  
+  fi
+  return 0
+} #run_command_d
 
 # Runs the command provided as parameter. 
 # Does exit if the command fails.
 # Sends error message if the command fails.
 run_command_e()
 {
-  msg "\"$1\""
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    msg "\"$1\""
+  fi
+
   # Determining if we are running in a debug mode. If so wait for any key before eval
   if [ -n "$DEBUG_MODE" ]; then
     if [ "$DEBUG_MODE" -eq "1" ] ; then
@@ -230,7 +291,26 @@ run_command_e()
     exit 1
   fi
   return 0
-}
+} #run_command_e
+
+# Run command untill successfull, when error encoutered waits for any key, then repeats the command
+run_command_ok()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    msg "\"$1\""
+  fi
+
+  eval $1
+  if [ $? -ne 0 ]; then
+    msge "zzz An error occured during: \"$1\". "                             
+    msgw "Fix the problem and press any key (any)"
+    exec 8</dev/tty
+    read V_TMP <&8
+    run_command_ok "$1"
+  fi
+  return 0
+} #f_run_untill_ok
+
 
 
 # eg. check_for_running_processes "FND"
@@ -398,6 +478,31 @@ EOF
   fi
 } #f_execute_sql
 
+# I need this function modified, dirty trick, but i am afraid to change the main one, should be deleted.
+f2_execute_sql()
+{
+  check_parameter $ORACLE_HOME
+  SQLPLUS=$ORACLE_HOME/bin/sqlplus
+  check_file $SQLPLUS
+
+  F_EXECUTE_SQL=/tmp/sql_output.tmp_${USERNAME}_${ORACLE_SID}
+ 
+  msga "Executing SQL: $1"
+  $SQLPLUS -S "/ as sysdba" <<EOF > $F_EXECUTE_SQL
+set heading off
+set linesize 200
+$1
+EOF
+  V_EXECUTE_SQL=`cat $F_EXECUTE_SQL | grep -v '^ *$' | tr -d "\n" | tr "\t" " " | tr -s '[:blank:]'`
+
+  TMP_CHK=`echo $V_EXECUTE_SQL | grep "ORA-01034"`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ne 0 ]; then
+    echo $V_EXECUTE_SQL
+    msge "ORACLE not available. Exiting."
+    exit 1
+  fi
+} #f2_execute_sql
+
 # Return error if any rows from query are returned
 f_execute_sql_no_rows_expected()
 {
@@ -506,6 +611,36 @@ f_change_init_para()
     cp /tmp/tmp_10g_init $FILE
   fi
 } #f_change_init_para
+
+
+f_determine_sby_conf() {
+	msgi "Determine database configuration ( primary / standby / single )"
+	
+    VROLE=single
+    f_execute_sql "select database_role from v\$database;"
+	RET=`cat $F_EXECUTE_SQL | grep STANDBY`
+	#msgw "1 $RET"
+    if [ "$RET" == "PHYSICAL STANDBY" ] ; then
+       VROLE=standby
+    else
+       ## primary or single ?
+       f_execute_sql "select group# from v\$standby_log;"
+	   RET=`cat $F_EXECUTE_SQL | grep 'no rows'`
+	   #msgw "2 $RET"
+       if [ "$RET" == "no rows selected" ] ; then
+          VROLE=single
+       else
+          VROLE=primary
+       fi
+       
+    fi
+    
+    # for test
+    export  VROLE
+	msgw "DB role is : $VROLE"
+
+
+} #f_determine_sby_conf
 
 
 # Perform checksum of the file provided as $1 with the digest provided as $2
@@ -650,6 +785,67 @@ f_check_if_spfile_is_used()
   fi
 } #f_check_if_spfile_is_used
 
+# Manual and primitive test to make sure you are on cached filesystem
+f_check_if_fs_is_cached()
+{
+  msgb "${FUNCNAME[0]} Started."
+
+  USER_ANSWER=''
+  EXIT_WHILE=''
+  while [ ! "$EXIT_WHILE" ]
+  do
+    read -p "[wait] Do you want to test if the filesystem is mounted as cached? (yes/no)" USER_ANSWER
+    if [ "$USER_ANSWER" = "yes" ]; then
+      msgi "Checking if filesystem is cached"
+      EXIT_WHILE=1
+    fi
+    if [ "$USER_ANSWER" = "no" ]; then
+      msgi "Doing nothing."
+      return 0
+      EXIT_WHILE=1
+    fi
+  done
+
+  read -p "[wait] Provide a directory where should the test run. (I need to be able to create a subdirectory): " D_CACHE_TEST
+
+  check_directory $D_CACHE_TEST
+  run_command_e "cd $D_CACHE_TEST"
+  if [ -d "${D_CACHE_TEST}/test_cache" ]; then
+    msge "There should be no such a directory ${D_CACHE_TEST}/test_cache "
+    msge "It means that the test was interrupted or that such a directory exists."
+    msge "Either way something is wrong, please check manually. Exiting"
+    exit 0
+  fi
+  run_command_e "mkdir test_cache"
+  run_command_e "cd test_cache"
+  if [ ! -f cache.tar.gz ]; then
+     run_command_e "wget -q -c http://mirror.pgf.com.pl/oracle/perftuning/cache.tar.gz"
+  else
+     msgi "Already found cache.tar.gz, not downloading again. OK"
+  fi
+  run_command_e "gunzip cache.tar.gz"
+  msgi "Untaring. Should be below 2min"
+  { time tar xf cache.tar ; } 2> $LOG_DIR/test_cache_time
+  run_command_e "cd $D_CACHE_TEST"
+  run_command_e "rm -Rf test_cache"
+  run_command_e "cat $LOG_DIR/test_cache_time"
+  V_ELAPSED_TIME=`cat $LOG_DIR/test_cache_time | grep real | awk '{ print $2 }' | awk -F"m" '{ print $1 }'`
+  if [ $V_ELAPSED_TIME -lt 2 ]; then
+    msgi "It looks like we are on cached filesystem. OK"
+  else
+    msge "It looks like we are on non-cached filesystem. NOT OK."
+    read -p "[wait] Are you sure you want to continue? NOT recommended (yes/any)" V_CONTINUE
+    if [ "$V_CONTINUE" = "yes" ]; then
+      msgi "Continuing despite recommendation not to continue."
+    else
+      msge "Exiting"
+      exit 1
+    fi
+  fi 
+  
+  msgb "${FUNCNAME[0]} Finished."
+} #f_check_if_fs_is_cached
+
 # Make sure that we have the min version of dependent files
 f_check_min_version_of_script()
 {
@@ -660,14 +856,14 @@ f_check_min_version_of_script()
   V_FILENAME=`basename $V_CHECK_FILE`
   V_FILEDIR=`dirname $V_CHECK_FILE`
   check_directory $V_FILEDIR
-  msgi "Checking if file $V_CHECK_FILE is at least on version $V_CHECK_VERSION"
-  run_command_e "cd $V_FILEDIR"
+  msgd "Checking if file $V_CHECK_FILE is at least on version $V_CHECK_VERSION"
+  cd $V_FILEDIR
   V_CURRENT_VERSION=`cvs status $V_FILENAME | grep "Working revision" | tr -d "Working revision:" | tr -d "\t" | awk -F"." '{ print $2 }'`
   msgd "Current version: $V_CURRENT_VERSION"
   msgd "Expected min version: $V_CHECK_VERSION"
 
   if [ "${V_CHECK_VERSION}" -le "${V_CURRENT_VERSION}" ]; then
-    msgi "OK, min expected version: $V_CHECK_VERSION curren version: $V_CURRENT_VERSION"
+    msgd "OK, min expected version: $V_CHECK_VERSION curren version: $V_CURRENT_VERSION"
   else
     msge "min expected version: $V_CHECK_VERSION curren version: $V_CURRENT_VERSION"
     msge "Consider updateing $V_CHECK_FILE to current version"
@@ -675,6 +871,68 @@ f_check_min_version_of_script()
     exit 1
   fi
 } #f_check_min_version_of_script
+
+f_check_expected_format_for_etc_hosts()
+{
+  # If the provided first parameter is EXIT I exit on error
+  V_EXIT=$1
+
+  msgi "Checking if line with localhost contains the hostname. It should not."
+  V_CHECK=`cat /etc/hosts | grep -v '^#' | grep localhost | grep ${HOSTNAME} | wc -l`
+  msgd "V_CHECK: $V_CHECK"
+  if [ "$V_CHECK" -gt 0 ]; then
+    msge "Line with localhost contains the hostname. It should not."
+    cat /etc/hosts | grep localhost
+    msge "Line with localhost should look like:"
+    echo "127.0.0.1       localhost"
+    msge "This results with the problems in DB agent."
+  fi
+
+  msgi "Checking if expected format for localhost found in /etc/hosts"
+  msgi "IP      hostname.domain hostname loghost"
+  msgd "HOSTNAME: ${HOSTNAME}"
+  V_NR_HOSTLINE=`cat /etc/hosts | grep -v '^#' | grep ${HOSTNAME}.pgf.com.pl | wc -l`
+  if [ "${V_NR_HOSTLINE}" -ne 1 ]; then
+    msge "Different number of entries than 1 for ${HOSTNAME}.pgf.com.pl found in /etc/hosts"
+    cat /etc/hosts | grep -v '^#' | grep ${HOSTNAME}.pgf.com.pl
+  else
+    V_HOSTLINE1=`cat /etc/hosts | grep -v '^#' | grep ${HOSTNAME}.pgf.com.pl | awk '{ print $1 }'`
+    msgd "V_HOSTLINE1: $V_HOSTLINE1"
+    V_HOSTLINE2=`cat /etc/hosts | grep -v '^#' | grep ${HOSTNAME}.pgf.com.pl | awk '{ print $2 }'`
+    msgd "V_HOSTLINE2: $V_HOSTLINE2"
+    V_HOSTLINE3=`cat /etc/hosts | grep -v '^#' | grep ${HOSTNAME}.pgf.com.pl | awk '{ print $3 }'`
+    msgd "V_HOSTLINE3: $V_HOSTLINE3"
+    V_HOSTLINE4=`cat /etc/hosts | grep -v '^#' | grep ${HOSTNAME}.pgf.com.pl | awk '{ print $4 }'`
+    msgd "V_HOSTLINE4: $V_HOSTLINE4"
+
+    if [ ! "${V_HOSTLINE2}" = "${HOSTNAME}.pgf.com.pl" ]; then
+      msge "The second column should be ${HOSTNAME}.pgf.com.pl"
+      if [ "$V_EXIT" == "EXIT" ]; then msge "Exiting. Fix the problem and rerun."; exit 1; fi
+    fi
+    if [ ! "${V_HOSTLINE3}" = "${HOSTNAME}" ]; then
+      msge "The third column should be ${HOSTNAME}"
+      if [ "$V_EXIT" == "EXIT" ]; then msge "Exiting. Fix the problem and rerun."; exit 1; fi
+    fi
+    if [ ! "${V_HOSTLINE4}" = "loghost" ]; then
+      msge "The fourth column should be loghost"
+      if [ "$V_EXIT" == "EXIT" ]; then msge "Exiting. Fix the problem and rerun."; exit 1; fi
+    fi
+  fi # ${V_NR_HOSTLINE}" -ne 1
+
+  msgi "The production host should use DNS and not static entries from /etc/hosts"
+  msgi "Checking if static entries exist in /etc/hosts"
+  V_STATIC_HOSTS_NR=`cat /etc/hosts | grep -v "^#" | grep -v localhost | grep -v ${HOSTNAME}.pgf.com.pl | wc -l`
+  if [ "${V_STATIC_HOSTS_NR}" -ne 0 ]; then
+    msge "Found static entries in /etc/hosts. If this is a production host this should not happen"
+    cat /etc/hosts | grep -v "^#" | grep -v localhost | grep -v ${HOSTNAME}.pgf.com.pl
+    if [ "$V_EXIT" == "EXIT" ]; then msge "Exiting. Fix the problem and rerun."; exit 1; fi
+  fi
+
+  msgi "Check if I can ping to myself"
+  run_command "ping ${HOSTNAME} > /dev/null"
+  run_command "ping ${HOSTNAME}.pgf.com.pl > /dev/null"
+
+} #f_check_expected_format_for_etc_hosts
 
 # To warn eg about potential errors with cvs issue a warning when we are getting close 
 # to cvs shautdow on 23:00
@@ -723,22 +981,113 @@ f_issue_warning_when_getting_close_to_hour()
       exit 0
     fi
   else
-    msgi "OK, plenty of time"
+    msgd "OK, plenty of time"
   fi
 
   msgd "${FUNCNAME[0]} End."
 } #f_issue_warning_when_getting_close_to_hour
 
+# Check file log provided as parameter. 
+# By default do not exit when the error is encountered, just send the mail.
+#  when $2 is set to EXIT - do exit when errors are found.
+check_log()
+{
+  msgd "${FUNCNAME[0]} Begin."
+  F_LOG=$1
+  check_file $F_LOG
+
+  V_EXIT_ON_ERROR=$2
+
+  TMP_VAL=`cat $F_LOG | $GREP -i -e "^error" -e "^ORA-" -e "^SP2-"`
+  if [ ! "$TMP_VAL" = "" ]; then
+    msge "There are some errors in the log file: $F_LOG"
+    error_log "There are some errors in the log file: $F_LOG" ${RECIPIENTS}
+    echo $TMP_VAL
+    if [ "$V_EXIT_ON_ERROR" = "EXIT" ]; then
+      msge "Exiting"
+      exit 1
+    fi
+
+  else
+    msgd "No errors in upgrade log file. OK"
+  fi
+
+  msgd "${FUNCNAME[0]} End."
+} #check_log
 
 # Setting some global variables. Now I take care of wheter I am on Linux or Solaris,
 # so that I do not need to bother any further
 
 # OS specific variables
 case `uname` in
+  "AIX")
+    # Find GNU find
+    if [ -f /opt/freeware/bin/find ]; then
+      FIND=/opt/freeware/bin/find
+    else
+      error_log "[ error ] Could not find suitable FIND executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU cvs
+    if [ -f /opt/freeware/bin/cvs ]; then
+      CVS=/opt/freeware/bin/cvs
+    else
+      error_log "[ error ] Could not find suitable CVS executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU awk
+    if [ -f /opt/freeware/bin/gawk ]; then
+      AWK=/opt/freeware/bin/gawk
+    else
+      error_log "[ error ] Could not find suitable gawk executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU sed
+    if [ -f /opt/freeware/bin/sed ]; then
+      SED=/opt/freeware/bin/sed
+    else
+      error_log "[ error ] Could not find suitable sed executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU date
+    if [ -f /opt/freeware/bin/date ]; then
+      DATE=/opt/freeware/bin/date
+    else
+      error_log "[ error ] Could not find suitable date executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+    # Find GNU grep
+    if [ -f /usr/bin/grep ]; then
+      GREP=/usr/bin/grep
+    else
+      error_log "[ error ] Could not find suitable GREP executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+
+    # Find GNU echo
+    if [ -f /opt/freeware/bin/echo ]; then
+      ECHO=/opt/freeware/bin/echo
+    else
+      error_log "[ error ] Could not find suitable ECHO executable. Exiting. " ${RECIPIENTS}
+      exit 1
+    fi
+
+
+    PING=/etc/ping
+
+    ;;
   "SunOS")
     # echo "I am running on Solaris now"
     # Find GNU find
-    if [ -f /opt/sfw/bin/gfind ]; then
+    if [ -f /opt/csw/bin/gfind ]; then
+      FIND=/opt/csw/bin/gfind
+    elif [ -f /opt/sfw/bin/gfind ]; then
       FIND=/opt/sfw/bin/gfind
     elif [ -f /opt/csw/bin/gfind ]; then
       FIND=/opt/csw/bin/gfind
@@ -748,7 +1097,9 @@ case `uname` in
     fi
 
     # Find GNU cvs
-    if [ -f /opt/sfw/bin/cvs ]; then
+    if [ -f /opt/csw/bin/cvs ]; then
+      CVS=/opt/csw/bin/cvs
+    elif [ -f /opt/sfw/bin/cvs ]; then
       CVS=/opt/sfw/bin/cvs
     elif [ -f /opt/csw/bin/cvs ]; then
       CVS=/opt/csw/bin/cvs
@@ -757,8 +1108,25 @@ case `uname` in
       exit 1
     fi
 
+    # Find GNU awk
+    if [ -f /opt/csw/bin/gawk ]; then
+      AWK=/opt/csw/bin/gawk
+    elif [ -f /opt/sfw/bin/gawk ]; then
+      AWK=/opt/sfw/bin/gawk
+    fi
+
+    # Find GNU sed
+    if [ -f /opt/csw/bin/gsed ]; then
+      SED=/opt/csw/bin/gsed
+    elif [ -f /opt/sfw/bin/gsed ]; then
+      SED=/opt/sfw/bin/gsed
+    fi
+
+
     # Find GNU rsync
-    if [ -f /opt/sfw/bin/rsync ]; then
+    if [ -f /opt/csw/bin/rsync ]; then
+      RSYNC=/opt/csw/bin/rsync
+    elif [ -f /opt/sfw/bin/rsync ]; then
       RSYNC=/opt/sfw/bin/rsync
     elif [ -f /opt/csw/bin/rsync ]; then
       RSYNC=/opt/csw/bin/rsync
@@ -768,10 +1136,12 @@ case `uname` in
     fi
 
     # Find GNU date
-    if [ -f /opt/sfw/bin/date ]; then
-      DATE=/opt/sfw/bin/date
-    elif [ -f /opt/csw/bin/date ]; then
+    if [ -f /opt/csw/bin/date ]; then
       DATE=/opt/csw/bin/date
+    elif [ -f /opt/sfw/bin/date ]; then
+      DATE=/opt/sfw/bin/date
+    elif [ -f /opt/csw/bin/gdate ]; then
+      DATE=/opt/csw/bin/gdate
     elif [ -f /opt/sfw/bin/gdate ]; then
       DATE=/opt/sfw/bin/gdate
     elif [ -f /opt/csw/bin/gdate ]; then
@@ -782,7 +1152,9 @@ case `uname` in
     fi
 
     # Find GNU grep
-    if [ -f /usr/sfw/bin/ggrep ]; then
+    if [ -f /usr/csw/bin/ggrep ]; then
+      GREP=/usr/csw/bin/ggrep
+    elif [ -f /usr/sfw/bin/ggrep ]; then
       GREP=/usr/sfw/bin/ggrep
     else
       error_log "[ error ] Could not find suitable GREP executable. Exiting. " ${RECIPIENTS}
@@ -805,8 +1177,9 @@ case `uname` in
     FIND=/usr/bin/find
     CVS=/usr/bin/cvs
     GREP=/bin/grep
-    ECHO=/bin/echo
-    SSH=/usr/bin/ssh
+    AWK=/bin/awk
+    SED=/bin/sed
+    DATE=/bin/date
     #USERNAME=`who am I | awk '{print $1}'` - does not work from crontab
     # The next line is bizare, but I found no elegant way
     USERNAME=`id | awk -F"(" '{print $2}' |  awk -F")" '{print $1}'`
