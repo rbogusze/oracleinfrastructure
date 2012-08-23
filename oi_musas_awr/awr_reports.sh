@@ -17,13 +17,14 @@ else
 fi
 
 check_lock $LOCKFILE
-touch $LOCKFILE
+#touch $LOCKFILE
 
 CN="$1"
-CURRENT_DAY="$2"
+V_USER="$2"
+CURRENT_DAY="$3"
 
-HOUR_START="$3"
-HOUR_STOP="$4"
+HOUR_START="$4"
+HOUR_STOP="$5"
 
 echo "HOUR_START: $HOUR_START"
 echo "HOUR_STOP : $HOUR_STOP"
@@ -32,6 +33,7 @@ check_parameter $CURRENT_DAY
 check_parameter $HOUR_START
 check_parameter $HOUR_STOP
 check_parameter $CN
+check_parameter $V_USER
 
 #LOG=/tmp/awr_reports.log
 #exec > $LOG 2>&1
@@ -41,12 +43,13 @@ F_CRED_FILE=~/.credentials
 check_file $F_CRED_FILE
 . $F_CRED_FILE
 
+msgd "V_USER: $V_USER"
+msgd "V_PASS: $V_PASS"
+
 S_SQL_ID_REPORTS=~/oi_musas_awr/sql_id_reports.sh
 check_file $S_SQL_ID_REPORTS
 
 IFS="="
-#ldapsearch -h smort.pgf.com.pl -b "dc=pgf,dc=com,dc=pl" "&(&(|(remikDbType=RETIREMENT)(remikDbType=ASSIST)(remikDbType=PRODUCTION)))(!(CN=WORKF))" CN | sed '/^$/d' | sed '/dc=/d' | sed '/OMS1/d' | sed '/ADE/d' | sed '/REPO/d' |  while read t1 CN; do
-
 echo "[msg] checking for $CN"
 
 testavail=`sqlplus -S /nolog <<EOF
@@ -57,16 +60,38 @@ exit;
 EOF`
 
 if [ "$testavail" != "1" ]; then
-  echo "Baza $CN niedostepna , wychodze !!" 
+  echo "DB $CN not available, exiting !!" 
+  rm -f $LOCKFILE
   exit 0
 else
-  echo "Baza $CN dostepna , generuje raporty AWR" 
+  echo "DB $CN available , generating AWR reports" 
 
 run_command "mkdir -p /var/tmp/awr_reports"
 run_command "check_directory /var/tmp/awr_reports"
 run_command "cd /var/tmp/awr_reports"
 
-sqlplus /nolog << EOF > /dev/null
+msgd "Checking if I am able to execute DBMS_WORKLOAD_REPOSITORY package"
+F_TMP=/tmp/awr_reports_out.tmp
+sqlplus /nolog << EOF > $F_TMP
+connect $V_USER/$V_PASS@$CN
+desc dbms_workload_repository;
+EOF
+
+V_TMP=`cat $F_TMP | grep -i "ORA-" | wc -l`
+msgd "V_TMP: $V_TMP"
+if [ "${V_TMP}" -ne 0 ]; then
+  msge "There is some error when trying to access the dbms_workload_repository package:"
+  run_command_d "cat $F_TMP"
+  msge "Exiting."
+  exit 0
+else
+  run_command_d "cat $F_TMP"
+  msgd "OK, I able to access dbms_workload_repository. Continuing."
+fi
+
+
+#sqlplus /nolog << EOF > /dev/null
+sqlplus /nolog << EOF 
 set head off pagesize 0 echo off verify off feedback off heading off
 col fname_txt new_value file_name_txt
 col fname_html new_value file_name_html
@@ -113,6 +138,7 @@ spool &file_name_html
 SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_HTML(:dbid,:instid,:begin_snap,:end_snap));
 spool off
 EOF
+
 
 ####### Co tu Radzio chcial powiedziec? Robi od poczatku zeby okreslic nazwe plikow?
 
@@ -169,42 +195,23 @@ mv ${FHTML}.tmp $FHTML
 fi; #Baza $CN dostepna , generuje raporty
 
 # moving the awr reports between the directories
-D_TXT_HOUR=/var/www/html/awr_reports/$CN/AWR_txt_hour/$CURRENT_DAY
-D_HTML_HOUR=/var/www/html/awr_reports/$CN/AWR_html_hour/$CURRENT_DAY
 D_TXT_DAY=/var/www/html/awr_reports/$CN/AWR_txt_day
 D_HTML_DAY=/var/www/html/awr_reports/$CN/AWR_html_day
 
 msgd "FTXT: $FTXT"
 msgd "FHTML: $FHTML"
-# decide whther the file is an hour or day file
-V_TMP=`echo $FTXT | grep "08:00" | grep "16:00" | wc -l`
-if [ "${V_TMP}" -eq 1 ]; then
-  # mamy plik dzienny
-  run_command "mkdir -p $D_TXT_DAY"
-  check_directory $D_TXT_DAY
-  run_command "mv $FTXT $D_TXT_DAY"
-  run_command "mkdir -p $D_HTML_DAY"
-  check_directory $D_HTML_DAY
-  run_command "mv $FHTML $D_HTML_DAY"
 
-  # generate sql_id reports
-  msga "This is dayly AWR report, generating sql_id reports."
-  $S_SQL_ID_REPORTS $D_TXT_DAY/$FTXT  
+run_command "mkdir -p $D_TXT_DAY"
+check_directory $D_TXT_DAY
+run_command "mv $FTXT $D_TXT_DAY"
+run_command "mkdir -p $D_HTML_DAY"
+check_directory $D_HTML_DAY
+run_command "mv $FHTML $D_HTML_DAY"
 
-else 
-  # mamy plik godzinowy
-  run_command "mkdir -p $D_TXT_HOUR"
-  check_directory $D_TXT_HOUR
-  run_command "mv $FTXT $D_TXT_HOUR"
-  run_command "mkdir -p $D_HTML_HOUR"
-  check_directory $D_HTML_HOUR
-  run_command "mv $FHTML $D_HTML_HOUR"
-
-  # generate sql_id reports, perhaps it is too much to generate the sql reports every hour?
-#  msgi "This is hourly AWR report, SKIPPING sql_id report generation"
-#  msgi "This is hourly AWR report, generating sql_id report but it can be too costly. Disable it if there are any perf problems encoutered."
-#  $S_SQL_ID_REPORTS $D_TXT_HOUR/$FTXT  
-fi
+# generate sql_id reports
+msga "Generating sql_id reports."
+check_file `which php`
+$S_SQL_ID_REPORTS $D_TXT_DAY/$FTXT $V_USER
 
 msgi "Done awr_reports.sh"
 
