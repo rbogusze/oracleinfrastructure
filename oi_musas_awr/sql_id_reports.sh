@@ -1,5 +1,5 @@
 #!/bin/bash
-#$Header: /home/remik/cvs_root_kgp/musas_awr/sql_id_reports.sh,v 1.9 2012-06-06 08:12:32 orainf Exp $
+#$Header$
 
 # Load usefull functions
 D_SCRIPTO_DIR=~/scripto
