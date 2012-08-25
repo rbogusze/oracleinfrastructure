@@ -136,7 +136,22 @@ $ tnsping ZEBRA
 $ sqlplus perfstat@ZEBRA
 }}}
 
-After 10min the new database should be available to chose from the pop-up menu at our rrdora web site = http://orainf/rrdora/
+After 10min the new database should be available to chose from the pop-up menu at our rrdora web site = http://logwatch/rrdora/
+
+Done. 
+
+Extra storage of the day view images.
+{{{
+# mkdir /var/www/html/rrdora_history
+# chown orainf:orainf /var/www/html/rrdora_history
+}}}
+
+And add to orainf crontab
+{{{
+$ crontab -e
+12 18 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_rrdora; ./rrdora_history.sh > /dev/null
+
+}}}
 
 
 ==troubleschooting==
