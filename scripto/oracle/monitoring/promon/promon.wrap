@@ -1,0 +1,139 @@
+#!/bin/bash
+#$Id: promon.wrap,v 1.1 2012-05-07 13:48:52 remik Exp $
+#
+# This script should perform no changes, only notice non standard configurations
+# See https://twiki.pgf.com.pl/cgi-bin/twiki/view/Main/OraclePromonMonitoring
+#
+# Load usefull functions
+if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
+  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
+  exit 1
+else
+  . $HOME/scripto/bash/bash_library.sh
+fi
+
+RECIPIENTS='Remigiusz_Boguszewicz@notes.pgf.com.pl'
+F_OUTPUT=/tmp/promon.output.tmp
+INFO_MODE=ERROR
+#INFO_MODE=INFO
+export INFO_MODE
+
+check_file $HOME/scripto/oracle/create_db_scripts/oracle_setup/oracle_setup.sh
+cd $HOME/scripto/oracle/create_db_scripts/oracle_setup
+
+ORATAB=/var/opt/oracle/oratab
+if [ ! -f "$ORATAB" ]; then
+  echo "No $ORATAB found. Exiting."
+  exit 1
+fi
+
+# Checks done for each database present
+F_ORATAB_FILTERED=/tmp/oratab_filetered_clean.tmp
+cat $ORATAB | grep -v "^#"  |   grep -v '^ *$'> $F_ORATAB_FILTERED
+while read ORATAB_LINE
+do
+  V_SID=`echo $ORATAB_LINE | awk -F":" '{print $1}'`
+  #echo "V_SID: $V_SID"
+  V_BIN=`echo $ORATAB_LINE | awk -F":" '{print $2}'` 
+  #echo "V_BIN: $V_BIN"
+
+  if [ -f "$V_BIN/.profile" ]; then
+    msgi "Sourcing .profile from $V_BIN."
+    . $V_BIN/.profile
+    msgi "##########################################################################"
+    msgi "ORACLE_SID: $V_SID"
+    export ORACLE_SID=$V_SID
+    msgi "################ ./oracle_setup.sh b_basic_db_healthcheck ################"
+    ./oracle_setup.sh b_basic_db_healthcheck | tee -a $F_OUTPUT
+    msgi "################ ./oracle_setup.sh b_change_profile CHECK ################"
+    ./oracle_setup.sh b_change_profile CHECK | tee -a $F_OUTPUT
+    msgi "################ ./oracle_setup.sh b_store_in_cvs ################"
+    ./oracle_setup.sh b_store_in_cvs | tee -a $F_OUTPUT
+    msgi "################ ./oracle_setup.sh b_set_audit_file_dest CHECK ################"
+    ./oracle_setup.sh b_set_audit_file_dest CHECK | tee -a $F_OUTPUT
+  else
+    msge "There should exist .profile in $V_BIN. Not found. Looks like not multibin installation. See InstallingMultibinOracleOnSolaris on twiki. Exiting."
+    return 0
+  fi #$V_CHOSEN_BIN/.profile
+
+done < $F_ORATAB_FILTERED
+
+msgi "######## Reseting the environment to easily spot #######"
+msgi "######## any problems that result from DB env not set                #######"
+if [ -f /ORABIN/.profile ]; then
+  . /ORABIN/.profile
+fi
+unset ORACLE_SID
+unset ORACLE_PATH
+unset ORACLE_BASE
+unset TNS_ADMIN
+unset ORACLE_HOME
+unset SQLPATH
+run_command_d "env"
+
+msgi "######## Checks done for each oracle binaries present                #######"
+F_ORATAB_FILTERED=/tmp/oratab_filetered_binaries.tmp
+cat $ORATAB | grep -v "^#" |   grep -v '^ *$'| awk -F":" '{print $2}' | sort -u > $F_ORATAB_FILTERED
+while read ORATAB_LINE
+do
+  V_BIN=$ORATAB_LINE
+  msgi "V_BIN: $V_BIN"
+
+  if [ -f "$V_BIN/.profile" ]; then
+    msgi "##########################################################################"
+    msgi "################ Actions for binaries: $ORATAB_LINE  ################"
+    msgi "Sourcing .profile from $V_BIN."
+    . $V_BIN/.profile
+    msgi "###### ./oracle_setup.sh b_check_and_fix_orphan_links_resulting_from_rsync_copy CHECK ##########"
+    ./oracle_setup.sh b_check_and_fix_orphan_links_resulting_from_rsync_copy CHECK | tee -a $F_OUTPUT
+  else
+    msge "There should exist .profile in $V_BIN. Not found. Weird. Exiting."
+    return 0
+  fi #$V_CHOSEN_BIN/.profile
+done < $F_ORATAB_FILTERED
+
+msgi "######## Reseting the environment to easily spot #######"
+msgi "######## any problems that result from DB env not set                #######"
+if [ -f /ORABIN/.profile ]; then
+  . /ORABIN/.profile
+fi
+unset ORACLE_SID
+unset ORACLE_PATH
+unset ORACLE_BASE
+unset TNS_ADMIN
+unset ORACLE_HOME
+unset SQLPATH
+run_command_d "env"
+
+msgi "######## Checks done only once on a host                         #######"
+msgi "################ ./oracle_setup.sh b_forward_mail CHECK ################"
+./oracle_setup.sh b_forward_mail CHECK | tee -a $F_OUTPUT
+msgi "################ ./oracle_setup.sh b_check_mail_queue CHECK ################"
+./oracle_setup.sh b_check_mail_queue CHECK | tee -a $F_OUTPUT
+msgi "################ ./oracle_setup.sh b_basic_os_healthcheck ################"
+./oracle_setup.sh b_basic_os_healthcheck | tee -a $F_OUTPUT
+
+msgi "################ ./implement_CFC.sh CHECK ################"
+check_file $HOME/scripto/oracle/RMAN/implement_CFC.sh
+cd $HOME/scripto/oracle/RMAN
+./implement_CFC.sh CHECK | tee -a $F_OUTPUT
+
+msgi "################ ./check_password.sh ################"
+if [ -f $HOME/scripto/solaris/check_password/check_password.sh ]; then
+  cd $HOME/scripto/solaris/check_password
+  ./check_password.sh | tee -a $F_OUTPUT
+fi
+
+
+
+#echo "Exiting without sending mail. "
+#exit 0
+
+if [ `cat $F_OUTPUT | wc -l` -gt 0 ]; then
+  msga "Sending mail with commands output"
+  cat $F_OUTPUT | tr -cd '[:graph:] [:space:]' | sed s/\\[31m//g | sed s/\\[39m\\[49m//g | /usr/bin/mailx -s "[ promon ] $ORACLE_SID `uname -n`" "Remigiusz_Boguszewicz@notes.pgf.com.pl"
+  cat $F_OUTPUT | tr -cd '[:graph:] [:space:]' | sed s/\\[31m//g | sed s/\\[39m\\[49m//g | /usr/bin/mailx -s "[ promon ] $ORACLE_SID `uname -n`" "Adam_Wieczorek@notes.pgf.com.pl"
+  cat $F_OUTPUT | tr -cd '[:graph:] [:space:]' | sed s/\\[31m//g | sed s/\\[39m\\[49m//g | /usr/bin/mailx -s "[ promon ] $ORACLE_SID `uname -n`" "Radoslaw_Cisz@notes.pgf.com.pl"
+fi
+
+rm -f $F_OUTPUT
