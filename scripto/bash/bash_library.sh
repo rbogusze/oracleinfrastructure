@@ -1021,6 +1021,8 @@ check_log()
 # OS specific variables
 case `uname` in
   "AIX")
+
+    ORATAB=/etc/oratab
     # Find GNU find
     if [ -f /opt/freeware/bin/find ]; then
       FIND=/opt/freeware/bin/find
@@ -1084,6 +1086,7 @@ case `uname` in
     ;;
   "SunOS")
     # echo "I am running on Solaris now"
+    ORATAB=/var/opt/oracle/oratab
     # Find GNU find
     if [ -f /opt/csw/bin/gfind ]; then
       FIND=/opt/csw/bin/gfind
@@ -1174,6 +1177,7 @@ case `uname` in
     ;;
   "Linux")
     #echo "I am running on Linux now"
+    ORATAB=/etc/oratab
     FIND=/usr/bin/find
     CVS=/usr/bin/cvs
     GREP=/bin/grep
