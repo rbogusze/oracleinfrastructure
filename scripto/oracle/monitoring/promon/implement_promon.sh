@@ -9,12 +9,6 @@ fi
 
 RECIPIENTS='Remigiusz_Boguszewicz'
 
-msga "Updating promon related scripts"
-
-check_directory "$HOME/scripto/bash/"
-cd $HOME/scripto/bash/
-cvs update
-
 check_directory "$HOME/scripto/oracle/create_db_scripts"
 cd $HOME/scripto/oracle/create_db_scripts
 cvs update -d

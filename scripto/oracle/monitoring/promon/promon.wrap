@@ -14,14 +14,13 @@ fi
 
 RECIPIENTS='Remigiusz_Boguszewicz@notes.pgf.com.pl'
 F_OUTPUT=/tmp/promon.output.tmp
-INFO_MODE=ERROR
-#INFO_MODE=INFO
+#INFO_MODE=ERROR
+INFO_MODE=INFO
 export INFO_MODE
 
 check_file $HOME/scripto/oracle/create_db_scripts/oracle_setup/oracle_setup.sh
 cd $HOME/scripto/oracle/create_db_scripts/oracle_setup
 
-ORATAB=/var/opt/oracle/oratab
 if [ ! -f "$ORATAB" ]; then
   echo "No $ORATAB found. Exiting."
   exit 1
