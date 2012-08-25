@@ -1188,6 +1188,7 @@ case `uname` in
     # The next line is bizare, but I found no elegant way
     USERNAME=`id | awk -F"(" '{print $2}' |  awk -F")" '{print $1}'`
     MAILCMD=/usr/bin/mailx
+    PING=/bin/ping
     ;;
   *)
     echo "Unknown OS!!! Exiting."
