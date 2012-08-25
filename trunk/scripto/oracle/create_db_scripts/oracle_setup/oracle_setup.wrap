@@ -318,43 +318,37 @@ f_standalone_file_to_cvs()
 b_store_in_cvs()
 {
   msgb "${FUNCNAME[0]} Beginning."
-  $PING -c 1 cvs.pgf.com.pl > /dev/null
+  V_CVS_HOST=logwatch
+  $PING -c 1 $V_CVS_HOST > /dev/null
   if [ $? -ne 0 ]; then
-    msge "Host cvs.pgf.com.pl not found. Exiting."
+    msge "Host $V_CVS_HOST not found. Exiting."
     exit 0
   else
-    msgi "Host cvs.pgf.com.pl found. OK"
+    msgi "Host $V_CVS_HOST found. OK"
   fi
 
   V_UNIQ_ORA_HOME=`echo $ORACLE_HOME | tr -d '/'`
-  f_standalone_file_to_cvs $ORACLE_HOME/.profile $HOME/scripto/oracle/logs profile_${USERNAME}_${HOSTNAME}_${V_UNIQ_ORA_HOME}
+  if [ -f $HOME/.profile ]; then
+    f_standalone_file_to_cvs $ORACLE_HOME/.profile $HOME/local_scripto/oracle/logs profile_${USERNAME}_${HOSTNAME}_${V_UNIQ_ORA_HOME}
+  fi
 
-  crontab -l > $D_TMP/crontab_${USERNAME}_${HOSTNAME}
-  f_standalone_file_to_cvs $D_TMP/crontab_${USERNAME}_${HOSTNAME} $HOME/scripto/crontabs crontab_${USERNAME}_${HOSTNAME}
-
-  f_execute_sql "create pfile from spfile;"
-  cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep -v "__" > $D_TMP/init${ORACLE_SID}.ora.tmp
-  f_standalone_file_to_cvs $D_TMP/init${ORACLE_SID}.ora.tmp $HOME/scripto/oracle/logs init${ORACLE_SID}.ora_${USERNAME}_${HOSTNAME}
-
-  msgd "Checking opatch PATH"
-  TMP_PATH=`which opatch`
-  msgd "TMP_PATH: $TMP_PATH"
+  
   check_file $TMP_PATH
 
   opatch lsinventory 2>&1 | grep -v 'Log file location' | grep -v 'Creating log file' | grep -v 'Lsinventory Output file location' > $D_TMP/lsinventory_${ORACLE_SID}_${HOSTNAME}
-  f_standalone_file_to_cvs $D_TMP/lsinventory_${ORACLE_SID}_${HOSTNAME} $HOME/scripto/oracle/logs lsinventory_${ORACLE_SID}_${HOSTNAME}
+  f_standalone_file_to_cvs $D_TMP/lsinventory_${ORACLE_SID}_${HOSTNAME} $HOME/local_scripto/oracle/logs lsinventory_${ORACLE_SID}_${HOSTNAME}
 
   if [ -f "$ORACLE_HOME/network/admin/listener.ora" ]; then
-    f_standalone_file_to_cvs $ORACLE_HOME/network/admin/listener.ora $HOME/scripto/oracle/logs listener.ora_${ORACLE_SID}_${HOSTNAME}
+    f_standalone_file_to_cvs $ORACLE_HOME/network/admin/listener.ora $HOME/local_scripto/oracle/logs listener.ora_${ORACLE_SID}_${HOSTNAME}
   fi
 
   if [ -f "$ORACLE_HOME/network/admin/sqlnet.ora" ]; then
-    f_standalone_file_to_cvs $ORACLE_HOME/network/admin/sqlnet.ora $HOME/scripto/oracle/logs sqlnet.ora_${ORACLE_SID}_${HOSTNAME}
+    f_standalone_file_to_cvs $ORACLE_HOME/network/admin/sqlnet.ora $HOME/local_scripto/oracle/logs sqlnet.ora_${ORACLE_SID}_${HOSTNAME}
   fi
 
   msgd "Preparing tnsnames.ora not to include the Header keyword interpreted by CVS"
   cat $ORACLE_HOME/network/admin/tnsnames.ora | grep -v "^# .Header:" > $D_TMP/tnsnames.ora
-  f_standalone_file_to_cvs $D_TMP/tnsnames.ora $HOME/scripto/oracle/logs tnsnames.ora_${ORACLE_SID}_${HOSTNAME}
+  f_standalone_file_to_cvs $D_TMP/tnsnames.ora $HOME/local_scripto/oracle/logs tnsnames.ora_${ORACLE_SID}_${HOSTNAME}
 
   msgb "${FUNCNAME[0]} Finished."
 } # b_store_in_cvs
