@@ -39,13 +39,11 @@ if (!$eJahr or !$eMonat or !$eJahr) {
 echo "<BR>Date selected : ";
 echo "<font color='black'> $getFilenameDate </font><BR>";
 
-//http://192.168.139.130/html/awr_reports/KSIPDBP1/AWR_txt_day/awr_KSIPDBP1_14499_14507_2012-05-15_08:00_2012-05-15_16:00.txt
-
-
 // Now let us construct the filename
 //$filename = "snap_" . "$getFilenameDate";
-$filename = "$getFilenameDate" . "_16:00.txt";
-//echo "<BR> Ala ma kota $filename dir: $dir<BR> ";
+//$filename = "$getFilenameDate" . "_16:00.txt";
+$filename = "$getFilenameDate";
+echo "<BR> Ala ma kota $filename dir: $dir<BR> ";
 
 if (is_dir($dir)) {
    if ($dh = opendir($dir)) {

@@ -16,8 +16,8 @@ $filenames_array_counter = 0;
 if (is_dir($dir)) {
    if ($dh = opendir($dir)) {
       while (($file = readdir($dh)) !== false) {
-        //echo "filename: $file : filetype: " . filetype($dir . $file) . "<BR>";
-        if ((filetype($dir . $file) == dir) && ($file != '.') && ($file != '..')) {
+        #echo "filename: $file : filetype: " . filetype($dir . $file) . "<BR>";
+        if ((filetype($dir . $file) == 'dir') && ($file != '.') && ($file != '..')) {
             // echo "filename: $file <BR>";
             // create an array
             $filenames_array[$filenames_array_counter] = $file;
