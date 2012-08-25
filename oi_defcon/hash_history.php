@@ -102,11 +102,17 @@ list($a_buffer_gets_timestamp, $a_buffer_gets, $a_buffer_gets_per_exec, $a_trash
 // 5 - Y/N whether to print the table with SQL explain plans through history. I provide the clean hash number if yes
 // 6 - $dir - directory needed for sql explain plan in the end table
 
+echo "<BR><HR><B>Per instance statistics</B><BR>";
 draw_chart($a_elapsed_time, $a_elapsed_time_timestamp, ("Sql Id: " . $hash_value ), "Elapsed Time (ms)", 0, "");
 draw_chart($a_cpu_time, $a_cpu_time_timestamp, ("Sql Id: " . $hash_value ), "CPU Time (ms)", 0, "");
 draw_chart($a_executions, $a_executions_timestamp, ("Sql Id: " . $hash_value ), "Executions", 0, "");
 draw_chart($a_buffer_gets, $a_buffer_gets_timestamp, ("Sql Id: " . $hash_value ), "Buffer Gets", "$hash_value", "$dir", $filenames_array);
 
+echo "<BR><HR><B>Per execution statistics</B><BR>";
+
+draw_chart($a_cpu_time_per_exec, $a_cpu_time_timestamp, ("Sql Id: " . $hash_value ), "CPU Time (ms) per execution", 0, "");
+draw_chart($a_elapsed_time_per_exec, $a_elapsed_time_timestamp, ("Sql Id: " . $hash_value ), "Elapsed Time (ms) per execution", 0, "");
+draw_chart($a_buffer_gets_per_exec, $a_buffer_gets_timestamp, ("Sql Id: " . $hash_value ), "Buffer Gets per execution", "$hash_value", "$dir", $filenames_array);
 //Include footer file with navigation links
 require("footer.php");
 exit;
