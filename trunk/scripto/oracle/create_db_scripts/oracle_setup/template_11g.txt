@@ -1,0 +1,102 @@
+ignore:_awr_flush_threshold_metrics::
+ignore:db_name::
+ignore:max_dump_file_size::
+ignore:audit_file_dest::
+ignore:db_unique_name::
+ignore:instance_name::
+ignore:background_dump_dest::
+ignore:core_dump_dest::
+ignore:user_dump_dest::
+ignore:diagnostic_dest::
+ignore:utl_file_dir::
+ignore:aq_tm_processes::
+ignore:log_archive_dest_3::
+ignore:log_archive_dest_state_3::
+ignore:standby_archive_dest::
+ignore:standby_file_management::
+ignore:log_archive_dest_1::
+ignore:log_archive_dest_state_1::
+ignore:log_archive_dest_2::
+ignore:log_archive_dest_state_2::
+ignore:nls_currency::
+ignore:nls_calendar:'gregorian':
+ignore:nls_date_format:'yyyy-mm-dd':
+ignore:nls_date_language:'polish':
+ignore:nls_iso_currency:'poland':
+ignore:nls_language:'polish':????
+ignore:nls_numeric_characters:',.':
+ignore:nls_sort:'polish':
+ignore:nls_territory:'poland':
+ignore:db_32k_cache_size::
+ignore:db_keep_cache_size::
+ignore:db_files::
+ignore:db_recovery_file_dest::
+ignore:db_recovery_file_dest_size::
+ignore:global_names::
+ignore:control_file_record_keep_time::makes real sense to set it with RMAN backup
+ignore:parallel_max_servers::
+ignore:db_flashback_retention_target::I should make it imperative some time
+ignore:sessions::Derived: (1.1 * PROCESSES) + 5
+ignore:db_block_checking::Think about making it permanent
+ignore:local_listener::Should be used only when the listener listens on non-default port
+ignore:java_pool_size::Problems with ASMM, accepting manual management
+ignore:large_pool_size::Problems with ASMM, accepting manual management
+ignore:sga_target::Problems with ASMM, accepting manual management
+ignore:db_create_file_dest::Set when using ASM
+ignore:memory_target::Acceptable on 11g
+do_not_set:sga_max_size::See twiki and search for sga_max_size
+do_not_set:_pga_max_size::
+do_not_set:archive_lag_target::
+do_not_set:fast_start_mttr_target::
+do_not_set:hash_join_enabled::
+do_not_set:lock_name_space::
+do_not_set:log_archive_dest::
+do_not_set:log_archive_duplex_dest::
+do_not_set:log_archive_trace::
+do_not_set:resource_limit::
+do_not_set:star_transformation_enabled::
+do_not_set:transactions_per_rollback_segment::
+do_not_set:dispatchers::
+do_not_set:streams_pool_size::
+do_not_set:log_archive_start::
+do_not_set:max_enabled_roles::
+do_not_set:remote_archive_enable::
+do_not_set:max_rollback_segments::
+do_not_set:optimizer_max_permutations::
+do_not_set:db_file_multiblock_read_count::
+do_not_set:sort_area_size::
+do_not_set:_complex_view_merging:false:!!changed from 9i!!
+do_not_set:_unnest_subquery:false:!!changed from 9i!!
+do_not_set:query_rewrite_enabled:'false':!!changed from 9i!!
+do_not_set:log_archive_min_succeed_dest::1 is the deafault
+do_not_set:audit_trail::
+do_not_set:db_writer_processes::
+do_not_set:trace_enabled::
+do_not_set:open_links_per_instance::
+do_not_set:fal_client::Sould not be set on standalone DB
+do_not_set:fal_server::Sould not be set on standalone DB
+do_not_set:optimizer_index_caching::
+do_not_set:optimizer_index_cost_adj::
+check_if_equal:compatible:'11.2.0.0.0':
+check_if_equal:filesystemio_options:'setall':
+check_if_equal:log_archive_format:'arch_%t_%s_%r.arc':
+check_if_equal:log_checkpoints_to_alert:true:
+check_if_equal:optimizer_mode:'all_rows':
+check_if_equal:remote_login_passwordfile:'exclusive':
+check_if_equal:timed_statistics:true:
+check_if_equal:undo_management:'auto':
+check_if_more:open_cursors:2000
+check_if_more:open_links:30:
+check_if_more:processes:100:
+check_if_more:session_cached_cursors:3000:
+check_if_more:undo_retention:14400:
+check_if_more:job_queue_processes:30:
+check_if_more:session_max_open_files:20:
+check_if_more:log_buffer:10485760:
+check_if_set:db_block_size::
+check_if_set:db_domain::
+check_if_set:control_files::
+check_if_set:db_cache_size::
+check_if_set:pga_aggregate_target::
+check_if_set:shared_pool_size::
+check_if_set:undo_tablespace::
