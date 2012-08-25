@@ -807,7 +807,9 @@ b_basic_db_healthcheck()
   msgb "${FUNCNAME[0]} Beginning."
   msgi "[b_basic_db_healthcheck] common blocks"
   b_basic_db_healthcheck_common
-  b_check_if_init_params_agree_with_template
+
+  # skipping that, to much fuss
+  #b_check_if_init_params_agree_with_template
 
   msgi "[b_basic_db_healthcheck] OS architecture dependend blocks"
   case `uname -p` in
@@ -1018,21 +1020,21 @@ b_basic_db_healthcheck_db_primary_10()
 {
   msgb "${FUNCNAME[0]} Beginning."
 
-  msgi "Checking if statistics estimate is 100"
-  f_execute_sql "select dbms_stats.get_param('ESTIMATE_PERCENT') from dual;"
-  V_TMP=$V_EXECUTE_SQL
-  msgd "V_TMP: $V_TMP"
-  if [ "${V_TMP}" = "NULL" ]; then
-    V_TMP=0
-  elif [ "${V_TMP}" = "DBMS_STATS.AUTO_SAMPLE_SIZE" ]; then
-    V_TMP=0
-  fi
-
-  if [ "${V_TMP}" -ne 100 ]; then
-    msge "The estimation for auto gathering statistics is not 100 on DB: $ORACLE_SID. Not a PGF standard."
-    msge "Change it by running: >exec DBMS_STATS.SET_PARAM('ESTIMATE_PERCENT','100');"
-  fi
-
+#  msgi "Checking if statistics estimate is 100"
+#  f_execute_sql "select dbms_stats.get_param('ESTIMATE_PERCENT') from dual;"
+#  V_TMP=$V_EXECUTE_SQL
+#  msgd "V_TMP: $V_TMP"
+#  if [ "${V_TMP}" = "NULL" ]; then
+#    V_TMP=0
+#  elif [ "${V_TMP}" = "DBMS_STATS.AUTO_SAMPLE_SIZE" ]; then
+#    V_TMP=0
+#  fi
+#
+#  if [ "${V_TMP}" -ne 100 ]; then
+#    msge "The estimation for auto gathering statistics is not 100 on DB: $ORACLE_SID. Not a company standard."
+#    msge "Change it by running: >exec DBMS_STATS.SET_PARAM('ESTIMATE_PERCENT','100');"
+#  fi
+#
 
   msgb "${FUNCNAME[0]} Finished."
 }
