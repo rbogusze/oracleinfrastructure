@@ -7,7 +7,7 @@
 
 # if RECIPIENTS value is set, preserve it.
 
-[ -z "$RECIPIENTS" ] && RECIPIENTS='orainf'
+[ -z "$RECIPIENTS" ] && RECIPIENTS='orainf@logwatch'
 
 # Level of messages
 [ -z "$INFO_MODE" ] && INFO_MODE='INFO'
