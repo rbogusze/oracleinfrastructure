@@ -1,0 +1,12 @@
+#summary Depot for frequently used scripts.
+
+The need is pretty obvious. It is usefull to have a location where all the favourite scripts are stored, that can be centrally rynchronized and used by varius bash and SQL scripts.
+
+I call this one 'scripto' and place it always in HOME directory. It is called 'scripto' to diferenciate it from 'scripts' name which is sometimes found.
+
+
+{{{
+$ cd
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto 
+$ cd 
+}}}
