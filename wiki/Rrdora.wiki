@@ -93,11 +93,8 @@ Install required perl module
 # yum install perl-LDAP
 }}}
 
-Download the scripto directory that contains many supporting scripts.
+Ask LDAP using a perl script.
 {{{
-$ cd
-$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto 
-$ cd 
 $ $HOME/scripto/perl/ask_ldap.pl "orainfDbRrdoraMonitoring=TRUE" "['cn', 'orainfDbRrdoraUser']"
 TEST2 perfstat
 }}}
