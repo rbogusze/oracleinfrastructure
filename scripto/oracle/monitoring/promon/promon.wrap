@@ -12,7 +12,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='orainf@logwatch'
 F_OUTPUT=/tmp/promon.output.tmp
 #INFO_MODE=ERROR
 INFO_MODE=DEBUG
@@ -113,7 +112,7 @@ fi
 
 if [ `cat $F_OUTPUT | wc -l` -gt 0 ]; then
   msga "Sending mail with commands output"
-  cat $F_OUTPUT | tr -cd '[:graph:] [:space:]' | sed s/\\[31m//g | sed s/\\[39m\\[49m//g | /usr/bin/mailx -s "[ promon ] $ORACLE_SID `uname -n`" "orainf@logwatch"
+  cat $F_OUTPUT | tr -cd '[:graph:] [:space:]' | sed s/\\[31m//g | sed s/\\[39m\\[49m//g | $MAILCMD -s "[ promon ] $ORACLE_SID `uname -n`" "orainf@logwatch"
 fi
 
 rm -f $F_OUTPUT
