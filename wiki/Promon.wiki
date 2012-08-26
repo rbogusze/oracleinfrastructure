@@ -9,3 +9,62 @@ Such approach has two major benefits - if someone changes something then I know 
 Those needs were born out of problems - someone changed something and did not tell about it to the other members of the DBA team. I wanted to avoid such a problems in the future.
 
 Other checks done are more or less in the same spirit - to learn from mistakes.
+
+----
+
+==Setup CVS repository==
+
+On logwatch host
+{{{
+# yum install cvs
+# useradd cvs
+# passwd cvs
+# cat /etc/xinetd.d/cvs 
+service cvspserver
+{
+       disable            = no
+       socket_type    = stream
+       wait                = no
+       user                = root
+       log_type          = FILE /var/log/cvspserver
+       protocol          = tcp
+       env                 = '$HOME=/home/cvs'
+       bind                = logwatch
+       log_on_failure  += USERID
+       port                = 2401
+       server             = /usr/bin/cvs
+       server_args     = -f --allow-root=/home/cvs pserver
+}
+
+
+# su - cvs
+$ cvs -d /home/cvs init
+
+# yum install xinetd
+# service xinetd restart
+
+Check connection
+$ telnet logwatch 2401
+}}}
+
+==Implement promon==
+On the dbhost
+
+
+On the dbhost
+{{{
+# yum install cvs
+# yum install expect
+
+Check connection
+$ telnet logwatch 2401
+
+$ export CVSROOT=:pserver:cvs@logwatch:/home/cvs
+$ cvs login
+
+local_scripto
+$ cvs co -d local_scripto local_scripto
+
+$ cd $HOME/scripto/oracle/monitoring/promon
+$ ./implement_promon.sh
+}}}
