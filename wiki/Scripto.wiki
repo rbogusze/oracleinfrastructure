@@ -4,9 +4,35 @@ The need is pretty obvious. It is usefull to have a location where all the favou
 
 I call this one 'scripto' and place it always in HOME directory. It is called 'scripto' to diferenciate it from 'scripts' name which is sometimes found.
 
-
 {{{
 $ cd
 $ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto 
 $ cd 
 }}}
+
+Following projects use extensively from this depot, but I also use it for frequently used SQL scripts.
+
+Together with variable SQLPATH I can run the SQL scripts in SQL*Plus.
+{{{
+$ vi .bash_profile
+SQLPATH=$HOME/scripto/oracle/sqlbin
+export SQLPATH
+
+
+SQL> @tbs
+Show size of tablespaces
+
+Tablespace Name 	       TBS_FULL   total_space(MB) Free_space(MB)
+------------------------------ ---------- --------------- --------------
+UNDO2			       1.68		      465	     457
+SYSAUX			       90.99		      612	      55
+SYSTEM			       98.97		      790	       8
+USERS			       99.03		      186	       2
+}}}
+
+Some of the scripts explained
+|| tbs.sql || Show size of tablespaces ||
+|| users.sql || User session details ||
+|| active.sql || Active session with sql text ||
+
+
