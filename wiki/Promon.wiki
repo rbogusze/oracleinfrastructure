@@ -50,6 +50,7 @@ $ telnet logwatch 2401
 ==Implement promon==
 On the dbhost
 
+Setup scripto depot - [Scripto].
 
 On the dbhost
 {{{
