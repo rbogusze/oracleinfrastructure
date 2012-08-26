@@ -99,11 +99,12 @@ check_file $HOME/scripto/oracle/RMAN/implement_CFC.sh
 cd $HOME/scripto/oracle/RMAN
 ./implement_CFC.sh CHECK | tee -a $F_OUTPUT
 
-msgi "################ ./check_password.sh ################"
-if [ -f $HOME/scripto/solaris/check_password/check_password.sh ]; then
-  cd $HOME/scripto/solaris/check_password
-  ./check_password.sh | tee -a $F_OUTPUT
-fi
+# WIP
+#msgi "################ ./check_password.sh ################"
+#if [ -f $HOME/scripto/solaris/check_password/check_password.sh ]; then
+#  cd $HOME/scripto/solaris/check_password
+#  ./check_password.sh | tee -a $F_OUTPUT
+#fi
 
 
 
