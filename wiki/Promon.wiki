@@ -1,0 +1,11 @@
+#summary Checks done on the DB host
+
+This project was born from the need to perform some of the checks on the host that was running the database, because that was the only way or because it was easier this way.
+
+The essential goal was to capture changes done to initialisation file, tnsnames.ora, profile, listener.ora and crontab. It saves those files in central CVS repository (placed on logwatch host) and notifies about any changes done to them.
+
+Such approach has two major benefits - if someone changes something then I know about it, second benefit is that with the help of revision control I am able to answer the questions like: "What init parameters the DB had 6 months ago", etc.
+
+Those needs were born out of problems - someone changed something and did not tell about it to the other members of the DBA team. I wanted to avoid such a problems in the future.
+
+Other checks done are more or less in the same spirit - to learn from mistakes.
