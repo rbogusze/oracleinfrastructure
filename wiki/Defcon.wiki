@@ -71,4 +71,7 @@ On Statspack (level 6 or greater)
 
 And I like the a lot. They tell us how selected SQLs are performing during the life of the database. Whether they take more or less time / resources, whether they are executed more or less often, etc. The statistics are divided into sections per instance and per execution. On the bottom of each section we have links that direct us to specific SQL ID report on which the are based.
 
+Here one can easily spot some important trends. The one that is dangerous is where on every next day the SQL is taking more and more time / resources to complete. 
+
+
 
