@@ -50,6 +50,8 @@ It becomes very obvious the the performance effords should focus on first three 
 
 This approach helped me a lot of times when dealing with developers to convince them to focus their attention on selected SQLs in cases where overall system performance was bad and we had to select some areas that will be redesigned / tuned.
 
+===SQL Statistics===
+
 Each section has the corresponding SQL links:
 
 <img src="http://oracleinfrastructure.googlecode.com/files/defcon_03.png" />
@@ -72,6 +74,3 @@ On Statspack (level 6 or greater)
 And I like the a lot. They tell us how selected SQLs are performing during the life of the database. Whether they take more or less time / resources, whether they are executed more or less often, etc. The statistics are divided into sections per instance and per execution. On the bottom of each section we have links that direct us to specific SQL ID report on which the are based.
 
 Here one can easily spot some important trends. The one that is dangerous is where on every next day the SQL is taking more and more time / resources to complete. 
-
-
-
