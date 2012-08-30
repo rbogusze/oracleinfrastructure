@@ -1,5 +1,7 @@
 #summary Visualising the AWR / Statspack report
 
+<wiki:toc max_depth="1" />
+
 <img src="http://oracleinfrastructure.googlecode.com/files/defcon.png" height='506' />
 
 This project as a prerequisite needs the [Musas] project running - to provide the raw AWR / Statspack reports. As we have those reports it is relatively easy to do some draws.
