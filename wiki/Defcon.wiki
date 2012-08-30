@@ -29,3 +29,5 @@ $ scp arial.ttf root@logwatch:/usr/X11R6/lib/X11/fonts/truetype/
 Open the browser and direct it to defcon main directory.
 
 http://logwatch/oi_defcon/
+
+<img src="http://oracleinfrastructure.googlecode.com/files/defcon_01.png" />
