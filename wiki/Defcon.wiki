@@ -6,7 +6,7 @@ This project as a prerequisite needs the [Musas] project running - to provide th
 
 This project was born from the need to somehow show developers a nice picture that will tell them more than the raw numbers.
 
-Installation
+==Installation==
 {{{
 # mkdir /var/www/html/oi_defcon
 # chown orainf:orainf /var/www/html/oi_defcon
@@ -23,6 +23,8 @@ Enable apache user to access the /home/orainf/scripto/php/my_library.php
 # mkdir -p /usr/X11R6/lib/X11/fonts/truetype
 $ scp arial.ttf root@logwatch:/usr/X11R6/lib/X11/fonts/truetype/
 }}}
+
+==Usage==
 
 Open the browser and direct it to defcon main directory.
 
