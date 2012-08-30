@@ -1,6 +1,6 @@
 #summary Visualising the AWR / Statspack report
 
-<wiki:toc max_depth="1" />
+<wiki:toc max_depth="3" />
 
 <img src="http://oracleinfrastructure.googlecode.com/files/defcon.png" height='506' />
 
