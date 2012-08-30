@@ -43,7 +43,7 @@ echo "<font color='black'> $getFilenameDate </font><BR>";
 //$filename = "snap_" . "$getFilenameDate";
 //$filename = "$getFilenameDate" . "_16:00.txt";
 $filename = "$getFilenameDate";
-echo "<BR> Ala ma kota $filename dir: $dir<BR> ";
+//echo "<BR> Ala ma kota $filename dir: $dir<BR> ";
 
 if (is_dir($dir)) {
    if ($dh = opendir($dir)) {
