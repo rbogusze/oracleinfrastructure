@@ -29,7 +29,7 @@ if (is_dir($dir)) {
 }
 
 // Print the list of databases
-echo "<tt>DEFCON is even more alive! Now it is DEFCON_AWR - View AWR Info <BR></tt>";
+echo "<tt>DEFCON - Visualising the AWR / Statspack report<BR></tt>";
 echo "<tt>Please select the database you are interested in</tt>";
 echo "<BR><table>";
 for($j=0;$j<count($filenames_array);$j++) 
