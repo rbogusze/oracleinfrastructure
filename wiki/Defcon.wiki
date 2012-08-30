@@ -26,8 +26,29 @@ $ scp arial.ttf root@logwatch:/usr/X11R6/lib/X11/fonts/truetype/
 
 ==Usage==
 
+===Selecting Database===
+
 Open the browser and direct it to defcon main directory.
 
 http://logwatch/oi_defcon/
 
+You will be presented with a page allowing to chose a database. There is no LDAP parameter that controls which DB will be available here :). It is just the directories under /var/www/html/awr_reports/ that contain the awr/statspack reports.
+
 <img src="http://oracleinfrastructure.googlecode.com/files/defcon_01.png" />
+
+===Main Statistics===
+
+After selecting the database we are at the main defcon page. Basically some sections from the Statspack report are visualised witch helps to "feel" waht is going on in the database.
+
+The main sections are "CPU Usage", "Buffer Gets", "Physical Reads" and "Elapsed Time". What I find to be the biggest advantage here is that it becomes very easy to see performance problems caused by few very bad performing SQLs that overwhelm the whole database.
+
+If you see something like:
+<img src="http://oracleinfrastructure.googlecode.com/files/defcon_02.png" />
+
+It becomes very obvious the the performance effords should focus on first three SQL, as they are the main contributors. 
+
+This approach helped me a lot of times when dealing with developers to convince them to focus their attention on selected SQLs in cases where overall system performance was bad and we had to select some areas that will be redesigned / tuned.
+
+
+
+
