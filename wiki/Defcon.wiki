@@ -77,3 +77,11 @@ On Statspack (level 6 or greater)
 And I like the a lot. They tell us how selected SQLs are performing during the life of the database. Whether they take more or less time / resources, whether they are executed more or less often, etc. The statistics are divided into sections per instance and per execution. On the bottom of each section we have links that direct us to specific SQL ID report on which the are based.
 
 Here one can easily spot some important trends. The one that is dangerous is where on every next day the SQL is taking more and more time / resources to complete. 
+
+==Instance Statistics==
+<img src="http://oracleinfrastructure.googlecode.com/files/defcon_05.png" />
+
+
+Another interesting feature is the ability to show the instance statistics in historical perspective. Often the numbers are just the numbers and until we have some historical data it is hard to tell whether they are high or low :)
+
+Those statistics are very usefull e.g. during some SGA / PGA parameter changes to confirm the expected effect.
