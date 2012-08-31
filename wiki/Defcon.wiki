@@ -81,6 +81,9 @@ Here one can easily spot some important trends. The one that is dangerous is whe
 ==Instance Statistics==
 <img src="http://oracleinfrastructure.googlecode.com/files/defcon_05.png" />
 
+<img src="http://oracleinfrastructure.googlecode.com/files/defcon_07.png" weight='406' />
+
+
 <img src="http://oracleinfrastructure.googlecode.com/files/defcon_06.png" weight='406' />
 
 Another interesting feature is the ability to show the instance statistics in historical perspective. Often the numbers are just the numbers and until we have some historical data it is hard to tell whether they are high or low :)
