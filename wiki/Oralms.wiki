@@ -14,6 +14,13 @@ Anyway this is what works for me.
 
 We need to create an unpriviledged user that will be able to connect to database host for us, without beeing asked for password, and do the tail -f of database alert log.
 
+On the logwatch host prevent SSH session from beeing time-out by some firewall or other network equipment add the following parameters to the Host * section :
+{{{
+# vim /etc/ssh/sshd_config
+ServerAliveInterval 300
+ServerAliveCountMax 2
+}}}
+
 On the DB host that will be monitored create an unpriviledged user, for example named logwatch on each database host. We will connect as that user to tail the alert log from logwatch host.
 {{{
 # adduser logwatch
