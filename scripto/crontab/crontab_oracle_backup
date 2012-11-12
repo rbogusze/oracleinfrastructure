@@ -1,0 +1,1 @@
+37 13 * * * export ORACLE_SID=REMIK; export ORACLE_HOME=/u01/app/oracle/product/11.2.0/dbhome_1; PATH=$ORACLE_HOME/bin:$PATH; /home/oracle/scripto/oracle/RMAN/backup_to_disk.sh /u01/backup/$ORACLE_SID FULL NOCATALOG
