@@ -42,7 +42,7 @@ mkdir -p $LOG_DIR
 check_directory $LOG_DIR
 
 LOG=${LOG_DIR}/${LOG_NAME}.$V_DATE
-#exec > $LOG 2>&1
+exec > $LOG 2>&1
 
 D_BACKUP_DIR=$1
 V_BACKUP_TYPE=$2
@@ -76,6 +76,7 @@ esac
 msgd "RMAN: $RMAN"
 msgd "D_BACKUP_DIR: $D_BACKUP_DIR"
 
+run_command_e "mkdir -p $D_BACKUP_DIR"
 run_command_e "touch $D_BACKUP_DIR/testing_if_writable"
 run_command "sleep 1"
 run_command "rm -f $D_BACKUP_DIR/testing_if_writable"
