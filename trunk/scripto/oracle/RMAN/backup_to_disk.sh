@@ -42,7 +42,7 @@ mkdir -p $LOG_DIR
 check_directory $LOG_DIR
 
 LOG=${LOG_DIR}/${LOG_NAME}.$V_DATE
-exec > $LOG 2>&1
+#exec > $LOG 2>&1
 
 D_BACKUP_DIR=$1
 V_BACKUP_TYPE=$2
@@ -55,13 +55,13 @@ check_parameter $V_BACKUP_TYPE
 
 msgd "Analysing the whether we use the RMAN repository or not."
 if [ -z "$V_CATALOG" ] ; then
-  msgi "[info] Not specified whether I should use catalog repository. Assuming CATALOG."
-  V_CATALOG=CATALOG
+  msgi "[info] Not specified whether I should use catalog repository. Assuming NOCATALOG."
+  V_CATALOG=NOCATALOG
 fi
 case $V_CATALOG in 
   "CATALOG")
     msgi "Using repository catalog"
-    RMAN="rman target / catalog rman/zebra12@RMAN"
+    RMAN="rman target / catalog rman/xxxx@RMAN"
   ;;
   "NOCATALOG")
     msgi "NOT using repository catalog"
