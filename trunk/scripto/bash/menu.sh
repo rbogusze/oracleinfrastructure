@@ -50,6 +50,7 @@ if [ -f "$ORATAB" ]; then
   export ORACLE_SID=$V_CHOSEN_SID
   export ORAENV_ASK=NO
   . oraenv
+  unset ORAENV_ASK
 
   # Setting handy aliases
   alias dbs='cd $ORACLE_HOME/dbs'
