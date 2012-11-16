@@ -59,7 +59,7 @@ if [ -f "$ORATAB" ]; then
   alias bdump='cd /ORABIN/diag/$ORACLE_SID/bdump'
   alias atail='tail -f /ORABIN/diag/$ORACLE_SID/bdump/alert_${ORACLE_SID}.log'
   alias ltail='less /ORABIN/diag/$ORACLE_SID/bdump/alert_${ORACLE_SID}.log'
-  alias dba='sqlplus "/ as sysdba"'
+  alias dba='rlwrap sqlplus "/ as sysdba"'
 
   # Info section
   msgi "ORACLE_SID: $ORACLE_SID"
