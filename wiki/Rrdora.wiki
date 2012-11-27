@@ -4,7 +4,7 @@
 
 For a long time (since at least version 8) the Oracle RDBMS has provided the waits interface that allowed an administrator to actually see where the time is spend during the query execution. 
 
-It is strange that we had to wait till version 10g for a usefull GUI interface for those waits. I started to use a nice, simple project called rrdora - http://members.tele2.nl/r.vermeer/rrdora/ when Oracle 9i was rulling and althou the performance view on 10g is much more than that (lets you split the waits by the users) I still use this simple tool.
+It is strange that we had to wait till version 10g for a usefull GUI interface for those waits. I started to use a nice, simple project called rrdora - http://members.tele2.nl/r.vermeer/rrdora/ when Oracle 9i was rulling and althou the performance view on 10g is much more than that (lets you split the waits by the users). This certainly is not full blown wait interface provided by Diagnostic Pack (requires a separate license on top of EE) that is available from Grid Control but is an alternative in case you have no other choice - do not want to buy this Diagnostic Pack license or if you use a Standard Edition in which such wait interface is not available.
 
 I modified a bit the rrdora:
   * added the tps statistic (transactions per second)
