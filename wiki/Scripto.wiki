@@ -18,6 +18,8 @@ $ vi .bash_profile
 SQLPATH=$HOME/scripto/oracle/sqlbin
 export SQLPATH
 
+NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
+export NLS_DATE_FORMAT
 
 SQL> @tbs
 Show size of tablespaces
@@ -34,5 +36,3 @@ Some of the scripts explained
 || tbs.sql || Show size of tablespaces ||
 || users.sql || User session details ||
 || active.sql || Active session with sql text ||
-
-
