@@ -10,7 +10,7 @@ All the provided examples use !CentOs 5.8 install.
 
 Some standard packages used
 {{{
-# yum install vim-common vim-enhanced gawk screen subversion xorg-x11-tools
+# yum install vim-common vim-enhanced gawk screen subversion xorg-x11-tools dialog
 }}}
 
 Make sure that the hosts can see each other. Test on both logwatch and dbhost
