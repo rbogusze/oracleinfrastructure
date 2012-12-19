@@ -14,7 +14,7 @@ fi
 
 #INFO_MODE=DEBUG
 INFO_MODE=INFO
-RECIPIENTS='remigiusz_boguszewicz'
+RECIPIENTS='dba@example.com'
 ORATAB=/etc/oratab
 
 # Find dialog
@@ -60,6 +60,10 @@ if [ -f "$ORATAB" ]; then
   alias atail='tail -f /ORABIN/diag/$ORACLE_SID/bdump/alert_${ORACLE_SID}.log'
   alias ltail='less /ORABIN/diag/$ORACLE_SID/bdump/alert_${ORACLE_SID}.log'
   alias dba='rlwrap sqlplus "/ as sysdba"'
+
+  # Setting usefull environment settings
+  export SQLPATH=$HOME/scripto/oracle/sqlbin
+  export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 
   # Info section
   msgi "ORACLE_SID: $ORACLE_SID"
