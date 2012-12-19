@@ -64,6 +64,7 @@ if [ -f "$ORATAB" ]; then
   # Setting usefull environment settings
   export SQLPATH=$HOME/scripto/oracle/sqlbin
   export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
+  export PATH=$PATH:$ORACLE_HOME/OPatch
 
   # Info section
   msgi "ORACLE_SID: $ORACLE_SID"
