@@ -1,12 +1,6 @@
 #!/bin/bash
 #$Id: _base_script_block.wrap,v 1.1 2012-05-07 13:47:27 remik Exp $
 #
-# Based on StandbyPrzerwaTechniczna
-#
-# Assumptions:
-# - this procedure is run from workstation
-# - workstation has authentication so configured that can login to primary and standby 
-#   host without beeing asked for password
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -16,34 +10,97 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='Remigiusz_Boguszewicz'
+RECIPIENTS='Remigiusz.Boguszewicz@gmail.com'
+INFO_MODE=DEBUG
 
-block_access_to_db()
+setup_yum_repository()
 {
-  B_PAR=$1 # Check if block was run with parameter
-  # Info section 
   msgb "${FUNCNAME[0]} Beginning."
-  msgb "I will do that "
-  # If block was run with INFO parameter I exit now
-  if [ "$B_PAR" = "INFO" ]; then
-    return 0
-  fi
+  case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+  "CentOS release 4.7 (Final)_i686")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    if [ -f /etc/yum.conf ]; then
+      cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
+    fi
+    check_file "./sup_files/yum.conf.CentOS_4.7_i686"
+    run_command "cp ./sup_files/yum.conf.CentOS_4.7_i686 /etc/yum.conf"
+
+    ;;
+  *)
+    msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+    exit 1
+    ;;
+  esac
+
+
 
   msgb "${FUNCNAME[0]} Finished."
-} #block_access_to_db
+} #setup_yum_repository
 
 
-# 14 lines to yank
+install_usefull_rpm()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  run_command "yum -y install mutt rsync lynx dialog"
+
+  case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+  "CentOS release 4.7 (Final)_i686")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+
+    TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "Installing rlwrap"
+      run_command "cd /tmp"
+      run_command "wget ftp://ftp.pbone.net/mirror/download.fedora.redhat.com/pub/fedora/epel/4/i386/rlwrap-0.30-1.el4.i386.rpm"
+      run_command "rpm -i rlwrap-0.30-1.el4.i386.rpm"
+      run_command "rm rlwrap-0.30-1.el4.i386.rpm"
+    else
+      msgi "rlwrap is already installed"
+    fi
+    ;;
+  *)
+    msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+    exit 1
+    ;;
+  esac
+
+  msgb "${FUNCNAME[0]} Finished."
+} #install_usefull_rpm
+
+set_uniq_hostname()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  V_HOSTNAME=`uname -n`
+  if [ ! "$V_HOSTNAME" = "localhost.localdomain" ]; then
+    msgi "Hostname: $V_HOSTNAME is not like localhost.localdomain, nothing to do"
+    return 0
+  fi 
+  msgi "Make sure we are using static IP"
+  check_file "/etc/sysconfig/network-scripts/ifcfg-eth0"
+  V_IP=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i IPADDR | awk -F"=" '{print $2}'`
+  msgd "V_IP: $V_IP"
+  check_variable $V_IP
+
+  msgw "Ask for new name"
+  read -p "[wait] Please provide the new name: " V_NEW_NAME
+  msgd "V_NEW_NAME: $V_NEW_NAME"
+  
+  TMP_CHK=`cat /etc/hosts | grep $V_NEW_NAME | wc -l`
+  if [ $TMP_CHK -eq 0 ]; then
+    msgi "No line found in /etc/hosts about this host. Adding it."
+    echo "${V_IP $V_NEW_NAME}.${V_DOMAIN} $V_NEW_NAME" >> /etc/hosts
+    run_command_d "cat /etc/hosts"
+  else
+    msgi "Line with this IP already found in /etc/hosts. Doing nothing."
+  fi
+ 
+  msgb "${FUNCNAME[0]} Finished."
+} #set_uniq_hostname
+
+# 6 lines to yank
 b_template()
 {
-  B_PAR=$1 # Check if block was run with parameter
-  # Info section 
   msgb "${FUNCNAME[0]} Beginning."
-  msgb "I will do that "
-  # If block was run with INFO parameter I exit now
-  if [ "$B_PAR" = "INFO" ]; then
-    return 0
-  fi
 
   msgb "${FUNCNAME[0]} Finished."
 } #b_template
@@ -53,18 +110,36 @@ b_template()
 SELECT_BLOCK=$1
 SCRIPTO_DIR=`pwd`
 
+# Global variables
+msgi "Determining the OS"
+check_file "/etc/redhat-release"
+V_RHEL_RELEASE=`cat /etc/redhat-release`
+msgd "V_RHEL_RELEASE: $V_RHEL_RELEASE"
+V_RHEL_ARCH=`uname -p`
+msgd "V_RHEL_ARCH: $V_RHEL_ARCH"
+
+V_DOMAIN=remik.org
 
 case $SELECT_BLOCK in
-  "block_access_to_db")
-    block_access_to_db
+  "setup_yum_repository")
+    setup_yum_repository
+    ;;
+  "install_usefull_rpm")
+    install_usefull_rpm 
+    ;;
+  "set_uniq_hostname")
+    set_uniq_hostname
     ;;
   "ALL")
-    block_access_to_db
+    setup_yum_repository
+    install_usefull_rpm
     ;; 
   *)
     echo "Please provide the block that You want to run."
     echo "Available blocks: "
-    echo " block_access_to_db"
+    echo " setup_yum_repository"
+    echo " install_usefull_rpm"
+    echo " set_uniq_hostname"
     echo ""
     echo "Available sets of blocks:"
     echo " ALL"
