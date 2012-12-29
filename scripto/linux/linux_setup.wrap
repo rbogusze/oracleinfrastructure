@@ -1,0 +1,76 @@
+#!/bin/bash
+#$Id: _base_script_block.wrap,v 1.1 2012-05-07 13:47:27 remik Exp $
+#
+# Based on StandbyPrzerwaTechniczna
+#
+# Assumptions:
+# - this procedure is run from workstation
+# - workstation has authentication so configured that can login to primary and standby 
+#   host without beeing asked for password
+
+# Load usefull functions
+if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
+  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
+  exit 1
+else
+  . $HOME/scripto/bash/bash_library.sh
+fi
+
+RECIPIENTS='Remigiusz_Boguszewicz'
+
+block_access_to_db()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "I will do that "
+  # If block was run with INFO parameter I exit now
+  if [ "$B_PAR" = "INFO" ]; then
+    return 0
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #block_access_to_db
+
+
+# 14 lines to yank
+b_template()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "I will do that "
+  # If block was run with INFO parameter I exit now
+  if [ "$B_PAR" = "INFO" ]; then
+    return 0
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_template
+
+# Execution of blocks
+# If parameter 'block_name' was provided I execute only specified block
+SELECT_BLOCK=$1
+SCRIPTO_DIR=`pwd`
+
+
+case $SELECT_BLOCK in
+  "block_access_to_db")
+    block_access_to_db
+    ;;
+  "ALL")
+    block_access_to_db
+    ;; 
+  *)
+    echo "Please provide the block that You want to run."
+    echo "Available blocks: "
+    echo " block_access_to_db"
+    echo ""
+    echo "Available sets of blocks:"
+    echo " ALL"
+
+    exit 1
+    ;;
+esac
+
+msgi "Done."
