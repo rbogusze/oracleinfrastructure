@@ -4,4 +4,4 @@
 LOG_DIR=/var/tmp/linux_setup
 mkdir -p $LOG_DIR
 
-(. ./prepare_to_failover.wrap 2>&1) | tee $LOG_DIR/prepare_to_failover_log_$1.`date '+%Y-%m-%d--%H:%M:%S'`
+(. ./linux_setup.wrap 2>&1) | tee $LOG_DIR/linux_setup_log_$1.`date '+%Y-%m-%d--%H:%M:%S'`
