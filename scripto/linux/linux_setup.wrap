@@ -89,10 +89,24 @@ set_uniq_hostname()
   TMP_CHK=`cat /etc/hosts | grep $V_NEW_NAME | wc -l`
   if [ $TMP_CHK -eq 0 ]; then
     msgi "No line found in /etc/hosts about this host. Adding it."
-    echo "${V_IP $V_NEW_NAME}.${V_DOMAIN} $V_NEW_NAME" >> /etc/hosts
+    cp /etc/hosts /var/tmp/hosts.`date -I`
+    echo "${V_IP} ${V_NEW_NAME}.${V_DOMAIN} $V_NEW_NAME" >> /etc/hosts
     run_command_d "cat /etc/hosts"
   else
     msgi "Line with this IP already found in /etc/hosts. Doing nothing."
+  fi
+
+  msgi "Changes to /etc/sysconfig/network"
+  TMP_CHK=`cat /etc/sysconfig/network | grep $V_NEW_NAME | wc -l`
+  if [ $TMP_CHK -eq 0 ]; then
+    msgi "No line found in /etc/sysconfig/network about this host. Adding it."
+    cp /etc/sysconfig/network /var/tmp/network.`date -I`
+    cat /etc/sysconfig/network | grep -v -i "HOSTNAME" > /tmp/linux_setup.network
+    echo "HOSTNAME=${V_NEW_NAME}.${V_DOMAIN}" >> /tmp/linux_setup.network
+    cp /tmp/linux_setup.network /etc/sysconfig/network
+    run_command_d "cat /etc/sysconfig/network"
+  else
+    msgi "Line with this hostname already found in /etc/sysconfig/network. Doing nothing."
   fi
 
  
