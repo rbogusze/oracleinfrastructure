@@ -284,6 +284,18 @@ b_disable_SE_firewall()
     run_command_d "cat /etc/selinux/config"
   fi
 
+  msgi "Disabling firewall (iptables)"
+  TMP_CHK=`service iptables status | grep "Firewall is stopped" | wc -l`
+  msgd "TMP_CHK: $TMP_CHK"
+  if [ $TMP_CHK -ne 1 ]; then
+    msga "Stopping iptables."
+    run_command "service iptables stop"
+  else
+    msgi "Iptables not running. Doing nothing."
+  fi
+  msga "Disabling iptables from autostart"
+  run_command "chkconfig iptables off"
+
   msgb "${FUNCNAME[0]} Finished."
 } #b_disable_SE_firewall
 
