@@ -84,7 +84,8 @@ set_uniq_hostname()
   msgw "Ask for new name"
   read -p "[wait] Please provide the new name: " V_NEW_NAME
   msgd "V_NEW_NAME: $V_NEW_NAME"
-  
+
+  msgi "Decide whether to add line to /etc/hosts"  
   TMP_CHK=`cat /etc/hosts | grep $V_NEW_NAME | wc -l`
   if [ $TMP_CHK -eq 0 ]; then
     msgi "No line found in /etc/hosts about this host. Adding it."
@@ -93,6 +94,7 @@ set_uniq_hostname()
   else
     msgi "Line with this IP already found in /etc/hosts. Doing nothing."
   fi
+
  
   msgb "${FUNCNAME[0]} Finished."
 } #set_uniq_hostname
