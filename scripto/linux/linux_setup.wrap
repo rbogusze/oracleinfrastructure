@@ -18,13 +18,37 @@ setup_yum_repository()
   msgb "${FUNCNAME[0]} Beginning."
   case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
   "CentOS release 4.7 (Final)_i686")
-    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     if [ -f /etc/yum.conf ]; then
       cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
     fi
     check_file "./sup_files/yum.conf.CentOS_4.7_i686"
     run_command "cp ./sup_files/yum.conf.CentOS_4.7_i686 /etc/yum.conf"
+    run_command "yum clean all"
+    ;;
+  "CentOS release 5.7 (Final)_x86_64")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
 
+    msgi "Base CentOS repository"
+    if [ -f /etc/yum.conf ]; then
+      cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
+    fi
+    check_file "./sup_files/yum.conf.CentOS_5.7_x86_64"
+    run_command "cp ./sup_files/yum.conf.CentOS_5.7_x86_64 /etc/yum.conf"
+    run_command "yum clean all"
+
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
     ;;
   *)
     msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
