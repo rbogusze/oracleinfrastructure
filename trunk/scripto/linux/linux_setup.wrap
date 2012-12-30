@@ -205,9 +205,19 @@ b_install_vmware_tools()
 {
   msgb "${FUNCNAME[0]} Beginning."
   if [ -f /usr/bin/vmware-uninstall-tools.pl ]; then
-    msgi "Looks like the vmware tools are already installed. Do you want to reinstall them?:"
-
+    msgi "Looks like the vmware tools installed by the VMPlayer are not supported under ESX. Do you want to uninstall them?:"
+    run_command "vmware-uninstall-tools.pl"
   fi #-f /usr/bin/vmware-uninstall-tools.pl
+
+  case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+  "CentOS release 5.7 (Final)_x86_64")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    ;;
+  *)
+    msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+    exit 1
+    ;;
+  esac
 
   msgb "${FUNCNAME[0]} Finished."
 } #b_install_vmware_tools
@@ -391,6 +401,9 @@ case $SELECT_BLOCK in
   "b_disable_SE_firewall")
     b_disable_SE_firewall
     ;;
+  "b_install_vmware_tools")
+    b_install_vmware_tools
+    ;;
   "ALL")
     setup_yum_repository
     install_usefull_rpm
@@ -399,6 +412,7 @@ case $SELECT_BLOCK in
     b_scripto_for_oracle
     b_copy_auth_keys
     b_disable_SE_firewall
+    b_install_vmware_tools
     ;; 
   *)
     echo "Please provide the block that You want to run."
@@ -410,6 +424,7 @@ case $SELECT_BLOCK in
     echo " b_scripto_for_oracle"
     echo " b_copy_auth_keys"
     echo " b_disable_SE_firewall"
+    echo " b_install_vmware_tools"
     echo ""
     echo "Available sets of blocks:"
     echo " ALL"
