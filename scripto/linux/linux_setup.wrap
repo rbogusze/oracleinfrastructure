@@ -186,6 +186,12 @@ time_synchro()
     run_command "ntpdate pool.ntp.org"
     run_command "/etc/init.d/ntpd start"
     ;;
+  "CentOS release 5.7 (Final)_x86_64")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    run_command "yum -y install ntp"
+    run_command "chkconfig ntpd on"
+    run_command "/etc/init.d/ntpd start"
+    ;;
   *)
     msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
     exit 1
@@ -221,7 +227,7 @@ b_scripto_for_oracle()
 
   msgd "Determine if the ${V_ORACLE_USER_HOME}/scripto dir already exists"
   if [ -d ${V_ORACLE_USER_HOME}/scripto ]; then
-    msge "Directory ${V_ORACLE_USER_HOME}/scripto already exists. Nothing to do."
+    msgi "Directory ${V_ORACLE_USER_HOME}/scripto already exists. Nothing to do."
     return 0 
   fi
 
@@ -325,8 +331,16 @@ b_disable_SE_firewall()
   else
     msgi "Iptables not running. Doing nothing."
   fi
-  msga "Disabling iptables from autostart"
-  run_command "chkconfig iptables off"
+
+  msgi "Disabling iptables from autostart"
+  TMP_CHK=`chkconfig --list | grep iptables | grep -e "3:off" -e "4:off" -e "5:off" | wc -l`
+  msgd "TMP_CHK: $TMP_CHK"
+  if [ $TMP_CHK -ne 1 ]; then
+    msga "Disabling iptables from autostart"
+    run_command "chkconfig iptables off"
+  else
+    msgi "Iptables not in autostart. Doing nothing."
+  fi
 
   msgb "${FUNCNAME[0]} Finished."
 } #b_disable_SE_firewall
@@ -353,6 +367,7 @@ V_RHEL_ARCH=`uname -p`
 msgd "V_RHEL_ARCH: $V_RHEL_ARCH"
 
 V_DOMAIN=remik.org
+LANG=en_EN.utf8
 
 case $SELECT_BLOCK in
   "setup_yum_repository")
