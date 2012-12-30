@@ -264,10 +264,28 @@ b_copy_auth_keys()
     run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $V_ORACLE_USER_HOME/.ssh/authorized_keys"
   fi
 
-
   msgb "${FUNCNAME[0]} Finished."
 } #b_copy_auth_keys
 
+b_disable_SE_firewall()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgi "Disabling SE Linux"
+  check_file "/etc/selinux/config"
+  TMP_CHK=`cat /etc/selinux/config | grep -i "SELINUX=disabled" | wc -l `
+  if [ $TMP_CHK -eq 1 ]; then
+    msgi "SE Linux already disabled. OK. Doing nothing."
+  else
+    msgi "SE Linux not disabled. Changing to disabled."
+    cp /etc/selinux/config /var/tmp/config.`date -I`
+    cat /etc/selinux/config | grep -v -i "^SELINUX=" > /tmp/linux_setup.config.tmp
+    echo "SELINUX=disabled" >> /tmp/linux_setup.config.tmp
+    cp /tmp/linux_setup.config.tmp /etc/selinux/config
+    run_command_d "cat /etc/selinux/config"
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_disable_SE_firewall
 
 # 6 lines to yank
 b_template()
@@ -311,6 +329,9 @@ case $SELECT_BLOCK in
   "b_copy_auth_keys")
     b_copy_auth_keys
     ;;
+  "b_disable_SE_firewall")
+    b_disable_SE_firewall
+    ;;
   "ALL")
     setup_yum_repository
     install_usefull_rpm
@@ -318,6 +339,7 @@ case $SELECT_BLOCK in
     time_synchro
     b_scripto_for_oracle
     b_copy_auth_keys
+    b_disable_SE_firewall
     ;; 
   *)
     echo "Please provide the block that You want to run."
@@ -328,6 +350,7 @@ case $SELECT_BLOCK in
     echo " time_synchro"
     echo " b_scripto_for_oracle"
     echo " b_copy_auth_keys"
+    echo " b_disable_SE_firewall"
     echo ""
     echo "Available sets of blocks:"
     echo " ALL"
