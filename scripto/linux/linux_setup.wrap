@@ -65,7 +65,13 @@ setup_yum_repository()
 install_usefull_rpm()
 {
   msgb "${FUNCNAME[0]} Beginning."
-  run_command "yum -y install mutt rsync lynx dialog"
+  TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" | wc -l`
+  if [ "$TMP_CHK" -lt 5 ]; then
+    msga "Installing mutt rsync lynx dialog ..."
+    run_command "yum -y install mutt rsync lynx dialog ntp"
+  else
+    msgi "mutt rsync lynx dialog ... already installed. Doing nothing."
+  fi 
 
   case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
   "CentOS release 4.7 (Final)_i686")
@@ -181,14 +187,12 @@ time_synchro()
   case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
   "CentOS release 4.7 (Final)_i686")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
-    run_command "yum -y install ntp"
     run_command "chkconfig ntpd on"
     run_command "ntpdate pool.ntp.org"
     run_command "/etc/init.d/ntpd start"
     ;;
   "CentOS release 5.7 (Final)_x86_64")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
-    run_command "yum -y install ntp"
     run_command "chkconfig ntpd on"
     run_command "/etc/init.d/ntpd start"
     ;;
@@ -216,7 +220,6 @@ b_install_vmware_tools()
     run_command "rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub"
     run_command "rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub"
 
-#-- WIP
     case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
     "CentOS release 5.7 (Final)_x86_64")
       msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
