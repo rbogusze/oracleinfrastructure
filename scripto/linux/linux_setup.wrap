@@ -205,6 +205,8 @@ b_copy_auth_keys()
   msgb "${FUNCNAME[0]} Beginning."
   check_file $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO 
 
+
+  msgi "For user root"
   msgd "Check if .ssh directory exists"
   if [ -d $HOME/.ssh ]; then
     msgd "$HOME/.ssh exists."
@@ -229,6 +231,37 @@ b_copy_auth_keys()
   else
     msgd "$HOME/.ssh/authorized_keys does NOT exists. Simply adding the key."
     run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $HOME/.ssh/authorized_keys"
+  fi
+
+  msgi "For user oracle"
+  msgd "Determine the oracle home directory"
+  V_ORACLE_USER_HOME=`cat /etc/passwd | grep -i "^oracle:" | awk -F":" '{print $6}'`
+  msgd "V_ORACLE_USER_HOME: $V_ORACLE_USER_HOME"
+
+  msgd "Check if .ssh directory exists"
+  if [ -d $V_ORACLE_USER_HOME/.ssh ]; then
+    msgd "$V_ORACLE_USER_HOME/.ssh exists."
+  else
+    msgd "$V_ORACLE_USER_HOME/.ssh does NOT exists."
+    su - oracle -c "mkdir $V_ORACLE_USER_HOME/.ssh"
+    su - oracle -c "chmod 700 $V_ORACLE_USER_HOME/.ssh"
+  fi
+
+  msgd "Check if the key is not already there"
+  if [ -f $V_ORACLE_USER_HOME/.ssh/authorized_keys ]; then
+    msgd "$V_ORACLE_USER_HOME/.ssh/authorized_keys exists."
+    msgd "Check if the key is already present."
+    TMP_CHK=`grep -f $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO $V_ORACLE_USER_HOME/.ssh/authorized_keys | wc -l`
+    if [ "$TMP_CHK" -ge 1 ]; then
+      msgi "Key already present in authorized_keys. Doing nothing."
+    else
+      msgi "Key not found in authorized_keys. Adding one."
+      run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $V_ORACLE_USER_HOME/.ssh/authorized_keys"
+    fi
+    
+  else
+    msgd "$HOME/.ssh/authorized_keys does NOT exists. Simply adding the key."
+    run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $V_ORACLE_USER_HOME/.ssh/authorized_keys"
   fi
 
 
