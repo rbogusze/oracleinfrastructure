@@ -163,6 +163,18 @@ time_synchro()
   msgb "${FUNCNAME[0]} Finished."
 } #time_synchro
 
+b_install_vmware_tools()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  if [ -f /usr/bin/vmware-uninstall-tools.pl ]; then
+    msgi "Looks like the vmware tools are already installed. Do you want to reinstall them?:"
+
+  fi #-f /usr/bin/vmware-uninstall-tools.pl
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_install_vmware_tools
+
+
 # 6 lines to yank
 b_template()
 {
