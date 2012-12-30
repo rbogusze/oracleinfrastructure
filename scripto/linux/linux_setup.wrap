@@ -197,9 +197,44 @@ b_scripto_for_oracle()
   su - oracle -c "svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto"
   su - oracle -c "ln -s scripto/bash/menu.sh ."
 
-
   msgb "${FUNCNAME[0]} Finished."
 } #b_scripto_for_oracle
+
+b_copy_auth_keys()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  check_file $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO 
+
+  msgd "Check if .ssh directory exists"
+  if [ -d $HOME/.ssh ]; then
+    msgd "$HOME/.ssh exists."
+  else
+    msgd "$HOME/.ssh does NOT exists."
+    run_command "mkdir $HOME/.ssh"
+    run_command "chmod 700 $HOME/.ssh"
+  fi
+
+  msgd "Check if the key is not already there"
+  if [ -f $HOME/.ssh/authorized_keys ]; then
+    msgd "$HOME/.ssh/authorized_keys exists."
+    msgd "Check if the key is already present."
+    TMP_CHK=`grep -f $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO $HOME/.ssh/authorized_keys | wc -l`
+    if [ "$TMP_CHK" -ge 1 ]; then
+      msgi "Key already present in authorized_keys. Doing nothing."
+    else
+      msgi "Key not found in authorized_keys. Adding one."
+      run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $HOME/.ssh/authorized_keys"
+    fi
+    
+  else
+    msgd "$HOME/.ssh/authorized_keys does NOT exists. Simply adding the key."
+    run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $HOME/.ssh/authorized_keys"
+  fi
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_copy_auth_keys
+
 
 # 6 lines to yank
 b_template()
@@ -240,12 +275,16 @@ case $SELECT_BLOCK in
   "b_scripto_for_oracle")
     b_scripto_for_oracle
     ;;
+  "b_copy_auth_keys")
+    b_copy_auth_keys
+    ;;
   "ALL")
     setup_yum_repository
     install_usefull_rpm
     set_uniq_hostname
     time_synchro
     b_scripto_for_oracle
+    b_copy_auth_keys
     ;; 
   *)
     echo "Please provide the block that You want to run."
@@ -255,6 +294,7 @@ case $SELECT_BLOCK in
     echo " set_uniq_hostname"
     echo " time_synchro"
     echo " b_scripto_for_oracle"
+    echo " b_copy_auth_keys"
     echo ""
     echo "Available sets of blocks:"
     echo " ALL"
