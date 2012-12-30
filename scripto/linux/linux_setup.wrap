@@ -70,16 +70,25 @@ install_usefull_rpm()
 set_uniq_hostname()
 {
   msgb "${FUNCNAME[0]} Beginning."
-  V_HOSTNAME=`uname -n`
-  if [ ! "$V_HOSTNAME" = "localhost.localdomain" ]; then
-    msgi "Hostname: $V_HOSTNAME is not like localhost.localdomain, nothing to do"
-    return 0
-  fi 
+
   msgi "Make sure we are using static IP"
   check_file "/etc/sysconfig/network-scripts/ifcfg-eth0"
   V_IP=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i IPADDR | awk -F"=" '{print $2}'`
   msgd "V_IP: $V_IP"
   check_variable $V_IP
+
+  V_HOSTNAME=`uname -n`
+  if [ ! "$V_HOSTNAME" = "localhost.localdomain" ]; then
+    msgi "Hostname: $V_HOSTNAME is not like localhost.localdomain, nothing to do, jest basic network checks."
+
+    msgi "Check if the host is pingable by hostname"
+    run_command_e "ping -c 2 ${V_HOSTNAME} > /dev/null"
+
+    msgi "Check if the host is pingable by IP"
+    run_command_e "ping -c 2 ${V_IP} > /dev/null"
+
+    return 0
+  fi 
 
   msgw "Ask for new name"
   read -p "[wait] Please provide the new name: " V_NEW_NAME
@@ -115,6 +124,7 @@ set_uniq_hostname()
       if [ "$USER_ANSWER" = "yes" ]; then
         msgi "Rebooting NOW."
         run_command "reboot"
+        run_command "exit 0"
         EXIT_WHILE=1
       fi
       if [ "$USER_ANSWER" = "no" ]; then
@@ -123,19 +133,9 @@ set_uniq_hostname()
       fi
     done
 
-
   else
     msgi "Line with this hostname already found in /etc/sysconfig/network. Doing nothing."
   fi
-
-  msgi "Check if the host is pingable by hostname"
-  run_command_e "ping -c 2 ${V_NEW_NAME} > /dev/null"
-
-  msgi "Check if the host is pingable by hostname.domain"
-  run_command_e "ping -c 2 ${V_NEW_NAME}.${V_DOMAIN} > /dev/null"
-
-  msgi "Check if the host is pingable by IP"
-  run_command_e "ping -c 2 ${V_IP} > /dev/null"
 
  
   msgb "${FUNCNAME[0]} Finished."
