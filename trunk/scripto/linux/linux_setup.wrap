@@ -97,7 +97,7 @@ set_uniq_hostname()
   fi
 
   msgi "Changes to /etc/sysconfig/network"
-  TMP_CHK=`cat /etc/sysconfig/network | grep $V_NEW_NAME | wc -l`
+  TMP_CHK=`cat /etc/sysconfig/network | grep ${V_NEW_NAME}.${V_DOMAIN} | wc -l`
   if [ $TMP_CHK -eq 0 ]; then
     msgi "No line found in /etc/sysconfig/network about this host. Adding it."
     cp /etc/sysconfig/network /var/tmp/network.`date -I`
@@ -105,9 +105,37 @@ set_uniq_hostname()
     echo "HOSTNAME=${V_NEW_NAME}.${V_DOMAIN}" >> /tmp/linux_setup.network
     cp /tmp/linux_setup.network /etc/sysconfig/network
     run_command_d "cat /etc/sysconfig/network"
+
+    msga "It is advisable to reboot the host now to refresh the hostname"
+    USER_ANSWER=''
+    EXIT_WHILE=''
+    while [ ! "$EXIT_WHILE" ]
+    do
+      read -p "[wait] Do you want to reboot now? (yes/no)" USER_ANSWER
+      if [ "$USER_ANSWER" = "yes" ]; then
+        msgi "Rebooting NOW."
+        run_command "reboot"
+        EXIT_WHILE=1
+      fi
+      if [ "$USER_ANSWER" = "no" ]; then
+        msgi "Doing nothing."
+        EXIT_WHILE=1
+      fi
+    done
+
+
   else
     msgi "Line with this hostname already found in /etc/sysconfig/network. Doing nothing."
   fi
+
+  msgi "Check if the host is pingable by hostname"
+  run_command_e "ping -c 2 ${V_NEW_NAME} > /dev/null"
+
+  msgi "Check if the host is pingable by hostname.domain"
+  run_command_e "ping -c 2 ${V_NEW_NAME}.${V_DOMAIN} > /dev/null"
+
+  msgi "Check if the host is pingable by IP"
+  run_command_e "ping -c 2 ${V_IP} > /dev/null"
 
  
   msgb "${FUNCNAME[0]} Finished."
