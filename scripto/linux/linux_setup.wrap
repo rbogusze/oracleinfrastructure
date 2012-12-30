@@ -174,6 +174,32 @@ b_install_vmware_tools()
   msgb "${FUNCNAME[0]} Finished."
 } #b_install_vmware_tools
 
+b_scripto_for_oracle()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  TMP_CHK=`cat /etc/passwd | grep -i "^oracle:" | wc -l`
+  if [ $TMP_CHK -ne 1 ]; then
+    msge "User oracle does not exists. Nothing to do."
+    return 0 
+  fi
+
+  msgd "Determine the oracle home directory"
+  V_ORACLE_USER_HOME=`cat /etc/passwd | grep -i "^oracle:" | awk -F":" '{print $6}'`
+  msgd "V_ORACLE_USER_HOME: $V_ORACLE_USER_HOME"
+
+  msgd "Determine if the ${V_ORACLE_USER_HOME}/scripto dir already exists"
+  if [ -d ${V_ORACLE_USER_HOME}/scripto ]; then
+    msge "Directory ${V_ORACLE_USER_HOME}/scripto already exists. Nothing to do."
+    return 0 
+  fi
+
+  msgi "Downloading scripto for oracle"
+  su - oracle -c "svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto"
+  su - oracle -c "ln -s scripto/bash/menu.sh ."
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_scripto_for_oracle
 
 # 6 lines to yank
 b_template()
@@ -211,11 +237,15 @@ case $SELECT_BLOCK in
   "time_synchro")
     time_synchro
     ;;
+  "b_scripto_for_oracle")
+    b_scripto_for_oracle
+    ;;
   "ALL")
     setup_yum_repository
     install_usefull_rpm
     set_uniq_hostname
     time_synchro
+    b_scripto_for_oracle
     ;; 
   *)
     echo "Please provide the block that You want to run."
@@ -224,6 +254,7 @@ case $SELECT_BLOCK in
     echo " install_usefull_rpm"
     echo " set_uniq_hostname"
     echo " time_synchro"
+    echo " b_scripto_for_oracle"
     echo ""
     echo "Available sets of blocks:"
     echo " ALL"
