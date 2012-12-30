@@ -376,6 +376,14 @@ b_disable_SE_firewall()
 b_configure_static_ip()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  check_file "/etc/sysconfig/network-scripts/ifcfg-eth0"
+
+  if [ -f /etc/sysconfig/network-scripts/ifcfg-eth0.bak ]; then
+    msgd "This is usually trash"
+    run_command "mv /etc/sysconfig/network-scripts/ifcfg-eth0.bak /var/tmp/ifcfg-eth0.bak.`date -I`"
+  fi
+
+  
 
   msgb "${FUNCNAME[0]} Finished."
 } #b_configure_static_ip
