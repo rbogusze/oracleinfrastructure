@@ -13,7 +13,7 @@ fi
 RECIPIENTS='Remigiusz.Boguszewicz@gmail.com'
 INFO_MODE=DEBUG
 
-setup_yum_repository()
+b_setup_yum_repository()
 {
   msgb "${FUNCNAME[0]} Beginning."
   case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
@@ -59,10 +59,10 @@ setup_yum_repository()
 
 
   msgb "${FUNCNAME[0]} Finished."
-} #setup_yum_repository
+} #b_setup_yum_repository
 
 
-install_usefull_rpm()
+b_install_usefull_rpm()
 {
   msgb "${FUNCNAME[0]} Beginning."
   TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" | wc -l`
@@ -105,9 +105,9 @@ install_usefull_rpm()
   esac
 
   msgb "${FUNCNAME[0]} Finished."
-} #install_usefull_rpm
+} #b_install_usefull_rpm
 
-set_uniq_hostname()
+b_set_uniq_hostname()
 {
   msgb "${FUNCNAME[0]} Beginning."
 
@@ -186,9 +186,9 @@ set_uniq_hostname()
 
  
   msgb "${FUNCNAME[0]} Finished."
-} #set_uniq_hostname
+} #b_set_uniq_hostname
 
-time_synchro()
+b_time_synchro()
 {
   msgb "${FUNCNAME[0]} Beginning."
   case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
@@ -210,7 +210,7 @@ time_synchro()
   esac
 
   msgb "${FUNCNAME[0]} Finished."
-} #time_synchro
+} #b_time_synchro
 
 b_install_vmware_tools()
 {
@@ -463,17 +463,17 @@ V_DOMAIN=remik.org
 LANG=en_EN.utf8
 
 case $SELECT_BLOCK in
-  "setup_yum_repository")
-    setup_yum_repository
+  "b_setup_yum_repository")
+    b_setup_yum_repository
     ;;
-  "install_usefull_rpm")
-    install_usefull_rpm 
+  "b_install_usefull_rpm")
+    b_install_usefull_rpm 
     ;;
-  "set_uniq_hostname")
-    set_uniq_hostname
+  "b_set_uniq_hostname")
+    b_set_uniq_hostname
     ;;
-  "time_synchro")
-    time_synchro
+  "b_time_synchro")
+    b_time_synchro
     ;;
   "b_scripto_for_oracle")
     b_scripto_for_oracle
@@ -492,10 +492,10 @@ case $SELECT_BLOCK in
     ;;
   "ALL")
     b_configure_static_ip
-    setup_yum_repository
-    install_usefull_rpm
-    set_uniq_hostname
-    time_synchro
+    b_setup_yum_repository
+    b_install_usefull_rpm
+    b_set_uniq_hostname
+    b_time_synchro
     b_scripto_for_oracle
     b_copy_auth_keys
     b_disable_SE_firewall
@@ -505,10 +505,10 @@ case $SELECT_BLOCK in
     echo "Please provide the block that You want to run."
     echo "Available blocks: "
     echo " b_configure_static_ip"
-    echo " setup_yum_repository"
-    echo " install_usefull_rpm"
-    echo " set_uniq_hostname"
-    echo " time_synchro"
+    echo " b_setup_yum_repository"
+    echo " b_install_usefull_rpm"
+    echo " b_set_uniq_hostname"
+    echo " b_time_synchro"
     echo " b_scripto_for_oracle"
     echo " b_copy_auth_keys"
     echo " b_disable_SE_firewall"
