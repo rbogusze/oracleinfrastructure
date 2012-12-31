@@ -387,7 +387,7 @@ b_configure_static_ip()
 
   TMP_CHK=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i "^IPADDR" | wc -l`
   if [ $TMP_CHK -eq 1 ]; then
-    msge "Host already using static IP. Nothing to do."
+    msgi "Host already using static IP. Nothing to do."
     return 0
   fi
 
