@@ -1,0 +1,63 @@
+[ol6_latest]
+name=Oracle Linux $releasever Latest ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/latest/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=0
+
+[ol6_addons]
+name=Oracle Linux $releasever Add ons ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/addons/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=0
+
+[ol6_ga_base]
+name=Oracle Linux $releasever GA installation media copy ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/0/base/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=0
+
+[ol6_u1_base]
+name=Oracle Linux $releasever Update 1 installation media copy ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/1/base/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=0
+
+[ol6_u2_base]
+name=Oracle Linux $releasever Update 2 installation media copy ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/2/base/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=0
+
+[ol6_u3_base]
+name=Oracle Linux $releasever Update 3 installation media copy ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/3/base/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=1
+
+[ol6_UEK_latest]
+name=Latest Unbreakable Enterprise Kernel for Oracle Linux $releasever ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/UEK/latest/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=0
+
+[ol6_UEK_base]
+name=Unbreakable Enterprise Kernel for Oracle Linux $releasever ($basearch)
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/UEK/base/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=1
+
+[ol6_playground_latest]
+name=Latest mainline stable kernel for Oracle Linux 6 ($basearch) - Unsupported 
+baseurl=http://public-yum.oracle.com/repo/OracleLinux/OL6/playground/latest/$basearch/
+gpgkey=http://public-yum.oracle.com/RPM-GPG-KEY-oracle-ol6
+gpgcheck=1
+enabled=0
+
