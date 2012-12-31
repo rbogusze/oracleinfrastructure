@@ -112,6 +112,8 @@ set_uniq_hostname()
   msgb "${FUNCNAME[0]} Beginning."
 
   msgi "Make sure we are using static IP"
+
+  msgi "Get the IP"
   check_file "/etc/sysconfig/network-scripts/ifcfg-eth0"
   V_IP=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i IPADDR | awk -F"=" '{print $2}'`
   msgd "V_IP: $V_IP"
@@ -383,6 +385,21 @@ b_configure_static_ip()
     run_command "mv /etc/sysconfig/network-scripts/ifcfg-eth0.bak /var/tmp/ifcfg-eth0.bak.`date -I`"
   fi
 
+  msgd "Get a uniq HWADDR info from current ifcfg-eth0" 
+  run_command "cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i -e "HWADDR" -e "UUID" > /tmp/linux_setup.HWADDR.tmp"
+  run_command_d "cat /tmp/linux_setup.HWADDR.tmp"
+  
+  read -p "[wait] Please provide the desired IP: " V_NEW_IP
+  msgd "V_NEW_IP: $V_NEW_IP"
+
+  msgi "Construct the new ifcfg-eth0"
+  check_file "$SCRIPTO_DIR/sup_files/ifcfg-eth0.template"
+  run_command "cp /etc/sysconfig/network-scripts/ifcfg-eth0 /var/tmp/ifcfg-eth0.$V_UNIQ"
+  run_command "cp /tmp/linux_setup.HWADDR.tmp /etc/sysconfig/network-scripts/ifcfg-eth0"
+  run_command "cat $SCRIPTO_DIR/sup_files/ifcfg-eth0.template >> /etc/sysconfig/network-scripts/ifcfg-eth0"
+  run_command "echo IPADDR=${V_NEW_IP} >> /etc/sysconfig/network-scripts/ifcfg-eth0"
+#-- WIP
+  
   
 
   msgb "${FUNCNAME[0]} Finished."
@@ -401,6 +418,7 @@ b_template()
 # If parameter 'block_name' was provided I execute only specified block
 SELECT_BLOCK=$1
 SCRIPTO_DIR=`pwd`
+V_UNIQ=`date '+%Y-%m-%d--%H:%M:%S'`
 
 # Global variables
 msgi "Determining the OS"
