@@ -87,10 +87,10 @@ b_setup_yum_repository()
 b_install_usefull_rpm()
 {
   msgb "${FUNCNAME[0]} Beginning."
-  TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" | wc -l`
-  if [ "$TMP_CHK" -lt 5 ]; then
+  TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" -e "^subversion" | wc -l`
+  if [ "$TMP_CHK" -lt 6 ]; then
     msga "Installing mutt rsync lynx dialog ..."
-    run_command "yum -y install mutt rsync lynx dialog ntp"
+    run_command "yum -y install mutt rsync lynx dialog ntp subversion vim-enhanced"
   else
     msgi "mutt rsync lynx dialog ... already installed. Doing nothing."
   fi 
@@ -295,6 +295,8 @@ b_scripto_for_oracle()
     return 0 
   fi
 
+  run_command_e "which svn"
+
   msgd "Determine the oracle home directory"
   V_ORACLE_USER_HOME=`cat /etc/passwd | grep -i "^oracle:" | awk -F":" '{print $6}'`
   msgd "V_ORACLE_USER_HOME: $V_ORACLE_USER_HOME"
@@ -475,6 +477,35 @@ b_configure_static_ip()
   msgb "${FUNCNAME[0]} Finished."
 } #b_configure_static_ip
 
+b_clean_up()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # Clean up old KASZTELAN nfs mount from fstab
+  TMP_CHK=`cat /etc/fstab | grep -v "^#" | grep -i KASZTELAN | wc -l`
+  if [ $TMP_CHK -ge 1 ]; then
+    msga "Clean up old KASZTELAN nfs mount from fstab"
+    TMP_LINE=`cat /etc/fstab | grep -v "^#" | grep -i KASZTELAN `
+    cp /etc/fstab /var/tmp/fstab.$V_UNIQ
+    cat /etc/fstab | grep -v "KASZTELAN" > /tmp/linux_setup.kasztelan.tmp
+    cp /tmp/linux_setup.kasztelan.tmp /etc/fstab
+    echo "#${TMP_LINE}" >> /etc/fstab
+  else
+    msgi "No KASZTELAN nfs mount found in fstab. Doing nothing"
+  fi
+
+  # Clean old repositories
+  if [ -f /etc/yum.repos.d/CentOS-Base.repo ]; then
+    msga "Clean old repositories"
+    run_command "mv /etc/yum.repos.d/CentOS-Base.repo /var/tmp/CentOS-Base.repo.$V_UNIQ"
+  fi 
+  if [ -f /etc/yum.repos.d/CentOS-Media.repo ]; then
+    msga "Clean old repositories"
+    run_command "mv /etc/yum.repos.d/CentOS-Media.repo /var/tmp/CentOS-Media.repo.$V_UNIQ"
+  fi 
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_clean_up
 
 # 6 lines to yank
 b_template()
@@ -529,27 +560,32 @@ case $SELECT_BLOCK in
   "b_configure_static_ip")
     b_configure_static_ip
     ;;
+  "b_clean_up")
+    b_clean_up
+    ;;
   "ALL")
+    b_clean_up
+    b_copy_auth_keys
     b_configure_static_ip
     b_setup_yum_repository
     b_install_usefull_rpm
     b_set_uniq_hostname
     b_time_synchro
     b_scripto_for_oracle
-    b_copy_auth_keys
     b_disable_SE_firewall
     b_install_vmware_tools
     ;; 
   *)
     echo "Please provide the block that You want to run."
     echo "Available blocks: "
+    echo " b_clean_up"
+    echo " b_copy_auth_keys"
     echo " b_configure_static_ip"
     echo " b_setup_yum_repository"
     echo " b_install_usefull_rpm"
     echo " b_set_uniq_hostname"
     echo " b_time_synchro"
     echo " b_scripto_for_oracle"
-    echo " b_copy_auth_keys"
     echo " b_disable_SE_firewall"
     echo " b_install_vmware_tools"
     echo ""
