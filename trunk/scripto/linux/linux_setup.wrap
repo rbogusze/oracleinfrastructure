@@ -262,6 +262,11 @@ b_install_vmware_tools()
     run_command "rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub"
 
     case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+    "CentOS release 4.7 (Final)_i686")
+      msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+      check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4"
+      run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4 /etc/yum.repos.d/vmware-tools.repo"
+      ;;
     "CentOS release 5.7 (Final)_x86_64")
       msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
       check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.CentOS_5.7_x86_64"
@@ -530,7 +535,7 @@ V_RHEL_ARCH=`uname -p`
 msgd "V_RHEL_ARCH: $V_RHEL_ARCH"
 
 V_DOMAIN=remik.org
-LANG=en_EN.utf8
+LANG=en_US.utf8
 
 case $SELECT_BLOCK in
   "b_setup_yum_repository")
