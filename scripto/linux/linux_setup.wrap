@@ -510,6 +510,14 @@ b_clean_up()
     run_command "mv /etc/yum.repos.d/CentOS-Media.repo /var/tmp/CentOS-Media.repo.$V_UNIQ"
   fi 
 
+  # Clean up eth0 backups
+  TMP_CHK=`ls /etc/sysconfig/network-scripts/ifcfg-eth0.* 2> /dev/null | wc -l`
+  if [ $TMP_CHK -ge 1 ]; then
+    msga "Clean up eth0 backups"
+    run_command "mv /etc/sysconfig/network-scripts/ifcfg-eth0.* /var/tmp"
+    run_command "rm -f /etc/sysconfig/network-scripts/ifcfg-eth0.*" 
+  fi
+
   msgb "${FUNCNAME[0]} Finished."
 } #b_clean_up
 
