@@ -11,7 +11,8 @@ else
 fi
 
 RECIPIENTS='Remigiusz.Boguszewicz@gmail.com'
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
+INFO_MODE=INFO
 
 b_setup_yum_repository()
 {
