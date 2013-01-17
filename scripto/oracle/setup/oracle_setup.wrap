@@ -1,0 +1,2109 @@
+#!/bin/bash
+#$Id: oracle_setup.wrap,v 1.1 2012-05-07 13:48:38 remik Exp $
+#
+# This is a script to run blocks of task (not related to each other) that are often performed on
+# database hosts. These are usually simple things that I am tired to do again and again.
+#
+# This script will perform checks and action with accordance to PGF best practices to setup database environment.
+# It should be possible to run this script multiple times with no negative effect. 
+# If some changes are already there the script should notice that and do no action. Do no harm is the motto.
+#
+# In particular:
+# - as fallback stores the current .profile and crontab contents in CVS
+# - modify .profile in accordance to desired contents, see HalInfrastructureProfile
+# - create .forward file if not already there with dba@notes.pgf.com.pl alias in it
+
+# Load usefull functions
+if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
+  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
+  exit 1
+else
+  . $HOME/scripto/bash/bash_library.sh
+fi
+
+SCRIPTO_DIR=`pwd`
+RECIPIENTS='Remigiusz_Boguszewicz'
+
+b_crontab_scripts_to_rm_gzip_archivelogs()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "I will create an entry in crontab to gzip and delete archivelogs "
+  # If block was run with INFO parameter I exit now
+  if [ "$B_PAR" = "INFO" ]; then
+    return 0
+  fi
+
+  f_confirm_block_run
+  if [ "${CONFIRM_BLOCK_STATUS}" -eq 0 ]; then
+    # Block actions start here
+    SQLPLUS=$ORACLE_HOME/bin/sqlplus
+    check_file $SQLPLUS
+    check_parameter ${ORACLE_SID}
+
+    msgi "Get from database local location of directories where archivelogs are stored"
+    f_execute_sql "select VALUE from v\$parameter where NAME like 'log_archive_dest%' and lower(value) like 'location%';"
+    NR_OF_LOCATIONS=`cat $F_EXECUTE_SQL | grep -v '^ *$' | wc -l | tr -d '[:blank:]'`
+
+    F_TMP_OUTPUT=$D_TMP/sql_output.tmp_clean_${USERNAME}_${ORACLE_SID}
+    cat $F_EXECUTE_SQL | grep -v '^ *$' > $F_TMP_OUTPUT
+   
+    while read LINE
+    do
+      echo $LINE
+      LOCATION1=`echo $LINE | sed -e s/\"//g | $GREP -o "[lL][oO][cC][aA][tT][iI][oO][nN]=.*" | awk '{ print $1 }' | sed s/,// | sed -e s/^location=// | sed -e s/^LOCATION=//`
+      read LINE
+      echo $LINE
+      LOCATION2=`echo $LINE | sed -e s/\"//g | $GREP -o "[lL][oO][cC][aA][tT][iI][oO][nN]=.*" | awk '{ print $1 }' | sed s/,// | sed -e s/^location=// | sed -e s/^LOCATION=//`
+    done < $F_TMP_OUTPUT
+
+    if [ "$LOCATION1" = "no rows selected" ]; then
+      msge "No arch location found. Exiting"
+      exit 0
+    fi
+
+    case $NR_OF_LOCATIONS in
+    "2")
+      msgi "2 locations found"
+    ;;
+    "1")
+      msgi "1 locations found"
+      LOCATION2=$LOCATION1
+    ;;
+    *)
+      echo "Not supported number of locations. Exiting."
+      exit 1
+    ;;
+    esac
+
+    
+    echo LOCATION1: $LOCATION1
+    echo LOCATION2: $LOCATION2
+
+    msga "Updating arch scripts"
+    check_parameter ${HOME}
+    run_command_e "cd $HOME/scripto/oracle/arch_gz_rm"
+    cvs update
+    
+    msga "Storing current crontab in CVS"
+    msg "[b_store_in_cvs] Storing the current crontab in CVS"
+    check_parameter ${USERNAME}
+    check_parameter ${HOSTNAME}
+    check_directory "$HOME/scripto/crontabs"
+    cd $HOME/scripto/crontabs
+    crontab -l > crontab_${USERNAME}_${HOSTNAME}
+    cvs add crontab_${USERNAME}_${HOSTNAME} > /dev/null 2>&1
+    cvs commit -m "[b_store_in_cvs] Commit before changes to crontab" crontab_${USERNAME}_${HOSTNAME} > /dev/null 2>&1
+
+    msgi "Decide if gziping of archive logs is required"
+    msgi "On vxfs filesystems where we store many storage checkpoints it makes no sense"
+    msgi " to gzip the archivelogs, as it only adds to the occupied space"
+    EXIT_WHILE=''
+    while [ ! "$EXIT_WHILE" ]
+    do
+      msgw "Decide about gziping."
+      read -p "[wait] Do you want to enable archive logs gziping? (yes/no)" V_ANSWER
+      if [ "$V_ANSWER" = "yes" ]; then
+        GZIPPING_MAKES_SENSE=GZIP 
+        EXIT_WHILE=1
+      fi
+      if [ "$V_ANSWER" = "no" ]; then
+        GZIPPING_MAKES_SENSE=NOGZIP 
+        EXIT_WHILE=1
+      fi
+    done
+
+
+    msga "Adding arch script to crontab"
+    RND_MM=`random_int "0" "60"`
+    RND_HH=`random_int "14" "19"`
+    run_command "cd $HOME/scripto/crontabs"
+    msgi "I am about to add the following line to crontab_${USERNAME}_${HOSTNAME}"
+    echo "$RND_MM $RND_HH * * * (. \$HOME/.profile; \$HOME/scripto/oracle/arch_gz_rm/arch_gz_rm.sh $LOCATION1 $LOCATION2 0 7 $GZIPPING_MAKES_SENSE)"
+    msgw "Does it looks resonable?"
+    ACTION_FINISHED=""
+    while [ ! "$ACTION_FINISHED" = "yes" ]
+    do
+      read  -p "[wait] Does it looks resonable?. (yes/any)" ACTION_FINISHED
+    done
+    echo "$RND_MM $RND_HH * * * (. \$HOME/.profile; \$HOME/scripto/oracle/arch_gz_rm/arch_gz_rm.sh $LOCATION1 $LOCATION2 0 7 $GZIPPING_MAKES_SENSE)"  >> crontab_${USERNAME}_${HOSTNAME}
+    run_command "cvs commit -m 'Gzip and delete archive, and oracle logs' crontab_${USERNAME}_${HOSTNAME}"
+    run_command "crontab crontab_${USERNAME}_${HOSTNAME}"
+    run_command "crontab -l"
+
+  fi #CONFIRM_BLOCK_STATUS
+  msgb "${FUNCNAME[0]} Finished."
+} #b_crontab_scripts_to_rm_gzip_archivelogs
+
+b_create_temp_datafiles_for_temp_tbs_if_dont_exist()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "Create temporary datafiles for temporary tablespaces if they don't exists "
+  msgb "such action is often needed after hot copy and I got bored doing that by hand."
+  # If block was run with INFO parameter I exit now
+  if [ "$B_PAR" = "INFO" ]; then
+    return 0
+  fi
+
+  SQLPLUS=$ORACLE_HOME/bin/sqlplus
+  check_file $SQLPLUS
+#  $SQLPLUS "/ as sysdba" <<EOF
+#set pagesize 400
+#set heading off
+#set verify off
+#set feedback on
+#set echo off
+#spool tmp.sql
+#select 'alter database tempfile '||name||' drop including datafiles;' from v$tempfile;
+#spool off
+#rem @tmp.sql
+#EOF
+
+  msgi "Get location where temp files will be created (I take simplistic approach - put it where SYSTEM tbs is)"
+  f_execute_sql "select name from v\$datafile where FILE#='1';"
+  TMP_VAR=`echo $V_EXECUTE_SQL | awk -F"/" '{print $NF}'`
+  V_TEMP_DIR=`echo $V_EXECUTE_SQL | sed -e s/$TMP_VAR//`
+  check_directory $V_TEMP_DIR
+
+  msgi "Create temp files for temp tablespaces that have no datafiles yet"
+  msgi "The tbs is assumed not to have datafiles if tbs name is not present in DBA_TEMP_FILES"
+  $SQLPLUS -s "/ as sysdba" <<EOF
+set pagesize 400
+set linesize 400
+set heading off
+set verify off
+set feedback off
+spool tmp.sql
+select 'alter tablespace '||TABLESPACE_NAME||' add tempfile ''$V_TEMP_DIR'||TABLESPACE_NAME||'_auto_tmp1.dbf'' size 150M autoextend on next 100M maxsize 30000M;' from dba_tablespaces where CONTENTS='TEMPORARY' and TABLESPACE_NAME not in (select TABLESPACE_NAME from DBA_TEMP_FILES);
+spool off
+@tmp.sql
+EOF
+  run_command "cat tmp.sql"
+  msgb "${FUNCNAME[0]} Finished."
+} #b_create_temp_datafiles_for_temp_tbs_if_dont_exist
+
+# Support functions
+#
+# Function that will remove the line with a string from .profile
+profile_remove()
+{ 
+  F_STORED_PROFILE=profile_${USERNAME}_${HOSTNAME}_${ORACLE_SID}
+  check_directory "$HOME/scripto/oracle/logs"
+  cd $HOME/scripto/oracle/logs
+  cp $ORACLE_HOME/.profile $F_STORED_PROFILE
+  check_file "$HOME/scripto/oracle/logs/$F_STORED_PROFILE"
+  TMP_CHK=`cat $F_STORED_PROFILE | grep "^$1$"`
+  if [ ! -z "$TMP_CHK" ]; then
+    msge "[profile_remove] EXISTS [$1], consider removing it."
+    # If block was run with CHECK parameter I exit now, before any permanent actions are done
+    if [ "$B_PAR" = "CHECK" ]; then
+      return 0
+    fi
+    msga "[profile_remove] EXISTS [$1], removing"
+    run_command_e "cat $ORACLE_HOME/.profile | grep -v \"^$1$\" > $F_STORED_PROFILE"
+    cvs commit -m "removed $1" $F_STORED_PROFILE
+    run_command_e "cp $F_STORED_PROFILE $ORACLE_HOME/.profile"
+  fi
+} # profile_remove
+
+# Function that will add a line to .profile
+profile_add()
+{
+  F_STORED_PROFILE=profile_${USERNAME}_${HOSTNAME}_${ORACLE_SID}
+  check_directory "$HOME/scripto/oracle/logs"
+  cd $HOME/scripto/oracle/logs
+  cp $ORACLE_HOME/.profile $F_STORED_PROFILE
+  check_file "$F_STORED_PROFILE"
+  #msg "[profile_add] Checking if [$1] exists, if yes skip adding it."
+  TMP_CHK=`cat $F_STORED_PROFILE | grep "^$1$"`
+  if [ -z "$TMP_CHK" ]; then
+    msge "[profile_add] [$1] does not exists. Consider adding it."
+    # If block was run with CHECK parameter I exit now, before any permanent actions are done
+    if [ "$B_PAR" = "CHECK" ]; then
+      return 0
+    fi
+    msga "[profile_add] ADDING it, [$1] does not exists."
+    run_command_e "echo \"$1\" >> $F_STORED_PROFILE"
+    cvs commit -m "added $1" $F_STORED_PROFILE
+    run_command_e "cp $F_STORED_PROFILE $HOME/.profile"
+  fi
+} # profile_add
+
+# Functions that are blocks of work
+#
+# Because I rely on mails forwarded from hosts to dba alias it is important to know that the mail is working fine
+# Checking it the host has queue of unsent mail 
+# If this command hangs add the host with domain name to /etc/hosts
+# Actions: check
+# 
+b_check_mail_queue()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  MAILQ=/usr/bin/mailq
+  check_file "$MAILQ"
+
+  $PING -c 2 notes.pgf.com.pl > /dev/null
+  if [ $? -ne 0 ]; then
+    msge "[b_check_mail_queue] Can not ping to notes.pgf.com.pl"
+  fi
+
+  TMP_CHK=`$MAILQ 2>&1 | grep "No authorization to run mailq"`
+  msgd "TMP_CHK: $TMP_CHK"
+  if [ "${TMP_CHK}" ]; then
+    msge "[b_check_mail_queue] No authorization to run mailq. Exiting. (Fix it with OS admin)"
+    exit 0
+  fi
+
+  # Architecture dependend checking
+  case `uname -p` in
+  "sparc")
+    msgd "I am running on Solaris SPARC now"
+    TMP_CHK=`$MAILQ | grep "Total requests" | awk '{ print $3 }'`
+    msgd "TMP_CHK: $TMP_CHK"
+    if [ "${TMP_CHK}" -ne "0" ]; then
+      msge "[b_check_mail_queue] Host has queue of unsent mail. Exiting. (Fix it with OS admin)"
+      exit 0
+    else
+      msgi "[b_check_mail_queue] No waiting mails. OK."
+    fi
+    ;;
+  "i686"|"x86_64")
+    msgd "I am running on Linux now"
+    TMP_CHK=`$MAILQ | grep "Mail queue is empty" | wc -l`
+    msgd "TMP_CHK: $TMP_CHK"
+    if [ "${TMP_CHK}" -ne "1" ]; then
+      msge "[b_check_mail_queue] Host has queue of unsent mail. Exiting. (Fix it with OS admin)"
+      exit 0
+    else
+      msgi "[b_check_mail_queue] No waiting mails. OK."
+    fi
+    ;;
+  *)
+    msge "Unknown OS!!! Exiting."
+    exit 1
+    ;;
+  esac
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} # b_check_mail_queue
+
+# Take file privided as $1
+# Copy to directory already in CVS provided as $2
+# store it in CVS as filename provided as $3
+f_standalone_file_to_cvs()
+{
+  msgi "[f_standalone_file_to_cvs] Storing the: $1 in CVS"
+  msgi "[f_standalone_file_to_cvs] In dir: $2 as filename: $3"
+  check_file "$1"
+  check_directory "$2"
+  check_parameter "$3"
+
+  cd $2
+  cp $1 $3
+  cvs add $3 > /dev/null 2>&1
+  V_CVSDIFF=`cvs diff $3 | $GREP -e "^>" -e "^<"`
+  if [ `echo $V_CVSDIFF | grep -v '^ *$' | wc -l ` -gt 0 ]; then
+    #echo $V_CVSDIFF
+    cvs diff $3
+  fi
+  cvs commit -m "[f_standalone_file_to_cvs] $V_CVSDIFF" $3 > /dev/null 2>&1
+
+} #f_standalone_file_to_cvs
+
+# Store interesting files in CVS
+b_store_in_cvs()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  $PING -c 1 cvs.pgf.com.pl > /dev/null
+  if [ $? -ne 0 ]; then
+    msge "Host cvs.pgf.com.pl not found. Exiting."
+    exit 0
+  else
+    msgi "Host cvs.pgf.com.pl found. OK"
+  fi
+
+  V_UNIQ_ORA_HOME=`echo $ORACLE_HOME | tr -d '/'`
+  f_standalone_file_to_cvs $ORACLE_HOME/.profile $HOME/scripto/oracle/logs profile_${USERNAME}_${HOSTNAME}_${V_UNIQ_ORA_HOME}
+
+  crontab -l > $D_TMP/crontab_${USERNAME}_${HOSTNAME}
+  f_standalone_file_to_cvs $D_TMP/crontab_${USERNAME}_${HOSTNAME} $HOME/scripto/crontabs crontab_${USERNAME}_${HOSTNAME}
+
+  f_execute_sql "create pfile from spfile;"
+  cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep -v "__" > $D_TMP/init${ORACLE_SID}.ora.tmp
+  f_standalone_file_to_cvs $D_TMP/init${ORACLE_SID}.ora.tmp $HOME/scripto/oracle/logs init${ORACLE_SID}.ora_${USERNAME}_${HOSTNAME}
+
+  msgd "Checking opatch PATH"
+  TMP_PATH=`which opatch`
+  msgd "TMP_PATH: $TMP_PATH"
+  check_file $TMP_PATH
+
+  opatch lsinventory 2>&1 | grep -v 'Log file location' | grep -v 'Creating log file' | grep -v 'Lsinventory Output file location' > $D_TMP/lsinventory_${ORACLE_SID}_${HOSTNAME}
+  f_standalone_file_to_cvs $D_TMP/lsinventory_${ORACLE_SID}_${HOSTNAME} $HOME/scripto/oracle/logs lsinventory_${ORACLE_SID}_${HOSTNAME}
+
+  if [ -f "$ORACLE_HOME/network/admin/listener.ora" ]; then
+    f_standalone_file_to_cvs $ORACLE_HOME/network/admin/listener.ora $HOME/scripto/oracle/logs listener.ora_${ORACLE_SID}_${HOSTNAME}
+  fi
+
+  if [ -f "$ORACLE_HOME/network/admin/sqlnet.ora" ]; then
+    f_standalone_file_to_cvs $ORACLE_HOME/network/admin/sqlnet.ora $HOME/scripto/oracle/logs sqlnet.ora_${ORACLE_SID}_${HOSTNAME}
+  fi
+
+  msgd "Preparing tnsnames.ora not to include the Header keyword interpreted by CVS"
+  cat $ORACLE_HOME/network/admin/tnsnames.ora | grep -v "^# .Header:" > $D_TMP/tnsnames.ora
+  f_standalone_file_to_cvs $D_TMP/tnsnames.ora $HOME/scripto/oracle/logs tnsnames.ora_${ORACLE_SID}_${HOSTNAME}
+
+  msgb "${FUNCNAME[0]} Finished."
+} # b_store_in_cvs
+
+# Make desired changes to .profile
+b_change_profile()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  B_PAR=$1 # Check if block was run with parameter
+
+  msgi "[b_change_profile] Adjusting .profile if neccessary"
+  profile_remove "stty erase" 
+  profile_remove "stty erase ^?" 
+  profile_remove "set -o vi" 
+  profile_remove 'export SQLPATH=\$HOME/scripto/oracle/sqlbin' 
+  profile_remove 'export NLS_LANG=AMERICAN_AMERICA.EE8ISO8859P2' 
+
+  profile_add 'SQLPATH=\$HOME/scripto/oracle/sqlbin'
+  profile_add 'export SQLPATH'
+  profile_add 'NLS_LANG=AMERICAN_AMERICA.EE8ISO8859P2'
+  profile_add 'export NLS_LANG' 
+  msgb "${FUNCNAME[0]} Finished."
+} # b_change_profile
+
+# Configure the host to forward user mails to alias
+# create .forward file if not already there with dba@notes.pgf.com.pl alias in it 
+b_forward_mail()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  B_PAR=$1 # Check if block was run with parameter
+
+  TMP_CHK=`cat $HOME/.forward | grep "^dba@notes.pgf.com.pl$"`
+  if [ ! "$TMP_CHK" = "dba@notes.pgf.com.pl" ]; then
+    msge "[b_forward_mail] File $HOME/.forward not found or different than expected."
+
+    # If block was run with CHECK parameter I exit now, before any permanent actions are done
+    if [ "$B_PAR" = "CHECK" ]; then
+      return 0
+    fi
+ 
+    msga "[b_forward_mail] CREATING file. "
+    run_command "echo dba@notes.pgf.com.pl > $HOME/.forward"
+  else
+    msgi "[b_forward_mail] Contents as expected, doing nothing."
+  fi
+  msgb "${FUNCNAME[0]} Finished."
+} # b_forward_mail
+
+#
+# End of block functions
+
+# There are often questions: Check if everything is OK. This block checks the basic things that should exists.
+# - oratab, oraInst.loc
+# - /etc/init.d/oracle, link from rc3.d
+b_basic_os_healthcheck()
+{
+  case `uname -p` in
+  "sparc")
+    msgi "I am running on Solaris SPARC now"
+    b_basic_os_healthcheck_sparc
+    ;;
+  "i686"|"x86_64")
+    msgi "I am running on Linux now"
+    msgi "WIP"
+    ;;
+  *)
+    msge "Unknown OS!!! Exiting."
+    exit 1
+    ;;
+  esac
+} #b_basic_os_healthcheck
+
+
+b_basic_os_healthcheck_sparc()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # function called from bash_library
+  f_check_expected_format_for_etc_hosts
+
+  msgi "Checking if oratab exists"
+  check_file "/var/opt/oracle/oratab"
+  if [ -f /var/opt/oracle/oratab ]; then
+    ORATAB_CONTENTS=`cat /var/opt/oracle/oratab | grep -v '^#' | grep -v '^ *$' | grep -v '^*'`
+    if [ -z "$ORATAB_CONTENTS" ]; then
+      msge "[b_basic_os_healthcheck_sparc] oratab does not contains a meningfull entry"
+    else
+      msgi "oratab found, contains a meningfull entry"
+      msgi "$ORATAB_CONTENTS"
+    fi
+  else
+    msge "[b_basic_os_healthcheck_sparc] oratab NOT found."
+  fi
+
+
+  msgi "Checking if oraInst.loc exists"
+  check_file "/var/opt/oracle/oraInst.loc"
+  if [ -f /var/opt/oracle/oraInst.loc ]; then
+    ORATAB_CONTENTS=`cat /var/opt/oracle/oraInst.loc | grep -v '^#' | grep -v '^ *$' | grep -v '^*'`
+    if [ -z "$ORATAB_CONTENTS" ]; then
+      msge "[b_basic_os_healthcheck_sparc] oraInst.loc does not contains a meningfull entry"
+    else
+      msgi "oraInst.loc found, contains a meningfull entry"
+      msgi "$ORATAB_CONTENTS"
+    fi
+  else
+    msge "[b_basic_os_healthcheck_sparc] oraInst.loc NOT found."
+  fi
+
+  # Check /etc/init.d/oracle, link from rc3.d
+  if [ ! -f "/etc/init.d/oracle" ]; then
+    msge "[b_basic_os_healthcheck_sparc] /etc/init.d/oracle does not exists, there can be problem with autostart of oracle db."
+  else
+    msgi "/etc/init.d/oracle exists. OK"
+    f_check_owner root /etc/init.d/oracle
+    # sometimes has -rwxr-xr-x, skiping test f_check_permission -rwxr--r-- /etc/init.d/oracle
+  fi
+
+  if [ ! -L "/etc/rc3.d/S99oracle" ]; then
+    msge "[b_basic_os_healthcheck_sparc] Link /etc/rc3.d/S99oracle does not exists, there can be problem with autostart of oracle db."
+  else
+    msgi "Link /etc/rc3.d/S99oracle exists. OK"
+  fi
+
+  #RB, 2011.04.18 I skin those checks, Przemek is working on forced shutdown procedure and needs the K links
+  #msgi "Checking how many links point to /etc/init.d/oracle"
+  #V_INODE=`ls -i /etc/init.d/oracle | awk '{ print $1 }'`
+  #V_LINKS_TO_ORACLE=`find /etc/rc* -follow -inum $V_INODE -print 2>/dev/null`
+  #V_NR_OF_LINKS_TO_ORACLE=`find /etc/rc* -follow -inum $V_INODE -print 2>/dev/null | wc -l | awk '{ print $1 }'`
+  #msgi "Nr of links: $V_NR_OF_LINKS_TO_ORACLE"
+
+  #msgi "Checking the Solaris version, to determine how many links should point to /etc/init.d/oracle"
+  V_SOLARIS=`uname -a | awk '{ print $3 }'`
+  case $V_SOLARIS in
+  "5.10")
+    #if [ "${V_NR_OF_LINKS_TO_ORACLE}" -ne 1 ]; then
+    #  msge "I am on the Solaris Zone, there should be no /etc/rc0.d/ link to shutdown the database. The database is shutdown from master zone by running /etc/init.d/oracle stop."
+    #  msge "Then number of links pointing to /etc/init.d/oracle different than 1. Something is wrong"
+    #  msge "$V_LINKS_TO_ORACLE"
+    #else
+    #  msgi "OK, one link found"
+    #  msgi "$V_LINKS_TO_ORACLE"
+    #fi
+
+    msgi "I check how many days was the zone up. If it is up more than 1 day that means that the zone was not shutdown to backup - meaning there was no backup."
+    msgi "This is true if we use cold backup."
+    msgi "If this zone can and shoul be up for more than X days place such an info by:"
+    msgi "echo X_nr_of_days > /var/tmp/DBA_zone_accepted_uptime.txt"
+    V_UPTIME_MORE_THAN_1_DAY=`uptime | grep day | wc -l`
+    if [ "${V_UPTIME_MORE_THAN_1_DAY}" -eq 1 ]; then
+      msgi "Zone is up more than 24h, checking how much"
+      if [ -f /var/tmp/DBA_zone_accepted_uptime.txt ]; then 
+        msgi "File with accepted days of uptime found. Comparing"
+        V_UPTIME_ACCEPTED_DAY=`cat /var/tmp/DBA_zone_accepted_uptime.txt`
+        V_UPTIME_ACTUAL_DAY=`uptime | grep day | awk '{ print $3 }'`
+        if [ "${V_UPTIME_ACTUAL_DAY}" -gt "${V_UPTIME_ACCEPTED_DAY}" ]; then
+          msge "Zone is up ${V_UPTIME_ACTUAL_DAY} days which is more than accepted ${V_UPTIME_ACCEPTED_DAY} days."
+          msge "If this zone can and should be up for more than ${V_UPTIME_ACTUAL_DAY} days place such an info by:"
+          msge "echo ${V_UPTIME_ACTUAL_DAY} > /var/tmp/DBA_zone_accepted_uptime.txt"
+        else
+          msgi "OK, zone is up ${V_UPTIME_ACTUAL_DAY} which is less than accepted ${V_UPTIME_ACCEPTED_DAY}."
+        fi
+      else
+        msge "Zone is up `uptime | grep day | awk '{ print $3 }'` days which is more than accepted 1 day. Check if backup was performed."
+        msge "Or set accepted nr of uptime days by eg: echo `uptime | grep day | awk '{ print $3 }'` > /var/tmp/DBA_zone_accepted_uptime.txt"
+      fi
+    else
+      msgi "OK, zone is up less than 24h"
+    fi
+
+    ;;
+  "5.9")
+    msgi "I am NOT on the Solaris Zone, there should be a link in /etc/rc0.d/K01oracle to shutdown the database."
+    if [ "${V_NR_OF_LINKS_TO_ORACLE}" -ne 2 ]; then
+      msge "Then number of links pointing to /etc/init.d/oracle different than 2. Something is wrong"
+      msgi "$V_LINKS_TO_ORACLE"
+    else
+      msgi "OK, one link found"
+      msgi "$V_LINKS_TO_ORACLE"
+    fi
+    ;;
+  *)
+    echo "Unknown Solaris version!!! Exiting."
+    exit 1
+    ;;
+  esac
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_os_healthcheck_sparc
+
+# This function is used in block b_basic_db_healthcheck
+# It takes a file $1 and replaces all occurences of lines found in $2 in it
+# $1 - main template $2 - exceptions file
+f_override_template_with_exception()
+{
+  check_file $1
+  check_file $2
+
+  # Parameters in exceptions override those in template 
+  cat $2 | awk -F":" '{ print ":"$2":" }' > $D_TMP/oracle_setup.tmp.template
+  cat $1 | $GREP -v -i -f $D_TMP/oracle_setup.tmp.template > $D_TMP/oracle_setup_template.txt_new
+  cp $1 $D_TMP/oracle_setup_template.txt_old
+  cp $D_TMP/oracle_setup_template.txt_new $1
+  cat $2 >> $1
+} #f_override_template_with_exception
+
+# Check if owner provided as $1 is an owner of the file provided as $2
+f_check_owner()
+{
+  V_EXPECTED_OWNER=$1
+  V_FILENAME=$2
+  check_parameter $V_EXPECTED_OWNER
+  check_file $V_FILENAME
+
+  msgd "Provided V_EXPECTED_OWNER: $V_EXPECTED_OWNER"
+  msgd "Provided V_FILENAME: $V_FILENAME"
+
+  V_ACTUAL_OWNER=`ls -l $V_FILENAME | awk '{ print $3 }'`  
+  if [ ${V_ACTUAL_OWNER} == ${V_EXPECTED_OWNER} ]; then
+    msgi "Expecting owner: $V_EXPECTED_OWNER on file $V_FILENAME . Found ${V_ACTUAL_OWNER} OK"
+  else
+    msge "Expecting owner: $V_EXPECTED_OWNER on file $V_FILENAME . Found ${V_ACTUAL_OWNER} NOT OK."
+  fi
+} # f_check_owner
+
+# Check if permission provided as $1 is an actual permission of the file provided as $2
+f_check_permission()
+{
+  V_EXPECTED_PERMISSION=$1
+  V_FILENAME=$2
+  check_parameter $V_EXPECTED_PERMISSION
+  if [ -f "${V_FILENAME}" ]; then
+
+    msgd "Provided V_EXPECTED_PERMISSION: $V_EXPECTED_PERMISSION"
+    msgd "Provided V_FILENAME: $V_FILENAME"
+
+    V_ACTUAL_PERMISSION=`ls -l $V_FILENAME | awk '{ print $1 }'`  
+    if [ ${V_ACTUAL_PERMISSION} == ${V_EXPECTED_PERMISSION} ]; then
+      msgi "Expecting permission: $V_EXPECTED_PERMISSION on file $V_FILENAME . Found ${V_ACTUAL_PERMISSION} OK"
+    else
+      msge "Expecting permission: $V_EXPECTED_PERMISSION on file $V_FILENAME . Found ${V_ACTUAL_PERMISSION} NOT OK."
+    fi
+  else
+    msge "File $V_FILENAME not found. Can not check permission."
+  fi # -f "${V_FILENAME}" 
+
+} #f_check_permission
+
+b_check_if_init_params_agree_with_template()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # Transform init to all lower case to ease the checking
+  cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | tr '[A-Z]' '[a-z]' | sed 's;^[^.]*\.;;' | grep -v "__db_cache_size" | grep -v "__java_pool_size" | grep -v "__large_pool_size" | grep -v "__shared_pool_size" | grep -v "__streams_pool_size" | grep -v "__oracle_base" | grep -v "__pga_aggregate_target" | grep -v "__sga_target" | grep -v "__shared_io_pool_size" > $D_TMP/oracle_infra_init${ORACLE_SID}.ora
+
+  case $V_RDBMS_VERSION in
+  "9.2")
+    TEMPLATE_FILE="$HOME/scripto/oracle/create_db_scripts/oracle_setup/template_HAL_9i.txt"
+    TEMPLATE_STB="$HOME/scripto/oracle/create_db_scripts/oracle_setup/exe_standby_9i.txt"
+    TEMPLATE_T2="$HOME/scripto/oracle/create_db_scripts/oracle_setup/exe_T2_9i.txt"
+    ;;
+  "10.2")
+    TEMPLATE_FILE="$HOME/scripto/oracle/create_db_scripts/oracle_setup/template_HAL_10g.txt"
+    TEMPLATE_STB="$HOME/scripto/oracle/create_db_scripts/oracle_setup/exe_standby_10g.txt"
+    TEMPLATE_T2="$HOME/scripto/oracle/create_db_scripts/oracle_setup/exe_T2_10g.txt"
+    ;;
+  "11.1"|"11.2")
+    TEMPLATE_FILE="$HOME/scripto/oracle/create_db_scripts/oracle_setup/template_HAL_11g.txt"
+    TEMPLATE_STB="$HOME/scripto/oracle/create_db_scripts/oracle_setup/exe_standby_11g.txt"
+    TEMPLATE_T2="$HOME/scripto/oracle/create_db_scripts/oracle_setup/exe_T2_11g.txt"
+    ;;
+  *)
+    msge "Unknown rdbms version: $V_RDBMS_VERSION. Exiting" 
+    ;;
+  esac
+
+  check_file $TEMPLATE_FILE
+  check_file $TEMPLATE_STB
+  check_file $TEMPLATE_T2
+  
+  msgi "Various special configurations, eg standby need some extra parameters"
+  msgi " I consider that as an exception and modify the original template accordingly"
+  msgi " Determining if this database needs an exception list"
+  cp $TEMPLATE_FILE $D_TMP/oracle_setup_template.txt
+  TEMPLATE_FILE=$D_TMP/oracle_setup_template.txt
+
+  msgi "Checking if this database has a standby. I check for parameter: standby_file_management."
+  TMP_CHK=`cat $D_TMP/oracle_infra_init${ORACLE_SID}.ora | grep -v '^ *$' | grep -i standby_file_management`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -gt 0 ]; then
+    msga "This is a standby configuration. Adding additional rules."
+    msgi "$TMP_CHK"
+    f_override_template_with_exception $TEMPLATE_FILE $TEMPLATE_STB
+  else
+    msgi "This in NOT a standby configuration. No extra rules added."
+  fi
+
+  msgi "Checking if the machine if a T2 processors family"
+  MACHINE_ARCH=`uname -i`
+  msgi "Current architecture: $MACHINE_ARCH"
+  if [ `echo $MACHINE_ARCH | grep "T5"` ]; then
+    msga "I am on the T2 architecture. Adding additional rules."
+    f_override_template_with_exception $TEMPLATE_FILE $TEMPLATE_T2
+  else
+    msgi "I am NOT on T2 architecture. No extra rules added."
+  fi
+
+  check_directory $SCRIPTO_DIR 
+  cd $SCRIPTO_DIR
+  msgi "Checking if this DB: $ORACLE_SID has its own init exceptions."
+  if [ -f exe_${ORACLE_SID}.txt ]; then
+    msga "Found DB specific exceptions. Adding additional rules."
+    f_override_template_with_exception $TEMPLATE_FILE ${SCRIPTO_DIR}/exe_${ORACLE_SID}.txt
+  else
+    msgi "No DB specific exceptions found."
+  fi
+  
+  msgb "Analysing init file."
+  # Preparing environment for analysis
+  check_file $TEMPLATE_FILE
+  check_file $D_TMP/oracle_infra_init${ORACLE_SID}.ora
+  # Removing temporary files
+  rm -f $D_TMP/oracle_infra_OK.txt
+  rm -f $D_TMP/oracle_infra_ERROR.txt
+  rm -f $D_TMP/oracle_infra_CHANGE.txt
+
+  # Checking if all the parameters that should have value are set
+  # To do that I scan the template in search for check_if_* parameters and make sure that they are set in init
+  # I do not check their values, but only the existence
+  while read TEMPLATE_LINE
+  do
+    #echo -n "."
+    msgri "."
+    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
+    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }'`
+    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }'`
+    #echo $TEMPLATE_LINE
+    #echo $TEMPLATE_ACTION
+    if [ `echo $TEMPLATE_ACTION | grep check_if_ | wc -l` -gt 0 ]; then
+      if [ `cat $D_TMP/oracle_infra_init${ORACLE_SID}.ora | grep "^${TEMPLATE_PAR}=" | wc -l` -lt 1 ]; then
+        echo "parameter should be set: $TEMPLATE_PAR" >> $D_TMP/oracle_infra_ERROR.txt
+        # I make the $TEMPLATE_VALUE uppercase to be consisten with how Oracle shows then
+        #  during show parameter
+        TEMPLATE_VALUE=`echo $TEMPLATE_VALUE | tr '[a-z]' '[A-Z]'`
+        echo "alter system set $TEMPLATE_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
+      fi
+    fi
+  done < $TEMPLATE_FILE
+
+
+  # Loop through the init file and analyse the contents
+  while read INIT_LINE
+  do
+    #echo -n "."
+    msgri "."
+    # Get init parameter from $INIT_LINE
+    INIT_PAR=`echo $INIT_LINE | awk -F"=" '{ print $1 }'`
+    INIT_VALUE=`echo $INIT_LINE | awk -F"=" '{ print $2 }'`
+    #echo $INIT_PAR; echo $INIT_VALUE
+
+    # Search the template for instructions
+    # Make sure there is 1 or 0 lines with instructions
+    TEMPLATE_CHECK=`cat $TEMPLATE_FILE | grep ":$INIT_PAR:" | wc -l`
+    if [ "$TEMPLATE_CHECK" -gt 1 ]; then
+      msge "There are two instructions or more in template regarding the same init parameter."
+      msge "It should not happen. Exiting."
+      cat $TEMPLATE_FILE | grep ":$INIT_PAR:"
+      exit 1
+    fi
+
+    TEMPLATE_LINE=`cat $TEMPLATE_FILE | grep ":$INIT_PAR:"`
+    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
+    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }'`
+    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }'`
+    TEMPLATE_COMMENT=`echo $TEMPLATE_LINE | awk -F":" '{ print $4 }'`
+    #echo $TEMPLATE_LINE; echo $TEMPLATE_ACTION; echo $TEMPLATE_PAR; echo $TEMPLATE_VALUE; echo $TEMPLATE_COMMENT
+
+    case $TEMPLATE_ACTION in
+    "ignore")
+      #echo "OK. Ignoring parameter $INIT_PAR"
+      echo "ignoring: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
+      ;;
+    "check_if_equal")
+      if [ ! "$INIT_VALUE" = "$TEMPLATE_VALUE" ]; then
+        echo "value not equal: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
+        echo "alter system set $INIT_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
+      else
+        echo "value equal: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
+      fi 
+      ;;
+    "check_if_less")
+      if [ "$INIT_VALUE" -gt "$TEMPLATE_VALUE" ]; then
+        echo "value too large: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
+        echo "alter system set $INIT_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
+      else
+        echo "value correct: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
+      fi 
+      ;;
+    "check_if_more")
+      if [ "$INIT_VALUE" -lt "$TEMPLATE_VALUE" ]; then
+        echo "value too small: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
+        echo "alter system set $INIT_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
+      else
+        echo "value correct: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
+      fi 
+      ;;
+    "check_if_set")
+      echo "value set: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
+      ;;
+    "do_not_set")
+      echo "parameter should not be set: $INIT_LINE" >> $D_TMP/oracle_infra_ERROR.txt
+      echo "alter system reset $INIT_PAR scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
+      ;;
+    *)
+      echo "Unknown parameter for template: $INIT_PAR"
+      exit 0
+      ;;
+   esac
+
+  done < $D_TMP/oracle_infra_init${ORACLE_SID}.ora
+
+  #echo ""
+
+  if [ -f $D_TMP/oracle_infra_ERROR.txt ]; then
+    msgi "You are on $USERNAME at `uname -n`"
+    msge "Parameters with wrong values or that should not be set for DB: $ORACLE_SID"
+    cat $D_TMP/oracle_infra_ERROR.txt | sort
+  fi
+
+  if [ -f $D_TMP/oracle_infra_CHANGE.txt ]; then
+    msgi "To change the configuration according to template you can issue:"
+    # for hidden parameters include them into "" to work
+    while read LINE
+    do
+      if [ `echo "$LINE" | awk '{ print $4 }' | grep '^_'` ]; then
+        echo "$LINE" | awk '{ print $1 " " $2 " " $3 " \"" $4 "\" " $5 " " $6 }'
+      else
+        echo $LINE
+      fi
+    done < $D_TMP/oracle_infra_CHANGE.txt
+    #cat $D_TMP/oracle_infra_CHANGE.txt | sort
+  fi
+  msgi "Done"
+  msgb "${FUNCNAME[0]} Finished."
+} #b_check_if_init_params_agree_with_template
+
+#Master block for DB health check, divided for architecture and db version specyfic and common blocks
+b_basic_db_healthcheck()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgi "[b_basic_db_healthcheck] common blocks"
+  b_basic_db_healthcheck_common
+  b_check_if_init_params_agree_with_template
+
+  msgi "[b_basic_db_healthcheck] OS architecture dependend blocks"
+  case `uname -p` in
+  "sparc")
+    msgi "I am running on Solaris SPARC now, block: b_basic_db_healthcheck_os_sparc"
+    b_basic_db_healthcheck_os_sparc
+    ;;
+  "i686"|"x86_64")
+    msgi "I am running on Linux i686 now, block: b_basic_db_healthcheck_os_linux"
+    b_basic_db_healthcheck_os_linux
+    ;;
+  *)
+    msge "Unknown OS!!! Exiting."
+    exit 1
+    ;;
+  esac
+
+  msgi "[b_basic_db_healthcheck] DB version dependend blocks"
+  # Note, for version dependend AND role dependend blocks see below
+  case $V_RDBMS_VERSION in
+  "9.2")
+    msgi "[b_basic_db_healthcheck] Version $V_RDBMS_VERSION"
+    msgi "[b_basic_db_healthcheck] NOT implemented"
+    ;;
+  "10.2")
+    msgi "[b_basic_db_healthcheck] Version $V_RDBMS_VERSION"
+    msgi "[b_basic_db_healthcheck] implemented"
+    b_basic_db_healthcheck_db_10
+    ;;
+  "11.2")
+    msgi "[b_basic_db_healthcheck] Version $V_RDBMS_VERSION"
+    msgi "[b_basic_db_healthcheck] NOT implemented"
+    ;;
+  *)
+    msge "Unknown rdbms version: $V_RDBMS_VERSION. Exiting"
+    ;;
+  esac
+
+  msgi "[b_basic_db_healthcheck] DB role (primary/standby) dependend blocks"
+  case ${V_DATABASE_ROLE} in
+  "PRIMARY")
+    msgi "Primary database"
+    b_basic_db_healthcheck_db_primary
+    b_check_if_recovery_was_taking_place_during_startup
+
+    msgi "Primary database dependend on the db version"
+    case $V_RDBMS_VERSION in
+    "10.2")
+      b_basic_db_healthcheck_db_primary_10    
+      ;;
+    "11.2")
+      msgi "Version $V_RDBMS_VERSION"
+      msgi "Not implemented"
+      ;;
+    *)
+      msgi "Not implemented in this rdbms version: $V_RDBMS_VERSION."
+      ;;
+    esac
+    ;;
+  "PHYSICAL STANDBY")
+    msgi "Standby database"
+    b_basic_db_healthcheck_db_standby
+    ;;
+  *)
+    msge "Unknown DB role (primary/standby): ${V_DATABASE_ROLE}. Exiting"
+    ;;
+  esac
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_db_healthcheck
+
+b_basic_db_healthcheck_os_linux()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgi "Nothing here yet."
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_db_healthcheck_os_linux
+
+b_basic_db_healthcheck_os_sparc()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgi "Checking if the machine if a T2 processors family"
+  MACHINE_ARCH=`uname -i`
+  msgi "Current architecture: $MACHINE_ARCH"
+  if [ `echo $MACHINE_ARCH | grep "T5"` ]; then
+    msgi "I am on the T2 architecture, DB version: $V_RDBMS_VERSION"
+    msgi " special configuration may be needed depending on the DB version"
+    case $V_RDBMS_VERSION in
+    "9.2")
+      msgi "Checks according to OracleKnowledge#Konfiguracja_baz_9i_na_serwerach"
+      msgi "1. Parameter cpu_count should be set and to a value lower/equal to 8"
+      
+      TMP_CHK=`cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep cpu_count`
+      if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ge 1 ]; then
+        msgi "OK, parameter set: $TMP_CHK"
+      else
+        msge "Parameter cpu_count not set on T2 machine."
+      fi
+
+      TMP_CHK=`cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep _kghdsidx_count`
+      if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ge 1 ]; then
+        msgi "OK, parameter set: $TMP_CHK"
+      else
+        msge "Parameter _kghdsidx_count not set on T2 machine."
+      fi
+
+      # eperiencing one case with that error, ignoring for now
+      #TMP_CHK=`cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep "timed_statistics=false"`
+      #echo $TMP_CHK
+      #if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ge 1 ]; then
+      #  msgi "OK, parameter set: $TMP_CHK"
+      #else
+      #  msge "Parameter timed_statistics=false not set on T2 machine."
+      #fi
+  
+      ;;
+    *)
+      msgi "No special actions needed. OK."  
+      ;;
+    esac
+  else
+    msgi "I am NOT on T2 architecture, no special checks done"
+  fi
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_db_healthcheck_os_sparc
+
+b_basic_db_healthcheck_db_10()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+# well, I am not sure any more, it is free and defcon looks still usefull
+#  msgi "Checking if statspack snap is created from crontab. It should not be."
+#  V_TMP=`crontab -l | grep -v "^#" | grep "execute statspack.snap" | wc -l`
+#  if [ "$V_TMP" -gt 0 ]; then
+#    msge "There are still statspack snapschots made from crontab. Use AWR reports instead"
+#  fi
+
+  msgi "Checking if certain oracle binaries have proper permissions"
+  f_check_owner root $ORACLE_HOME/bin/nmo
+  #on 10.2.0.5 they changes permisiion, I skip checking # f_check_permission -rwsr-s--- $ORACLE_HOME/bin/nmo
+  f_check_owner root $ORACLE_HOME/bin/nmb
+  #on 10.2.0.5 they changes permisiion, I skip checking # f_check_permission -rwsr-s--- $ORACLE_HOME/bin/nmb
+  f_check_owner root $ORACLE_HOME/bin/oradism
+  f_check_permission -r-sr-s--- $ORACLE_HOME/bin/oradism
+
+  msgi "Checking if there are still old 9.2 binaries present"
+  if [ -d $ORACLE_HOME/../9.2.0 ]; then
+    msge "There are still 9.2 binaries present in 10.2 database. Consider running 03_post_upgrade.sh"
+  fi
+ 
+  if [ -d /$ORACLE_SID ]; then 
+    msgi "Checking if there are still installation binaries present under /SID (default location)"
+    V_TMP=`ls /$ORACLE_SID | $GREP -e _bin_agent10205 -e _patch10204 -e _10g_bin -e _10g_com -e _patches`
+    if [ `echo $V_TMP | grep -v '^ *$' | wc -l` -gt 0 ]; then
+      msge "Looks like those binaries or upgrade logs are still present: $V_TMP . Consider deleting the installation binaries."
+    fi
+  fi
+
+  msgi "Checking if 10g agent is running"
+  TMP_CHK=`ps -ef | grep -v grep | grep emagent`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -lt 1 ]; then
+    msge "Looks like the 10g agent is not running, check and fix it"
+  else
+    msgi "Looks like the 10g agent is running. OK"
+    msgi "$TMP_CHK" 
+  fi # ps -ef
+
+  
+  msgi "Checking if this database has a standby. I check for parameter: standby_file_management."
+  TMP_CHK=`cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep -v '^ *$' | grep -i standby_file_management`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -gt 0 ]; then
+    msgi "This is a standby configuration. Actions related to standby configuration go here."
+
+    msgi "Check permission of drc${ORACLE_SID}.log"
+    f_execute_sql "select VALUE from v\$parameter where NAME='background_dump_dest';"
+    V_DG_LOG=$V_EXECUTE_SQL
+    V_DG_LOG="${V_EXECUTE_SQL}/drc${ORACLE_SID}.log"
+    msgd "V_DG_LOG: $V_DG_LOG"
+    check_file $V_DG_LOG
+    f_check_permission -rw-r--r-- $V_DG_LOG
+
+    msgi "Checking if Data Guard logs look like beeing monitored by oralms"
+    TMP_CHK=`ps -ef | grep -v grep | grep tail | grep drc${ORACLE_SID}.log`
+    if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -lt 1 ]; then
+      msge "Looks like the DG alert log is not monitored by oralms, check and fix it"
+    else
+      msgi "Looks like the DG alert log is monitored by oralms. OK"
+      msgi "$TMP_CHK" 
+    fi # ps -ef
+
+    msgi "Checking if listener has service name for DG Broker. See StandbySetupOracle10 for explanation"
+    TMP_CHK=`$LSNRCTL status | grep ${V_DB_UNIQUE_NAME}_DGMGRL.${V_DB_DOMAIN}`
+    if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ne 1 ]; then
+      msge "Looks like the listener does not have the service name for DG Broker. Check and fix it"
+    else
+      msgi "Looks like the listener does have the service name for DG Broker. OK"
+      msgi "$TMP_CHK"
+    fi # ps -ef
+  fi # Actions if DB is DB with standby
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_db_healthcheck_db_10
+
+b_basic_db_healthcheck_db_primary_10()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgi "Checking if statistics estimate is 100"
+  f_execute_sql "select dbms_stats.get_param('ESTIMATE_PERCENT') from dual;"
+  V_TMP=$V_EXECUTE_SQL
+  msgd "V_TMP: $V_TMP"
+  if [ "${V_TMP}" = "NULL" ]; then
+    V_TMP=0
+  elif [ "${V_TMP}" = "DBMS_STATS.AUTO_SAMPLE_SIZE" ]; then
+    V_TMP=0
+  fi
+
+  if [ "${V_TMP}" -ne 100 ]; then
+    msge "The estimation for auto gathering statistics is not 100 on DB: $ORACLE_SID. Not a PGF standard."
+    msge "Change it by running: >exec DBMS_STATS.SET_PARAM('ESTIMATE_PERCENT','100');"
+  fi
+
+
+  msgb "${FUNCNAME[0]} Finished."
+}
+
+b_check_if_recovery_was_taking_place_during_startup()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgi "Checking if last startup was done withou recovery, which would indicate clean shutdown"
+  msgi "This check is introduced to spot DB that does not shutdown properly for cold backup"
+  msgi "This checking makes sense only for PRIMARY database, not for standby"
+
+  msgd "Determining line with last Completed: ALTER DATABASE CLOSE NORMAL"
+  msgd "V_ALERT_LOG: $V_ALERT_LOG"
+  V_ALERT_DB_CLOSE=`tail -15000 $V_ALERT_LOG | $GREP -B 1 -n -i "Completed: ALTER DATABASE CLOSE NORMAL" | tail -1 | awk -F":" '{ print $1 }'`
+  if [ -z "$V_ALERT_DB_CLOSE" ]; then
+    msgd "Strange, alert log does not contain any info about database beeing closed. Ever."
+    msgd "Can happen when alert log is rotated. Setting V_ALERT_DB_CLOSE to 1"
+    V_ALERT_DB_CLOSE=1
+  fi
+  msgd "V_ALERT_DB_CLOSE: $V_ALERT_DB_CLOSE"
+
+  msgd "Determining line with last Completed: ALTER DATABASE OPEN"
+  V_ALERT_DB_OPEN=`tail -15000 $V_ALERT_LOG | $GREP -B 1 -n -i "Completed: ALTER DATABASE OPEN" | tail -1 | awk -F":" '{ print $1 }'`
+  if [ -z "$V_ALERT_DB_OPEN" ]; then
+    msgd "Strange, alert log does not contain any info about database startup. Ever."
+    msgd "Should not happen. Setting V_ALERT_DB_RECOVER to 0"
+    V_ALERT_DB_OPEN=0
+  fi
+  msgd "V_ALERT_DB_OPEN: $V_ALERT_DB_OPEN"
+
+  msgd "Determining line with last Beginning crash recovery of"
+  V_ALERT_DB_RECOVER=`tail -15000 $V_ALERT_LOG | $GREP -B 1 -n -i "Beginning crash recovery of" | tail -1 | awk -F":" '{ print $1 }'`
+  if [ -z "$V_ALERT_DB_RECOVER" ]; then
+    msgd "Strange, alert log does not contain any info about database doing crash recovery. Ever."
+    msgd "Can happen when alert log is rotated. Setting V_ALERT_DB_RECOVER to 0"
+    V_ALERT_DB_RECOVER=0
+  fi
+  msgd "V_ALERT_DB_RECOVER: $V_ALERT_DB_RECOVER"
+
+  msgd "Determining whether the order is normal or indicates recovery during startup, which should not happen"
+  msgd "if ( ${V_ALERT_DB_RECOVER} < ${V_ALERT_DB_CLOSE} ) and ( ${V_ALERT_DB_CLOSE} < ${V_ALERT_DB_OPEN} )"
+  msgd "if ( V_ALERT_DB_RECOVER < V_ALERT_DB_CLOSE ) and ( V_ALERT_DB_CLOSE < V_ALERT_DB_OPEN )"
+  if [ "${V_ALERT_DB_RECOVER}" -lt "${V_ALERT_DB_CLOSE}" ] && [ "${V_ALERT_DB_CLOSE}" -lt "${V_ALERT_DB_OPEN}" ]; then
+    msgd "The order seems fine: recover(past, not related), close, open"
+  else
+    msge "Database $ORACLE_SID has performed automatic instance recovery before last open. This should not happen and indicates, that DB was not shutdown cleanly to cold backup. Check the alert log."
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+}
+
+
+b_basic_db_healthcheck_db_primary()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgi "Checking if supplemental logging is enabled."
+  f_execute_sql "SELECT SUPPLEMENTAL_LOG_DATA_MIN FROM V\$DATABASE;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  if [ ! "${V_EXECUTE_SQL}" = "YES" ]; then
+    msge "Supplemental logging should be turned on. DB: $ORACLE_SID"
+    msge "See HalInfrastructureSupplementalLogging"
+  fi
+
+  msgi "Checking if number of rows in deferror table is greater than: $V_DEFERROR_TRESHOLD"
+  V_DEFERROR_TRESHOLD=2000
+  f_execute_sql "select count(*) from sys.deferror;"
+  if [ "$V_EXECUTE_SQL" -gt "$V_DEFERROR_TRESHOLD" ]; then
+    msge "Number if rows in deferror table: $V_EXECUTE_SQL larger than $V_DEFERROR_TRESHOLD"
+    msge "It has been agreed that errors older than 30 days can be safely deleted."
+    msge "There should be an automatic procedure implemented to delete the old deferror entries."
+    msge "See https://twiki.pgf.com.pl/cgi-bin/twiki/view/Main/InstallingOracle10gOnSolaris10#Standard_post_install_actions_ch"
+    msge "If You wand to manually delete the errors:"
+    msge "See https://twiki.pgf.com.pl/cgi-bin/twiki/view/Main/HalReplikacja#Delete_transactions_from_DEFERRO for solution"
+  fi
+  msgi "Number of rows in deferror table: $V_EXECUTE_SQL"
+
+  msgi "Checking if there are unusable indexes"
+  f_execute_sql_no_rows_expected "select owner,index_name from dba_indexes where status='UNUSABLE' order by owner;"
+  f_execute_sql_no_rows_expected "select index_owner,index_name,partition_name from dba_ind_partitions where status='UNUSABLE';"
+
+  msgi "I sometimes setup an logon trigger to trace certain user actions. This is to check if I forgot to delete it."
+  f_execute_sql_no_rows_expected "select TRIGGER_NAME from dba_triggers where TRIGGER_NAME='SET_TRACE';"
+
+  msgi "Just in case. Controlfile to trace"
+  f_execute_sql "alter database backup controlfile to trace;"
+  msgi "$V_EXECUTE_SQL"
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_db_healthcheck_db_primary
+
+b_basic_db_healthcheck_db_standby()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgi "Checking if flashback db is turned on on standby database"
+  f_execute_sql "select FLASHBACK_ON from v\$database;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  if [ ! "${V_EXECUTE_SQL}" = "YES" ]; then
+    msge "Flashback db should be turned on on standby database"
+    msge "Run ./oracle_setup.sh b_implement_flashback_database"
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_db_healthcheck_db_standby
+
+
+b_basic_db_healthcheck_common()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # Set usefull variables
+  f_execute_sql "select VERSION from v\$instance;"
+  V_RDBMS_VERSION=`echo $V_EXECUTE_SQL | awk -F"." '{ print $1 "." $2 }'`
+
+  f_execute_sql "select upper(VALUE) from v\$parameter where NAME='db_name';"
+  V_DB_NAME=$V_EXECUTE_SQL 
+
+  f_execute_sql "select upper(VALUE) from v\$parameter where NAME='db_unique_name';"
+  V_DB_UNIQUE_NAME=$V_EXECUTE_SQL
+  if [ "$V_DB_UNIQUE_NAME" = "no rows selected" ]; then
+    msgd "db_unique_name parameter not sed (probably pre 10g db. Taking db_name instead."
+    V_DB_UNIQUE_NAME=$V_DB_NAME
+  fi
+  msgd "V_DB_UNIQUE_NAME: $V_DB_UNIQUE_NAME"
+  
+  f_execute_sql "select upper(VALUE) from v\$parameter where NAME='db_domain';"
+  V_DB_DOMAIN=$V_EXECUTE_SQL 
+
+  f_execute_sql "select DATABASE_ROLE from v\$database;"
+  V_DATABASE_ROLE=$V_EXECUTE_SQL 
+  msgd "V_DATABASE_ROLE: $V_DATABASE_ROLE"
+
+
+  msgd "Checking permission of alert log"
+  f_execute_sql "select VALUE from v\$parameter where NAME='background_dump_dest';"
+  V_ALERT_LOG=$V_EXECUTE_SQL
+  V_ALERT_LOG="${V_EXECUTE_SQL}/alert_${ORACLE_SID}.log"
+  msgd "V_ALERT_LOG: $V_ALERT_LOG"
+  check_file $V_ALERT_LOG
+  f_check_permission -rw-r--r-- $V_ALERT_LOG
+
+
+  msgi "Check if spfile is used. It should."
+  SQLPLUS=$ORACLE_HOME/bin/sqlplus
+  check_file $SQLPLUS
+  f_execute_sql "select VALUE from v\$parameter where NAME='spfile';"
+  if [ ! `echo $V_EXECUTE_SQL | grep spfile` ]; then
+    echo $V_EXECUTE_SQL
+    msge "Spfile is NOT used. Can not continue."
+    exit 1
+  fi
+
+  msgi "Create pfile from spfile for the purpose of analysis"
+  f_execute_sql "create pfile from spfile;"
+  check_file "$ORACLE_HOME/dbs/init${ORACLE_SID}.ora"
+
+
+  LSNRCTL=$ORACLE_HOME/bin/lsnrctl
+  check_file $LSNRCTL
+
+  msgi "Checking listener registered databases only if listener.ora found"
+  if [ -f "$ORACLE_HOME/network/admin/listener.ora" ]; then
+    msgi "Listener.ora found. Checking if listener has service name for ${V_DB_UNIQUE_NAME}.${V_DB_DOMAIN}"
+    TMP_CHK=`$LSNRCTL status | grep ${V_DB_UNIQUE_NAME}.${V_DB_DOMAIN}`
+    if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ne 1 ]; then
+      msge "Looks like the listener does not have the service name for DB_UNIQUE_NAME.DB_DOMAIN: ${V_DB_UNIQUE_NAME}.${V_DB_DOMAIN}. Check and fix it"
+    else
+      msgi "Looks like the listener does have the service name for DB_UNIQUE_NAME.DB_DOMAIN: ${V_DB_UNIQUE_NAME}.${V_DB_DOMAIN}. OK"
+      msgi "$TMP_CHK"
+    fi # ps -ef
+
+    msgi "Checking if listener has service name for ${V_DB_NAME}.${V_DB_DOMAIN}"
+    TMP_CHK=`$LSNRCTL status | grep ${V_DB_NAME}.${V_DB_DOMAIN}`
+    if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ne 1 ]; then
+      msge "Looks like the listener does not have the service name for DB_NAME.DB_DOMAIN: ${V_DB_NAME}.${V_DB_DOMAIN}. Check and fix it"
+    else
+      msgi "Looks like the listener does have the service name for DB_NAME.DB_DOMAIN: ${V_DB_NAME}.${V_DB_DOMAIN}. OK"
+      msgi "$TMP_CHK"
+    fi # ps -ef
+  else
+    msgi "Listener.ora NOT found."
+  fi #$ORACLE_HOME/network/admin/listener.ora
+
+  msgi "Checking if alert log look like beeing monitored"
+  TMP_CHK=`ps -ef | grep -v grep | grep tail | grep alert_${ORACLE_SID}.log`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -lt 1 ]; then
+    msge "Looks like the DB alert log: alert_${ORACLE_SID}.log is not monitored, check and fix it"
+  else
+    msgi "Looks like the DB alert log: alert_${ORACLE_SID}.log is monitored. OK"
+    msgi "$TMP_CHK" 
+  fi # ps -ef
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_basic_db_healthcheck_common
+
+
+
+###########################
+
+
+b_implement_flashback_database()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "Implement Flashback Database functionality"
+  # If block was run with INFO parameter I exit now
+  if [ "$B_PAR" = "INFO" ]; then
+    return 0
+  fi
+
+  msgi "Check if flashback database is enabled"
+  f_execute_sql "select FLASHBACK_ON from v\$database;"
+  echo $V_EXECUTE_SQL
+  if [ ! "$V_EXECUTE_SQL" = "NO" ]; then
+    msgi "Flashback database already enabled. Exiting."
+    exit 0
+  else
+    msgi "Flashback database not enabled. Continuing."
+  fi
+
+  msgw "The following actions will make the currently running database UNAVAILABLE to end users."
+  ACTION_FINISHED=""
+  while [ ! "$ACTION_FINISHED" = "yes" ]
+  do
+    read  -p "Are you sure, that you are doing that in scheduled maintenance? (yes/any)" ACTION_FINISHED
+  done
+
+  msgi "Check if spfile is used"
+  f_check_if_spfile_is_used
+
+  msgi "Check if database is in archivelog mode"
+  f_execute_sql "select log_mode from v\$database;"
+  echo $V_EXECUTE_SQL 
+  if [ ! "$V_EXECUTE_SQL" = "ARCHIVELOG" ]; then
+    msge "Database NOT in archivelog mode. Exiting."
+  fi
+
+  msgi "Check if flash recovery area is already set"
+  f_execute_sql "select value from v\$parameter where name = 'db_recovery_file_dest';"
+  echo $V_EXECUTE_SQL
+  if [ ! -z "$V_EXECUTE_SQL" ]; then
+    msgi "Flash recovery area already configured. Skipping this part."
+    f_execute_sql "select name, value from v\$parameter where name like 'db_recovery_file_dest%';"
+    cat $F_EXECUTE_SQL
+  else
+    msga "Configuring flash recovery area (FRA)"
+    msgi "Estimate the recommended size of FRA for 3 days of flashback database capability (minimum * 2)"
+    # The following estimation could also be used, but that requires the flashback database to be active for some time
+    # SELECT ESTIMATED_FLASHBACK_SIZE FROM V$FLASHBACK_DATABASE_LOG;
+    f_execute_sql "select round((redo_size.bytes * nr_switched.count * 2)/1024/1024/1024) GB from ( select distinct BYTES from sys.v\$log ) redo_size, ( select count(*) count from gv\$loghist where FIRST_TIME > sysdate -3 ) nr_switched;"
+    echo $V_EXECUTE_SQL
+    V_FRA_SIZE=$V_EXECUTE_SQL
+    msga "The suggested size of FRA in GB is: $V_FRA_SIZE"
+    msgw "Do you want to change it? (y/any)"
+    read -p "" V_TMP_CHANGE_VALUE
+    if [ "$V_TMP_CHANGE_VALUE" = "y" ]; then
+      read -p "Provide new size in GB: " V_FRA_SIZE
+    fi
+    msga "Size of FRA will be set in GB to: $V_FRA_SIZE"
+
+    msgi "Configuring the location of FRA"
+    V_FRA_LOCATION=/${ORACLE_SID}/flash_recovery_area
+    msga "The suggested location of FRA is: $V_FRA_LOCATION"
+    msgw "Do you want to change it? (y/any)"
+    read -p "" V_TMP_CHANGE_VALUE
+    if [ "$V_TMP_CHANGE_VALUE" = "y" ]; then
+      read -p "Provide new location: " V_FRA_LOCATION
+    fi
+    msga "Location of FRA will be set to: $V_FRA_LOCATION"
+    run_command_e "mkdir -p $V_FRA_LOCATION"
+    f_execute_sql "alter system set DB_RECOVERY_FILE_DEST_SIZE=${V_FRA_SIZE}G scope=spfile;"
+    cat $F_EXECUTE_SQL
+    f_execute_sql "alter system set DB_RECOVERY_FILE_DEST='$V_FRA_LOCATION' scope=spfile;"
+    cat $F_EXECUTE_SQL
+
+    msgi "Restart database"
+    f_execute_sql "shutdown immediate"
+    cat $F_EXECUTE_SQL
+    f_execute_sql "startup"
+    cat $F_EXECUTE_SQL
+
+  fi #flash recovery area is already set
+
+
+  msgi "Enabling flashback database."
+  f_execute_sql "select FLASHBACK_ON from v\$database;"
+  echo $V_EXECUTE_SQL
+  if [ ! "$V_EXECUTE_SQL" = "NO" ]; then
+    msgi "Flashback database already enabled. Skipping this part."
+  else
+    msga "Enabling flashback database." 
+    V_FDB_RETENTION=4320
+    msga "The suggested retention time (in min) is $V_FDB_RETENTION (`expr $V_FDB_RETENTION / 24 / 60` days)"
+    msgw "Do you want to change it? (y/any)"
+    read -p "" V_TMP_CHANGE_VALUE
+    if [ "$V_TMP_CHANGE_VALUE" = "y" ]; then
+      read -p "Provide new retention time in min: " V_FDB_RETENTION
+    fi
+    msga "Retention time in min st to: $V_FDB_RETENTION"
+
+    msgi "Mount database to enable flashback db"
+    f_execute_sql "shutdown immediate"
+    cat $F_EXECUTE_SQL
+    f_execute_sql "startup mount"
+    cat $F_EXECUTE_SQL
+    f_execute_sql "ALTER SYSTEM SET DB_FLASHBACK_RETENTION_TARGET=${V_FDB_RETENTION};"
+    cat $F_EXECUTE_SQL
+    f_execute_sql "ALTER DATABASE FLASHBACK ON;"
+    cat $F_EXECUTE_SQL
+    f_execute_sql "alter database open;"
+    cat $F_EXECUTE_SQL
+
+  fi #Check if flashback database is enabled
+  msgb "${FUNCNAME[0]} Finished."
+} #b_implement_flashback_database
+
+b_check_and_fix_orphan_links_resulting_from_rsync_copy()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "For security reasons rsync does not properly handles absolut links when copying between hosts."
+  msgb "He eats the leading slash. This block checks for links that are broken under specified directory,"
+  msgb "and suggests a change that will fix this problem."
+
+  msgi "I will check all the links under current ORACLE_HOME: $ORACLE_HOME"
+  check_parameter $ORACLE_HOME
+  check_directory $ORACLE_HOME
+  F_LINKS_LIST=$D_TMP/links_list.txt
+  find $ORACLE_HOME -type l > $F_LINKS_LIST
+  
+  F_INVALID_LINKS_LIST=$D_TMP/invalid_links_list.txt
+  rm -f $F_INVALID_LINKS_LIST
+  msgi "Looping through the list and checking if links are valid"
+  while read LINE
+  do
+    msgd "-- Checking: $LINE"
+    ls -lL $LINE > /dev/null
+    if [ $? -ne 0 ]; then
+      msgd "-- link not valid"
+      echo $LINE >> $F_INVALID_LINKS_LIST
+    fi
+  done < $F_LINKS_LIST
+ 
+  if [ -f $F_INVALID_LINKS_LIST ]; then
+    msge "Invalid links found that probably result from rsync copy."
+    msge "This can be fixed by running ./oracle_setup.sh b_check_and_fix_orphan_links_resulting_from_rsync_copy"
+  else
+    msgi "No invalid links found. OK."
+    return 0
+  fi 
+
+  # If block was run with CHECK parameter I exit now, before any permanent actions are done
+  if [ "$B_PAR" = "CHECK" ]; then
+    return 0
+  fi
+ 
+  check_file $F_INVALID_LINKS_LIST
+  msgi "Analysing each failed link and preparing corrective actions"
+  exec 6<$F_INVALID_LINKS_LIST
+  while read -u 6 LINE
+  do
+    msgi ""
+    msgi "Invalid link: $LINE"
+    V_INVALID_LINK=`ls -l $LINE | awk -F">" '{ print $2 }' | tr -d " " `
+    V_PROBABLY_FIXED_LINK=`ls -l $LINE | awk -F">" '{ print $2 }' | tr -d " " | awk '{ print "/"$1 }' ` 
+    msgi "Pointing to: $V_INVALID_LINK"
+    msgi "Probably should point to: $V_PROBABLY_FIXED_LINK"
+    msgi "Checking if fixed link would be valid"
+    ls -l $V_PROBABLY_FIXED_LINK
+    if [ $? -ne 0 ]; then
+      msge "Fixed link not valid, I did not expected that. Exiting, fix it manually."
+      exit 1
+    else 
+      msgi "Fixed link would work OK"
+    fi
+
+    read -p "[wait] Do you want to delete the old link and create the new one? (y/any)" V_ANSWER
+    if [ "$V_ANSWER" = "y" ]; then
+      msga "Deleting old link"
+      run_command_e "rm $LINE"
+      msga "Creating new link"
+      run_command_e "ln -s $V_PROBABLY_FIXED_LINK $LINE"
+    fi #$V_ANSWER" = "y"
+    
+  done #while read $F_INVALID_LINKS_LIST
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_check_and_fix_orphan_links_resulting_from_rsync_copy
+
+# Function used in b_PGF_db_files_layout to suggest db files location changes
+f_change_location_db_file()
+{
+  msgd "${FUNCNAME[0]} Enter."
+  V_SOURCE_PATH=$1
+  V_DEST_DIR=$2
+
+  check_file $V_SOURCE_PATH
+  check_directory $V_DEST_DIR
+
+  V_SOURCE_FILENAME=`basename $V_SOURCE_PATH`
+  V_SOURCE_DIR=`dirname $V_SOURCE_PATH`
+
+  msgd "V_SOURCE_PATH $V_SOURCE_PATH"
+  msgd "V_SOURCE_FILENAME $V_SOURCE_FILENAME"
+  msgd "V_SOURCE_DIR $V_SOURCE_DIR"
+  msgd "V_DEST_DIR $V_DEST_DIR" 
+
+  msgd "Make sure that both V_SOURCE_DIR and V_DEST_DIR are on the same filesystem"
+  cd $V_SOURCE_DIR
+  V_SOURCE_DIR_FS=`df -h . | grep -v "Filesystem" | awk '{ print $6 }'`
+  cd $V_DEST_DIR
+  V_DEST_DIR_FS=`df -h . | grep -v "Filesystem" | awk '{ print $6 }'`
+  if [ "${V_SOURCE_DIR_FS}" == "${V_DEST_DIR_FS}" ]; then
+    msgd "Filesystem are the same. OK"
+  else
+    msge "Source filesystem: ${V_SOURCE_DIR_FS} is different from destination ${V_DEST_DIR_FS} . Exiting"
+    exit 1
+  fi
+
+
+  if [ "${V_SOURCE_DIR}" == "${V_DEST_DIR}" ]; then
+    msgd "Source and Destination path is the same. Doing nothing"
+  else
+    msgd "Preparing commands for path change"
+    echo "mv -i $V_SOURCE_PATH ${V_DEST_DIR}/${V_SOURCE_FILENAME}" >> $F_OUTPUT_SH_COMMANDS
+    echo "alter database rename file '$V_SOURCE_PATH' to '${V_DEST_DIR}/${V_SOURCE_FILENAME}';" >> $F_OUTPUT_SQL_COMMANDS
+  fi
+
+  msgd "${FUNCNAME[0]} Finished."
+} #f_change_location_db_file
+
+b_change_db_files_to_PGF_layout()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "This block checks if database files have standard layout"
+  # If block was run with CHECK parameter I exit now, before any permanent actions are done
+  if [ "$B_PAR" = "CHECK" ]; then
+    return 0
+  fi
+
+  msgi "This procedure can be used on RDBMS 10g or later. Checking if this is true."
+  f_execute_sql "select regexp_substr(VALUE, '[[:alnum:]]*') from v\$parameter where NAME='compatible';"
+  if [ "$V_EXECUTE_SQL" -le 10 ]; then
+    echo $V_EXECUTE_SQL
+    msgi "OK. 10g or above used."
+  else
+    echo $V_EXECUTE_SQL
+    msge "Can not continue. Not sufficient DB version."
+    exit 1
+  fi
+
+  msga "Creating directories for new layout"
+  run_command_e "mkdir -p /${ORACLE_SID}/u02/${ORACLE_SID}"
+  run_command_e "mkdir -p /${ORACLE_SID}/u03/${ORACLE_SID}"
+  run_command_e "mkdir -p /${ORACLE_SID}/u04/${ORACLE_SID}"
+  run_command_e "mkdir -p /${ORACLE_SID}/u05/${ORACLE_SID}"
+  run_command_e "mkdir -p /${ORACLE_SID}/${ORACLE_SID}_arch_1"
+  run_command_e "mkdir -p /${ORACLE_SID}/${ORACLE_SID}_arch_2"
+
+  # Cleaning output files
+  F_OUTPUT_SH_COMMANDS=$D_TMP/output.sh
+  F_OUTPUT_SQL_COMMANDS=$D_TMP/output.sql
+  rm -f $F_OUTPUT_SH_COMMANDS $F_OUTPUT_SQL_COMMANDS
+  touch $F_OUTPUT_SH_COMMANDS $F_OUTPUT_SQL_COMMANDS
+  check_file $F_OUTPUT_SH_COMMANDS
+  check_file $F_OUTPUT_SQL_COMMANDS
+  echo "#!/bin/bash" >> $F_OUTPUT_SH_COMMANDS
+  echo "set -x" >> $F_OUTPUT_SH_COMMANDS
+  chmod 750 $F_OUTPUT_SH_COMMANDS
+  echo "set echo on" >> $F_OUTPUT_SQL_COMMANDS
+  echo "set termout on" >> $F_OUTPUT_SQL_COMMANDS
+  echo "set feedback on" >> $F_OUTPUT_SQL_COMMANDS
+
+  msgi "Analysing controlfiles"
+  f_execute_sql "select NAME from v\$controlfile order by NAME;"
+  F_CTRLFILE=$D_TMP/b_PGF_db_files_layout.ctrlfile
+  run_command_e "cat $F_EXECUTE_SQL | grep -v '^ *\$' | grep -v 'rows selected' > $F_CTRLFILE"
+  V_CTRLFILE_NR=`cat $F_CTRLFILE | wc -l`
+  if [ "${V_CTRLFILE_NR}" -ge 5 ]; then
+    msge "This script is able to handle max 4 control files. Provided ${V_CTRLFILE_NR} Exiting."
+    exit 0
+  else
+    msgd "OK, ${V_CTRLFILE_NR} controlfiles found"
+  fi
+
+  V_ALTER_CTRL="alter system set control_files="
+  V_NR=2
+  while read V_CUR_CTRL_LOC
+  do
+    msgd "V_CUR_CTRL_LOC: $V_CUR_CTRL_LOC"
+    V_CUR_CTRL_LOC_BASENAME=`basename $V_CUR_CTRL_LOC` 
+    msgd "V_CUR_CTRL_LOC_BASENAME: $V_CUR_CTRL_LOC_BASENAME"
+    V_NEW_CTRL_LOC=/${ORACLE_SID}/u0${V_NR}/${ORACLE_SID}/$V_CUR_CTRL_LOC_BASENAME
+    msgd "V_NEW_CTRL_LOC: $V_NEW_CTRL_LOC"
+  
+    msgd "Preparing commands to change the ctrl file location"
+    echo "mv -i $V_CUR_CTRL_LOC $V_NEW_CTRL_LOC" >> $F_OUTPUT_SH_COMMANDS
+
+    msgd "Building alter system command"
+    V_ALTER_CTRL="${V_ALTER_CTRL}'${V_NEW_CTRL_LOC}',"
+    
+    V_NR=`expr ${V_NR} + 1`
+  done < $F_CTRLFILE
+
+  msgd "Chop the last , and add ;"
+  V_ALTER_CTRL=`echo ${V_ALTER_CTRL} | sed s/.$//`
+  V_ALTER_CTRL="${V_ALTER_CTRL} scope=spfile;"
+  msgi "V_ALTER_CTRL: ${V_ALTER_CTRL}"
+
+  msgi "Analysing logfile"
+  f_execute_sql "select member from v\$logfile;"
+  F_LOGFILE=$D_TMP/b_PGF_db_files_layout.logfile
+  run_command_e "cat $F_EXECUTE_SQL | grep -v '^ *\$' | grep -v 'rows selected' > $F_LOGFILE"
+  while read LINE
+  do
+    msgd "LINE: $LINE"
+    if [ ! -z "$LINE" ]; then
+      f_change_location_db_file $LINE "/${ORACLE_SID}/u02/${ORACLE_SID}"
+    fi
+    read LINE
+    msgd "LINE: $LINE"
+    if [ ! -z "$LINE" ]; then
+      f_change_location_db_file $LINE "/${ORACLE_SID}/u03/${ORACLE_SID}"
+    fi
+  done < $F_LOGFILE
+
+  msgi "Analysing dba_temp_files"
+  f_execute_sql "select file_name from dba_temp_files order by file_name;"
+  F_DBA_TEMP_FILES=$D_TMP/b_PGF_db_files_layout.dba_temp_files
+  run_command_e "cat $F_EXECUTE_SQL | grep -v '^ *\$' | grep -v 'rows selected' > $F_DBA_TEMP_FILES"
+  while read LINE
+  do
+    msgd $LINE
+    f_change_location_db_file $LINE "/${ORACLE_SID}/u05/${ORACLE_SID}"
+  done < $F_DBA_TEMP_FILES
+
+  msgi "Analysing dba_data_files"
+  f_execute_sql "select file_name from dba_data_files order by file_name;"
+  F_DBA_DATA_FILES=$D_TMP/b_PGF_db_files_layout.dba_data_files
+  run_command_e "cat $F_EXECUTE_SQL | grep -v '^ *\$' | grep -v 'rows selected' > $F_DBA_DATA_FILES"
+  while read LINE
+  do
+    msgd $LINE
+    V_FILENAME=`basename $LINE`
+    V_FILEPATH=`dirname $LINE`
+    
+    msgd "V_FILENAME: $V_FILENAME"
+    msgd "V_FILEPATH: $V_FILEPATH"
+
+    # I stripe filename from number and extention to be able to decide what to do with it
+    V_FILENAME_CORE=`echo $V_FILENAME | awk -F"." '{ print $1 }' | sed s/[0-9]//g | tr -d "_"`
+
+    case $V_FILENAME_CORE in 
+    "HALINDEKSY"|"HALINDEKSYST"|"TCINDX"|"tcindx")
+       msgd "pliki danych - uzytkownik - indeksy  -> /SID/u04/SID"
+       f_change_location_db_file $LINE "/${ORACLE_SID}/u04/${ORACLE_SID}"
+       ;;
+    "HALDANE"|"HALJN"|"HALUZYTK"|"HALREJ"|"HALDANEST"|"HALAR"|"MJREJESTRATOR"|"TELEPOCZTA"|"USERS"|"XADANE"|"HALDEVEL"|"xadane"|"halindeksyst"|"haluzytk"|"haldane"|"haljn"|"halindeksy"|"haldevel"|"tcdane"|"tcdevel"|"TCDANE"|"TCDEVEL")
+       msgd "pliki danych - uzytkownik - tabele -> /SID/u03/SID"
+       f_change_location_db_file $LINE "/${ORACLE_SID}/u03/${ORACLE_SID}"
+       ;;
+    "undotbs"|"xdb"|"users"|"tools"|"indx"|"drsys"|"system"|"perfstat"|"sysaux"|"PERFSTAT")
+       msgd "pliki danych - oracle - wszystko ( tabele indeksy, default temp ) -> /SID/u02/SID"
+       f_change_location_db_file $LINE "/${ORACLE_SID}/u02/${ORACLE_SID}"
+       ;;
+    *)
+       msge "Not known tablespace name, please setup a rule"
+       msgi "$V_FILENAME_CORE $V_FILENAME"
+       msge "exiting"
+       exit 1
+       ;;
+    esac
+  done < $F_DBA_DATA_FILES
+
+  msgi "Resulting shell commands in file: $F_OUTPUT_SH_COMMANDS"
+  #cat $F_OUTPUT_SH_COMMANDS
+
+  msgi "Resulting SQL commands in file: $F_OUTPUT_SQL_COMMANDS"
+  #cat $F_OUTPUT_SQL_COMMANDS
+
+  msga "To make the changes:"
+  msga "!! This procedure should not be used when Data Guard is configured. !!"
+  msga ""
+  msga "1. Issue the controlfile rename command"
+  msga "   > ${V_ALTER_CTRL}"
+  msga "2. Change the location of archivelogs"
+  msga "   > alter system set log_archive_dest_1='location=/${ORACLE_SID}/${ORACLE_SID}_arch_1' scope=spfile;"
+  msga "   > alter system set log_archive_dest_2='location=/${ORACLE_SID}/${ORACLE_SID}_arch_2' scope=spfile;"
+  msga "3. Shutdown cleanly database"
+  msga "   > shutdown immediate"
+  msga "4. Check the files content before running them"
+  msga "   less $F_OUTPUT_SH_COMMANDS"
+  msga "   less $F_OUTPUT_SQL_COMMANDS"
+  msga "5. Run the physical move commands"
+  msga "   $ cd `dirname $F_OUTPUT_SH_COMMANDS`"
+  msga "   $ ./`basename $F_OUTPUT_SH_COMMANDS`"
+  msga "6. Startup mount, run the SQL portion to update controlfile"
+  msga "   > startup mount"
+  msga "   > @`basename $F_OUTPUT_SQL_COMMANDS`"
+  msga "7. Open database"
+  msga "   > alter database open;"
+  msga "8. Investigate the old directories whether they can be deleted"
+
+  # Block actions start here
+  msgb "${FUNCNAME[0]} Finished."
+} #b_change_db_files_to_PGF_layout
+
+b_set_audit_file_dest()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgd "Running this block only on 10.2 database"
+  if [ ! "${V_RDBMS_VERSION}" = "10.2" ]; then
+    msgi "Performing this check only on 10.2 database. This is ${V_RDBMS_VERSION}. Skipping."
+    return 0
+  fi
+
+  msgi "Checking if audit_file_dest location has expected value"
+
+  f_execute_sql "select VALUE from v\$parameter where NAME='background_dump_dest';"
+  V_BASE_DIR=`dirname $V_EXECUTE_SQL`
+  msgd "V_BASE_DIR: $V_BASE_DIR"
+
+  f_execute_sql "select VALUE from v\$parameter where NAME='audit_file_dest';"
+  V_AUDIT_DIR=$V_EXECUTE_SQL
+  msgd "V_AUDIT_DIR: $V_AUDIT_DIR"
+
+  if [ "${V_AUDIT_DIR}" == "${V_BASE_DIR}/adump" ]; then
+    msgi "audit_file_dest has expected value: ${V_AUDIT_DIR}"
+    exit 0
+  else
+    msge "audit_file_dest has value: ${V_AUDIT_DIR} different that expected ${V_BASE_DIR}/adump"
+    msge "Run cd ~/scripto/oracle/create_db_scripts/oracle_setup; ./oracle_setup.sh b_set_audit_file_dest"
+    msge "To set proper audit_file_dest."
+  fi  
+
+  # If block was run with CHECK parameter I exit now, before any permanent actions are done
+  if [ "$B_PAR" = "CHECK" ]; then
+    return 0
+  fi
+
+  check_directory $V_BASE_DIR
+  run_command_e "mkdir -p $V_BASE_DIR/adump"
+
+  msgi "Set the value of audit_file_dest to $V_BASE_DIR/adump"
+  f_execute_sql "alter system set audit_file_dest='$V_BASE_DIR/adump' scope=spfile;"
+  cat $F_EXECUTE_SQL
+
+  msgi "Please note, the changes will be visible after the db restarts as this is static parameter"
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_set_audit_file_dest
+
+# Check if provided variable $1 is an integer and within range >= $2 and <= $3
+f_check_integer()
+{
+  msgd "${FUNCNAME[0]} Beginning."
+  V_INTEGER=$1
+  V_LOW=$2
+  V_HIGH=$3
+ 
+  check_parameter $V_INTEGER
+  check_parameter $V_LOW
+  check_parameter $V_HIGH
+
+  msgd "V_INTEGER: $V_INTEGER"
+  if [ ! $(echo "$V_INTEGER" | $GREP -E "^[0-9]+$") ]
+  then
+    msge "$V_INTEGER is not a valid integer, exiting"
+    exit 1
+  fi
+
+  if [ "${V_INTEGER}" -lt "${V_LOW}" ]; then
+    msge "Provided integer: ${V_INTEGER} is lower than provided minimum: ${V_LOW} . Exiting."
+    exit 1
+  fi
+
+  if [ "${V_INTEGER}" -gt "${V_HIGH}" ]; then
+    msge "Provided integer: ${V_INTEGER} is greater than provided maximum: ${V_HIGH} . Exiting."
+    exit 1
+  fi
+
+  msgd "${FUNCNAME[0]} Finished."
+} #f_check_integer
+
+b_add_new_redo()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "WARNING: This procedure is for testing purposes only"
+  msgb "I will add new redo to database"
+  msgb "- if standby redo exists I will add it too"
+  # If block was run with CHECK parameter I exit now, before any permanent actions are done
+  if [ "$B_PAR" = "CHECK" ]; then
+    return 0
+  fi
+
+  read -p "Provide size of redo in MB: " V_REDO_SIZE
+  msgd "V_REDO_SIZE: $V_REDO_SIZE"
+  f_check_integer $V_REDO_SIZE 50 5000
+
+  msgd "Trying to suggest reasonable location for redo logs"
+  msgd "Based on current redo location"
+  f_execute_sql "select member from v\$logfile where rownum < 3;"
+  F_LOGFILE=$D_TMP/b_add_new_redo.logfile
+  run_command_e "cat $F_EXECUTE_SQL | grep -v '^ *\$' | grep -v 'rows selected' > $F_LOGFILE"
+  while read LINE
+  do
+    V_REDO_LOC1=`dirname $LINE`
+    msgd "V_REDO_LOC1: $V_REDO_LOC1"
+    read LINE
+    V_REDO_LOC2=`dirname $LINE`
+    msgd "V_REDO_LOC2: $V_REDO_LOC2"
+  done < $F_LOGFILE
+
+  msgi "Based on current redo location "
+  msgi "I suggest the first redo location as : $V_REDO_LOC1"
+  msgi "I suggest the second redo location as: $V_REDO_LOC2"
+  read -p "Do you want to change the locatios of redo? (y/any)" V_ANSWER
+  if [ "$V_ANSWER" = "y" ]; then
+    read -p "Provide new first location of redo : " V_REDO_LOC1
+    read -p "Provide new second location of redo: " V_REDO_LOC2
+  fi
+  msgi "First location of redo : $V_REDO_LOC1"
+  msgi "Second location of redo: $V_REDO_LOC1"
+  
+  check_directory $V_REDO_LOC1
+  check_directory $V_REDO_LOC2
+
+  read -p "Provide number of redo log groups: " V_REDO_NR
+  f_check_integer $V_REDO_NR 3 50
+  msgd "V_REDO_NR: $V_REDO_NR"
+  msgi "Number of redo groups to be created: ${V_REDO_NR}"
+
+  msgd "Determining if standby redo should be first created"
+  msgi "Create pfile from spfile for the purpose of analysis"
+  f_execute_sql "create pfile from spfile;"
+
+  msgd "Checking if this database has a standby. I check for parameter: standby_file_management."
+  TMP_CHK=`cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep -v '^ *$' | grep -i standby_file_management`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -gt 0 ]; then
+    msgi "This is a standby configuration."
+    msgi "Determining starting group number"
+    f_execute_sql "select max(GROUP#) from v\$logfile;"
+    V_GROUP_START=$V_EXECUTE_SQL
+    msgd "V_GROUP_START: $V_GROUP_START"
+    msgi "I will start creating redo group from number $V_GROUP_START + 1"
+
+    F_GEN_STB_LOGFILE=$D_TMP/generate_standby_redo.sql
+    rm -f $F_GEN_STB_LOGFILE
+
+    msgi "If this is standby database I have to cancel recovery first"
+    f_execute_sql "select DATABASE_ROLE from v\$database;"
+    msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+    if [ "${V_EXECUTE_SQL}" = "PHYSICAL STANDBY" ]; then
+      msgd "Adding cancel recovery to script"
+      echo "ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;"  >> $F_GEN_STB_LOGFILE
+    fi
+
+    msgd "Generating SQLs to create new standby redo"
+    V_ITER=0
+    msgd "Increasing redo number to have + 1 of standby redo logs"
+    V_REDO_STB_NR=`expr ${V_REDO_NR} + 1 `
+    msgd "V_REDO_NR: $V_REDO_NR"
+    while [ ! ${V_ITER} -eq ${V_REDO_STB_NR} ]
+    do
+      V_ITER=`expr ${V_ITER} + 1 `
+      msgd "V_ITER: $V_ITER"
+      V_GROUP_NR=`expr ${V_GROUP_START} + ${V_ITER}`
+      msgd "V_GROUP_NR: $V_GROUP_NR"
+      echo "alter database add standby logfile group $V_GROUP_NR ('${V_REDO_LOC1}/stb_redo${V_REDO_SIZE}M${V_GROUP_NR}a.rdo','${V_REDO_LOC2}/stb_redo${V_REDO_SIZE}M${V_GROUP_NR}b.rdo') size ${V_REDO_SIZE}M;" >> $F_GEN_STB_LOGFILE
+    done
+
+    msgi "If this is standby database I have to start recovery after adding standby redo"
+    f_execute_sql "select DATABASE_ROLE from v\$database;"
+    msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+    if [ "${V_EXECUTE_SQL}" = "PHYSICAL STANDBY" ]; then
+      msgd "Adding recovery to script"
+      echo "ALTER DATABASE RECOVER MANAGED STANDBY DATABASE USING CURRENT LOGFILE DISCONNECT;"  >> $F_GEN_STB_LOGFILE
+    fi
+
+    cat $F_GEN_STB_LOGFILE
+    V_ANSWER=''
+    EXIT_WHILE=''
+    while [ ! "$EXIT_WHILE" ]
+    do
+      read -p "[wait] Do you want to run the SQL commands? (yes/no)" V_ANSWER
+      if [ "$V_ANSWER" = "yes" ]; then
+        f_execute_sql "@${F_GEN_STB_LOGFILE}"
+        cat $F_EXECUTE_SQL
+        EXIT_WHILE=1
+      fi
+      if [ "$V_ANSWER" = "no" ]; then
+        msgi "Doing nothing."
+        EXIT_WHILE=1
+      fi
+    done
+  fi # Actions if DB is DB with standby
+
+  msgi "Determining starting group number"
+  f_execute_sql "select max(GROUP#) from v\$logfile;"
+  V_GROUP_START=$V_EXECUTE_SQL
+  msgd "V_GROUP_START: $V_GROUP_START"
+  msgi "I will start creating redo group from number $V_GROUP_START + 1"
+
+  F_GEN_LOGFILE=$D_TMP/generate_redo.sql
+  rm -f $F_GEN_LOGFILE
+
+  msgi "If this is standby database I have to cancel recovery first"
+  f_execute_sql "select DATABASE_ROLE from v\$database;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  if [ "${V_EXECUTE_SQL}" = "PHYSICAL STANDBY" ]; then
+    msgd "Adding cancel recovery to script"
+    echo "ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;"  >> $F_GEN_LOGFILE
+    echo "alter system set STANDBY_FILE_MANAGEMENT=MANUAL scope=memory;"  >> $F_GEN_LOGFILE
+  fi
+
+  msgd "Generating SQLs to create new redo"
+  V_ITER=0
+  while [ ! ${V_ITER} -eq ${V_REDO_NR} ]
+  do
+    V_ITER=`expr ${V_ITER} + 1 `
+    msgd "V_ITER: $V_ITER"
+    V_GROUP_NR=`expr ${V_GROUP_START} + ${V_ITER}`
+    msgd "V_GROUP_NR: $V_GROUP_NR"
+    echo "alter database add logfile group $V_GROUP_NR ('${V_REDO_LOC1}/redo${V_REDO_SIZE}M${V_GROUP_NR}a.rdo','${V_REDO_LOC2}/redo${V_REDO_SIZE}M${V_GROUP_NR}b.rdo') size ${V_REDO_SIZE}M;" >> $F_GEN_LOGFILE
+  done
+
+  msgi "If this is standby database I have to start recovery after adding standby redo"
+  f_execute_sql "select DATABASE_ROLE from v\$database;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  if [ "${V_EXECUTE_SQL}" = "PHYSICAL STANDBY" ]; then
+    msgd "Adding recovery to script"
+    echo "alter system set STANDBY_FILE_MANAGEMENT=AUTO scope=memory;"  >> $F_GEN_LOGFILE
+    echo "ALTER DATABASE RECOVER MANAGED STANDBY DATABASE USING CURRENT LOGFILE DISCONNECT;"  >> $F_GEN_LOGFILE
+  fi
+
+  cat $F_GEN_LOGFILE
+  V_ANSWER=''
+  EXIT_WHILE=''
+  while [ ! "$EXIT_WHILE" ]
+  do
+    read -p "[wait] Do you want to run the SQL commands? (yes/no)" V_ANSWER
+    if [ "$V_ANSWER" = "yes" ]; then
+      f_execute_sql "@${F_GEN_LOGFILE}"
+      cat $F_EXECUTE_SQL
+      EXIT_WHILE=1
+    fi
+    if [ "$V_ANSWER" = "no" ]; then
+      msgi "Doing nothing."
+      EXIT_WHILE=1
+    fi
+  done
+
+  msgi "Listing potential groups to be droped"
+  f_execute_sql "select 'alter database drop logfile group '||GROUP#||';' from v\$log where BYTES > ${V_REDO_SIZE}*1024*1024 or BYTES < ${V_REDO_SIZE}*1024*1024;"
+  cat $F_EXECUTE_SQL
+  f_execute_sql "select 'alter database drop logfile group '||GROUP#||';' from v\$standby_log where BYTES > ${V_REDO_SIZE}*1024*1024 or BYTES < ${V_REDO_SIZE}*1024*1024;"
+  cat $F_EXECUTE_SQL
+
+  # Block actions start here
+  msgb "${FUNCNAME[0]} Finished."
+} #b_add_new_redo
+
+# Try to tnsping to all the databases found in tnsnames
+b_check_reachability_of_DBs_from_tnsnames()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "Try to tnsping to all the databases found in tnsnames"
+  # If block was run with CHECK parameter I exit now, before any permanent actions are done
+  if [ "$B_PAR" = "CHECK" ]; then
+    return 0
+  fi
+
+  F_TNSNAMES=$ORACLE_HOME/network/admin/tnsnames.ora
+  check_file $F_TNSNAMES
+
+  msgd "Prepare the list of tnsnames aliases to check"
+  cat $F_TNSNAMES | grep -v '(' | grep -v ')' | grep -v "^$" | grep -v "^#" | sed -e 's/=//' | awk -F"," '{ print $1 }' > $D_TMP/tns_alias.txt
+
+  check_file $D_TMP/tns_alias.txt
+
+  msgd "Loop through the list and try to tnsping each service"
+  while read LINE
+  do
+    msga "Checking $LINE"
+    tnsping $LINE > /dev/null
+    if [ $? -ne 0 ]; then
+      msge " >>> Failed to reach >>> $LINE"
+    else
+      msgi "Reached $LINE. OK."
+    fi
+  done < $D_TMP/tns_alias.txt
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_check_reachability_of_DBs_from_tnsnames
+
+b_switch_to_manual_from_ASMM()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "This block helps in switch from ASMM (sga_target) to manual memory management"
+  msgb " it takes the values of parameters currently set on database and produces"
+  msgb " a set of alter system commands to complete the task."
+  msgb "Based on https://twiki.pgf.com.pl/cgi-bin/twiki/view/Main/HalInfrastructureNoAsmm"
+  # If block was run with CHECK parameter I exit now, before any permanent actions are done
+  if [ "$B_PAR" = "CHECK" ]; then
+    return 0
+  fi
+
+  msgd "Check whether this DB is using ASMM at all"
+  msgi "Create pfile from spfile for the purpose of analysis"
+  f_execute_sql "create pfile from spfile;"
+
+  check_file "$ORACLE_HOME/dbs/init${ORACLE_SID}.ora"
+  V_TMP=`cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep -i sga_target | wc -l`
+  if [ "$V_TMP" -gt 0 ]; then
+    msgi "System has sga_target set to `cat $ORACLE_HOME/dbs/init${ORACLE_SID}.ora | grep -i sga_target`"
+  else
+    msge "System does not have a sga_target set, thus is not using ASMM. Exiting."
+    exit 0
+  fi
+
+  rm -f $D_TMP/no_more_asmm.txt
+
+  f_execute_sql "select * from (select 'alter system set '||parameter||'='||case when FINAL_SIZE/1024/1024 < 1024 then 1024 when FINAL_SIZE/1024/1024 > 1024 then FINAL_SIZE/1024/1024 end ||'M scope=spfile;' from v\$sga_resize_ops where parameter='db_cache_size' order by end_time desc) where rownum=1;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  echo $V_EXECUTE_SQL >> $D_TMP/no_more_asmm.txt
+
+  f_execute_sql "select * from (select 'alter system set '||parameter||'='||case when FINAL_SIZE/1024/1024 < 512 then 512 when FINAL_SIZE/1024/1024 > 512 then FINAL_SIZE/1024/1024 end ||'M scope=spfile;' from v\$sga_resize_ops where parameter='shared_pool_size' order by end_time desc) where rownum=1;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  echo $V_EXECUTE_SQL >> $D_TMP/no_more_asmm.txt
+ 
+  f_execute_sql "select * from (select 'alter system set '||parameter||'='||case when FINAL_SIZE/1024/1024 < 256 then 256 when FINAL_SIZE/1024/1024 > 256 then FINAL_SIZE/1024/1024 end ||'M scope=spfile;' from v\$sga_resize_ops where parameter='java_pool_size' order by end_time desc) where rownum=1;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  echo $V_EXECUTE_SQL >> $D_TMP/no_more_asmm.txt
+
+  f_execute_sql "select * from (select 'alter system set '||parameter||'='||case when FINAL_SIZE/1024/1024 < 64 then 64 when FINAL_SIZE/1024/1024 > 64 then FINAL_SIZE/1024/1024 end ||'M scope=spfile;' from v\$sga_resize_ops where parameter='large_pool_size' order by end_time desc) where rownum=1;"
+  msgd "V_EXECUTE_SQL: $V_EXECUTE_SQL"
+  echo $V_EXECUTE_SQL >> $D_TMP/no_more_asmm.txt
+
+  echo "alter system reset sga_target scope=spfile sid='*';" >> $D_TMP/no_more_asmm.txt
+
+  msgi "MANUALLY check and issue the following commands:"
+  cat $D_TMP/no_more_asmm.txt 
+
+  msgc "Have You issued the commands MANUALLY?" 
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_switch_to_manual_from_ASMM
+
+# 16 lines to yank
+b_template()
+{
+  B_PAR=$1 # Check if block was run with parameter
+  # Info section 
+  msgb "${FUNCNAME[0]} Beginning."
+  msgb "I will do that "
+  msgb "and that "
+  # If block was run with CHECK parameter I exit now, before any permanent actions are done
+  if [ "$B_PAR" = "CHECK" ]; then
+    return 0
+  fi
+
+  # Block actions start here
+  msgi "ala ma kota"
+  msgb "${FUNCNAME[0]} Finished."
+} #b_template
+
+# Execution of blocks
+
+#INFO_MODE=DEBUG
+#INFO_MODE=ERROR
+
+# If parameter 'block_name' was provided I execute only specified block
+SELECT_BLOCK=$1
+
+# Temporary directory temporary files, has to be unique
+D_TMP=/tmp/tmp_${USERNAME}_${ORACLE_SID}
+mkdir -p $D_TMP
+
+case $SELECT_BLOCK in
+  "b_crontab_scripts_to_rm_gzip_archivelogs")
+    b_crontab_scripts_to_rm_gzip_archivelogs $2
+    ;;
+  "b_create_temp_datafiles_for_temp_tbs_if_dont_exist")
+    b_create_temp_datafiles_for_temp_tbs_if_dont_exist $2
+    ;;
+  "b_basic_db_healthcheck")
+    b_basic_db_healthcheck $2
+    ;;
+  "b_implement_flashback_database")
+    b_implement_flashback_database $2
+    ;;
+  "b_check_mail_queue")
+    b_check_mail_queue $2
+    ;;
+  "b_forward_mail")
+    b_forward_mail $2
+    ;;
+  "b_change_profile")
+    b_change_profile $2
+    ;;
+  "b_store_in_cvs")
+    b_store_in_cvs
+    ;;
+  "b_basic_os_healthcheck")
+    b_basic_os_healthcheck
+    ;;
+  "b_change_db_files_to_PGF_layout")
+    b_change_db_files_to_PGF_layout
+    ;;
+  "s_standard_infrastructure_actions")
+    b_check_mail_queue
+    b_store_in_cvs
+    b_change_profile
+    b_forward_mail
+    b_basic_os_healthcheck
+    b_basic_db_healthcheck
+    ;; 
+  "b_check_and_fix_orphan_links_resulting_from_rsync_copy")
+    b_check_and_fix_orphan_links_resulting_from_rsync_copy $2
+    ;;
+  "b_set_audit_file_dest")
+    b_set_audit_file_dest $2
+    ;;
+  "b_add_new_redo")
+    b_add_new_redo
+    ;;
+  "b_check_reachability_of_DBs_from_tnsnames")
+    b_check_reachability_of_DBs_from_tnsnames
+    ;;
+  "b_switch_to_manual_from_ASMM")
+    b_switch_to_manual_from_ASMM
+    ;;
+  *)
+    echo "Please provide the block that You want to run."
+    echo "Available blocks: "
+    echo "b_crontab_scripts_to_rm_gzip_archivelogs"
+    echo "b_create_temp_datafiles_for_temp_tbs_if_dont_exist"
+    echo "b_basic_db_healthcheck"
+    echo "b_implement_flashback_database"
+    echo "b_check_and_fix_orphan_links_resulting_from_rsync_copy"
+    echo "b_change_db_files_to_PGF_layout"
+    echo "b_set_audit_file_dest"
+    echo "b_add_new_redo"
+    echo "b_check_reachability_of_DBs_from_tnsnames"
+    echo "b_switch_to_manual_from_ASMM"
+    echo ""
+    echo "Available sets of blocks:"
+    echo "s_standard_infrastructure_actions"
+    echo "- b_check_mail_queue"
+    echo "- b_store_in_cvs"
+    echo "- b_change_profile"
+    echo "- b_forward_mail"
+    echo "- b_basic_os_healthcheck"
+    echo "- b_basic_db_healthcheck"
+
+    exit 1
+    ;;
+esac
+
+rm -f tmp.sql
