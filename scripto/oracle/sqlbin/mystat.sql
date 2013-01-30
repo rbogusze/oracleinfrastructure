@@ -1,12 +1,11 @@
-Column value new_val V
-Define S="&1"
-Col name format a50
-Set feedback off
-Prompt
-Select a.name, b.value
+set echo off
+set verify off
+column value new_val V
+define S="&1"
+set autotrace off
+select a.name, b.value
 from v$statname a, v$mystat b
 where a.statistic# = b.statistic#
-and lower(a.name) like '%'||lower('&S')||'%'
+and lower(a.name) like '%' || lower('&S')||'%'
 /
-Prompt
-Set feedback on
+set echo on
