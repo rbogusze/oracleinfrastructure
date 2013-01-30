@@ -1,10 +1,9 @@
-Col name format a50
-Set feedback off
-Prompt
-Select a.name, b.value, b.value-&V diff
+set echo off
+set verify off
+select a.name, b.value V, to_char(b.value-&V,'999,999,999,999') diff
 from v$statname a, v$mystat b
 where a.statistic# = b.statistic#
-and lower(a.name) like '%'||lower('&S')||'%'
+and lower(a.name) like '%' || lower('&S')||'%'
 /
-Prompt
-Set feedback on
+set echo on
+
