@@ -1,0 +1,12 @@
+ORACLE =
+  (DESCRIPTION =
+    (ADDRESS_LIST =
+      (ADDRESS = (PROTOCOL = TCP)(HOST = 10.220.0.242)(PORT = 1521))
+    )
+    (CONNECT_DATA =
+      (SID = ADOLF)
+      (SERVER = DEDICATED)
+    )
+  )
+
+

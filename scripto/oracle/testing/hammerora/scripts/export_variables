@@ -1,0 +1,7 @@
+export ORACLE_HOME=~/instantclient_10_2
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+export TNS_ADMIN=~/hammerora/scripts
+echo "Setting the following variables"
+echo "ORACLE_HOME: $ORACLE_HOME"
+echo "LD_LIBRARY_PATH: $LD_LIBRARY_PATH"
+echo "TNS_ADMIN: $TNS_ADMIN"
