@@ -34,7 +34,7 @@ LOG_NAME=backup_to_disk_${ORACLE_SID}.log
 LOCKFILE=/tmp/backup_to_disk_${ORACLE_SID}.lock
 #INFO_MODE=DEBUG
 
-V_DATE=`$DATE '+%Y-%m-%d--%H:%M:%S'`
+V_DATE=`$DATE '+%Y-%m-%d--%H%M%S'`
 msgd "V_DATE: $V_DATE"
 
 # Sanity checks
