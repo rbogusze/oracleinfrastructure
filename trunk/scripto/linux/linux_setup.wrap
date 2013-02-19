@@ -163,6 +163,7 @@ b_set_uniq_hostname()
 
   V_HOSTNAME=`uname -n`
   msgd "V_HOSTNAME: $V_HOSTNAME"
+  msgi "Current hostname: $V_HOSTNAME"
   read -p "Do you want to change the hostname? (y/any)" V_ANSWER
   if [ ! "$V_ANSWER" = "y" ]; then
     msgi "No changes to hostname. Just basic network checks."
@@ -237,7 +238,7 @@ b_time_synchro()
     run_command "ntpdate pool.ntp.org"
     run_command "/etc/init.d/ntpd start"
     ;;
-  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     run_command "chkconfig ntpd on"
     run_command "/etc/init.d/ntpd start"
@@ -272,7 +273,7 @@ b_install_vmware_tools()
       check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4"
       run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4 /etc/yum.repos.d/vmware-tools.repo"
       ;;
-    "CentOS release 5.7 (Final)_x86_64")
+    "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64")
       msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
       check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.CentOS_5.7_x86_64"
       run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.CentOS_5.7_x86_64 /etc/yum.repos.d/vmware-tools.repo"
@@ -445,6 +446,8 @@ b_configure_static_ip()
     exit 1
   fi
 
+  V_CURR_IP=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i IPADDR`
+  msgi "Currently set in ifcfg-eth0: $V_CURR_IP"
 
   read -p "Do you want to set the static IP? (y/any)" V_ANSWER
   if [ ! "$V_ANSWER" = "y" ]; then
