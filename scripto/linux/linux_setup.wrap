@@ -27,7 +27,7 @@ b_setup_yum_repository()
     run_command "cp ./sup_files/yum.conf.CentOS_4.7_i686 /etc/yum.conf"
     run_command "yum clean all"
     ;;
-  "CentOS release 5.7 (Final)_x86_64")
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64")
     msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
 
     msgi "Base CentOS repository"
@@ -91,7 +91,7 @@ b_install_usefull_rpm()
   TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" -e "^subversion" | wc -l`
   if [ "$TMP_CHK" -lt 6 ]; then
     msga "Installing mutt rsync lynx dialog ..."
-    run_command "yum -y install mutt rsync lynx dialog ntp subversion vim-enhanced"
+    run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced"
   else
     msgi "mutt rsync lynx dialog ... already installed. Doing nothing."
   fi 
