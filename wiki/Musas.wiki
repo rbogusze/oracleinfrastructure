@@ -11,6 +11,8 @@ Installation
 $ cd
 $ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_musas_awr oi_musas_awr
 $ svn propset svn:keywords "Header" awr_reports.sh
+
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_musas_statspack oi_musas_statspack
 }}}
 
 Usual LDAP attributes
