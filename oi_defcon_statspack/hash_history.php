@@ -2,7 +2,7 @@
 /* $Id: hash_history.php,v 1.1 2011/07/27 18:52:22 remikcvs Exp $ */
 
 //Include HTML header
-require("/home/oracle/scripto/php/my_library.php");
+require("/home/orainf/scripto/php/my_library.php");
 require("header.php");
 require("hash_history_functions.php");
 echo "<tt>SQL History <BR></tt>";

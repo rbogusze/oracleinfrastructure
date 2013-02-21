@@ -37,7 +37,7 @@ function draw_chart_section($dir, $chart_data, $chart_leg, $data_module, $sectio
 function show_statspack($dir, $filename) {
 
 //Include
-require_once("/home/oracle/scripto/php/my_library.php");
+require_once("/home/orainf/scripto/php/my_library.php");
 
 // sanity check
 if (is_file($dir . $filename) ) {
