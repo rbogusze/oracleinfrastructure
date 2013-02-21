@@ -16,6 +16,7 @@ $ svn propset svn:keywords "Header" awr_reports.sh
 Usual LDAP attributes
 {{{
 orainfDbMusasMonitoring: TRUE
+orainfDbMusasMonitoringMode: awr | statspack
 orainfDbMusasStart: 08:00
 orainfDbMusasEnd: 16:00
 }}}
@@ -45,4 +46,10 @@ But as we have good old LDAP and configure there what we run on which database t
 # MUSAS_AWR - Generate AWR reports
 #
 16 16 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_awr; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh
+
+
+#
+# MUSAS_STATSPACK - Generate Statspack reports
+#
+09 21 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_statspack; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh; touch /tmp/ala_ma_kota2
 }}}
