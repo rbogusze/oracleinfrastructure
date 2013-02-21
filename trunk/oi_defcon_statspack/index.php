@@ -2,10 +2,10 @@
 /* $Id: index.php,v 1.2 2011/08/01 11:00:44 remikcvs Exp $ */
 
 //Include HTML header
-require_once("/home/oracle/scripto/php/my_library.php");
+require_once("/home/orainf/scripto/php/my_library.php");
 require("header.php");
 
-$dir="/var/www/html/musas1x/history/";
+$dir="/var/www/html/statspack_reports/";
 $filenames_array = array();
 $filenames_array_counter = 0;
 
