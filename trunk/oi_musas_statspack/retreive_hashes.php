@@ -4,7 +4,7 @@
 # Retreive hashes from provided statspack report
 # par1 - statspack report file
 # par2 - destination file
-require_once("/home/oracle/scripto/php/my_library.php");
+require_once("/home/orainf/scripto/php/my_library.php");
 
 if (!$argv[1] || !$argv[2]) { die("\nPlease provide required parameters\n"); }
 
