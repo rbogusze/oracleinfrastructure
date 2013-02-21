@@ -42,17 +42,18 @@ SNAP_END=$4
 
 TEMP_DIR=/tmp
 RUNNING_DIR=`pwd`
-HISTORY_DIR=$RUNNING_DIR/history
+HISTORY_DIR=/var/www/html/statspack_reports
 TEMP_HASH=${TEMP_DIR}/hash_list_$SERVICE_NAME.txt
 RETREIVE_HASHES=$RUNNING_DIR/retreive_hashes.php
 GET_DIAGNOSTIC=$RUNNING_DIR/get_diagnostic.sh
 
-run_command "mkdir -p ${HISTORY_DIR}/${SERVICE_NAME}"
+run_command_e "mkdir -p ${HISTORY_DIR}/${SERVICE_NAME}"
 
 # Extract date from SNAP_START for hash history
 HASH_DATE=`echo $SNAP_START | awk -F"--" '{print $1}'`
+msgd "HASH_DATE: $HASH_DATE"
 
-${TNSPING} $SERVICE_NAME >> /dev/null
+${TNSPING} $SERVICE_NAME >> /tmp/tnsping.out
 # Check the sucsess status if TNSPING
 if [ ! $? -ne 0 ]; then
   msgd "TNSPING to ${SERVICE_NAME} was sucessfull, now ask the questions."
@@ -161,6 +162,8 @@ EOF
 
   # Checkout the diagnostic scripts too
   #disabled now, 2 prio $GET_DIAGNOSTIC ${SERVICE_NAME}
-
+else
+  msge "Tnsping was not successfull. Exiting."
+  run_command_d "cat /tmp/tnsping.out"
 fi # Check the sucsess status if TNSPING
 
