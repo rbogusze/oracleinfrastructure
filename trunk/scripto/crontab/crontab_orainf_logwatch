@@ -2,4 +2,18 @@
 # RRDORA - monitoring waitow bazodanowych
 #
 */5 * * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_rrdora; ./prepare_rrdora.dblist.sh > rrdora.dblist; ./rrdora.rrd.sh rrdora.dblist; ./rrdora.get.sh rrdora.dblist; ./rrdora.img.sh rrdora.dblist
+12 18 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_rrdora; ./rrdora_history.sh > /dev/null
+#
+# ORALMS
+#
+*/42 * * * * /home/orainf/oi_oralms/oralms_gather_monitor.sh
+#
+# MUSAS_AWR - Generate AWR reports
+#
+09 22 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_awr; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh; touch /tmp/ala_ma_kota
+
+#
+# MUSAS_STATSPACK - Generate Statspack reports
+#
+09 21 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_statspack; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh; touch /tmp/ala_ma_kota2
 
