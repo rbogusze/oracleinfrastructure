@@ -1,0 +1,40 @@
+<?
+/**************************************
+* myPhpCalendar Language File
+* v 1.1.0
+* English
+*************************************/
+
+$str_noDataAvailable="No Appointments scheduled";
+$str_editDayCmd="Edit day";
+$str_editWeekCmd="Week overview";
+$str_editDayCmd2="Edit";						//in week.php
+$str_editMonthCmd="Month overview";
+$str_editAnnivCmd="Add anniversary";
+$str_weekDays=array("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
+$str_months=array("nothing", "January","February","March","April","May","June","July","August","September","October","November","December");
+$str_submitButton="Save Changes";
+$str_resetButton="Clear";
+$str_backToTodaysWeek="Back to today's week overview";
+$str_backToCurrentWeek="Back to actual entry's week overview";
+$str_backToMonth="Back to month overview";
+$str_windowClose="Close window";
+$str_nextWeekStr="Next week";
+$str_lastWeekStr="Last week";
+$str_nextMonthStr="Next month";
+$str_lastMonthStr="Last month";
+$str_anniversaryStr="Today's anniversaries";
+$str_saveSuccess="Data saved successfully";
+$str_saveFailure="Data could not be saved!";
+$str_openPostIt="Open phpPost-it";
+
+$str_username="Username";
+$str_password="Password";
+$str_password2="Retype password";
+$str_email="Email address";
+$str_lang="Language";
+$str_annivDate="Date of anniversary";
+$str_annivType="Type of anniversary";
+$str_annivTypes=array("", "Birthday", "Wedding day", "other");
+$str_anniversary="Anniversary";
+?>
