@@ -14,10 +14,19 @@ This project was born from the need to somehow show developers a nice picture th
 # mkdir /var/www/html/oi_defcon_awr
 # chown orainf:orainf /var/www/html/oi_defcon_awr
 
+# mkdir /var/www/html/oi_defcon_statspack
+# chown orainf:orainf /var/www/html/oi_defcon_statspack
+
 $ cd /var/www/html/
 $ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_defcon_awr oi_defcon_awr
 $ cd oi_defcon_awr
 $ tar xvzf jpgraph-1.20.5.tar.gz
+
+$ cd /var/www/html/
+$ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/oi_defcon_statspack oi_defcon_statspack
+$ cd oi_defcon_statspack
+$ tar xvzf jpgraph-1.20.5.tar.gz
+
 
 Enable apache user to access the /home/orainf/scripto/php/my_library.php
 # chmod g+rx /home/orainf/
@@ -34,6 +43,8 @@ $ scp arial.ttf root@logwatch:/usr/X11R6/lib/X11/fonts/truetype/
 Open the browser and direct it to defcon main directory.
 
 http://logwatch/oi_defcon_awr/
+
+http://logwatch/oi_defcon_statspack/
 
 You will be presented with a page allowing to chose a database. There is no LDAP parameter that controls which DB will be available here :). It is just the directories under /var/www/html/awr_reports/ that contain the awr/statspack reports.
 
