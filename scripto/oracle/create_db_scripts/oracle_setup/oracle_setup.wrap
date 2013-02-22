@@ -22,7 +22,6 @@ else
 fi
 
 SCRIPTO_DIR=`pwd`
-RECIPIENTS='Remigiusz_Boguszewicz'
 
 b_crontab_scripts_to_rm_gzip_archivelogs()
 {

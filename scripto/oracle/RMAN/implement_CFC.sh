@@ -7,8 +7,6 @@ else
   . ${HOME}/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='Remigiusz_Boguszewicz'
-
 B_PAR=$1 # Check if script was run with parameter
 
 # Set random time of check start to avoid running everything on the same time

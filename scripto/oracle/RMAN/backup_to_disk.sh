@@ -26,9 +26,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-#RECIPIENTS='remigiusz_boguszewicz'
-RECIPIENTS='dba'
-
 LOG_DIR=/var/tmp/backup_to_disk
 LOG_NAME=backup_to_disk_${ORACLE_SID}.log
 LOCKFILE=/tmp/backup_to_disk_${ORACLE_SID}.lock

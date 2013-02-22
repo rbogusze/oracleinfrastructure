@@ -7,7 +7,7 @@
 
 # if RECIPIENTS value is set, preserve it.
 
-[ -z "$RECIPIENTS" ] && RECIPIENTS='orainf@logwatch'
+[ -z "$RECIPIENTS" ] && RECIPIENTS='remigiusz.boguszewicz@gmail.com'
 
 # Level of messages
 [ -z "$INFO_MODE" ] && INFO_MODE='INFO'

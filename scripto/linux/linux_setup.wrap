@@ -10,7 +10,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='Remigiusz.Boguszewicz@gmail.com'
 #INFO_MODE=DEBUG
 INFO_MODE=INFO
 
