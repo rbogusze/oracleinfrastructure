@@ -16,7 +16,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='remigiusz_boguszewicz'
 INFO_MODE=DEBUG
 
 SP_PASS=$1

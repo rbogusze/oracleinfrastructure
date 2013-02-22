@@ -18,7 +18,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='Remigiusz_Boguszewicz'
 INFO_MODE=DEBUG
 
 # Sanity checks
