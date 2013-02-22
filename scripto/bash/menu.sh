@@ -14,7 +14,6 @@ fi
 
 #INFO_MODE=DEBUG
 INFO_MODE=INFO
-RECIPIENTS='dba@example.com'
 ORATAB=/etc/oratab
 
 # Find dialog
