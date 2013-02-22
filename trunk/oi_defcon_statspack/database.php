@@ -44,7 +44,7 @@ $filename = "snap_" . "$getFilenameDate";
 if (is_dir($dir)) {
    if ($dh = opendir($dir)) {
       while (($file = readdir($dh)) !== false) {
-        echo "filename: $file : filetype: " . filetype($dir . $file) . "<BR>";
+        //echo "filename: $file : filetype: " . filetype($dir . $file) . "<BR>";
         if ((filetype($dir . $file) == file)) {
           //echo "filename: $file <BR>";
           // Search for constructed string
