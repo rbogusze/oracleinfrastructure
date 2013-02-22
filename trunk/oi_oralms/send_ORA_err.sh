@@ -11,8 +11,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-#RECIPIENTS='Remigiusz_Boguszewicz@notes.pgf.com.pl'
-RECIPIENTS='dba@notes.pgf.com.pl'
 F_ERROR_FILE=/tmp/oralms_ORA.err
 D_ARCH_DIR=/tmp/oralms_ORA_arch
 

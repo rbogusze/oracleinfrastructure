@@ -20,7 +20,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='orainf@localhost'
 
 # Sanity check
 check_lock $LOCKFILE
