@@ -60,3 +60,10 @@ But as we have good old LDAP and configure there what we run on which database t
 #
 09 21 * * * . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_statspack; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh; touch /tmp/ala_ma_kota2
 }}}
+
+We shoul now see the reports lifter for every monitored database under:
+
+http://logwatch/awr_reports/
+
+http://logwatch/statspack_reports/
+
