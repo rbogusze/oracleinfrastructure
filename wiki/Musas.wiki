@@ -32,6 +32,11 @@ Some packages and directory setup
 {{{
 # mkdir /var/www/html/awr_reports
 # chown orainf:orainf /var/www/html/awr_reports
+
+# mkdir /var/www/html/statspack_reports
+# chown orainf:orainf /var/www/html/statspack_reports
+
+
 # yum install httpd
 # chkconfig httpd on
 # yum install php php-gd lynx
