@@ -12,7 +12,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='remigiusz_boguszewicz'
 #INFO_MODE=DEBUG
 F_PASSWORDS=$HOME/scripto/solaris/check_password/easy_passwords.txt
 check_file $F_PASSWORDS

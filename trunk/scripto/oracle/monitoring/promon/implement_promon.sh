@@ -7,7 +7,6 @@ else
   . ${HOME}/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='Remigiusz_Boguszewicz'
 
 check_directory "$HOME/scripto/oracle/create_db_scripts"
 cd $HOME/scripto/oracle/create_db_scripts

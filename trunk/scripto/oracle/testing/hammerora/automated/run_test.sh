@@ -29,8 +29,6 @@ else
   . ~/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='Remigiusz_Boguszewicz'
-
 # Sanity checks
 OS_USER_NAME=$1
 HOST_NAME=$2

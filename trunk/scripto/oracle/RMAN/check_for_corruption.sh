@@ -15,7 +15,6 @@ else
   . ${HOME}/scripto/bash/bash_library.sh
 fi
 
-RECIPIENTS='dba'
 LOG_DIR=/var/tmp/rman_logs
 LOG_NAME=check_for_corruptions.log
 LOCKFILE=/tmp/check_for_corruptions.lock
