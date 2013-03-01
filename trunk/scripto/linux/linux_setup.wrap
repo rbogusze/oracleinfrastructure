@@ -177,7 +177,7 @@ b_set_uniq_hostname()
   fi
 
   msgw "Ask for new name"
-  read -p "[wait] Please provide the new name: " V_NEW_NAME
+  read -p "[wait] Please provide the new name (without the domain, domain ${V_DOMAIN} will be automatically added): " V_NEW_NAME
   msgd "V_NEW_NAME: $V_NEW_NAME"
 
   msgi "Decide whether to add line to /etc/hosts"  
