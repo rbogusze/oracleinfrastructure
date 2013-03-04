@@ -1,3 +1,2 @@
-#Przydatne komendy podczas szkolenia
-
-= Konfiguracja testowego vm =
+== Konfiguracja testowego vm ==
+=== Zmiana rozdzielczości ekranu pod vmware ===
