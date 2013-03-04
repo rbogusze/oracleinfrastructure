@@ -1,2 +1,18 @@
 == Konfiguracja testowego vm ==
+=== Dlaczego sendmail uruchamia się tak długo? ===
+Próbuje on rozwiązać nazwę hosta tm11201.localdomain i czeka na timeout DNS, którym jest w tym momencie serwer na którym działa klient vmplayer'a.
+
+Aby mu pomóc określ aktualne IP maszyny wirtualnej
+{{{
+# ifconfig eth0
+eth0      Link encap:Ethernet  HWaddr 00:0C:29:3B:E4:25  
+          inet addr:192.168.211.174  Bcast:192.168.211.255  
+}}}
+
+I taki adres IP wstaw do pliku /etc/hosts, w tym przypadku:
+{{{
+# vi /etc/hosts
+192.168.211.174 tm11201.localdomain tm11201
+}}}
+
 === Zmiana rozdzielczości ekranu pod vmware ===
