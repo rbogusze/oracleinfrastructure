@@ -1,0 +1,3 @@
+#Przydatne komendy podczas szkolenia
+
+= Konfiguracja testowego vm =
