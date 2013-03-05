@@ -175,3 +175,9 @@ $ mv /JASIO/JASIO/*.dbf /KASIA/KASIA
 > alter database open;
 
 }}}
+
+Co się składa na pliki bazy danych
+{{{
+> set echo on
+> @files
+}}}
