@@ -97,3 +97,18 @@ select GROUP#,BYTES,STATUS from sys.v$log;
 > alter system switch logfile;
 > alter system checkpoint;
 }}}
+
+*Zadanie 3: Przełącz bazę w tryb archivelog*
+{{{
+> select LOG_MODE from v$database;
+
+> show parameter log_archive_dest_1
+$ mkdir -p /JASIO/arch
+> alter system set log_archive_dest_1='location=/JASIO/arch';
+> shutdown immediate
+> startup mount
+> alter database archivelog;
+> alter database open;
+> alter system switch logfile;
+
+}}}
