@@ -117,7 +117,7 @@ $ mkdir -p /JASIO/arch
 > alter system switch logfile;
 }}}
 
-*Zadanie 3: Sytuacja awaryjna: Baza nie uruchamia się ze względu na błędną wartość parametru inicjalizacyjnego*
+*Zadanie 4: Sytuacja awaryjna: Baza nie uruchamia się ze względu na błędną wartość parametru inicjalizacyjnego*
 {{{
 > alter system set log_archive_format='log_%S.arc' scope=spfile;
 > startup force
