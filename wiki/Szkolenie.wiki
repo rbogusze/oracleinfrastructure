@@ -69,6 +69,11 @@ Jak została utworzona moja baza
 alter database backup controlfile to trace;
 }}}
 
+Tworzenie spfile z inita
+{{{
+create spfile from pfile;
+startup force 
+}}}
 
 *Zadanie 1: Zrestartuj bazy danych JASIO i CZESIODBCA jednocześnie podglądając plik alertlog.*
 
