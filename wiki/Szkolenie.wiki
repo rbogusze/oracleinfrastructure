@@ -60,13 +60,16 @@ Strona kodowa: EE8ISO8859P2
 /ORABIN/db/admin/JASIO/scripts
 
 Jakie bazy działają na serwerze
+{{{
 $ ps -ef | grep pmon
+}}}
 
 Ustalenie zmiennych środowiskowych dla konkretnej bazy danych
+{{{
 $ env | grep ORA
 $ cat /etc/oratab
 $ . oraenv
-
+}}}
 
 
 
