@@ -19,6 +19,20 @@ I taki adres IP wstaw do pliku /etc/hosts, w tym przypadku:
 === Zmiana rozdzielczości ekranu pod vmware ===
 
 
+=== Tworzenie bazy danych ===
+
+Zaloguj się jako oracle na serwer bazodanowy
+
+Potwierdź dostępność narzędzia tworzącego bazę
+$ which dbca
+~/db/11.2.0.1/bin/dbca
+
+Przy uzyciu kreatora:
+$ dbca
+
+
+
+
 
 
 === Test ===
