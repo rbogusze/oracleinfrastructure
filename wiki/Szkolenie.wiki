@@ -144,5 +144,28 @@ NAME				     TYPE	 VALUE
 ------------------------------------ ----------- ----------
 spfile				     string	 /ORABIN/db/11.2.0.1/dbs/spfile
 						 JASIO.ora
+}}}
+
+*Zadanie 5: Zmiana położenia plików bazy danych*
+{{{
+Zmiana przeprowadzana jest poleceniem:
+> alter database rename file '/disk1/file1' to '/disk2/file1';
+
+Przygotuj komendy do zmiany na działającej bazie
+> select name from v$datafile;
+
+> spool rename.sql
+> select 'alter database rename file '''||name||''' to '''||REPLACE(name,'JASIO','KASIA')||'''; ' from v$datafile;
+> spool off
+
+Zamknij bazę 
+> shutdown immediate
+
+Fizycznie przesuń pliki
+# mkdir /KASIA
+# chown oracle:dba /KASIA
+$ mkdir /KASIA/KASIA
+> startup mount
+> @rename.sql
 
 }}}
