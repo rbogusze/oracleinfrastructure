@@ -241,15 +241,24 @@ $ tnsping ORACLE
 *Zadanie 6: konfiguracja konsoli administratora*
 
 Określenie statusu, jeżeli uruchomiona podaje adres pod jakim jest dostępna, np. https://oracle1:5500/em/ Logowanie jako użytkownik bazodanowy system.
-: $ emctl status dbconsole
+{{{
+$ export ORACLE_UNQNAME=$ORACLE_SID
+
+$ emctl status dbconsole
+}}}
 
 Uruchomienie
-: $ emctl start dbconsole
+{{{
+$ emctl start dbconsole
+}}}
 
 Zatrzymanie
-: $ emctl stop dbconsole
-
 {{{
-: $ emca -deconfig dbcontrol db -repos drop
-: $ emca -config dbcontrol db -repos create
+$ emctl stop dbconsole
+}}}
+
+Rekonfiguracja
+{{{
+$ emca -deconfig dbcontrol db -repos drop
+$ emca -config dbcontrol db -repos create
 }}}
