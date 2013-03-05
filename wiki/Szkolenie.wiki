@@ -86,6 +86,3 @@ background_dump_dest /ORABIN/db/diag/rdbms/jasio/JASIO/trace
 
 
 
-
-=== Test ===
-http://www.maxr.org/docs.php?id=41&s=0c25da309b5bdbded144cc1f664cdb88
