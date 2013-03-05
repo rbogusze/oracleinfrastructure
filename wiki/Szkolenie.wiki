@@ -64,11 +64,19 @@ Jakie bazy działają na serwerze
 $ ps -ef | grep pmon
 }}}
 
+Zadanie 1: Zrestartuj bazy danych JASIO i CZESIODBCA jednocześnie podglądając plik alertlog.
+
 Ustalenie zmiennych środowiskowych dla konkretnej bazy danych
 {{{
 $ env | grep ORA
 $ cat /etc/oratab
 $ . oraenv
+}}}
+
+Określenie położenia pliku alert log
+{{{
+> show parameter dump
+background_dump_dest /ORABIN/db/diag/rdbms/jasio/JASIO/trace
 }}}
 
 
