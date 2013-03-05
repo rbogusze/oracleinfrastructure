@@ -79,7 +79,12 @@ Określenie położenia pliku alert log
 background_dump_dest /ORABIN/db/diag/rdbms/jasio/JASIO/trace
 }}}
 
+*Zadanie 2: Utwórz 3 grupy redo o wielkości 100M i skasuj stare, w tej samej lokalizacji tylko o innej nazwie*
+{{{
+> column MEMBER format a50
+select * from v$logfile;
+select GROUP#,BYTES,STATUS from sys.v$log;
 
-
-
+> alter database add logfile group 4 ('/JASIO/oradata/redo100M6a.rdo') size 100M;
+}}}
 
