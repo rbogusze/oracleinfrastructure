@@ -211,7 +211,11 @@ Stop
 $ lsnrctl stop
 }}}
 
-Automatyczna rejestracja baz jeżeli listener działa na porcie defaultowym.
+Automatyczna rejestracja (po 5 min) baz jeżeli listener działa na porcie defaultowym. Lub wymuszona:
+{{{
+> alter system register;
+}}}
+
 
 Konfiguracja pliku tnsnames.ora
 {{{
