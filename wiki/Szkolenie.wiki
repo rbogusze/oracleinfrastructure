@@ -93,4 +93,7 @@ select GROUP#,BYTES,STATUS from sys.v$log;
 
 > alter database add logfile group 4 ('/JASIO/oradata/redo100M6a.rdo') size 100M;
 > alter database drop logfile group 1;
+
+> alter system switch logfile;
+> alter system checkpoint;
 }}}
