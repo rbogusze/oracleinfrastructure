@@ -198,3 +198,38 @@ $ mv /JASIO/JASIO/control02.ctl /KASIA/KASIA/control02.ctl
 
 > startup
 }}}
+
+*Zadanie 6: konfiguracja sieci*
+{{{
+Status
+$ lsnrctl status
+
+Start
+$ lsnrctl start
+
+Stop
+$ lsnrctl stop
+}}}
+
+Automatyczna rejestracja baz jeżeli listener działa na porcie defaultowym.
+
+Konfiguracja pliku tnsnames.ora
+{{{
+$ cd $ORACLE_HOME/network/admin/
+}}}
+
+Przykładowy wpis do tnsnames.ora
+{{{
+$ vim tnsnames.ora
+ORACLE =
+ (DESCRIPTION =
+   (ADDRESS_LIST =
+     (ADDRESS = (PROTOCOL = TCP)(Host = 10.0.255.193)(Port = 1521))
+   )
+ (CONNECT_DATA =
+   (SERVICE_NAME = TEST)
+ )
+)
+
+$ tnsping ORACLE
+}}}
