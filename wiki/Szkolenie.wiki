@@ -123,4 +123,26 @@ $ mkdir -p /JASIO/arch
 > startup force
 ORA-19905: log_archive_format must contain %s, %t and %r
 
+> create pfile from spfile;
+> shutdown immediate
+$ cd $ORACLE_HOME/dbs
+$ env | grep ORACLE_SID
+ORACLE_SID=JASIO
+$ mv spfileJASIO.ora spfileJASIO.ora.bck1
+$ vi initJASIO.ora
+*.log_archive_format='log_%S_%t_%r.arc'
+> startup
+> show parameter spfile
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- --------
+spfile				     string
+> create spfile from pfile;
+> startup force
+> show parameter spfile
+
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ----------
+spfile				     string	 /ORABIN/db/11.2.0.1/dbs/spfile
+						 JASIO.ora
+
 }}}
