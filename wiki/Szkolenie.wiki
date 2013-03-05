@@ -24,12 +24,31 @@ I taki adres IP wstaw do pliku /etc/hosts, w tym przypadku:
 Zaloguj się jako oracle na serwer bazodanowy
 
 Potwierdź dostępność narzędzia tworzącego bazę
+{{{
 $ which dbca
 ~/db/11.2.0.1/bin/dbca
+}}}
+
+Zwolnijmy miejsce na filesystemie
+{{{
+$ cd /BACKUP/
+$ rm arch_*
+$ rm db_*
+}}}
+
+Utwórzmy pusty katalog na nową bazę
+{{{
+# mkdir /JASIO
+$ id -a
+uid=600(oracle) gid=600(dba) groups=600(dba)
+# chown oracle:dba /JASIO
+$ touch /JASIO/ala_ma_kota
+}}}
 
 Przy uzyciu kreatora:
+{{{
 $ dbca
-
+}}}
 
 
 
