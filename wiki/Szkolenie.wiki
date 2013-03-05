@@ -64,6 +64,12 @@ Jakie bazy działają na serwerze
 $ ps -ef | grep pmon
 }}}
 
+Jak została utworzona moja baza
+{{{
+alter database backup controlfile to trace;
+}}}
+
+
 *Zadanie 1: Zrestartuj bazy danych JASIO i CZESIODBCA jednocześnie podglądając plik alertlog.*
 
 Ustalenie zmiennych środowiskowych dla konkretnej bazy danych
