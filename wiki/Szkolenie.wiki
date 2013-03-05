@@ -154,9 +154,13 @@ Zmiana przeprowadzana jest poleceniem:
 Przygotuj komendy do zmiany na działającej bazie
 > select name from v$datafile;
 
+> set linesize 200
 > spool rename.sql
 > select 'alter database rename file '''||name||''' to '''||REPLACE(name,'JASIO','KASIA')||'''; ' from v$datafile;
 > spool off
+
+Usuwamy śmieci
+$ vi rename.sql
 
 Zamknij bazę 
 > shutdown immediate
@@ -165,7 +169,9 @@ Fizycznie przesuń pliki
 # mkdir /KASIA
 # chown oracle:dba /KASIA
 $ mkdir /KASIA/KASIA
+$ mv /JASIO/JASIO/*.dbf /KASIA/KASIA
 > startup mount
 > @rename.sql
+> alter database open;
 
 }}}
