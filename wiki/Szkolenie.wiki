@@ -181,3 +181,20 @@ Co się składa na pliki bazy danych
 > set echo on
 > @files
 }}}
+
+Zmiana położenie plików controlfile
+{{{
+Określ aktualne położenie plików controlfile
+> select value from v$parameter where name='control_files';
+/JASIO/JASIO/control01.ctl, /JASIO/JASIO/control02.ctl
+
+Powiedzmy, że ustalamy miejsce docelowe na /KASIA/KASIA
+> alter system set control_files='/KASIA/KASIA/control01.ctl','/KASIA/KASIA/control02.ctl' scope=spfile;
+> shutdown immediate
+
+Fizycznie zmieniamy położenie plików controlfile
+$ mv /JASIO/JASIO/control01.ctl /KASIA/KASIA/control01.ctl
+$ mv /JASIO/JASIO/control02.ctl /KASIA/KASIA/control02.ctl
+
+> startup
+}}}
