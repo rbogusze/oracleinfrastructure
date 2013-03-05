@@ -159,7 +159,7 @@ Przygotuj komendy do zmiany na działającej bazie
 > select 'alter database rename file '''||name||''' to '''||REPLACE(name,'JASIO','KASIA')||'''; ' from v$datafile;
 > spool off
 
-Usuwamy śmieci
+Usuwamy śmieci tak żeby zostały tylko komendy 'alter database ...'
 $ vi rename.sql
 
 Zamknij bazę 
