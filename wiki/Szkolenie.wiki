@@ -358,4 +358,7 @@ RMAN> delete expired backup;
 
 RMAN> list backup;
 RMAN> delete backup;
+
+RMAN> drop database;
+
 }}}
