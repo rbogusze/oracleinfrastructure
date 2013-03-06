@@ -361,4 +361,7 @@ RMAN> delete backup;
 
 RMAN> drop database;
 
+Skasuj wpis nieistniejącej bazy z pliku oratab
+$ vi /etc/oratab
+-> to skasuj ZENEKDBCA:/ORABIN...
 }}}
