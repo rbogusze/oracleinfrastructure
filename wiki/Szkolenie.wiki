@@ -262,3 +262,26 @@ Rekonfiguracja
 $ emca -deconfig dbcontrol db -repos drop
 $ emca -config dbcontrol db -repos create
 }}}
+
+== Instalacja ASMLib ==
+
+Określ wersję jądra linuksa
+{{{
+# uname -a
+Linux tm11201 2.6.18-274.el5 #1 SMP Fri Jul 22 04:43:29 EDT 2011 x86_64 x86_64 x86_64 GNU/Linux
+# cat /etc/redhat-release 
+CentOS release 5.7 (Final)
+
+http://www.oracle.com/technetwork/topics/linux/asmlib/index-101839.html
+
+Red Hat Enterprise Linux 5 AS -> Intel EM64T (x86_64) Architecture -> 
+
+# wget http://download.oracle.com/otn_software/asmlib/oracleasmlib-2.0.4-1.el5.x86_64.rpm
+
+# wget http://oss.oracle.com/projects/oracleasm-support/dist/files/RPMS/rhel5/amd64/2.1.8/oracleasm-support-2.1.8-1.el5.x86_64.rpm
+
+# wget http://oss.oracle.com/projects/oracleasm/dist/files/RPMS/rhel5/amd64/2.0.5/2.6.18-274.el5/oracleasm-2.6.18-274.el5-2.0.5-1.el5.x86_64.rpm
+
+}}}
+
+
