@@ -438,6 +438,10 @@ $ sqlplus / as sysasm
 
 Konfigurator asm
 $ asmca
+lub
+> ALTER DISKGROUP DATA ADD DISK 'ORCL:DATA2' REBALANCE POWER 11;
+
+
 $ sqlplus / as sysasm
 > select * from V$ASM_OPERATION;
 > select * from V$ASM_OPERATION;
