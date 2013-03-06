@@ -386,7 +386,14 @@ $ cat /etc/oratab
 +ASM:/ORABIN/db/product/11.2.0/grid:N
 
 $ cd /ORABIN/db/product/11.2.0/grid
-
 }}}
 
+Tworzenie bazy na ASM
+{{{
 
+Zaloguj się jako oracle
+$ dbca
+
+
+
+}}}
