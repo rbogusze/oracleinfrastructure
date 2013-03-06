@@ -330,3 +330,32 @@ DATA1
 
 # ls -l /dev/oracleasm/disks
 }}}
+
+
+Czyścimy miejsce
+{{{
+Kasowanie bazy danych
+
+Ustaw środowisko wybranej bazy danych
+$ cd
+$ . menu.sh
+ORACLE_SID: ZENEKDBCA
+
+Wystartuj bazę w trybie mount restrict
+> shutdown abort
+> startup mount restrict
+
+Upewnij się, że to na pewno baza którą chcesz skasować
+> show parameter name
+$ env | grep ORACLE_SID
+
+$ rlwrap rman target /
+RMAN> list archivelog all;
+RMAN> delete archivelog all;
+
+RMAN> crosscheck backup;
+RMAN> delete expired backup;
+
+RMAN> list backup;
+RMAN> delete backup;
+}}}
