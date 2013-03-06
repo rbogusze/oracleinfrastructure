@@ -457,3 +457,8 @@ Usunięcie dysku z grupy
 > ALTER DISKGROUP DATA DROP DISK 'DATA1' REBALANCE POWER 5;
 > ALTER DISKGROUP DATA REBALANCE POWER 11;
 }}}
+
+Użytkownik testowy scott
+{{{
+@?/rdbms/admin/utlsampl.sql 
+}}}
