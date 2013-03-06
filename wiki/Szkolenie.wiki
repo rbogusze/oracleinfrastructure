@@ -403,7 +403,10 @@ Na dyskgrupie:
 > SELECT name, free_mb, total_mb, round(free_mb/total_mb*100) "%FREE" FROM v$asm_diskgroup;
 
 Na dysku:
-> select DISK_NUMBER, NAME, TOTAL_MB, FREE_MB from v$asm_disk;
+> select GROUP_NUMBER, DISK_NUMBER, NAME, TOTAL_MB, FREE_MB from v$asm_disk;
+
+GROUP_NUMBER DISK_NUMBER NAME				  TOTAL_MB    FREE_MB
+------------ ----------- ------------------------------ ---------- ----------
+	   1	       0 DATA1				     17406	15959
+
 }}}
-
-
