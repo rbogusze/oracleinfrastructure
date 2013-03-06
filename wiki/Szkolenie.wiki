@@ -461,6 +461,7 @@ Usunięcie dysku z grupy
 Użytkownik testowy scott
 {{{
 @?/rdbms/admin/utlsampl.sql
+> grant select any dictionary to scott;
 > connect scott/tiger
 > select table_name from user_tables;
 
