@@ -460,5 +460,15 @@ Usunięcie dysku z grupy
 
 Użytkownik testowy scott
 {{{
-@?/rdbms/admin/utlsampl.sql 
+@?/rdbms/admin/utlsampl.sql
+> connect scott/tiger
+> select table_name from user_tables;
+
+Pobranie czasu z bazy
+> select sysdate from dual;
+
+Pobranie SCNa z bazy
+> column CURRENT_SCN format 999999999999999;
+> select current_scn from v$database;
+
 }}}
