@@ -472,4 +472,11 @@ Pobranie SCNa z bazy
 > column CURRENT_SCN format 999999999999999;
 > select current_scn from v$database;
 
+Wyświetlić zawartość tabelki
+> select * from DEPT;
+> update dept set DNAME='ala' where 1=1;
+
+> select * from DEPT AS OF SCN 1047999;
+
+
 }}}
