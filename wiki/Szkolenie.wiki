@@ -327,4 +327,6 @@ Marking disk "DATA1" as an ASM disk:                       [  OK  ]
 
 # /usr/sbin/oracleasm listdisks
 DATA1
+
+# ls -l /dev/oracleasm/disks
 }}}
