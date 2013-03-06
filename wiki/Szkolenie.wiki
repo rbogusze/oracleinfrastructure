@@ -313,3 +313,18 @@ Command (m for help): w
 The partition table has been altered!
 
 }}}
+
+Naznaczanie urządzeń tagiem ASMlib
+{{{
+# /etc/init.d/oracleasm configure
+Default user to own the driver interface []: oracle
+Default group to own the driver interface []: dba
+Start Oracle ASM library driver on boot (y/n) [n]: y
+Scan for Oracle ASM disks on boot (y/n) [y]: y
+
+# /etc/init.d/oracleasm createdisk DATA1 /dev/sdb1
+Marking disk "DATA1" as an ASM disk:                       [  OK  ]
+
+# /usr/sbin/oracleasm listdisks
+DATA1
+}}}
