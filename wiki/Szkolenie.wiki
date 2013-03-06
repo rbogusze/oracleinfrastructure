@@ -429,4 +429,14 @@ Marking disk "DATA2" as an ASM disk:                       [  OK  ]
 DATA1
 DATA2
 
+Start ASM
+$ ps -ef | grep pmon
+$ . oraenv
+ORACLE_SID = [ZENEKDBCA] ? +ASM
+$ sqlplus / as sysasm
+> startup
+
+Konfigurator asm
+$ asmca
+
 }}}
