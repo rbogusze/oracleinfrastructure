@@ -282,6 +282,7 @@ Red Hat Enterprise Linux 5 AS -> Intel EM64T (x86_64) Architecture ->
 
 # wget http://oss.oracle.com/projects/oracleasm/dist/files/RPMS/rhel5/amd64/2.0.5/2.6.18-274.el5/oracleasm-2.6.18-274.el5-2.0.5-1.el5.x86_64.rpm
 
+Instalacja:
+# rpm -ivh oracleasmlib-2.0.4-1.el5.x86_64.rpm oracleasm-2.6.18-274.el5-2.0.5-1.el5.x86_64.rpm oracleasm-support-2.1.8-1.el5.x86_64.rpm
+
 }}}
-
-
