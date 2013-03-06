@@ -410,3 +410,23 @@ GROUP_NUMBER DISK_NUMBER NAME				  TOTAL_MB    FREE_MB
 	   1	       0 DATA1				     17406	15959
 
 }}}
+
+Dodawanie nowego dysku do ASM
+{{{
+# fdisk -l 
+Disk /dev/sdc: 18.2 GB, 18253611008 bytes
+
+Patrycjonujemy dysk
+# fdisk /dev/sdc
+# fdisk -l 
+/dev/sdc1               1        2219    17824086   83  Linux
+
+Tagujemy partcję ASMlibem
+# /etc/init.d/oracleasm createdisk DATA2 /dev/sdc1
+Marking disk "DATA2" as an ASM disk:                       [  OK  ]
+
+# /usr/sbin/oracleasm listdisks
+DATA1
+DATA2
+
+}}}
