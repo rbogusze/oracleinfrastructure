@@ -477,6 +477,7 @@ Wyświetlić zawartość tabelki
 > update dept set DNAME='ala' where 1=1;
 
 > select * from DEPT AS OF SCN 1047999;
-
+> ALTER TABLE scott.DEPT ENABLE ROW MOVEMENT;
+> FLASHBACK TABLE scott.DEPT TO SCN 1047999;
 
 }}}
