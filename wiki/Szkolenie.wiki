@@ -365,8 +365,6 @@ Skasuj wpis nieistniejącej bazy z pliku oratab
 $ vi /etc/oratab
 -> to skasuj ZENEKDBCA:/ORABIN...
 
-
-
 }}}
 
 
@@ -375,5 +373,20 @@ Przygotowanie mediów instalacyjnych
 $ cksum linux.x64_11gR2_grid.zip 
 3369676398 1052897657 linux.x64_11gR2_grid.zip
 $ unzip linux.x64_11gR2_grid.zip
+}}}
+
+Instalacja właściwa
+{{{
+$ cd grid/
+$ ./runInstaller
+
+
+Obserwacje
+$ cat /etc/oratab
++ASM:/ORABIN/db/product/11.2.0/grid:N
+
+$ cd /ORABIN/db/product/11.2.0/grid
 
 }}}
+
+
