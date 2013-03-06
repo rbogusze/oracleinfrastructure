@@ -438,5 +438,15 @@ $ sqlplus / as sysasm
 
 Konfigurator asm
 $ asmca
+$ sqlplus / as sysasm
+> select * from V$ASM_OPERATION;
+> select * from V$ASM_OPERATION;
+
+GROUP_NUMBER OPERA STAT      POWER     ACTUAL	   SOFAR   EST_WORK   EST_RATE
+------------ ----- ---- ---------- ---------- ---------- ---------- ----------
+EST_MINUTES ERROR_CODE
+----------- --------------------------------------------
+	   1 REBAL REAP 	 1	    0	     721	727	   684
+	  0
 
 }}}
