@@ -393,7 +393,17 @@ Tworzenie bazy na ASM
 
 Zaloguj się jako oracle
 $ dbca
-
-
-
 }}}
+
+
+Okreslenie zajetości miejsca w ASM
+{{{
+Na dyskgrupie:
+> @asm.sql
+> SELECT name, free_mb, total_mb, round(free_mb/total_mb*100) "%FREE" FROM v$asm_diskgroup;
+
+Na dysku:
+> select DISK_NUMBER, NAME, TOTAL_MB, FREE_MB from v$asm_disk;
+}}}
+
+
