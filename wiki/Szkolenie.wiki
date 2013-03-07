@@ -479,5 +479,30 @@ Wyświetlić zawartość tabelki
 > select * from DEPT AS OF SCN 1047999;
 > ALTER TABLE scott.DEPT ENABLE ROW MOVEMENT;
 > FLASHBACK TABLE scott.DEPT TO SCN 1047999;
+}}}
+
+
+=== Backup bazy danych ===
+
+Backup na filesystem
+{{{
+Lokalizacja na backupy
+
+Kasujemy niepotrzebne binaria instalacyjne
+$ cd /ORABIN/inst
+$ rm -Rf grid/
+$ df -h
+
+Sprawdzić prawo do zapisu
+$ touch /BACKUP/ala
+$ rm /BACKUP/ala
+
+Ustaw środowisko bazodanowe
+$ cd
+$ . menu.sh
+$ rman target / nocatalog
+> show all;
+
 
 }}}
+
