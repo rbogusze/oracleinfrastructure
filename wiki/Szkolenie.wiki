@@ -735,5 +735,9 @@ recover database;
 }
 > alter database open resetlogs;
 
+lub 
+restore database UNTIL SEQUENCE 3;
+recover database UNTIL SEQUENCE 3;
+alter database open resetlogs;
 
 }}}
