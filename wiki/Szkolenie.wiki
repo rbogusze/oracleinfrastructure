@@ -722,10 +722,12 @@ $ rlwrap rman target / nocatalog
   Thrd Seq     Low SCN    Low Time            Next SCN   Next Time
   ---- ------- ---------- ------------------- ---------- ---------
   1    2       1251808    2013-03-07 04:47:23 1251852    2013-03-07 04:47:57
+}}}
 
 Ostatnim backupen archiveloga jest Thrd 1 Seq 2, czyli w poleceniu 'set UNTIL SEQUENCE' musimy dodać +1 tak aby zrealizować aplikację tego ostatniego archiveloga.
 
-
+Właściwe odtwarzanie i dokręcanie.
+{{{
 run {
 set UNTIL SEQUENCE 3;
 restore database;
