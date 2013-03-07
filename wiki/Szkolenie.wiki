@@ -518,7 +518,7 @@ $ rm /BACKUP/ala
 Ustaw środowisko bazodanowe
 $ cd
 $ . menu.sh
-$ rman target / nocatalog
+$ rlwrap rman target / nocatalog
 > show all;
 
 > CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 8 DAYS;
@@ -527,5 +527,15 @@ $ rman target / nocatalog
 > BACKUP DATABASE FORMAT "/BACKUP/db_%U";
 > BACKUP ARCHIVELOG ALL FORMAT '/BACKUP/arch_%U';
 > BACKUP CURRENT CONTROLFILE FORMAT '/BACKUP/ctrl_%U';
+
+Wyświetl ukończone backupy:
+> list backup;
+
+Potwierdź fizyczne istnienie backupu z informacją o backupie
+> crosscheck backup;
+
+Usuń informacje o backupach których nie znaleziono
+> delete expired backup;
+
 
 }}}
