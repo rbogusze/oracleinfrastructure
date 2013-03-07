@@ -1,3 +1,5 @@
+<wiki:toc max_depth="5" />
+
 == Konfiguracja testowego vm ==
 
 === Dlaczego sendmail uruchamia się tak długo? ===
