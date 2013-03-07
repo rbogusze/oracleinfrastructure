@@ -674,6 +674,8 @@ ORA-27037: unable to obtain file status
 $ rlwrap rman target / nocatalog
 RMAN> restore database;
 RMAN> recover database;
-RMAN> alter database open resetlogs;
-}}}
 
+SQL> recover database until cancel;
+AUTO
+SQL> alter database open resetlogs;
+}}}
