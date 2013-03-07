@@ -705,6 +705,17 @@ $ ls -ltr
 $ rlwrap rman target / nocatalog
 > RESTORE SPFILE FROM '/BACKUP/db_0no3t9pt_1_1';
 
+Uruchomienie bazy z spfilea wyciągniętego z backupu
+> shutdown immediate
+> startup nomount
+> show parameter spfile
+/ORABIN/db/11.2.0.1/dbs/spfileJASIO.ora
+
+Wyciągnięcie z backupu controlfile
+$ ls -ltr /BACKUP
+> RESTORE CONTROLFILE FROM '/BACKUP/ctrl_0to3t9s0_1_1';
+
+
 
 
 }}}
