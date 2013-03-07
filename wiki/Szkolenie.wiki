@@ -796,4 +796,11 @@ RMAN> switch database to copy;
 RMAN> recover database;
 RMAN> alter database open;
 
+$ rlwrap sqlplus / as sysdba
+> select FILE_NAME from dba_data_files;
++DATA/jasio/datafile/users.276.809418967
++DATA/jasio/datafile/undotbs1.274.809418941
++DATA/jasio/datafile/sysaux.273.809418895
++DATA/jasio/datafile/system.272.809418845
+
 }}}
