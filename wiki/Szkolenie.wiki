@@ -609,3 +609,41 @@ run {
     alter database open resetlogs;
     }
 }}}
+
+
+Utrata redo logów po zamknięciu bazy:
+{{{
+> insert into skarby values ('jeszcze nowszy',100);
+> commit;
+
+> select * from skarby;
+super nowy			      100
+jeszcze nowszy			      100
+
+> select member from v$logfile;
+/JASIO/JASIO/redo03.log
+/JASIO/JASIO/redo02.log
+/JASIO/JASIO/redo01.log
+
+> shutdown immediate
+$ rm /JASIO/JASIO/redo03.log
+$ rm /JASIO/JASIO/redo02.log
+$ rm /JASIO/JASIO/redo01.log
+
+> show parameter background_dump_dest
+/ORABIN/db/diag/rdbms/jasio/JASIO/trace/
+
+> startup
+ORA-00313: open failed for members of log group 1 of thread 
+ORA-00312: online log 1 thread 1: '/JASIO/JASIO/redo01.log'
+USER (ospid: 9673): terminating the instance due to error 313
+
+> startup mount
+> recover database until cancel;
+Media recovery complete.
+> alter database open resetlogs;
+
+> select * from skarby;
+super nowy			      100
+jeszcze nowszy			      100
+}}}
