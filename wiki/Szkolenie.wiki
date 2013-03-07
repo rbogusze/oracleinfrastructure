@@ -570,10 +570,10 @@ $ rlwrap rman target / nocatalog
 > alter database open;
 
 Odtwarzanie na konkretny punkt w czasie
-$ rlwrap rman target / nocatalog
 $ export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
+$ rlwrap rman target / nocatalog
 run {
-    SET UNTIL TIME '2013-03-01 23:58:16';
+    SET UNTIL TIME '2013-03-07 02:40:37';
     restore database;
     recover database;
     alter database open resetlogs;
