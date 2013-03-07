@@ -895,7 +895,7 @@ Dysk dzielony został udostępniony dla dwóch serwerów na tych samuch zasadach
 
 {{{
 Widoczny w katalogu
-# cd dev/disk/by-path
+# cd /dev/disk/by-path
 # ls -l
 lrwxrwxrwx 1 root root  9 Mar  3 22:51 ip-192.168.1.49:3260-iscsi-iqn.2006-01.com.openfiler:tsn.user1-lun-0 -> ../../sdc
 
@@ -910,7 +910,33 @@ Na każdym z nodów:
 # /usr/sbin/oracleasm scandisks
 # /usr/sbin/oracleasm listdisks
 
-
 }}}
 
+=== Instalacja GI - Grid Infrastructure ===
+{{{
+Potwierdź poprawność konfiguracji
+$ cat /etc/hosts
 
+Upewnij się, adresy IP są rozwiązywane prawidłowo
+$ ping userx1
+$ ping userx1-priv
+$ ping userx2
+$ ping userx2-prix
+
+$ nslookup (ip publiczny obu nodów)
+$ nslookup (adres scan)
+$ nslookip (ip vip obu nodów)
+}}}
+
+Zaloguj się jako użytkownik oracle na pierwszy z nodów na graficzne środowisko serwera VNC.
+{{{
+$ cd /unziped/oracle/oracle11.2.0.3_linux_SE_EE_x86-64/grid
+$ ./runInstaller
+}}}
+
+=== Instalacja bazy danych RAC ===
+Zaloguj się jako użytkownik oracle na pierwszy z nodów na graficzne środowisko serwera VNC.
+{{{
+$ cd /unziped/oracle/oracle11.2.0.3_linux_SE_EE_x86-64/database
+$ ./runInstaller
+}}}
