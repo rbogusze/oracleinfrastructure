@@ -803,4 +803,21 @@ $ rlwrap sqlplus / as sysdba
 +DATA/jasio/datafile/sysaux.273.809418895
 +DATA/jasio/datafile/system.272.809418845
 
+Przejście z redo na ASM
+- utwórz nowe pliki redo na ASM, skasuj stare
+
+Przejście z controlfile na ASM
+> shutdown immediate
+
+> show parameter control_files
+control_files /KASIA/KASIA/control01.ctl, /KASIA/KASIA/control02.ctl
+
+> alter system set control_files = '+DATA/jasio/control01.ctl' scope=spfile;
+
+> shutdown immediate
+> startup nomount
+RMAN> restore controlfile to '+DATA/jasio/control01.ctl' from '/KASIA/KASIA/control01.ctl';
+> shutdown immediate
+> startup
+
 }}}
