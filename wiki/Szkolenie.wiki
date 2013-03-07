@@ -679,3 +679,31 @@ SQL> recover database until cancel;
 AUTO
 SQL> alter database open resetlogs;
 }}}
+
+Utrata wszystkich plików bazy danych
+{{{
+Zrób backup!
+
+SQL> shutdown abort
+
+Kasowanie plików bazy daych
+$ rm /ORABIN/db/11.2.0.1/dbs/spfileJASIO.ora
+$ rm /KASIA/KASIA/*
+$ rm /JASIO/JASIO/*
+$ rm /ZOSIA/ZOSIA/*
+
+$ cd $ORACLE_HOME/dbs
+$ vi initJASIO.ora
+db_name=JASIO
+sga_target=600M
+
+SQL> startup nomount
+
+Wyszukujemy pliku backupu bazy
+$ cd /BACKUP/
+$ ls -ltr
+
+
+
+
+}}}
