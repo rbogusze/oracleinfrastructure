@@ -542,11 +542,30 @@ Usuń informacje o backupach których nie znaleziono
 > delete expired backup;
 
 Tabelka testowa
+$ rlwrap sqlplus / as sysdba
 > create table skarby (nazwa varchar2(30), value number);
 > insert into skarby values ('super nowy',100);
 > commit;
 
+$ cd /ZOSIA/ZOSIA
+$ rm *.dbf
+
+SQL> startup force
+ORA-01157: cannot identify/lock data file 1 - see DBWR trace file
+ORA-01110: data file 1: '/ZOSIA/ZOSIA/system01.dbf'
 
 
+$ rlwrap rman target / nocatalog
+> restore database;
+> recover database;
+> alter database open;
 
+> drop table skarby;
+> shutdown abort
+> startup mount
+
+$ rlwrap rman target / nocatalog
+> restore database;
+> recover database;
+> alter database open;
 }}}
