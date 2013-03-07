@@ -836,3 +836,12 @@ $ echo "SPFILE='+DATA/jasio/spfileJASIO.ora'" > $ORACLE_HOME/dbs/initJASIO.ora
 
 > startup
 }}}
+
+Przeniesienie plików przestrzeni tymczasowej
+{{{
+> select FILE_NAME from dba_temp_files;
+/JASIO/JASIO/temp01.dbf
+
+> alter database tempfile '/JASIO/JASIO/temp01.dbf' drop including datafiles;
+> ALTER TABLESPACE "TEMP" ADD TEMPFILE '+DATA' SIZE 50M;
+}}}
