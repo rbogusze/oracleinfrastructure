@@ -713,9 +713,17 @@ Uruchomienie bazy z spfilea wyciągniętego z backupu
 
 Wyciągnięcie z backupu controlfile
 $ ls -ltr /BACKUP
+
+$ rlwrap rman target / nocatalog
 > RESTORE CONTROLFILE FROM '/BACKUP/ctrl_0to3t9s0_1_1';
-
-
+> alter database mount;
+> list backup;
+run {
+set UNTIL SEQUENCE 3;
+restore database;
+recover database;
+}
+> alter database open resetlogs;
 
 
 }}}
