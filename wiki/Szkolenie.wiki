@@ -570,6 +570,10 @@ $ rlwrap rman target / nocatalog
 > alter database open;
 
 Odtwarzanie na konkretny punkt w czasie
+$ rlwrap sqlplus / as sysdba
+> shutdown abort
+> startup mount
+
 $ export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
 $ rlwrap rman target / nocatalog
 run {
@@ -578,4 +582,8 @@ run {
     recover database;
     alter database open resetlogs;
     }
+
+RMAN> list incarnation;
+
+
 }}}
