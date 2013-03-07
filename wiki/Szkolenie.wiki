@@ -503,6 +503,8 @@ $ . menu.sh
 $ rman target / nocatalog
 > show all;
 
+> CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 8 DAYS;
+> CONFIGURE BACKUP OPTIMIZATION ON;
+
 
 }}}
-
