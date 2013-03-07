@@ -524,6 +524,10 @@ $ rlwrap rman target / nocatalog
 > CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 8 DAYS;
 > CONFIGURE BACKUP OPTIMIZATION ON;
 
+sqlplus> show parameter control_file_record_keep_time
+control_file_record_keep_time	     integer	 7
+
+
 > BACKUP DATABASE FORMAT "/BACKUP/db_%U";
 > BACKUP ARCHIVELOG ALL FORMAT '/BACKUP/arch_%U';
 > BACKUP CURRENT CONTROLFILE FORMAT '/BACKUP/ctrl_%U';
@@ -536,6 +540,13 @@ Potwierdź fizyczne istnienie backupu z informacją o backupie
 
 Usuń informacje o backupach których nie znaleziono
 > delete expired backup;
+
+Tabelka testowa
+> create table skarby (nazwa varchar2(30), value number);
+> insert into skarby values ('super nowy',100);
+> commit;
+
+
 
 
 }}}
