@@ -775,3 +775,8 @@ recover database;
 alter database open resetlogs;
 }
 }}}
+
+Przejście z bazą na ASM (lub dowolna zmiana podstawowego miejsca na którym jest baza danych)
+
+
+
