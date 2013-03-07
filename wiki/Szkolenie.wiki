@@ -670,4 +670,10 @@ $ rm /JASIO/JASIO/redo03.log /JASIO/JASIO/redo02.log /JASIO/JASIO/redo01.log
 ORA-00313: open failed for members of log group 3 of thread 1
 ORA-00312: online log 3 thread 1: '/JASIO/JASIO/redo03.log'
 ORA-27037: unable to obtain file status
+
+$ rlwrap rman target / nocatalog
+RMAN> restore database;
+RMAN> recover database;
+RMAN> alter database open resetlogs;
 }}}
+
