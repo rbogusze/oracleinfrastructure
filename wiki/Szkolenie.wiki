@@ -778,5 +778,22 @@ alter database open resetlogs;
 
 Przejście z bazą na ASM (lub dowolna zmiana podstawowego miejsca na którym jest baza danych)
 
+Gdzie znajdują się pliki bazy danych
+{{{
+$ rlwrap sqlplus / as sysdba
+> select FILE_NAME from dba_data_files;
+/ZOSIA/ZOSIA/users01.dbf
+/ZOSIA/ZOSIA/undotbs01.dbf
+/ZOSIA/ZOSIA/sysaux01.dbf
+/ZOSIA/ZOSIA/system01.dbf
 
+$ rlwrap rman target / nocatalog
+> BACKUP AS COPY DATABASE FORMAT '+DATA';
 
+SQL> shutdown immediate;
+SQL> startup mount
+RMAN> switch database to copy;
+RMAN> recover database;
+RMAN> alter database open;
+
+}}}
