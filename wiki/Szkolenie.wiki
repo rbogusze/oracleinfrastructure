@@ -484,6 +484,11 @@ Wyświetlić zawartość tabelki
 
 === Backup bazy danych ===
 
+Dodajmy dysk na potrzeby backupu
+1. Zamknij maszynę wirtualną
+2. Dodaj dysk poprzez 'Edit virtual machine settings' -> Add... -> Hard Disk (rozmiar 30G, reszta ustawień defaultowa)
+
+
 Backup na filesystem
 {{{
 Lokalizacja na backupy
@@ -507,5 +512,7 @@ $ rman target / nocatalog
 > CONFIGURE BACKUP OPTIMIZATION ON;
 
 > BACKUP DATABASE FORMAT "/BACKUP/db_%U";
+> BACKUP ARCHIVELOG ALL FORMAT '/BACKUP/arch_%U';
+> BACKUP CURRENT CONTROLFILE FORMAT '/BACKUP/ctrl_%U';
 
 }}}
