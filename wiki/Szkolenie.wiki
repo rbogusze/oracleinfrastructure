@@ -583,7 +583,27 @@ run {
     alter database open resetlogs;
     }
 
+
+
+Powrót do inkarnacji ojca i zmiana czasu wycofania bazy
 RMAN> list incarnation;
+DB Key  Inc Key DB Name  DB ID            STATUS  Reset SCN  Reset Time
+------- ------- -------- ---------------- --- ---------- ----------
+1       1       JASIO    2326726408       PARENT  1          2009-08-15 00:16:43
+2       2       JASIO    2326726408       PARENT  945184     2013-03-05 01:22:20
+3       3       JASIO    2326726408       CURRENT 1248412    2013-03-07 02:57:55
 
+$ rlwrap sqlplus / as sysdba
+> shutdown abort
+> startup mount
 
+$ export NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
+$ rlwrap rman target / nocatalog
+> reset database to incarnation 2;
+run {
+    SET UNTIL TIME '2013-03-07 02:45:37';
+    restore database;
+    recover database;
+    alter database open resetlogs;
+    }
 }}}
