@@ -882,5 +882,35 @@ Ciekawe narzędzia monitorujące
 # iftop
 # nmon
 
+ASMlib OEL6
+# yum install oracleasm-support
+# /etc/init.d/oracleasm configure
+
 
 }}}
+
+=== Konfiguracja udziału dzielonego dla ASM ===
+
+Dysk dzielony został udostępniony dla dwóch serwerów na tych samuch zasadach poprzez interfejs iscsi.
+
+{{{
+Widoczny w katalogu
+# cd dev/disk/by-path
+# ls -l
+lrwxrwxrwx 1 root root  9 Mar  3 22:51 ip-192.168.1.49:3260-iscsi-iqn.2006-01.com.openfiler:tsn.user1-lun-0 -> ../../sdc
+
+Utwórz partycję na dysku
+# fdisk /dev/sdc
+
+Naznacz partycję tagiem ASMLiba
+# /etc/init.d/oracleasm createdisk DATA1 /dev/sdc1
+
+Na każdym z nodów:
+# partprobe
+# /usr/sbin/oracleasm scandisks
+# /usr/sbin/oracleasm listdisks
+
+
+}}}
+
+
