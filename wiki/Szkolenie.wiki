@@ -741,3 +741,37 @@ recover database UNTIL SEQUENCE 3;
 alter database open resetlogs;
 
 }}}
+
+Wyciągnięcie starego pliku controlfile i rejestracja w nim pozostałych backupów
+{{{
+$ rlwrap sqlplus / as sysdba
+> shutdown abort
+> startup nomount
+
+Wybieramy controlfile automatycznie utworzony podczas backupu bazy danych, pliki zaczynające się od db_
+$ ls -ltr /BACKUP
+$ rlwrap rman target / nocatalog
+> RESTORE CONTROLFILE FROM '/BACKUP/db_0no3t9pt_1_1';
+> alter database mount;
+> list backup;
+
+  File LV Type Ckp SCN    Ckp Time            Name
+  ---- -- ---- ---------- ------------------- ----
+  1       Full 1251755    2013-03-07 04:45:38 /ZOSIA/ZOSIA/system01.dbf
+  2       Full 1251755    2013-03-07 04:45:38 /ZOSIA/ZOSIA/sysaux01.dbf
+  3       Full 1251755    2013-03-07 04:45:38 /ZOSIA/ZOSIA/undotbs01.dbf
+  4       Full 1251755    2013-03-07 04:45:38 /ZOSIA/ZOSIA/users01.dbf
+
+Backup ten musi zostać uspójniony, a baza nie zna archivelogów którymi mogłaby to zrobić.
+
+$ rlwrap rman target / nocatalog
+> CATALOG START WITH '/BACKUP/';
+
+I dopiero teraz komenda na odtwarzania
+run {
+set UNTIL SEQUENCE 3;
+restore database;
+recover database;
+alter database open resetlogs;
+}
+}}}
