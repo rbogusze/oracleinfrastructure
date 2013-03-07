@@ -821,3 +821,16 @@ RMAN> restore controlfile to '+DATA/jasio/control01.ctl' from '/KASIA/KASIA/cont
 > startup
 
 }}}
+
+Przejście z spfile na ASM
+{{{
+> create pfile from spfile;
+> create spfile='+DATA/jasio/spfileJASIO.ora' from 
+pfile='/ORABIN/db/11.2.0.1/dbs/initJASIO.ora';
+
+$ cd $ORACLE_HOME/dbs
+$ mv spfileJASIO.ora spfileJASIO.ora.bck2
+$ mv initJASIO.ora initJASIO.ora.bck2
+$ echo "SPFILE='+DATA/jasio/spfileJASIO.ora'" > $ORACLE_HOME/dbs/initJASIO.ora
+
+}}}
