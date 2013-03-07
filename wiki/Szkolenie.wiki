@@ -21,7 +21,7 @@ I taki adres IP wstaw do pliku /etc/hosts, w tym przypadku:
 === Zmiana rozdzielczości ekranu pod vmware ===
 
 
-=== Tworzenie bazy danych ===
+== Tworzenie bazy danych ==
 
 Zaloguj się jako oracle na serwer bazodanowy
 
@@ -844,4 +844,43 @@ Przeniesienie plików przestrzeni tymczasowej
 
 > alter database tempfile '/JASIO/JASIO/temp01.dbf' drop including datafiles;
 > ALTER TABLESPACE "TEMP" ADD TEMPFILE '+DATA' SIZE 50M;
+}}}
+
+
+== Instalacja RAC ==
+=== Przygotowanie systemu operacyjnego ===
+{{{
+Wyłączenie SE Linux
+# vi /etc/selinux/config
+SELINUX=disabled 
+
+Wyłączenie firewall
+# service iptables stop
+# chkconfig iptables off
+
+Instalacja synchronizacji czasu
+# yum install ntp
+# chkconfig --levels 235 ntpd on
+# ntpdate 0.rhel.pool.ntp.org
+# service ntpd start
+
+Aby uniknąć następującego błędu podczas instalacji bazy:
+PRVF-5439 : NTP daemon does not have slewing option "-x" set on node "rac1"
+
+# service ntpd stop
+# vim /etc/sysconfig/ntpd
+OPTIONS="-u ntp:ntp -p /var/run/ntpd.pid"
+to
+OPTIONS="-x -u ntp:ntp -p /var/run/ntpd.pid"
+# service ntpd start
+
+Instalacja wymaganych pakietów systemowych dla OEL6 pod bazę 11g
+# yum install oracle-rdbms-server-11gR2-preinstall xorg-x11-apps 
+# yum install wget unzip libX11-devel which libXScrnSaver telnet
+
+Ciekawe narzędzia monitorujące
+# iftop
+# nmon
+
+
 }}}
