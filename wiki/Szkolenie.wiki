@@ -702,7 +702,8 @@ SQL> startup nomount
 Wyszukujemy pliku backupu bazy
 $ cd /BACKUP/
 $ ls -ltr
-
+$ rlwrap rman target / nocatalog
+> RESTORE SPFILE FROM '/BACKUP/db_0no3t9pt_1_1';
 
 
 
