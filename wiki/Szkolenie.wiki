@@ -488,6 +488,16 @@ Dodajmy dysk na potrzeby backupu
 1. Zamknij maszynę wirtualną
 2. Dodaj dysk poprzez 'Edit virtual machine settings' -> Add... -> Hard Disk (rozmiar 30G, reszta ustawień defaultowa)
 
+Po starcie zaloguj jako root
+# fdisk -l
+Disk /dev/sdb: 32.2 GB, 32212254720 bytes
+
+# fdisk /dev/sdb
+# mkfs.ext3 /dev/sdb1
+# rm -f /BACKUP/*
+# echo "/dev/sdb1 /BACKUP ext3 defaults 0 0" >> /etc/fstab 
+# mount /BACKUP/
+
 
 Backup na filesystem
 {{{
