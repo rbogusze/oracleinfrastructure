@@ -718,6 +718,14 @@ $ rlwrap rman target / nocatalog
 > RESTORE CONTROLFILE FROM '/BACKUP/ctrl_0to3t9s0_1_1';
 > alter database mount;
 > list backup;
+  List of Archived Logs in backup set 21
+  Thrd Seq     Low SCN    Low Time            Next SCN   Next Time
+  ---- ------- ---------- ------------------- ---------- ---------
+  1    2       1251808    2013-03-07 04:47:23 1251852    2013-03-07 04:47:57
+
+Ostatnim backupen archiveloga jest Thrd 1 Seq 2, czyli w poleceniu 'set UNTIL SEQUENCE' musimy dodać +1 tak aby zrealizować aplikację tego ostatniego archiveloga.
+
+
 run {
 set UNTIL SEQUENCE 3;
 restore database;
