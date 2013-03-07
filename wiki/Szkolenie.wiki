@@ -554,7 +554,7 @@ SQL> startup force
 ORA-01157: cannot identify/lock data file 1 - see DBWR trace file
 ORA-01110: data file 1: '/ZOSIA/ZOSIA/system01.dbf'
 
-
+Odtwarzanie pełne
 $ rlwrap rman target / nocatalog
 > restore database;
 > recover database;
@@ -568,4 +568,13 @@ $ rlwrap rman target / nocatalog
 > restore database;
 > recover database;
 > alter database open;
+
+Odtwarzanie na konkretny punkt w czasie
+$ rlwrap rman target / nocatalog
+run {
+    SET UNTIL TIME '2012-01-01 23:58:16';
+    restore database;
+    recover database;
+    alter database open resetlogs;
+    }
 }}}
