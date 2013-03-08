@@ -977,3 +977,26 @@ Zaloguj się jako użytkownik oracle na pierwszy z nodów na graficzne środowis
 $ cd /unziped/oracle/oracle11.2.0.3_linux_SE_EE_x86-64/database
 $ ./runInstaller
 }}}
+
+=== Deinstalacja oprogramowania klastrowego i bazy ===
+W tym celu musimy lokalnie podiadać deinstalatora binariów oraclowych\
+
+Zaloguj się jako użytkownik oracle na hoście na którym chcesz odinstalować binaria.
+
+{{{
+$ mkdir /u01/inst
+$ cp /mirror/oracle/oracle11.2.0.3_linux_SE_EE_x86-64/p10404530_112030_Linux-x86-64_7of7.zip /u01/inst/
+$ cd /u01/inst/
+$ unzip p10404530_112030_Linux-x86-64_7of7.zip
+$ cd deinstall
+$ ./deinstall -home /u01/app/oracle/product/11.2.0/dbhome_1
+$ ./deinstall -home /u01/app/11.2.0/grid
+
+rm -Rf /etc/ora*
+rm -Rf /tmp/*
+rm -Rf /var/tmp/*
+rm -Rf /u01/app
+rm -f /etc/init.d/init.ohasd /etc/init.d/ohasd
+chown oracle:oinstall /u01
+reboot
+}}}
