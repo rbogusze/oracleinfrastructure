@@ -933,7 +933,7 @@ Upewnij się, adresy IP są rozwiązywane prawidłowo
 $ ping userx1
 $ ping userx1-priv
 $ ping userx2
-$ ping userx2-prix
+$ ping userx2-priv
 
 $ nslookup (ip publiczny obu nodów)
 $ nslookup (adres scan)
