@@ -1000,3 +1000,48 @@ rm -f /etc/init.d/init.ohasd /etc/init.d/ohasd
 chown oracle:oinstall /u01
 reboot
 }}}
+
+=== Instalacja bazy danych ===
+Zaloguj się jako użytkownik oracle na pierwszy z nodów
+$ cd /u01/app/oracle/product/11.2.0/dbhome_1/bin
+$ ./dbca
+
+=== RAC: Procedura odzyskania z backupu na konkretny punkt w czasie ===
+
+Jeżeli zajdzie potrzeba odzyskania stanu bazy z backupu na konkretny
+punkt w czasie wykonaj następujące punkty:
+
+Uruchom tylko jedną instancję bazy danych
+
+{{{
+    > alter system set cluster_database=false scope=spfile sid='RAC1';
+    $ srvctl stop database -d RAC
+    $ sqlplus / as sysdba
+    > startup mount
+}}}
+
+Ustaw środowisko bazodanowe i podłącz się do RMANa
+
+{{{
+    $ NLS_DATE_FORMAT='YYYY-MM-DD HH24:MI:SS'
+    $ export NLS_DATE_FORMAT
+    $ NLS_LANG=AMERICAN_AMERICA.EE8ISO8859P2
+    $ export NLS_LANG
+    $ rman "target / nocatalog"
+    run {
+    SET UNTIL TIME '2012-01-01 23:58:16';
+    restore database;
+    recover database;
+    alter database open resetlogs;
+    }
+}}}
+
+Włącz drugą instancję
+
+{{{
+    > alter system set cluster_database=true scope=spfile sid='RAC1';
+    > shutdown immediate
+    $ srvctl start database -d RAC
+}}}
+
+
