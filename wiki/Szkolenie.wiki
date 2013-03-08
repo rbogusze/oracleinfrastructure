@@ -947,7 +947,10 @@ $ ./runInstaller
 }}}
 
 Błędy:
-*PRVF-5636 : The DNS response time for an unreachable node exceeded*
+
+*Task resolve.conf integrity*
+
+PRVF-5636 : The DNS response time for an unreachable node exceeded
 {{{
 "15000" ms on following nodes
 
