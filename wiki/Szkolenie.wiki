@@ -1003,8 +1003,10 @@ reboot
 
 === Instalacja bazy danych ===
 Zaloguj się jako użytkownik oracle na pierwszy z nodów
+{{{
 $ cd /u01/app/oracle/product/11.2.0/dbhome_1/bin
 $ ./dbca
+}}}
 
 === RAC: Procedura odzyskania z backupu na konkretny punkt w czasie ===
 
@@ -1059,4 +1061,3 @@ Włącz drugą instancję
 
 
 }}}
-
