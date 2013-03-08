@@ -1059,5 +1059,7 @@ Włącz drugą instancję
     $ srvctl start instance -d RAC -i RAC1
     $ srvctl start instance -d RAC -i RAC2
 
+Status klastra
+$ crsctl stat res -t
 
 }}}
