@@ -1103,7 +1103,15 @@ Włącz drugą instancję
     $ srvctl start instance -d RAC -i RAC1
     $ srvctl start instance -d RAC -i RAC2
 
+
+}}}
+
 Status klastra
+{{{
+Ustaw środowisko na ASM
+$ . oraenv
+ORACLE_SID = [RAC] ? +ASM1
+
 $ crsctl stat res -t
 
 }}}
