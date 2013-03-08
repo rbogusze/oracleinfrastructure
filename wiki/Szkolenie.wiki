@@ -1020,6 +1020,9 @@ $ srvctl stop database -d RAC
 $ sqlplus / as sysdba
 > startup mount
 > alter database archivelog;
+> alter system set cluster_database=true scope=spfile sid='RAC1';
+    > shutdown immediate
+    $ srvctl start database -d RAC
 }}}
 
 === RAC: Procedura odzyskania z backupu na konkretny punkt w czasie ===
