@@ -1075,7 +1075,7 @@ Ustaw środowisko bazodanowe i podłącz się do RMANa
     $ export NLS_LANG
     $ rman "target / nocatalog"
     run {
-    SET UNTIL TIME '2012-01-01 23:58:16';
+    SET UNTIL TIME '2013-03-08 06:43:01';
     restore database;
     recover database;
     alter database open resetlogs;
