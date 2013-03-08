@@ -912,6 +912,7 @@ Utwórz partycję na dysku (tylko na jednym serwerze)
 # fdisk /dev/sdc
 
 Naznacz partycję tagiem ASMLiba (tylko na jednym serwerze)
+# /etc/init.d/oracleasm deletedisk /dev/sdc1
 # /etc/init.d/oracleasm createdisk DATA1 /dev/sdc1
 
 Na każdym z nodów:
