@@ -946,6 +946,28 @@ $ cd /unziped/oracle/oracle11.2.0.3_linux_SE_EE_x86-64/grid
 $ ./runInstaller
 }}}
 
+Błędy:
+*PRVF-5636 : The DNS response time for an unreachable node exceeded*
+
+"15000" ms on following nodes
+
+MOS:
+- PRVF-5637 : DNS response time could not be checked on following nodes [ID 1480242.1]
+
+Verified that the /etc/resolv.conf is same across the nodes and nslookup for all names from all the nodes worked fine, and nslookup of unknown-not-reachable-node is fast: 
+
+$ time nslookup unknown-not-reachable-node
+
+At the time of this writing, bug 16038314 is still being worked by Development, the workaround is to verify /etc/resolv.conf and nslookup manually.
+
+
+*Instalacja ręcznie pakietu cvu*
+{{{
+Wykonać na każdym węźle:
+# cd /unziped/oracle/oracle11.2.0.3_linux_SE_EE_x86-64/grid/rpm
+# rpm -i cvuqdisk-1.0.9-1.rpm
+}}}
+
 === Instalacja bazy danych RAC ===
 Zaloguj się jako użytkownik oracle na pierwszy z nodów na graficzne środowisko serwera VNC.
 {{{
