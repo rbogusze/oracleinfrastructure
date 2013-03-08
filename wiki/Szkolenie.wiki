@@ -1027,9 +1027,29 @@ $ sqlplus / as sysdba
 
 === Backup na ASM ===
 {{{
+$ rlwrap rman target / nocatalog
 > BACKUP DATABASE FORMAT "+DATA";
 > BACKUP ARCHIVELOG ALL FORMAT '+DATA';
 > BACKUP CURRENT CONTROLFILE FORMAT '+DATA';
+
+$ rlwrap sqlplus / as sysdba
+> create table skarby (nazwa varchar2(30), value number);
+> insert into skarby values ('dobrze',100);
+> commit;
+> select sysdate from dual;
+2013-03-08 06:43:01
+
+> insert into skarby values ('zle',100);
+> commit;
+> select * from skarby;
+
+NAZWA				    VALUE
+------------------------------ ----------
+dobrze				      100
+zle				      100
+
+Decyduje się, że dodanie wiersza 'zle' było katastrofą i chcę odtworzyć bazę na chwilę po dodaniu pierwszego wiersza, czyli 2013-03-08 06:43:01
+
 }}}
 
 === RAC: Procedura odzyskania z backupu na konkretny punkt w czasie ===
