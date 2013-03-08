@@ -1006,6 +1006,20 @@ Zaloguj się jako użytkownik oracle na pierwszy z nodów
 {{{
 $ cd /u01/app/oracle/product/11.2.0/dbhome_1/bin
 $ ./dbca
+
+Dodaj do /etc/oratab na node1
+RAC1:/u01/app/oracle/product/11.2.0/dbhome_1:N
+
+Dodaj do /etc/oratab na node2
+RAC2:/u01/app/oracle/product/11.2.0/dbhome_1:N
+
+Ustaw środowisko na instancję i włącz tryb archivelog
+> alter system set log_archive_dest_1='location=+DATA' scope=both;
+> alter system set cluster_database=false scope=spfile sid='RAC1';
+$ srvctl stop database -d RAC
+$ sqlplus / as sysdba
+> startup mount
+> alter database archivelog;
 }}}
 
 === RAC: Procedura odzyskania z backupu na konkretny punkt w czasie ===
