@@ -884,6 +884,15 @@ Ciekawe narzędzia monitorujące
 
 ASMlib OEL6
 # yum install oracleasm-support
+
+Zaloguj się jako użytkownik oracle (w innym oknie) i wyświetl grupę oracle
+$ id -a
+$ id -a
+uid=54321(oracle) gid=54321(oinstall) groups=54321(oinstall),54322(dba)
+Czyli wiemy, że:
+nazwa użytkownika: oracle
+nazwa grupy: oinstall
+
 # /etc/init.d/oracleasm configure
 
 
