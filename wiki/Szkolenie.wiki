@@ -948,7 +948,7 @@ $ ./runInstaller
 
 Błędy:
 *PRVF-5636 : The DNS response time for an unreachable node exceeded*
-
+{{{
 "15000" ms on following nodes
 
 MOS:
@@ -959,7 +959,7 @@ Verified that the /etc/resolv.conf is same across the nodes and nslookup for all
 $ time nslookup unknown-not-reachable-node
 
 At the time of this writing, bug 16038314 is still being worked by Development, the workaround is to verify /etc/resolv.conf and nslookup manually.
-
+}}}
 
 *Instalacja ręcznie pakietu cvu*
 {{{
