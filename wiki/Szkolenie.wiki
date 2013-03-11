@@ -1117,3 +1117,5 @@ $ crsctl stat res -t
 }}}
 
 == Instalacja RAC - screeny z instalacji ==
+
+http://oracleinfrastructure.googlecode.com/files/installing_oracle.pdf
