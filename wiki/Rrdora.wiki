@@ -159,3 +159,14 @@ rrdtool graph (...) --unit 1
 but this option is not present in current rrdtool - 
 http://oss.oetiker.ch/rrdtool/doc/rrdgraph.en.html
 removing it
+
+===Images do not show in browser===
+Althou the apache log says that the image is properly 'get' the browser shows nothing. What is weird is that picture properties show: naturalHeight: 0 naturalWidth: 0 but in reality it is for example width='498' height='285'.
+
+After a long and painful research it turned out that this behaviour happens only on Windows OS and when the Widows Firewall is enabled.
+
+I do not know how to make some kind of exception, but switching the windows firewall off helps :)
+
+
+
+
