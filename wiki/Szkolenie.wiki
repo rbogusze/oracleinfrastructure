@@ -1115,3 +1115,5 @@ ORACLE_SID = [RAC] ? +ASM1
 $ crsctl stat res -t
 
 }}}
+
+== Instalacja RAC - screeny z instalacji ==
