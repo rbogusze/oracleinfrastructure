@@ -1,20 +1,49 @@
-NAME=TEST10.db 
-TYPE=cluster_resource 
-DESCRIPTION=Oracle Database resource 
-ACL=owner:oracle:rwx,pgrp:oinstall:rwx,other::r-- 
-ACTION_SCRIPT=/u01/app/oracle/product/10.2.0/OC_RBO_active_passive_10g.sh
-PLACEMENT=restricted 
-ACTIVE_PLACEMENT=0 
-AUTO_START=restore 
-CARDINALITY=1 
-CHECK_INTERVAL=10 
-DEGREE=1 
-ENABLED=1 
-HOSTING_MEMBERS=usera1 usera2
-LOGGING_LEVEL=1 
-RESTART_ATTEMPTS=1 
-START_DEPENDENCIES=hard(ora.DATA.dg) weak(type:ora.listener.type,uniform:ora.ons,uniform:ora.eons) pullup(ora.DATA.dg) 
-START_TIMEOUT=600 
-STOP_DEPENDENCIES=hard(intermediate:ora.asm,shutdown:ora.DATA.dg)
-STOP_TIMEOUT=600 
-UPTIME_THRESHOLD=1h
+#!/bin/bash
+
+export ORACLE_HOME=/u01/app/oracle/product/10.2.0/db_1
+export ORACLE_SID=TEST10
+
+RET=1
+
+case $1 in 
+'start') 
+  $ORACLE_HOME/bin/sqlplus /nolog <<EOF
+connect / as sysdba 
+startup 
+EOF
+RET=0 
+;; 
+'stop') 
+$ORACLE_HOME/bin/sqlplus /nolog <<EOF 
+connect / as sysdba 
+shutdown immediate 
+EOF
+RET=0 
+;;
+'clean') 
+$ORACLE_HOME/bin/sqlplus /nolog <<EOF 
+connect / as sysdba 
+shutdown abort 
+##for i in `ps -ef | grep -i $ORACLE_SID | awk '{print $2}' ` ;do kill -9 $i; done 
+EOF
+RET=0 
+;; 
+'check') 
+ok=`ps -ef | grep smon | grep $ORACLE_SID | wc -l` 
+if [ $ok = 0 ]; then 
+RET=1 
+else 
+RET=0 
+fi 
+;; 
+'*') 
+RET=0 
+;; 
+esac
+
+if [ $RET -eq 0 ]; then 
+  exit 0 
+else 
+  exit 1
+fi
+
