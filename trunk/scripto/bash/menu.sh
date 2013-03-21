@@ -32,8 +32,7 @@ msgd "Analiza oratab"
 F_TMP=/tmp/dialog.tmp
 if [ -f "$ORATAB" ]; then
   # construct dialog parameters
-  #V_ORATAB_LINE=`cat $ORATAB | grep -v "^#" | grep -v "+ASM" | sed -e s/\#\ line\ added\ by\ Agent// | awk '{print $0 " "$0}' | tr "\n" " "`
-  V_ORATAB_LINE=`cat $ORATAB | grep -v "^#" | grep -v "^*" | grep -v "+ASM" | sed -e s/\#\ line\ added\ by\ Agent// | awk -F":" '{print $1 " "$0}' | tr "\n" " "`
+  V_ORATAB_LINE=`cat $ORATAB | grep -v "^#" | grep -v "^*" | sed -e s/\#\ line\ added\ by\ Agent// | awk -F":" '{print $1 " "$0}' | tr "\n" " "`
   msgd "V_ORATAB_LINE: $V_ORATAB_LINE"
   run_command_d "cat $ORATAB"
   #dialog --menu "Chose database" 15 65 5 1 "zzz" 2 "bbb" 2> $F_TMP
