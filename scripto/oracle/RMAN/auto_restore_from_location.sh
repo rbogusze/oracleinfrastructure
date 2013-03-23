@@ -47,7 +47,33 @@ unset ORAENV_ASK
 msgd "ORACLE_SID: $ORACLE_SID"
 msgd "ORACLE_HOME: $ORACLE_HOME"
 
+msgi "Deleting the current $ORACLE_SID database"
+#RR f_execute_sql "shutdown abort"
+#cat $F_EXECUTE_SQL
+#RR f_execute_sql "startup mount restrict"
+#cat $F_EXECUTE_SQL
+
+RMAN="rman target / nocatalog"
+
+$RMAN <<EOF
+SET ECHO ON
+delete noprompt archivelog all;
+drop database noprompt;
+EOF
+
+msgi "Restoring the pfile from the backup location"
+if [ -f "$ORACLE_HOME/dbs/init$ORACLE_SID.ora" ]; then
+  run_command "mv $ORACLE_HOME/dbs/init$ORACLE_SID.ora /var/tmp/init$ORACLE_SID.ora_`date -I`"
+fi
+
+if [ -f "$ORACLE_HOME/dbs/spfile$ORACLE_SID.ora" ]; then
+  run_command "mv $ORACLE_HOME/dbs/spfile$ORACLE_SID.ora /var/tmp/spfile$ORACLE_SID.ora_`date -I`"
+fi
 
 
+V_LAST_PFILE=`ls -1tr $D_BACKUP_DIR | grep pfile | tail -1`
+msgd "V_LAST_PFILE: $V_LAST_PFILE"
+check_file $D_BACKUP_DIR/$V_LAST_PFILE
 
+run_command "cp $D_BACKUP_DIR/$V_LAST_PFILE $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
 
