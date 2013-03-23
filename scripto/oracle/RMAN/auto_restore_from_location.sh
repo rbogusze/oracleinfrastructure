@@ -1,5 +1,5 @@
 #!/bin/bash
-#$Id: backup_to_disk.sh,v 1.1 2012-05-07 13:48:30 remik Exp $
+#$Id$
 #
 # Example:
 # With RMAN repository:
