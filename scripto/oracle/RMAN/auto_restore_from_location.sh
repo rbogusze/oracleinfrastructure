@@ -1,14 +1,12 @@
 #!/bin/bash
-#$Id::$
+#$Id$
+#
+# This will perform an automated DB restore/recovery for testing purposes
+# !!! DANGER !!!
+# This script as a first step will DELETE the running database - with the idea to replace it with the new one.
 #
 # Example:
-# With RMAN repository:
-# ./backup_to_disk.sh /BACKUP/$HOSTNAME/$ORACLE_SID
-# or
-# ./backup_to_disk.sh /BACKUP/$HOSTNAME/$ORACLE_SID <MODE> CATALOG
-#
-# Without RMAN repository:
-# ./backup_to_disk.sh /BACKUP/$HOSTNAME/$ORACLE_SID <MODE> NOCATALOG
+# ./auto_restore_from_location.sh /mnt/backup/TEST10
 #
 
 # Load usefull functions
@@ -19,10 +17,10 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-LOG_DIR=/var/tmp/backup_to_disk
-LOG_NAME=backup_to_disk_${ORACLE_SID}.log
-LOCKFILE=/tmp/backup_to_disk_${ORACLE_SID}.lock
-#INFO_MODE=DEBUG
+LOG_DIR=/var/tmp/auto_restore_from_location
+LOG_NAME=auto_restore_from_location_${ORACLE_SID}.log
+
+INFO_MODE=DEBUG
 
 V_DATE=`$DATE '+%Y-%m-%d--%H%M%S'`
 msgd "V_DATE: $V_DATE"
@@ -35,6 +33,21 @@ LOG=${LOG_DIR}/${LOG_NAME}.$V_DATE
 #exec > $LOG 2>&1
 
 D_BACKUP_DIR=$1
-
 check_parameter $D_BACKUP_DIR
+
+msgi "Get ORACLE_SID from dir name"
+export ORACLE_SID=`echo $D_BACKUP_DIR | awk -F"/" '{print $NF}'`
+msgd "ORACLE_SID: $ORACLE_SID"
+
+msgi "Based on ORACLE_SID: $ORACLE_SID setup the environment"
+export ORAENV_ASK=NO
+  . oraenv
+unset ORAENV_ASK
+
+msgd "ORACLE_SID: $ORACLE_SID"
+msgd "ORACLE_HOME: $ORACLE_HOME"
+
+
+
+
 
