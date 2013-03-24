@@ -11,6 +11,9 @@
 # Example:
 # ./auto_restore_from_location.sh /mnt/backup/TEST10
 #
+# Running from crontab (PATH set to find oraenv)
+# 59 17 * * * PATH=$PATH:/usr/local/bin; cd /home/oracle/scripto/oracle/RMAN; ./auto_restore_from_location.sh /mnt/backup/TEST10
+
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
