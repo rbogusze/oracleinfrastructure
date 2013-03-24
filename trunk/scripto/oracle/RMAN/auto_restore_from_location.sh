@@ -39,7 +39,7 @@ V_DATE=`$DATE '+%Y-%m-%d--%H%M%S'`
 msgd "V_DATE: $V_DATE"
 
 LOG=${LOG_DIR}/${LOG_NAME}.$V_DATE
-#exec > $LOG 2>&1
+exec > $LOG 2>&1
 
 check_lock $LOCKFILE
 touch $LOCKFILE
