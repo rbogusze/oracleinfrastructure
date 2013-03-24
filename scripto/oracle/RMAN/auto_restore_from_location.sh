@@ -5,6 +5,9 @@
 # !!! DANGER !!!
 # This script as a first step will DELETE the running database - with the idea to replace it with the new one.
 #
+# As a precaution measure no work (harm) will be done unless there is a plain file laying under
+# /on_this_system_db_will_be_deleted_and_created_from_backup_dir
+#
 # Example:
 # ./auto_restore_from_location.sh /mnt/backup/TEST10
 #
@@ -22,12 +25,17 @@ LOG_NAME=auto_restore_from_location_${ORACLE_SID}.log
 
 INFO_MODE=DEBUG
 
-V_DATE=`$DATE '+%Y-%m-%d--%H%M%S'`
-msgd "V_DATE: $V_DATE"
+if [ ! -f /on_this_system_db_will_be_deleted_and_created_from_backup_dir ]; then
+  exit 0
+fi
+
 
 # Sanity checks
 mkdir -p $LOG_DIR
 check_directory $LOG_DIR
+
+V_DATE=`$DATE '+%Y-%m-%d--%H%M%S'`
+msgd "V_DATE: $V_DATE"
 
 LOG=${LOG_DIR}/${LOG_NAME}.$V_DATE
 #exec > $LOG 2>&1
@@ -89,7 +97,6 @@ $RMAN <<EOF
 SET ECHO ON
 RESTORE CONTROLFILE FROM '$D_BACKUP_DIR/$V_LAST_CTRL';
 EOF
-
 
 msgi "Mount database"
 f_execute_sql "alter database mount;"
