@@ -82,7 +82,11 @@ V_LAST_PFILE=`ls -1tr $D_BACKUP_DIR | grep pfile | tail -1`
 msgd "V_LAST_PFILE: $V_LAST_PFILE"
 check_file $D_BACKUP_DIR/$V_LAST_PFILE
 
-run_command "cp $D_BACKUP_DIR/$V_LAST_PFILE $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
+run_command "cat $D_BACKUP_DIR/$V_LAST_PFILE | grep -i -v db_cache_size | grep -i -v java_pool_size | grep -i -v large_pool_size | grep -i -v shared_pool_size | grep -i -v streams_pool_size | grep -i -v db_recovery_file_dest_size | grep -i -v pga_aggregate_target | grep -i -v remote_listener | grep -i -v sga_target > $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
+run_command "echo 'db_recovery_file_dest_size=20G' >> $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
+run_command "echo 'pga_aggregate_target=500M' >> $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
+run_command "echo 'sga_target=2G' >> $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
+
 
 msgi "Startup nomount"
 f_execute_sql "startup nomount"
