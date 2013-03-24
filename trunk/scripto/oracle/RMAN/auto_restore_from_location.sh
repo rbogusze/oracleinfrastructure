@@ -27,7 +27,7 @@ LOG_DIR=/var/tmp/auto_restore_from_location
 LOG_NAME=auto_restore_from_location.log
 LOCKFILE=/tmp/auto_restore_from_location.lock
 
-INFO_MODE=DEBUG
+INFO_MODE=INFO
 
 if [ ! -f /on_this_system_db_will_be_deleted_and_created_from_backup_dir ]; then
   exit 0
