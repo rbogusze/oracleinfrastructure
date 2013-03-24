@@ -119,4 +119,12 @@ recover database;
 alter database open resetlogs;
 EOF
 
+msgi "Restart database to avoid:"
+msgi "Instance XXX, status RESTRICTED, has 1 handler(s) for this service..."
+msgi "Which results from the auto registered when the DB is in mounted state ?? (I suspect)"
+f_execute_sql "shutdown immediate;"
+cat $F_EXECUTE_SQL
+f_execute_sql "startup;"
+cat $F_EXECUTE_SQL
+
 msgi "Done."
