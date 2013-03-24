@@ -114,4 +114,4 @@ recover database;
 alter database open resetlogs;
 EOF
 
-
+msgi "Done."
