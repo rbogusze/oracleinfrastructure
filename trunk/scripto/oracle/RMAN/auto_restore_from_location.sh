@@ -21,7 +21,8 @@ else
 fi
 
 LOG_DIR=/var/tmp/auto_restore_from_location
-LOG_NAME=auto_restore_from_location_${ORACLE_SID}.log
+LOG_NAME=auto_restore_from_location.log
+LOCKFILE=/tmp/auto_restore_from_location.lock
 
 INFO_MODE=DEBUG
 
@@ -39,6 +40,9 @@ msgd "V_DATE: $V_DATE"
 
 LOG=${LOG_DIR}/${LOG_NAME}.$V_DATE
 #exec > $LOG 2>&1
+
+check_lock $LOCKFILE
+touch $LOCKFILE
 
 D_BACKUP_DIR=$1
 check_parameter $D_BACKUP_DIR
@@ -127,4 +131,8 @@ cat $F_EXECUTE_SQL
 f_execute_sql "startup;"
 cat $F_EXECUTE_SQL
 
+msgi "Remove lock file"
+run_command "rm -f $LOCKFILE"
+
 msgi "Done."
+
