@@ -7,7 +7,7 @@ from V$SESSION ses
 where ses.paddr = pro.addr
 and ses.status = 'ACTIVE'
 and stx.hash_value = ses.sql_hash_value
-and ses.USERNAME not in ('SYS', 'SYSTEM')
+and ses.USERNAME not in ('SYS', 'SYSTEM','DBSNMP','SYSMAN')
 ;
 
 
