@@ -10,6 +10,15 @@ $ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scr
 $ cd 
 }}}
 
+If going through proxy provide the proxy address in svn configuration
+{{{
+# vi /etc/subversion/servers
+[Global]
+http-proxy-host=proxy.example.com
+http-proxy-port=3128
+}}}
+
+
 Following projects use extensively from this depot, but I also use it for frequently used SQL scripts.
 
 Together with variable SQLPATH I can run the SQL scripts in SQL*Plus.
