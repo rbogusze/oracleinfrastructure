@@ -1,0 +1,2233 @@
+
+STATSPACK report for
+
+Database    DB Id    Instance     Inst Num  Startup Time   Release     RAC
+~~~~~~~~ ----------- ------------ -------- --------------- ----------- ---
+          3319055972 TPCC                1 01-Apr-13 14:07 11.2.0.3.0  NO
+
+Host Name             Platform                CPUs Cores Sockets   Memory (G)
+~~~~ ---------------- ---------------------- ----- ----- ------- ------------
+     db2              Linux x86 64-bit          24    12       2         94.5
+
+Snapshot       Snap Id     Snap Time      Sessions Curs/Sess Comment
+~~~~~~~~    ---------- ------------------ -------- --------- ------------------
+Begin Snap:          5 01-Apr-13 14:12:05      140       5.0
+  End Snap:          7 01-Apr-13 14:13:31      139       4.7
+   Elapsed:       1.43 (mins) Av Act Sess:      82.0
+   DB time:     117.49 (mins)      DB CPU:      31.59 (mins)
+
+Cache Sizes            Begin        End
+~~~~~~~~~~~       ---------- ----------
+    Buffer Cache:    47,232M              Std Block Size:         8K
+     Shared Pool:     3,456M                  Log Buffer:    25,000K
+
+Load Profile              Per Second    Per Transaction    Per Exec    Per Call
+~~~~~~~~~~~~      ------------------  ----------------- ----------- -----------
+      DB time(s):               82.0                0.0        0.00        0.01
+       DB CPU(s):               22.0                0.0        0.00        0.00
+       Redo size:       54,956,302.0            5,141.0
+   Logical reads:        1,088,410.4              101.8
+   Block changes:          342,275.8               32.0
+  Physical reads:              233.5                0.0
+ Physical writes:               23.1                0.0
+      User calls:            8,198.1                0.8
+          Parses:                2.4                0.0
+     Hard parses:                0.4                0.0
+W/A MB processed:                1.3                0.0
+          Logons:                0.0                0.0
+        Executes:          220,700.9               20.7
+       Rollbacks:               17.6                0.0
+    Transactions:           10,689.8
+
+Instance Efficiency Indicators
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            Buffer Nowait %:   99.99       Redo NoWait %:  100.00
+            Buffer  Hit   %:   99.98  Optimal W/A Exec %:  100.00
+            Library Hit   %:  102.25        Soft Parse %:   81.46
+         Execute to Parse %:  100.00         Latch Hit %:   98.72
+Parse CPU to Parse Elapsd %:   33.33     % Non-Parse CPU:   99.97
+
+ Shared Pool Statistics        Begin   End
+                               ------  ------
+             Memory Usage %:   19.08   19.14
+    % SQL with executions>1:   63.50   63.14
+  % Memory for SQL w/exec>1:   68.14   68.37
+
+Top 5 Timed Events                                                    Avg %Total
+~~~~~~~~~~~~~~~~~~                                                   wait   Call
+Event                                            Waits    Time (s)   (ms)   Time
+----------------------------------------- ------------ ----------- ------ ------
+log file sync                                  635,363       3,354      5   53.4
+CPU time                                                     1,836          29.2
+latch: cache buffers chains                     49,435         364      7    5.8
+cursor: pin S                                   27,253         199      7    3.2
+enq: TX - row lock contention                   29,197         136      5    2.2
+          -------------------------------------------------------------
+Host CPU  (CPUs: 24  Cores: 12  Sockets: 2)
+~~~~~~~~              Load Average
+                      Begin     End      User  System    Idle     WIO     WCPU
+                    ------- -------   ------- ------- ------- ------- --------
+                      24.25   26.04     80.31   11.95    6.71    0.00
+
+Instance CPU
+~~~~~~~~~~~~                                       % Time (seconds)
+                                            -------- --------------
+                     Host: Total time (s):                  2,080.0
+                  Host: Busy CPU time (s):                  1,940.4
+                   % of time Host is Busy:      93.3
+             Instance: Total CPU time (s):                  1,913.3
+          % of Busy CPU used for Instance:      98.6
+        Instance: Total Database time (s):                  7,137.0
+  %DB time waiting for CPU (Resource Mgr):       0.0
+
+Memory Statistics                       Begin          End
+~~~~~~~~~~~~~~~~~                ------------ ------------
+                  Host Mem (MB):     96,738.8     96,738.8
+                   SGA use (MB):     50,971.4     50,971.4
+                   PGA use (MB):        543.7        546.1
+    % Host Mem used for SGA+PGA:         53.3         53.3
+          -------------------------------------------------------------
+
+Time Model System Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Ordered by % of DB time desc, Statistic name
+
+Statistic                                       Time (s) % DB time
+----------------------------------- -------------------- ---------
+sql execute elapsed time                         3,584.6      50.8
+DB CPU                                           1,895.5      26.9
+PL/SQL execution elapsed time                      396.0       5.6
+parse time elapsed                                   3.4        .0
+repeated bind elapsed time                           0.7        .0
+hard parse elapsed time                              0.3        .0
+PL/SQL compilation elapsed time                      0.1        .0
+hard parse (sharing criteria) elaps                  0.0        .0
+sequence load elapsed time                           0.0        .0
+DB time                                          7,049.4
+background elapsed time                             87.6
+background cpu time                                 17.8
+          -------------------------------------------------------------
+Foreground Wait Events  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Only events with Total Wait Time (s) >= .001 are shown
+-> ordered by Total Wait Time desc, Waits desc (idle events last)
+
+                                                             Avg          %Total
+                                          %Tim Total Wait   wait    Waits   Call
+Event                               Waits  out   Time (s)   (ms)     /txn   Time
+---------------------------- ------------ ---- ---------- ------ -------- ------
+log file sync                     635,363    0      3,354      5      0.7   53.4
+latch: cache buffers chains        49,434    0        364      7      0.1    5.8
+cursor: pin S                      27,253    0        199      7      0.0    3.2
+enq: TX - row lock contentio       29,197    0        136      5      0.0    2.2
+library cache: mutex X             29,936    0         96      3      0.0    1.5
+latch: enqueue hash chains         10,558    0         75      7      0.0    1.2
+latch: In memory undo latch        53,408    0         65      1      0.1    1.0
+latch: redo allocation              6,833    0         26      4      0.0     .4
+cell single block physical r        3,496    0         15      4      0.0     .2
+buffer busy waits                   9,782    0         13      1      0.0     .2
+cell multiblock physical rea        3,404    0         11      3      0.0     .2
+latch free                          1,345    0          5      4      0.0     .1
+latch: undo global data               559    0          3      5      0.0     .0
+latch: cache buffers lru cha          421    0          2      4      0.0     .0
+control file sequential read          578    0          1      1      0.0     .0
+latch: object queue header o           94    0          0      3      0.0     .0
+wait list latch free                  109    0          0      2      0.0     .0
+latch: session allocation              70    0          0      3      0.0     .0
+latch: messages                        40    0          0      5      0.0     .0
+latch: checkpoint queue latc           30    0          0      3      0.0     .0
+latch: row cache objects               18    0          0      4      0.0     .0
+buffer deadlock                        36  100          0      2      0.0     .0
+enq: HW - contention                   21    0          0      3      0.0     .0
+latch: cache buffer handles             8    0          0      5      0.0     .0
+enq: FB - contention                   17    0          0      2      0.0     .0
+reliable message                       11    0          0      2      0.0     .0
+enq: TX - contention                   10    0          0      2      0.0     .0
+SQL*Net break/reset to clien           18    0          0      0      0.0     .0
+SQL*Net message from client       705,130    0      1,793      3      0.8
+jobq slave wait                       120  100         60    501      0.0
+SQL*Net message to client         705,136    0          1      0      0.8
+          -------------------------------------------------------------
+
+Background Wait Events  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Only events with Total Wait Time (s) >= .001 are shown
+-> ordered by Total Wait Time desc, Waits desc (idle events last)
+
+                                                             Avg          %Total
+                                          %Tim Total Wait   wait    Waits   Call
+Event                               Waits  out   Time (s)   (ms)     /txn   Time
+---------------------------- ------------ ---- ---------- ------ -------- ------
+log file parallel write            61,668    0         58      1      0.1     .9
+LGWR wait for redo copy            20,082    0         14      1      0.0     .2
+latch: redo allocation                745    0          2      3      0.0     .0
+db file parallel write                219    0          1      3      0.0     .0
+control file sequential read           66    0          0      1      0.0     .0
+control file parallel write            41    0          0      2      0.0     .0
+os thread startup                       2    0          0     24      0.0     .0
+CSS initialization                      6    0          0      4      0.0     .0
+latch: redo writing                     8    0          0      3      0.0     .0
+CSS operation: action                   6    0          0      3      0.0     .0
+CSS operation: query                   19    0          0      1      0.0     .0
+latch: messages                         4    0          0      3      0.0     .0
+CGS wait for IPC msg                  833  100          0      0      0.0     .0
+CSS operation: data query               5    0          0      1      0.0     .0
+ASM file metadata operation            37    0          0      0      0.0     .0
+latch free                              3    0          0      1      0.0     .0
+latch: cache buffers lru cha            1    0          0      2      0.0     .0
+cell single block physical r            2    0          0      1      0.0     .0
+rdbms ipc message                   3,163   46      1,471    465      0.0
+class slave wait                       12    0        293  24458      0.0
+DIAG idle wait                      8,585  100        170     20      0.0
+shared server idle wait                 3  100         90  30009      0.0
+PING                                   21   33         90   4279      0.0
+ges remote message                     66  100         86   1306      0.0
+wait for unread message on b           86  100         86   1001      0.0
+ASM background timer                   17    0         85   5006      0.0
+Space Manager: slave idle wa           17  100         85   5001      0.0
+GCR sleep                              17  100         85   5001      0.0
+pmon timer                             29   97         85   2929      0.0
+Streams AQ: qmn slave idle w            3    0         84  28008      0.0
+Streams AQ: qmn coordinator             6   50         84  14004      0.0
+dispatcher timer                        1  100         60  60012      0.0
+          -------------------------------------------------------------
+
+Wait Events (fg and bg) DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> s - second, cs - centisecond,  ms - millisecond, us - microsecond
+-> %Timeouts:  value of 0 indicates value was < .5%.  Value of null is truly 0
+-> Only events with Total Wait Time (s) >= .001 are shown
+-> ordered by Total Wait Time desc, Waits desc (idle events last)
+
+                                                             Avg          %Total
+                                          %Tim Total Wait   wait    Waits   Call
+Event                               Waits  out   Time (s)   (ms)     /txn   Time
+---------------------------- ------------ ---- ---------- ------ -------- ------
+log file sync                     635,363    0      3,354      5      0.7   53.4
+latch: cache buffers chains        49,435    0        364      7      0.1    5.8
+cursor: pin S                      27,253    0        199      7      0.0    3.2
+enq: TX - row lock contentio       29,197    0        136      5      0.0    2.2
+library cache: mutex X             29,936    0         96      3      0.0    1.5
+latch: enqueue hash chains         10,558    0         75      7      0.0    1.2
+latch: In memory undo latch        53,408    0         65      1      0.1    1.0
+log file parallel write            61,668    0         58      1      0.1     .9
+latch: redo allocation              7,578    0         28      4      0.0     .5
+cell single block physical r        3,498    0         15      4      0.0     .2
+LGWR wait for redo copy            20,082    0         14      1      0.0     .2
+buffer busy waits                   9,782    0         13      1      0.0     .2
+cell multiblock physical rea        3,404    0         11      3      0.0     .2
+latch free                          1,348    0          5      4      0.0     .1
+latch: undo global data               559    0          3      5      0.0     .0
+latch: cache buffers lru cha          422    0          2      4      0.0     .0
+control file sequential read          644    0          1      1      0.0     .0
+db file parallel write                219    0          1      3      0.0     .0
+latch: object queue header o           95    0          0      3      0.0     .0
+wait list latch free                  109    0          0      2      0.0     .0
+latch: session allocation              70    0          0      3      0.0     .0
+latch: messages                        44    0          0      5      0.0     .0
+latch: checkpoint queue latc           30    0          0      3      0.0     .0
+control file parallel write            41    0          0      2      0.0     .0
+latch: row cache objects               18    0          0      4      0.0     .0
+buffer deadlock                        36  100          0      2      0.0     .0
+enq: HW - contention                   21    0          0      3      0.0     .0
+os thread startup                       2    0          0     24      0.0     .0
+latch: cache buffer handles             8    0          0      5      0.0     .0
+enq: FB - contention                   17    0          0      2      0.0     .0
+CSS initialization                      6    0          0      4      0.0     .0
+latch: redo writing                     8    0          0      3      0.0     .0
+reliable message                       11    0          0      2      0.0     .0
+CSS operation: action                   6    0          0      3      0.0     .0
+enq: TX - contention                   10    0          0      2      0.0     .0
+CSS operation: query                   19    0          0      1      0.0     .0
+CGS wait for IPC msg                  833  100          0      0      0.0     .0
+CSS operation: data query               5    0          0      1      0.0     .0
+ASM file metadata operation            37    0          0      0      0.0     .0
+SQL*Net break/reset to clien           18    0          0      0      0.0     .0
+SQL*Net message from client       705,130    0      1,793      3      0.8
+rdbms ipc message                   3,163   46      1,471    465      0.0
+class slave wait                       12    0        293  24458      0.0
+DIAG idle wait                      8,585  100        170     20      0.0
+shared server idle wait                 3  100         90  30009      0.0
+PING                                   21   33         90   4279      0.0
+ges remote message                     66  100         86   1306      0.0
+wait for unread message on b           86  100         86   1001      0.0
+ASM background timer                   17    0         85   5006      0.0
+
+Wait Events (fg and bg) DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> s - second, cs - centisecond,  ms - millisecond, us - microsecond
+-> %Timeouts:  value of 0 indicates value was < .5%.  Value of null is truly 0
+-> Only events with Total Wait Time (s) >= .001 are shown
+-> ordered by Total Wait Time desc, Waits desc (idle events last)
+
+                                                             Avg          %Total
+                                          %Tim Total Wait   wait    Waits   Call
+Event                               Waits  out   Time (s)   (ms)     /txn   Time
+---------------------------- ------------ ---- ---------- ------ -------- ------
+Space Manager: slave idle wa           17  100         85   5001      0.0
+GCR sleep                              17  100         85   5001      0.0
+pmon timer                             29   97         85   2929      0.0
+Streams AQ: qmn slave idle w            3    0         84  28008      0.0
+Streams AQ: qmn coordinator             6   50         84  14004      0.0
+jobq slave wait                       120  100         60    501      0.0
+dispatcher timer                        1  100         60  60012      0.0
+SQL*Net message to client         705,136    0          1      0      0.8
+          -------------------------------------------------------------
+Wait Event Histogram  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Total Waits - units: K is 1000, M is 1000000, G is 1000000000
+-> % of Waits - column heading: <=1s is truly <1024ms, >1s is truly >=1024ms
+-> % of Waits - value: .0 indicates value was <.05%, null is truly 0
+-> Ordered by Event (idle events last)
+
+                           Total ----------------- % of Waits ------------------
+Event                      Waits  <1ms  <2ms  <4ms  <8ms <16ms <32ms  <=1s   >1s
+-------------------------- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ASM file metadata operatio   37   97.3         2.7
+CGS wait for IPC msg        833  100.0
+CSS group membership query    1  100.0
+CSS initialization            6   50.0              33.3  16.7
+CSS operation: action         6               83.3  16.7
+CSS operation: data query     5         80.0  20.0
+CSS operation: query         19   84.2   5.3   5.3   5.3
+Disk file operations I/O     10  100.0
+LGWR wait for redo copy      20K  82.4   5.8   6.2   5.0    .7
+SQL*Net break/reset to cli   18   94.4         5.6
+asynch descriptor resize      2  100.0
+buffer busy waits          9784   68.6   9.0  11.8   8.0   2.5    .1
+buffer deadlock              36   55.6  13.9   8.3  19.4   2.8
+cell multiblock physical r 3405   42.4  17.7  15.2  13.7   9.6   1.1    .4
+cell single block physical 3495   34.8  13.1  14.9  21.1  13.8   1.5    .9
+control file parallel writ   41   80.5   7.3   7.3         2.4   2.4
+control file sequential re  644   86.8   5.9   1.9   1.2   4.0    .2
+cursor: pin S                27K  21.0   8.7  10.4   9.2  47.7   3.0    .0
+db file async I/O submit    215  100.0
+db file parallel write      219   42.5  26.5  12.3   9.1   8.7    .5    .5
+enq: FB - contention         17   64.7   5.9   5.9  17.6   5.9
+enq: HW - contention         21   42.9  14.3   9.5  28.6   4.8
+enq: TX - contention         10   50.0  30.0  10.0  10.0
+enq: TX - row lock content   29K  28.7  14.4  19.6  18.9  13.8   4.4    .3
+latch free                 1350   23.9  14.6  26.5  23.3  10.9    .8
+latch: In memory undo latc   53K  67.9  10.8  12.4   7.1   1.7    .1    .0
+latch: cache buffer handle    8   12.5  12.5  25.0  25.0  25.0
+latch: cache buffers chain   49K  19.6   8.7  12.4  21.1  27.1  11.0    .1
+latch: cache buffers lru c  421   21.6  18.1  24.2  26.4   8.8   1.0
+latch: checkpoint queue la   30   23.3  16.7  30.0  30.0
+latch: enqueue hash chains   10K  11.6   9.9  16.1  27.2  26.4   8.7    .1
+latch: messages              44   20.5   4.5  50.0        25.0
+latch: object queue header   95   28.4  11.6  22.1  32.6   4.2   1.1
+latch: redo allocation     7588   13.6  15.6  34.4  30.2   5.7    .5
+latch: redo writing           8   12.5  62.5        12.5  12.5
+latch: row cache objects     18   22.2  11.1  22.2  38.9   5.6
+latch: session allocation    70   31.4  15.7  20.0  24.3   8.6
+latch: undo global data     559   18.1  13.4  18.1  31.1  17.7   1.6
+library cache: mutex X       29K  53.5   9.5  10.3   9.0  16.5   1.2
+log file parallel write      61K  76.1  11.4   7.9   4.2    .4          .0
+log file sync               635K    .8   7.6  32.6  43.7  15.1    .3    .0
+os thread startup             2                                100.0
+reliable message             11   36.4  18.2  27.3  18.2
+wait list latch free        109         56.9  27.5  14.7    .9
+ASM background timer         17                                            100.0
+DIAG idle wait             8586                           95.2    .0   4.8
+GCR sleep                    17                                            100.0
+KSV master wait               4  100.0
+PING                         21   66.7                                      33.3
+SQL*Net message from clien  704K  36.8  30.3  18.7  11.8   2.3    .1    .0    .0
+SQL*Net message to client   704K 100.0    .0    .0    .0    .0
+Wait Event Histogram  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Total Waits - units: K is 1000, M is 1000000, G is 1000000000
+-> % of Waits - column heading: <=1s is truly <1024ms, >1s is truly >=1024ms
+-> % of Waits - value: .0 indicates value was <.05%, null is truly 0
+-> Ordered by Event (idle events last)
+
+                           Total ----------------- % of Waits ------------------
+Event                      Waits  <1ms  <2ms  <4ms  <8ms <16ms <32ms  <=1s   >1s
+-------------------------- ----- ----- ----- ----- ----- ----- ----- ----- -----
+Space Manager: slave idle    17                                            100.0
+Streams AQ: qmn coordinato    6   50.0                                      50.0
+Streams AQ: qmn slave idle    3                                            100.0
+class slave wait             13   30.8               7.7  15.4   7.7        38.5
+dispatcher timer              1                                            100.0
+ges remote message           66                                            100.0
+jobq slave wait             120                                      100.0
+pmon timer                   29                                        3.4  96.6
+rdbms ipc message          3164   50.2   1.3   1.2    .9    .3    .0  34.5  11.6
+shared server idle wait       3                                            100.0
+wait for unread message on   86                                      100.0
+          -------------------------------------------------------------
+
+SQL ordered by CPU  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Total DB CPU (s):           1,895
+-> Captured SQL accounts for  127.6% of Total DB CPU
+-> SQL reported below exceeded  1.0% of Total DB CPU
+
+    CPU                  CPU per             Elapsd                     Old
+  Time (s)   Executions  Exec (s)  %Total   Time (s)    Buffer Gets  Hash Value
+---------- ------------ ---------- ------ ---------- --------------- ----------
+   1027.46      306,354       0.00   54.2    2295.94      53,684,881 2369897509
+Module: wish85t.exe
+begin neword(:no_w_id,:no_max_w_id,:no_d_id,:no_c_id,:no_o_ol_cn
+t,:no_c_discount,:no_c_last,:no_c_credit,:no_d_tax,:no_w_tax,:no
+_d_next_o_id,TO_DATE(:timestamp,'YYYYMMDDHH24MISS')); END;
+
+    257.33       30,590       0.01   13.6     544.74      10,047,036 2945408166
+Module: wish85t.exe
+BEGIN delivery(:d_w_id,:d_o_carrier_id,TO_DATE(:timestamp,'YYYYM
+MDDHH24MISS')); END;
+
+    229.66      306,141       0.00   12.1     572.88      10,383,631 3657542648
+Module: wish85t.exe
+BEGIN payment(:p_w_id,:p_d_id,:p_c_w_id,:p_c_d_id,:p_c_id,:bynam
+e,:p_h_amount,:p_c_last,:p_w_street_1,:p_w_street_2,:p_w_city,:p
+_w_state,:p_w_zip,:p_d_street_1,:p_d_street_2,:p_d_city,:p_d_sta
+te,:p_d_zip,:p_c_first,:p_c_middle,:p_c_street_1,:p_c_street_2,:
+
+    158.58    3,053,774       0.00    8.4     546.70      12,622,087 1028266262
+Module: wish85t.exe
+INSERT INTO ORDER_LINE (OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, OL
+_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DIST_INFO) VAL
+UES (:B9 , :B8 , :B7 , :B6 , :B5 , :B4 , :B3 , :B2 , :B1 )
+
+    131.33    3,053,065       0.00    6.9     257.54      12,136,544 2615411387
+Module: wish85t.exe
+UPDATE STOCK SET S_QUANTITY = :B3 WHERE S_I_ID = :B2 AND S_W_ID
+= :B1
+
+     89.16    3,050,964       0.00    4.7     182.68      11,975,952 1736126963
+Module: wish85t.exe
+SELECT S_QUANTITY, S_DATA, S_DIST_01, S_DIST_02, S_DIST_03, S_DI
+ST_04, S_DIST_05, S_DIST_06, S_DIST_07, S_DIST_08, S_DIST_09, S_
+DIST_10 FROM STOCK WHERE S_I_ID = :B2 AND S_W_ID = :B1
+
+     75.67    3,052,284       0.00    4.0     147.90       8,984,526 2968878469
+Module: wish85t.exe
+SELECT I_PRICE, I_NAME, I_DATA FROM ITEM WHERE I_ID = :B1
+
+     69.18      305,882       0.00    3.6     170.53       2,301,079 3510960099
+Module: wish85t.exe
+UPDATE ORDER_LINE SET OL_DELIVERY_D = :B4 WHERE OL_O_ID = :B3 AN
+D OL_D_ID = :B2 AND OL_W_ID = :B1
+
+     62.66       30,491       0.00    3.3     112.02      18,547,192  541960617
+Module: wish85t.exe
+BEGIN slev(:st_w_id,:st_d_id,:threshold); END;
+
+     58.34       30,490       0.00    3.1     101.22      18,457,714 3266522503
+Module: wish85t.exe
+SELECT COUNT(DISTINCT (S_I_ID)) FROM ORDER_LINE, STOCK WHERE OL_
+W_ID = :B2 AND OL_D_ID = :B4 AND (OL_O_ID < :B3 ) AND OL_O_ID >=
+SQL ordered by CPU  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Total DB CPU (s):           1,895
+-> Captured SQL accounts for  127.6% of Total DB CPU
+-> SQL reported below exceeded  1.0% of Total DB CPU
+
+    CPU                  CPU per             Elapsd                     Old
+  Time (s)   Executions  Exec (s)  %Total   Time (s)    Buffer Gets  Hash Value
+---------- ------------ ---------- ------ ---------- --------------- ----------
+ (:B3 - 20) AND S_W_ID = :B2 AND S_I_ID = OL_I_ID AND S_QUANTITY
+ < :B1
+
+     29.12      306,339       0.00    1.5      91.65       2,457,088    7688312
+Module: wish85t.exe
+INSERT INTO ORDERS (O_ID, O_D_ID, O_W_ID, O_C_ID, O_ENTRY_D, O_O
+L_CNT, O_ALL_LOCAL) VALUES (:B7 , :B6 , :B5 , :B4 , :B3 , :B2 ,
+:B1 )
+
+     24.07      305,860       0.00    1.3      50.74       1,219,655 1344808673
+Module: wish85t.exe
+DELETE FROM NEW_ORDER WHERE ROWID = :B1
+
+          -------------------------------------------------------------
+SQL ordered by Elapsed time for DB: TPCC  Instance: TPCC  Snaps: 5 -7
+-> Total DB Time (s):           7,049
+-> Captured SQL accounts for   80.8% of Total DB Time
+-> SQL reported below exceeded  1.0% of Total DB Time
+
+  Elapsed                Elap per            CPU                        Old
+  Time (s)   Executions  Exec (s)  %Total   Time (s)  Physical Reads Hash Value
+---------- ------------ ---------- ------ ---------- --------------- ----------
+   2295.94      306,354       0.01   32.6    1027.46          12,696 2369897509
+Module: wish85t.exe
+begin neword(:no_w_id,:no_max_w_id,:no_d_id,:no_c_id,:no_o_ol_cn
+t,:no_c_discount,:no_c_last,:no_c_credit,:no_d_tax,:no_w_tax,:no
+_d_next_o_id,TO_DATE(:timestamp,'YYYYMMDDHH24MISS')); END;
+
+    572.88      306,141       0.00    8.1     229.66           1,156 3657542648
+Module: wish85t.exe
+BEGIN payment(:p_w_id,:p_d_id,:p_c_w_id,:p_c_d_id,:p_c_id,:bynam
+e,:p_h_amount,:p_c_last,:p_w_street_1,:p_w_street_2,:p_w_city,:p
+_w_state,:p_w_zip,:p_d_street_1,:p_d_street_2,:p_d_city,:p_d_sta
+te,:p_d_zip,:p_c_first,:p_c_middle,:p_c_street_1,:p_c_street_2,:
+
+    546.70    3,053,774       0.00    7.8     158.58               0 1028266262
+Module: wish85t.exe
+INSERT INTO ORDER_LINE (OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, OL
+_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DIST_INFO) VAL
+UES (:B9 , :B8 , :B7 , :B6 , :B5 , :B4 , :B3 , :B2 , :B1 )
+
+    544.74       30,590       0.02    7.7     257.33           4,387 2945408166
+Module: wish85t.exe
+BEGIN delivery(:d_w_id,:d_o_carrier_id,TO_DATE(:timestamp,'YYYYM
+MDDHH24MISS')); END;
+
+    257.54    3,053,065       0.00    3.7     131.33               0 2615411387
+Module: wish85t.exe
+UPDATE STOCK SET S_QUANTITY = :B3 WHERE S_I_ID = :B2 AND S_W_ID
+= :B1
+
+    182.68    3,050,964       0.00    2.6      89.16          12,568 1736126963
+Module: wish85t.exe
+SELECT S_QUANTITY, S_DATA, S_DIST_01, S_DIST_02, S_DIST_03, S_DI
+ST_04, S_DIST_05, S_DIST_06, S_DIST_07, S_DIST_08, S_DIST_09, S_
+DIST_10 FROM STOCK WHERE S_I_ID = :B2 AND S_W_ID = :B1
+
+    170.53      305,882       0.00    2.4      69.18           4,174 3510960099
+Module: wish85t.exe
+UPDATE ORDER_LINE SET OL_DELIVERY_D = :B4 WHERE OL_O_ID = :B3 AN
+D OL_D_ID = :B2 AND OL_W_ID = :B1
+
+    147.90    3,052,284       0.00    2.1      75.67               0 2968878469
+Module: wish85t.exe
+SELECT I_PRICE, I_NAME, I_DATA FROM ITEM WHERE I_ID = :B1
+
+    112.02       30,491       0.00    1.6      62.66               0  541960617
+Module: wish85t.exe
+BEGIN slev(:st_w_id,:st_d_id,:threshold); END;
+
+    101.22       30,490       0.00    1.4      58.34               0 3266522503
+Module: wish85t.exe
+SELECT COUNT(DISTINCT (S_I_ID)) FROM ORDER_LINE, STOCK WHERE OL_
+W_ID = :B2 AND OL_D_ID = :B4 AND (OL_O_ID < :B3 ) AND OL_O_ID >=
+SQL ordered by Elapsed time for DB: TPCC  Instance: TPCC  Snaps: 5 -7
+-> Total DB Time (s):           7,049
+-> Captured SQL accounts for   80.8% of Total DB Time
+-> SQL reported below exceeded  1.0% of Total DB Time
+
+  Elapsed                Elap per            CPU                        Old
+  Time (s)   Executions  Exec (s)  %Total   Time (s)  Physical Reads Hash Value
+---------- ------------ ---------- ------ ---------- --------------- ----------
+ (:B3 - 20) AND S_W_ID = :B2 AND S_I_ID = OL_I_ID AND S_QUANTITY
+ < :B1
+
+     91.65      306,339       0.00    1.3      29.12              48    7688312
+Module: wish85t.exe
+INSERT INTO ORDERS (O_ID, O_D_ID, O_W_ID, O_C_ID, O_ENTRY_D, O_O
+L_CNT, O_ALL_LOCAL) VALUES (:B7 , :B6 , :B5 , :B4 , :B3 , :B2 ,
+:B1 )
+
+     88.72      306,322       0.00    1.3      14.50               6  158025105
+Module: wish85t.exe
+UPDATE DISTRICT SET D_NEXT_O_ID = D_NEXT_O_ID + 1 WHERE D_ID = :
+B2 AND D_W_ID = :B1 RETURNING D_NEXT_O_ID, D_TAX INTO :O0 ,:O1
+
+     80.00      306,143       0.00    1.1      13.28               0  914473098
+Module: wish85t.exe
+UPDATE WAREHOUSE SET W_YTD = W_YTD + :B2 WHERE W_ID = :B1
+
+          -------------------------------------------------------------
+SQL ordered by Gets  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Buffer Gets Threshold:     10000 Total Buffer Gets:      93,603,296
+-> Captured SQL accounts for   97.9% of Total Buffer Gets
+-> SQL reported below exceeded  1.0% of Total Buffer Gets
+
+                                                     CPU      Elapsd     Old
+  Buffer Gets    Executions  Gets per Exec  %Total Time (s)  Time (s) Hash Value
+--------------- ------------ -------------- ------ -------- --------- ----------
+     53,684,881      306,354          175.2   57.4  1027.46   2295.94 2369897509
+Module: wish85t.exe
+begin neword(:no_w_id,:no_max_w_id,:no_d_id,:no_c_id,:no_o_ol_cn
+t,:no_c_discount,:no_c_last,:no_c_credit,:no_d_tax,:no_w_tax,:no
+_d_next_o_id,TO_DATE(:timestamp,'YYYYMMDDHH24MISS')); END;
+
+     18,547,192       30,491          608.3   19.8    62.66    112.02  541960617
+Module: wish85t.exe
+BEGIN slev(:st_w_id,:st_d_id,:threshold); END;
+
+     18,457,714       30,490          605.4   19.7    58.34    101.22 3266522503
+Module: wish85t.exe
+SELECT COUNT(DISTINCT (S_I_ID)) FROM ORDER_LINE, STOCK WHERE OL_
+W_ID = :B2 AND OL_D_ID = :B4 AND (OL_O_ID < :B3 ) AND OL_O_ID >=
+ (:B3 - 20) AND S_W_ID = :B2 AND S_I_ID = OL_I_ID AND S_QUANTITY
+ < :B1
+
+     12,622,087    3,053,774            4.1   13.5   158.58    546.70 1028266262
+Module: wish85t.exe
+INSERT INTO ORDER_LINE (OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, OL
+_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DIST_INFO) VAL
+UES (:B9 , :B8 , :B7 , :B6 , :B5 , :B4 , :B3 , :B2 , :B1 )
+
+     12,136,544    3,053,065            4.0   13.0   131.33    257.54 2615411387
+Module: wish85t.exe
+UPDATE STOCK SET S_QUANTITY = :B3 WHERE S_I_ID = :B2 AND S_W_ID
+= :B1
+
+     11,975,952    3,050,964            3.9   12.8    89.16    182.68 1736126963
+Module: wish85t.exe
+SELECT S_QUANTITY, S_DATA, S_DIST_01, S_DIST_02, S_DIST_03, S_DI
+ST_04, S_DIST_05, S_DIST_06, S_DIST_07, S_DIST_08, S_DIST_09, S_
+DIST_10 FROM STOCK WHERE S_I_ID = :B2 AND S_W_ID = :B1
+
+     10,383,631      306,141           33.9   11.1   229.66    572.88 3657542648
+Module: wish85t.exe
+BEGIN payment(:p_w_id,:p_d_id,:p_c_w_id,:p_c_d_id,:p_c_id,:bynam
+e,:p_h_amount,:p_c_last,:p_w_street_1,:p_w_street_2,:p_w_city,:p
+_w_state,:p_w_zip,:p_d_street_1,:p_d_street_2,:p_d_city,:p_d_sta
+te,:p_d_zip,:p_c_first,:p_c_middle,:p_c_street_1,:p_c_street_2,:
+
+     10,047,036       30,590          328.4   10.7   257.33    544.74 2945408166
+Module: wish85t.exe
+BEGIN delivery(:d_w_id,:d_o_carrier_id,TO_DATE(:timestamp,'YYYYM
+MDDHH24MISS')); END;
+
+      8,984,526    3,052,284            2.9    9.6    75.67    147.90 2968878469
+Module: wish85t.exe
+SELECT I_PRICE, I_NAME, I_DATA FROM ITEM WHERE I_ID = :B1
+
+      3,069,489      183,628           16.7    3.3    18.73     30.92  571265797
+Module: wish85t.exe
+SQL ordered by Gets  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Buffer Gets Threshold:     10000 Total Buffer Gets:      93,603,296
+-> Captured SQL accounts for   97.9% of Total Buffer Gets
+-> SQL reported below exceeded  1.0% of Total Buffer Gets
+
+                                                     CPU      Elapsd     Old
+  Buffer Gets    Executions  Gets per Exec  %Total Time (s)  Time (s) Hash Value
+--------------- ------------ -------------- ------ -------- --------- ----------
+SELECT C_FIRST, C_MIDDLE, C_ID, C_STREET_1, C_STREET_2, C_CITY,
+C_STATE, C_ZIP, C_PHONE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT, C_B
+ALANCE, C_SINCE FROM CUSTOMER WHERE C_W_ID = :B3 AND C_D_ID = :B
+2 AND C_LAST = :B1 ORDER BY C_FIRST
+
+      2,457,088      306,339            8.0    2.6    29.12     91.65    7688312
+Module: wish85t.exe
+INSERT INTO ORDERS (O_ID, O_D_ID, O_W_ID, O_C_ID, O_ENTRY_D, O_O
+L_CNT, O_ALL_LOCAL) VALUES (:B7 , :B6 , :B5 , :B4 , :B3 , :B2 ,
+:B1 )
+
+      2,301,079      305,882            7.5    2.5    69.18    170.53 3510960099
+Module: wish85t.exe
+UPDATE ORDER_LINE SET OL_DELIVERY_D = :B4 WHERE OL_O_ID = :B3 AN
+D OL_D_ID = :B2 AND OL_W_ID = :B1
+
+      1,851,469      306,332            6.0    2.0     5.91     21.13  481953120
+Module: wish85t.exe
+SELECT C_DISCOUNT, C_LAST, C_CREDIT, W_TAX FROM CUSTOMER, WAREHO
+USE WHERE WAREHOUSE.W_ID = :B3 AND CUSTOMER.C_W_ID = :B3 AND CUS
+TOMER.C_D_ID = :B2 AND CUSTOMER.C_ID = :B1
+
+      1,538,811      306,322            5.0    1.6    14.50     88.72  158025105
+Module: wish85t.exe
+UPDATE DISTRICT SET D_NEXT_O_ID = D_NEXT_O_ID + 1 WHERE D_ID = :
+B2 AND D_W_ID = :B1 RETURNING D_NEXT_O_ID, D_TAX INTO :O0 ,:O1
+
+      1,270,085      305,861            4.2    1.4    12.89     38.91  535523050
+Module: wish85t.exe
+SELECT SUM(OL_AMOUNT) FROM ORDER_LINE WHERE OL_O_ID = :B3 AND OL
+_D_ID = :B2 AND OL_W_ID = :B1
+
+      1,260,091      305,852            4.1    1.3    11.88     21.86 2873373459
+Module: wish85t.exe
+SELECT NO_O_ID,ROWID FROM NEW_ORDER WHERE NO_D_ID = :B2 AND NO_W
+_ID = :B1 ORDER BY NO_O_ID ASC
+
+      1,243,906      306,143            4.1    1.3    13.28     80.00  914473098
+Module: wish85t.exe
+UPDATE WAREHOUSE SET W_YTD = W_YTD + :B2 WHERE W_ID = :B1
+
+      1,229,840      305,883            4.0    1.3    14.98     29.78 2489006191
+Module: wish85t.exe
+UPDATE CUSTOMER SET C_BALANCE = C_BALANCE + :B4 WHERE C_ID = :B3
+ AND C_D_ID = :B2 AND C_W_ID = :B1
+
+      1,226,601      305,860            4.0    1.3    12.62     23.88 3888328823
+Module: wish85t.exe
+UPDATE ORDERS SET O_CARRIER_ID = :B4 WHERE O_ID = :B3 AND O_D_ID
+ = :B2 AND O_W_ID = :B1
+
+      1,222,913      305,844            4.0    1.3     8.95     22.21 2376470410
+SQL ordered by Gets  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Buffer Gets Threshold:     10000 Total Buffer Gets:      93,603,296
+-> Captured SQL accounts for   97.9% of Total Buffer Gets
+-> SQL reported below exceeded  1.0% of Total Buffer Gets
+
+                                                     CPU      Elapsd     Old
+  Buffer Gets    Executions  Gets per Exec  %Total Time (s)  Time (s) Hash Value
+--------------- ------------ -------------- ------ -------- --------- ----------
+Module: wish85t.exe
+SELECT O_C_ID FROM ORDERS WHERE O_ID = :B3 AND O_D_ID = :B2 AND
+O_W_ID = :B1
+
+      1,219,655      305,860            4.0    1.3    24.07     50.74 1344808673
+Module: wish85t.exe
+DELETE FROM NEW_ORDER WHERE ROWID = :B1
+
+        942,568      306,335            3.1    1.0    12.82     31.25 2520493975
+Module: wish85t.exe
+INSERT INTO NEW_ORDER (NO_O_ID, NO_D_ID, NO_W_ID) VALUES (:B3 ,
+:B2 , :B1 )
+
+          -------------------------------------------------------------
+SQL ordered by Reads  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Disk Reads Threshold:      1000  Total Disk Reads:          20,078
+-> Captured SQL accounts for   97.2% of Total Disk Reads
+-> SQL reported below exceeded  1.0% of Total Disk Reads
+
+                                                     CPU      Elapsd
+  Physical Rds   Executions  Rds per Exec   %Total Time (s)  Time (s) Hash Value
+--------------- ------------ -------------- ------ -------- --------- ----------
+         12,696      306,354            0.0   63.2  1027.46   2295.94 2369897509
+Module: wish85t.exe
+begin neword(:no_w_id,:no_max_w_id,:no_d_id,:no_c_id,:no_o_ol_cn
+t,:no_c_discount,:no_c_last,:no_c_credit,:no_d_tax,:no_w_tax,:no
+_d_next_o_id,TO_DATE(:timestamp,'YYYYMMDDHH24MISS')); END;
+
+         12,568    3,050,964            0.0   62.6    89.16    182.68 1736126963
+Module: wish85t.exe
+SELECT S_QUANTITY, S_DATA, S_DIST_01, S_DIST_02, S_DIST_03, S_DI
+ST_04, S_DIST_05, S_DIST_06, S_DIST_07, S_DIST_08, S_DIST_09, S_
+DIST_10 FROM STOCK WHERE S_I_ID = :B2 AND S_W_ID = :B1
+
+          4,387       30,590            0.1   21.8   257.33    544.74 2945408166
+Module: wish85t.exe
+BEGIN delivery(:d_w_id,:d_o_carrier_id,TO_DATE(:timestamp,'YYYYM
+MDDHH24MISS')); END;
+
+          4,174      305,882            0.0   20.8    69.18    170.53 3510960099
+Module: wish85t.exe
+UPDATE ORDER_LINE SET OL_DELIVERY_D = :B4 WHERE OL_O_ID = :B3 AN
+D OL_D_ID = :B2 AND OL_W_ID = :B1
+
+          1,329       30,673            0.0    6.6    12.12     33.31 1682859672
+Module: wish85t.exe
+BEGIN ostat(:os_w_id,:os_d_id,:os_c_id,:byname,:os_c_last,:os_c_
+first,:os_c_middle,:os_c_balance,:os_o_id,:os_entdate,:os_o_carr
+ier_id); END;
+
+          1,327       30,673            0.0    6.6     1.90      9.89 1146391701
+Module: wish85t.exe
+SELECT OL_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DELIV
+ERY_D FROM ORDER_LINE WHERE OL_O_ID = :B3 AND OL_D_ID = :B2 AND
+OL_W_ID = :B1
+
+          1,156      306,141            0.0    5.8   229.66    572.88 3657542648
+Module: wish85t.exe
+BEGIN payment(:p_w_id,:p_d_id,:p_c_w_id,:p_c_d_id,:p_c_id,:bynam
+e,:p_h_amount,:p_c_last,:p_w_street_1,:p_w_street_2,:p_w_city,:p
+_w_state,:p_w_zip,:p_d_street_1,:p_d_street_2,:p_d_city,:p_d_sta
+te,:p_d_zip,:p_c_first,:p_c_middle,:p_c_street_1,:p_c_street_2,:
+
+            840      183,628            0.0    4.2    18.73     30.92  571265797
+Module: wish85t.exe
+SELECT C_FIRST, C_MIDDLE, C_ID, C_STREET_1, C_STREET_2, C_CITY,
+C_STATE, C_ZIP, C_PHONE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT, C_B
+ALANCE, C_SINCE FROM CUSTOMER WHERE C_W_ID = :B3 AND C_D_ID = :B
+2 AND C_LAST = :B1 ORDER BY C_FIRST
+
+            309      122,516            0.0    1.5     3.33      6.63  646044192
+Module: wish85t.exe
+SELECT C_FIRST, C_MIDDLE, C_LAST, C_STREET_1, C_STREET_2, C_CITY
+, C_STATE, C_ZIP, C_PHONE, C_CREDIT, C_CREDIT_LIM, C_DISCOUNT, C
+SQL ordered by Reads  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Disk Reads Threshold:      1000  Total Disk Reads:          20,078
+-> Captured SQL accounts for   97.2% of Total Disk Reads
+-> SQL reported below exceeded  1.0% of Total Disk Reads
+
+                                                     CPU      Elapsd
+  Physical Rds   Executions  Rds per Exec   %Total Time (s)  Time (s) Hash Value
+--------------- ------------ -------------- ------ -------- --------- ----------
+_BALANCE, C_SINCE FROM CUSTOMER WHERE C_W_ID = :B3 AND C_D_ID =
+:B2 AND C_ID = :B1
+
+            208      305,844            0.0    1.0     8.95     22.21 2376470410
+Module: wish85t.exe
+SELECT O_C_ID FROM ORDERS WHERE O_ID = :B3 AND O_D_ID = :B2 AND
+O_W_ID = :B1
+
+          -------------------------------------------------------------
+SQL ordered by Executions  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Executions Threshold:       100  Total Executions:      18,980,277
+-> Captured SQL accounts for   99.7% of Total Executions
+-> SQL reported below exceeded  1.0% of Total Executions
+
+                                                CPU per    Elap per     Old
+ Executions   Rows Processed   Rows per Exec    Exec (s)   Exec (s)  Hash Value
+------------ --------------- ---------------- ----------- ---------- ----------
+   3,053,774       3,053,539              1.0       0.00        0.00  1028266262
+Module: wish85t.exe
+INSERT INTO ORDER_LINE (OL_O_ID, OL_D_ID, OL_W_ID, OL_NUMBER, OL
+_I_ID, OL_SUPPLY_W_ID, OL_QUANTITY, OL_AMOUNT, OL_DIST_INFO) VAL
+UES (:B9 , :B8 , :B7 , :B6 , :B5 , :B4 , :B3 , :B2 , :B1 )
+
+   3,053,065       3,053,621              1.0       0.00        0.00  2615411387
+Module: wish85t.exe
+UPDATE STOCK SET S_QUANTITY = :B3 WHERE S_I_ID = :B2 AND S_W_ID
+= :B1
+
+   3,052,284       3,046,112              1.0       0.00        0.00  2968878469
+Module: wish85t.exe
+SELECT I_PRICE, I_NAME, I_DATA FROM ITEM WHERE I_ID = :B1
+
+   3,050,964       3,044,714              1.0       0.00        0.00  1736126963
+Module: wish85t.exe
+SELECT S_QUANTITY, S_DATA, S_DIST_01, S_DIST_02, S_DIST_03, S_DI
+ST_04, S_DIST_05, S_DIST_06, S_DIST_07, S_DIST_08, S_DIST_09, S_
+DIST_10 FROM STOCK WHERE S_I_ID = :B2 AND S_W_ID = :B1
+
+     306,354         306,354              1.0       0.00        0.01  2369897509
+Module: wish85t.exe
+begin neword(:no_w_id,:no_max_w_id,:no_d_id,:no_c_id,:no_o_ol_cn
+t,:no_c_discount,:no_c_last,:no_c_credit,:no_d_tax,:no_w_tax,:no
+_d_next_o_id,TO_DATE(:timestamp,'YYYYMMDDHH24MISS')); END;
+
+     306,339         306,353              1.0       0.00        0.00     7688312
+Module: wish85t.exe
+INSERT INTO ORDERS (O_ID, O_D_ID, O_W_ID, O_C_ID, O_ENTRY_D, O_O
+L_CNT, O_ALL_LOCAL) VALUES (:B7 , :B6 , :B5 , :B4 , :B3 , :B2 ,
+:B1 )
+
+     306,335         306,337              1.0       0.00        0.00  2520493975
+Module: wish85t.exe
+INSERT INTO NEW_ORDER (NO_O_ID, NO_D_ID, NO_W_ID) VALUES (:B3 ,
+:B2 , :B1 )
+
+     306,332         306,312              1.0       0.00        0.00   481953120
+Module: wish85t.exe
+SELECT C_DISCOUNT, C_LAST, C_CREDIT, W_TAX FROM CUSTOMER, WAREHO
+USE WHERE WAREHOUSE.W_ID = :B3 AND CUSTOMER.C_W_ID = :B3 AND CUS
+TOMER.C_D_ID = :B2 AND CUSTOMER.C_ID = :B1
+
+     306,322         306,317              1.0       0.00        0.00   158025105
+Module: wish85t.exe
+UPDATE DISTRICT SET D_NEXT_O_ID = D_NEXT_O_ID + 1 WHERE D_ID = :
+B2 AND D_W_ID = :B1 RETURNING D_NEXT_O_ID, D_TAX INTO :O0 ,:O1
+
+     306,143         306,141              1.0       0.00        0.00   914473098
+Module: wish85t.exe
+UPDATE WAREHOUSE SET W_YTD = W_YTD + :B2 WHERE W_ID = :B1
+SQL ordered by Executions  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Executions Threshold:       100  Total Executions:      18,980,277
+-> Captured SQL accounts for   99.7% of Total Executions
+-> SQL reported below exceeded  1.0% of Total Executions
+
+                                                CPU per    Elap per     Old
+ Executions   Rows Processed   Rows per Exec    Exec (s)   Exec (s)  Hash Value
+------------ --------------- ---------------- ----------- ---------- ----------
+
+     306,141         306,110              1.0       0.00        0.00  3657542648
+Module: wish85t.exe
+BEGIN payment(:p_w_id,:p_d_id,:p_c_w_id,:p_c_d_id,:p_c_id,:bynam
+e,:p_h_amount,:p_c_last,:p_w_street_1,:p_w_street_2,:p_w_city,:p
+_w_state,:p_w_zip,:p_d_street_1,:p_d_street_2,:p_d_city,:p_d_sta
+te,:p_d_zip,:p_c_first,:p_c_middle,:p_c_street_1,:p_c_street_2,:
+
+     306,132         306,137              1.0       0.00        0.00  2864492183
+Module: wish85t.exe
+INSERT INTO HISTORY (H_C_D_ID, H_C_W_ID, H_C_ID, H_D_ID, H_W_ID,
+ H_DATE, H_AMOUNT, H_DATA) VALUES (:B8 , :B7 , :B6 , :B5 , :B4 ,
+ :B3 , :B2 , :B1 )
+
+     306,109         306,062              1.0       0.00        0.00  1611593292
+Module: wish85t.exe
+SELECT D_STREET_1, D_STREET_2, D_CITY, D_STATE, D_ZIP, D_NAME FR
+OM DISTRICT WHERE D_W_ID = :B2 AND D_ID = :B1
+
+     306,095         306,104              1.0       0.00        0.00   740386449
+Module: wish85t.exe
+UPDATE DISTRICT SET D_YTD = D_YTD + :B3 WHERE D_W_ID = :B2 AND D
+_ID = :B1
+
+     306,090         306,081              1.0       0.00        0.00  2569934510
+Module: wish85t.exe
+SELECT W_STREET_1, W_STREET_2, W_CITY, W_STATE, W_ZIP, W_NAME FR
+OM WAREHOUSE WHERE W_ID = :B1
+
+     305,883         305,879              1.0       0.00        0.00  2489006191
+Module: wish85t.exe
+UPDATE CUSTOMER SET C_BALANCE = C_BALANCE + :B4 WHERE C_ID = :B3
+ AND C_D_ID = :B2 AND C_W_ID = :B1
+
+     305,882       3,060,753             10.0       0.00        0.00  3510960099
+Module: wish85t.exe
+UPDATE ORDER_LINE SET OL_DELIVERY_D = :B4 WHERE OL_O_ID = :B3 AN
+D OL_D_ID = :B2 AND OL_W_ID = :B1
+
+     305,861         305,842              1.0       0.00        0.00   535523050
+Module: wish85t.exe
+SELECT SUM(OL_AMOUNT) FROM ORDER_LINE WHERE OL_O_ID = :B3 AND OL
+_D_ID = :B2 AND OL_W_ID = :B1
+
+     305,860         304,025              1.0       0.00        0.00  1344808673
+Module: wish85t.exe
+DELETE FROM NEW_ORDER WHERE ROWID = :B1
+
+     305,860         305,859              1.0       0.00        0.00  3888328823
+Module: wish85t.exe
+UPDATE ORDERS SET O_CARRIER_ID = :B4 WHERE O_ID = :B3 AND O_D_ID
+ = :B2 AND O_W_ID = :B1
+SQL ordered by Executions  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> End Executions Threshold:       100  Total Executions:      18,980,277
+-> Captured SQL accounts for   99.7% of Total Executions
+-> SQL reported below exceeded  1.0% of Total Executions
+
+                                                CPU per    Elap per     Old
+ Executions   Rows Processed   Rows per Exec    Exec (s)   Exec (s)  Hash Value
+------------ --------------- ---------------- ----------- ---------- ----------
+
+     305,852         305,808              1.0       0.00        0.00  2873373459
+Module: wish85t.exe
+SELECT NO_O_ID,ROWID FROM NEW_ORDER WHERE NO_D_ID = :B2 AND NO_W
+_ID = :B1 ORDER BY NO_O_ID ASC
+
+     305,844         305,814              1.0       0.00        0.00  2376470410
+Module: wish85t.exe
+SELECT O_C_ID FROM ORDERS WHERE O_ID = :B3 AND O_D_ID = :B2 AND
+O_W_ID = :B1
+
+     202,007         201,997              1.0       0.00        0.00  4000355767
+Module: wish85t.exe
+SELECT COUNT(C_ID) FROM CUSTOMER WHERE C_LAST = :B3 AND C_D_ID =
+ :B2 AND C_W_ID = :B1
+
+          -------------------------------------------------------------
+Instance Activity Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+Statistic                                      Total     per Second    per Trans
+--------------------------------- ------------------ -------------- ------------
+Batched IO (bound) vector count                    0            0.0          0.0
+Batched IO (full) vector count                     0            0.0          0.0
+Batched IO block miss count                        0            0.0          0.0
+Batched IO buffer defrag count                     0            0.0          0.0
+Batched IO double miss count                       0            0.0          0.0
+Batched IO same unit count                         0            0.0          0.0
+Batched IO single block count                      0            0.0          0.0
+Batched IO vector block count                      0            0.0          0.0
+Batched IO vector read count                       0            0.0          0.0
+Block Cleanout Optim referenced                    1            0.0          0.0
+CCursor + sql area evicted                         0            0.0          0.0
+CPU used by this session                     183,583        2,134.7          0.2
+CPU used when call started                   183,561        2,134.4          0.2
+CR blocks created                             26,624          309.6          0.0
+Commit SCN cached                             26,505          308.2          0.0
+DB time                                      711,160        8,269.3          0.8
+DBWR checkpoint buffers written                1,982           23.1          0.0
+DBWR checkpoints                                   0            0.0          0.0
+DBWR transaction table writes                     94            1.1          0.0
+DBWR undo block writes                         1,581           18.4          0.0
+HSC Heap Segment Block Changes             5,514,274       64,119.5          6.0
+Heap Segment Array Inserts                       144            1.7          0.0
+Heap Segment Array Updates                         0            0.0          0.0
+IMU CR rollbacks                              17,431          202.7          0.0
+IMU Flushes                                  244,557        2,843.7          0.3
+IMU Redo allocation size               1,405,943,820   16,348,184.0      1,529.3
+IMU commits                                  659,314        7,666.4          0.7
+IMU contention                               169,097        1,966.2          0.2
+IMU pool not allocated                        15,568          181.0          0.0
+IMU recursive-transaction flush               11,929          138.7          0.0
+IMU undo allocation size               5,299,061,680   61,616,996.3      5,764.1
+IMU- failed to get a private stra             15,547          180.8          0.0
+Requests to/from client                      705,009        8,197.8          0.8
+RowCR - row contention                        15,573          181.1          0.0
+RowCR attempts                                25,254          293.7          0.0
+RowCR hits                                     8,651          100.6          0.0
+SQL*Net roundtrips to/from client            705,111        8,199.0          0.8
+active txn count during cleanout             225,069        2,617.1          0.2
+application wait time                         13,638          158.6          0.0
+background checkpoints started                     0            0.0          0.0
+background timeouts                              649            7.6          0.0
+branch node splits                               167            1.9          0.0
+buffer is not pinned count                47,567,294      553,108.1         51.7
+buffer is pinned count                     8,792,757      102,241.4          9.6
+bytes received via SQL*Net from c         40,746,737      473,799.3         44.3
+bytes sent via SQL*Net to client         226,444,492    2,633,075.5        246.3
+calls to get snapshot scn: kcmgss         15,261,126      177,455.0         16.6
+calls to kcmgas                            1,138,951       13,243.6          1.2
+calls to kcmgcs                              179,706        2,089.6          0.2
+cell flash cache read hits                     6,000           69.8          0.0
+cell physical IO interconnect byt     10,034,860,032  116,684,419.0     10,915.5
+change write time                             11,259          130.9          0.0
+cleanout - number of ktugct calls            247,885        2,882.4          0.3
+cleanouts and rollbacks - consist             22,446          261.0          0.0
+cleanouts only - consistent read              24,351          283.2          0.0
+cluster key scan block gets                       89            1.0          0.0
+Instance Activity Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+Statistic                                      Total     per Second    per Trans
+--------------------------------- ------------------ -------------- ------------
+cluster key scans                                 89            1.0          0.0
+commit batch/immediate performed               1,517           17.6          0.0
+commit batch/immediate requested               1,517           17.6          0.0
+commit cleanout failures: callbac              4,094           47.6          0.0
+commit cleanout failures: cannot             111,131        1,292.2          0.1
+commit cleanouts                           7,527,247       87,526.1          8.2
+commit cleanouts successfully com          7,412,019       86,186.3          8.1
+commit immediate performed                     1,517           17.6          0.0
+commit immediate requested                     1,517           17.6          0.0
+commit txn count during cleanout             212,593        2,472.0          0.2
+concurrency wait time                         73,780          857.9          0.1
+consistent changes                            46,133          536.4          0.1
+consistent gets                           68,249,848      793,602.9         74.2
+consistent gets - examination             63,265,150      735,641.3         68.8
+consistent gets from cache                68,249,861      793,603.0         74.2
+consistent gets from cache (fastp          4,351,922       50,603.7          4.7
+cursor authentications                            44            0.5          0.0
+data blocks consistent reads - un             29,624          344.5          0.0
+db block changes                          29,435,716      342,275.8         32.0
+db block gets                             25,353,689      294,810.3         27.6
+db block gets from cache                  25,353,693      294,810.4         27.6
+db block gets from cache (fastpat            922,812       10,730.4          1.0
+deferred (CURRENT) block cleanout          3,017,150       35,083.1          3.3
+enqueue conversions                               59            0.7          0.0
+enqueue releases                           4,989,150       58,013.4          5.4
+enqueue requests                           4,988,966       58,011.2          5.4
+enqueue timeouts                                   0            0.0          0.0
+enqueue waits                                 29,240          340.0          0.0
+exchange deadlocks                                36            0.4          0.0
+execute count                             18,980,277      220,700.9         20.7
+failed probes on index block recl                 27            0.3          0.0
+file io wait time                         26,658,209      309,979.2         29.0
+free buffer inspected                            393            4.6          0.0
+free buffer requested                        704,424        8,191.0          0.8
+global enqueue gets sync                           0            0.0          0.0
+heap block compress                          143,065        1,663.6          0.2
+immediate (CR) block cleanout app             46,797          544.2          0.1
+immediate (CURRENT) block cleanou            739,379        8,597.4          0.8
+in call idle wait time                       275,748        3,206.4          0.3
+index crx upgrade (positioned)                     9            0.1          0.0
+index fast full scans (full)                       0            0.0          0.0
+index fetch by key                        19,281,616      224,204.8         21.0
+index scans kdiixs1                        1,401,639       16,298.1          1.5
+leaf node 90-10 splits                            29            0.3          0.0
+leaf node splits                              50,821          590.9          0.1
+logical read bytes from cache        766,800,117,760 ##############    834,095.8
+logons cumulative                                  3            0.0          0.0
+max cf enq hold time                               0            0.0          0.0
+messages received                             61,914          719.9          0.1
+messages sent                                 61,914          719.9          0.1
+min active SCN optimization appli              1,958           22.8          0.0
+no work - consistent read gets             4,850,698       56,403.5          5.3
+non-idle wait count                        1,771,871       20,603.2          1.9
+non-idle wait time                           444,297        5,166.2          0.5
+opened cursors cumulative                 19,223,192      223,525.5         20.9
+parse count (failures)                             0            0.0          0.0
+Instance Activity Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+Statistic                                      Total     per Second    per Trans
+--------------------------------- ------------------ -------------- ------------
+parse count (hard)                                38            0.4          0.0
+parse count (total)                              205            2.4          0.0
+parse time cpu                                    60            0.7          0.0
+parse time elapsed                               180            2.1          0.0
+physical read IO requests                      6,897           80.2          0.0
+physical read bytes                      164,478,976    1,912,546.2        178.9
+physical read requests optimized               6,001           69.8          0.0
+physical read total IO requests                7,541           87.7          0.0
+physical read total bytes                175,030,272    2,035,235.7        190.4
+physical read total bytes optimiz        150,290,432    1,747,563.2        163.5
+physical read total multi block r                  0            0.0          0.0
+physical reads                                20,078          233.5          0.0
+physical reads cache                          20,078          233.5          0.0
+physical reads cache prefetch                 13,181          153.3          0.0
+physical reads direct                              0            0.0          0.0
+physical reads direct temporary t                  0            0.0          0.0
+physical reads prefetch warmup                13,181          153.3          0.0
+physical write IO requests                       226            2.6          0.0
+physical write bytes                      16,236,544      188,797.0         17.7
+physical write total IO requests             121,936        1,417.9          0.1
+physical write total bytes             4,929,579,008   57,320,686.1      5,362.2
+physical write total multi block               9,395          109.2          0.0
+physical writes                                1,982           23.1          0.0
+physical writes direct                             0            0.0          0.0
+physical writes from cache                     1,982           23.1          0.0
+physical writes non checkpoint                 1,982           23.1          0.0
+pinned buffers inspected                           0            0.0          0.0
+process last non-idle time                         0            0.0          0.0
+recursive aborts on index block r                  2            0.0          0.0
+recursive calls                           22,899,060      266,268.1         24.9
+recursive cpu usage                          131,238        1,526.0          0.1
+redo blocks checksummed by FG (ex          6,442,929       74,917.8          7.0
+redo blocks written                        9,593,383      111,551.0         10.4
+redo buffer allocation retries                     0            0.0          0.0
+redo entries                               5,430,880       63,149.8          5.9
+redo log space requests                            0            0.0          0.0
+redo log space wait time                           0            0.0          0.0
+redo ordering marks                              521            6.1          0.0
+redo size                              4,726,241,968   54,956,302.0      5,141.0
+redo subscn max counts                        27,912          324.6          0.0
+redo synch long waits                              0            0.0          0.0
+redo synch poll writes                       643,626        7,484.0          0.7
+redo synch polls                           1,073,362       12,481.0          1.2
+redo synch time                              335,723        3,903.8          0.4
+redo synch time (usec)                 3,357,131,253   39,036,409.9      3,651.8
+redo synch writes                            643,624        7,484.0          0.7
+redo wastage                              29,694,440      345,284.2         32.3
+redo write time                                6,771           78.7          0.0
+redo writes                                   61,637          716.7          0.1
+rollback changes - undo records a             34,655          403.0          0.0
+rollbacks only - consistent read               2,855           33.2          0.0
+rows fetched via callback                 14,072,488      163,633.6         15.3
+session connect time                               0            0.0          0.0
+session cursor cache hits                    154,192        1,792.9          0.2
+session logical reads                     93,603,296    1,088,410.4        101.8
+session pga memory                         5,636,096       65,536.0          6.1
+Instance Activity Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+Statistic                                      Total     per Second    per Trans
+--------------------------------- ------------------ -------------- ------------
+session pga memory max                     5,832,704       67,822.1          6.3
+session uga memory                     4,295,049,784   49,942,439.4      4,672.0
+session uga memory max                     2,018,896       23,475.5          2.2
+shared hash latch upgrades - no w             22,287          259.2          0.0
+shared hash latch upgrades - wait                 52            0.6          0.0
+sorts (memory)                                   255            3.0          0.0
+sorts (rows)                                   9,335          108.6          0.0
+sql area evicted                                   0            0.0          0.0
+sql area purged                                    0            0.0          0.0
+switch current to new buffer                 333,421        3,877.0          0.4
+table fetch by rowid                      15,571,288      181,061.5         16.9
+table fetch continued row                         47            0.6          0.0
+table scan blocks gotten                          21            0.2          0.0
+table scan rows gotten                           899           10.5          0.0
+table scans (short tables)                        20            0.2          0.0
+total cf enq hold time                            20            0.2          0.0
+total number of cf enq holders                     4            0.1          0.0
+total number of times SMON posted                  0            0.0          0.0
+transaction rollbacks                          1,517           17.6          0.0
+undo change vector size                1,851,972,288   21,534,561.5      2,014.5
+user I/O wait time                             2,614           30.4          0.0
+user calls                                   705,035        8,198.1          0.8
+user commits                                 917,810       10,672.2          1.0
+user rollbacks                                 1,509           17.6          0.0
+workarea executions - optimal                    201            2.3          0.0
+write clones created in foregroun                 54            0.6          0.0
+          -------------------------------------------------------------
+
+Instance Activity Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Statistics with absolute values (should not be diffed)
+
+Statistic                             Begin Value       End Value
+--------------------------------- --------------- ---------------
+logons current                                140             139
+opened cursors current                        696             656
+session cursor cache count                  4,943           5,041
+          -------------------------------------------------------------
+
+Instance Activity Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Statistics identified by '(derived)' come from sources other than SYSSTAT
+
+Statistic                                      Total  per Hour
+--------------------------------- ------------------ ---------
+log switches (derived)                             0       .00
+          -------------------------------------------------------------
+
+OS Statistics  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by statistic type (CPU use, Virtual Memory, Hardware Config), Name
+
+Statistic                                  Total
+------------------------- ----------------------
+BUSY_TIME                                194,040
+IDLE_TIME                                 13,964
+IOWAIT_TIME                                    0
+SYS_TIME                                  24,851
+USER_TIME                                167,039
+PHYSICAL_MEMORY_BYTES            101,438,005,248
+NUM_CPUS                                      24
+NUM_CPU_CORES                                 12
+NUM_CPU_SOCKETS                                2
+GLOBAL_RECEIVE_SIZE_MAX                4,194,304
+GLOBAL_SEND_SIZE_MAX                   2,097,152
+TCP_RECEIVE_SIZE_DEFAULT                  87,380
+TCP_RECEIVE_SIZE_MAX                   4,194,304
+TCP_RECEIVE_SIZE_MIN                       4,096
+TCP_SEND_SIZE_DEFAULT                     16,384
+TCP_SEND_SIZE_MAX                      4,194,304
+TCP_SEND_SIZE_MIN                          4,096
+          -------------------------------------------------------------
+
+OS Statistics - detail  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+  Snap Snapshot
+    Id Day Time          Load  %Busy  %User %System   %WIO  %WCPU
+------ --------------- ------ ------ ------ ------- ------ ------
+     5 Mon 01 14:12:05   24.3
+     6 Mon 01 14:12:55   23.5   93.4   80.4    12.0    0.0
+     7 Mon 01 14:13:31   26.0   93.2   80.2    11.9    0.0
+          -------------------------------------------------------------
+IO Stat by Function - summary  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->Data Volume values suffixed with   M,G,T,P are in multiples of 1024,
+  other values suffixed with       K,M,G,T,P are in multiples of 1000
+->ordered by Data Volume (Read+Write) desc
+
+               ---------- Read --------- --------- Write -------- --- Wait ----
+                 Data  Requests    Data   Data  Requests    Data          Avg
+Function        Volume     /sec  Vol/sec Volume     /sec  Vol/sec  Count Tm(ms)
+--------------- ------ -------- -------- ------ -------- -------- ------ ------
+LGWR                        .1            4688M  1416.4     54.5M    62K    0.0
+Buffer Cache Re   157M    80.3      1.8M                           6908     0.0
+Others             10M     7.4       .1M             .5             679     0.0
+          -------------------------------------------------------------
+
+IO Stat by Function - detail  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->ordered by Data Volume (Read+Write) desc
+
+                   ----------- Read ---------- ----------- Write ---------
+                    Small  Large  Small  Large  Small  Large  Small  Large
+                     Read   Read   Data   Data  Write  Write   Data   Data
+Function             Reqs   Reqs   Read   Read   Reqs   Reqs  Writn  Writn
+------------------ ------ ------ ------ ------ ------ ------ ------ ------
+LGWR                   6                         113K  9281   2921M  1767M
+Buffer Cache Reads  6908           157M
+Others               638            10M           41
+          -------------------------------------------------------------
+Tablespace IO Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->ordered by IOs (Reads + Writes) desc
+
+Tablespace
+------------------------------
+                 Av      Av     Av                    Av        Buffer Av Buf
+         Reads Reads/s Rd(ms) Blks/Rd       Writes Writes/s      Waits Wt(ms)
+-------------- ------- ------ ------- ------------ -------- ---------- ------
+TPCCTAB
+         6,670      78    3.8     3.0           24        0      8,142    1.1
+UNDOTBS1
+             6       0    1.7     1.0          184        2      3,324    1.1
+SYSTEM
+           160       2    1.9     1.0           10        0          0    0.0
+SYSAUX
+            72       1    2.8     3.0            8        0          0    0.0
+          -------------------------------------------------------------
+File IO Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->Mx Rd Bkt: Max bucket time for single block read
+->ordered by Tablespace, File
+
+Tablespace               Filename
+------------------------ ----------------------------------------------------
+                        Av   Mx                                             Av
+                 Av     Rd   Rd    Av                    Av        Buffer BufWt
+         Reads Reads/s (ms)  Bkt Blks/Rd       Writes Writes/s      Waits  (ms)
+-------------- ------- ----- --- ------- ------------ -------- ---------- ------
+SYSAUX                   +DATA_HUB/tpcc/datafile/sysaux.283.811352745
+            72       1   2.8  16     3.0            8        0          0
+
+SYSTEM                   +DATA_HUB/tpcc/datafile/system.285.811352745
+           160       2   1.9  16     1.0           10        0          0
+
+TPCCTAB                  +DATA_HUB/tpcc/datafile/tpcctab.277.811357225
+         6,670      78   3.8 ###     3.0           24        0      8,142    1.1
+
+UNDOTBS1                 +DATA_HUB/tpcc/datafile/undotbs1.265.811352747
+             6       0   1.7   8     1.0          184        2      3,324    1.1
+
+          -------------------------------------------------------------
+File Read Histogram Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->Number of single block reads in each time range
+->Tempfiles are not included
+->ordered by Tablespace, File
+
+Tablespace               Filename
+------------------------ ----------------------------------------------------
+    0 - 2 ms     2 - 4 ms    4 - 8 ms     8 - 16 ms   16 - 32 ms       32+ ms
+------------ ------------ ------------ ------------ ------------ ------------
+SYSAUX                   +DATA_HUB/tpcc/datafile/sysaux.283.811352745
+          21            6            7            2            0            0
+
+SYSTEM                   +DATA_HUB/tpcc/datafile/system.285.811352745
+         122           17           12            9            0            0
+
+TPCCTAB                  +DATA_HUB/tpcc/datafile/tpcctab.277.811357225
+       1,523          497          717          473           51           30
+
+UNDOTBS1                 +DATA_HUB/tpcc/datafile/undotbs1.265.811352747
+           5            0            1            0            0            0
+
+          -------------------------------------------------------------
+Instance Recovery Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> B: Begin snapshot,  E: End snapshot
+
+  Targt Estd                                  Log File  Log Ckpt    Log Ckpt
+  MTTR  MTTR   Recovery   Actual    Target      Size     Timeout    Interval
+   (s)   (s)   Estd IOs  Redo Blks Redo Blks Redo Blks  Redo Blks  Redo Blks
+- ----- ----- ---------- --------- --------- ---------- --------- ------------
+B     0  1528    1268227  22602113  33177600   33177600
+E     0  2123    1609618  32197316  33177600   33177600
+          -------------------------------------------------------------
+
+Memory Dynamic Components  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->  Op - memory resize Operation
+->  Cache:    D: Default,  K: Keep,  R:  Recycle
+->   Mode:  DEF: DEFerred mode,  IMM: IMMediate mode
+
+                       Begin Snap End Snap   Op    Last Op
+Cache                    Size (M) Size (M)  Count  Type/Mode   Last Op Time
+---------------------- ---------- -------- ------- ---------- ---------------
+D:buffer cache             47,232                0 INITIA/IMM 01-Apr 14:07:44
+PGA Target                  9,728                0 STATIC
+SGA Target                 51,200                0 STATIC
+java pool                     128                0 STATIC
+large pool                    128                0 STATIC
+shared pool                 3,456                0 GROW/IMM   01-Apr 14:07:44
+          -------------------------------------------------------------
+
+Buffer Pool Advisory  DB/Inst: TPCC/TPCC  End Snap: 7
+-> Only rows with estimated physical reads >0 are displayed
+-> ordered by Pool, Block Size, Buffers For Estimate
+
+                                   Est
+                                  Phys      Estimated                   Est
+    Size for  Size      Buffers   Read     Phys Reads     Est Phys % dbtime
+P    Est (M) Factr  (thousands)  Factr    (thousands)    Read Time  for Rds
+--- -------- ----- ------------ ------ -------------- ------------ --------
+D      4,608    .1          568    1.6          1,217        2,134      9.2
+D      9,216    .2        1,135    1.0            749          799      3.5
+D     13,824    .3        1,703    1.0            741          775      3.4
+D     18,432    .4        2,270    1.0            741          775      3.4
+D     23,040    .5        2,838    1.0            741          775      3.4
+D     27,648    .6        3,406    1.0            741          775      3.4
+D     32,256    .7        3,973    1.0            741          775      3.4
+D     36,864    .8        4,541    1.0            741          775      3.4
+D     41,472    .9        5,109    1.0            741          775      3.4
+D     46,080   1.0        5,676    1.0            741          775      3.4
+D     47,232   1.0        5,818    1.0            741          775      3.4
+D     50,688   1.1        6,244    1.0            741          775      3.4
+D     55,296   1.2        6,811    1.0            741          775      3.4
+D     59,904   1.3        7,379    1.0            741          775      3.4
+D     64,512   1.4        7,947    1.0            741          775      3.4
+D     69,120   1.5        8,514    1.0            741          775      3.4
+D     73,728   1.6        9,082    1.0            741          775      3.4
+D     78,336   1.7        9,649    1.0            741          775      3.4
+D     82,944   1.8       10,217    1.0            741          775      3.4
+D     87,552   1.9       10,785    1.0            741          775      3.4
+D     92,160   2.0       11,352    1.0            741          775      3.4
+          -------------------------------------------------------------
+
+Buffer Pool Statistics  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Standard block size Pools  D: default,  K: keep,  R: recycle
+-> Default Pools for other block sizes: 2k, 4k, 8k, 16k, 32k
+-> Buffers: the number of buffers.  Units of K, M, G are divided by 1000
+
+                                                            Free Writ     Buffer
+            Pool         Buffer     Physical    Physical  Buffer Comp       Busy
+P   Buffers Hit%           Gets        Reads      Writes   Waits Wait      Waits
+--- ------- ---- -------------- ------------ ----------- ------- ---- ----------
+D     5818K  100     93,233,427       20,082       1,982       0    0     11,460
+          -------------------------------------------------------------
+
+Buffer wait Statistics  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by wait time desc, waits desc
+
+Class                        Waits Total Wait Time (s) Avg Time (ms)
+---------------------- ----------- ------------------- -------------
+data block                   7,932                   9             1
+undo header                  3,015                   3             1
+undo block                     320                   0             1
+1st level bmb                  196                   0             1
+file header block                2                   0             5
+segment header                   6                   0             0
+2nd level bmb                    1                   0             0
+          -------------------------------------------------------------
+PGA Aggr Target Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> B: Begin snap   E: End snap (rows identified with B or E contain data
+   which is absolute i.e. not diffed over the interval)
+-> PGA cache hit % - percentage of W/A (WorkArea) data processed only in-memory
+-> Auto PGA Target - actual workarea memory target
+-> W/A PGA Used    - amount of memory used for all WorkAreas (manual + auto)
+-> %PGA W/A Mem    - percentage of PGA memory allocated to WorkAreas
+-> %Auto W/A Mem   - percentage of WorkArea memory controlled by Auto Mem Mgmt
+-> %Man W/A Mem    - percentage of WorkArea memory under Manual control
+
+PGA Cache Hit % W/A MB Processed Extra W/A MB Read/Written
+--------------- ---------------- -------------------------
+          100.0              109                         0
+
+                                             %PGA  %Auto   %Man
+  PGA Aggr  Auto PGA   PGA Mem    W/A PGA    W/A    W/A    W/A   Global Mem
+  Target(M) Target(M)  Alloc(M)   Used(M)    Mem    Mem    Mem    Bound(K)
+- --------- --------- ---------- ---------- ------ ------ ------ ----------
+B     9,673     8,372      543.7        0.0     .0     .0     .0    990,510
+E     9,673     8,371      546.1        0.0     .0     .0     .0    990,510
+          -------------------------------------------------------------
+
+PGA Aggr Target Histogram  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Optimal Executions are purely in-memory operations
+
+    Low    High
+Optimal Optimal    Total Execs Optimal Execs 1-Pass Execs M-Pass Execs
+------- ------- -------------- ------------- ------------ ------------
+     2K      4K            109           109            0            0
+    64K    128K             10            10            0            0
+   512K   1024K             32            32            0            0
+     1M      2M             46            46            0            0
+     4M      8M              4             4            0            0
+          -------------------------------------------------------------
+
+PGA Memory Advisory  DB/Inst: TPCC/TPCC  End Snap: 7
+-> When using Auto Memory Mgmt, minimally choose a pga_aggregate_target value
+   where Estd PGA Overalloc Count is 0
+
+                                   Estd Extra                Estd
+  PGA Aggr                           W/A MB      Estd Time    PGA   Estd PGA
+    Target   Size         W/A MB  Read/Written  to Process  Cache  Overalloc
+  Est (MB)  Factr      Processed    to Disk      Bytes (s)  Hit %      Count
+---------- ------ -------------- -------------- ---------- ------ ----------
+     1,209    0.1            259              0        0.1  100.0          0
+     2,418    0.3            259              0        0.1  100.0          0
+     4,837    0.5            259              0        0.1  100.0          0
+     7,255    0.8            259              0        0.1  100.0          0
+     9,673    1.0            259              0        0.1  100.0          0
+    11,608    1.2            259              0        0.1  100.0          0
+    13,542    1.4            259              0        0.1  100.0          0
+    15,477    1.6            259              0        0.1  100.0          0
+    17,411    1.8            259              0        0.1  100.0          0
+    19,346    2.0            259              0        0.1  100.0          0
+    29,019    3.0            259              0        0.1  100.0          0
+    38,692    4.0            259              0        0.1  100.0          0
+    58,038    6.0            259              0        0.1  100.0          0
+    77,384    8.0            259              0        0.1  100.0          0
+          -------------------------------------------------------------
+Process Memory Summary Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> B: Begin snap   E: End snap
+-> All rows below contain absolute values (i.e. not diffed over the interval)
+-> Max Alloc is Maximum PGA Allocation size at snapshot time
+   Hist Max Alloc is the Historical Max Allocation for still-connected processes
+-> Num Procs or Allocs:  For Begin/End snapshot lines, it is the number of
+   processes. For Category lines, it is the number of allocations
+-> ordered by Begin/End snapshot, Alloc (MB) desc
+
+                                                                  Hist   Num
+                                          Avg    Std Dev   Max    Max   Procs
+             Alloc     Used    Freeabl   Alloc    Alloc   Alloc  Alloc    or
+  Category   (MB)      (MB)      (MB)     (MB)    (MB)    (MB)    (MB)  Allocs
+- -------- --------- --------- -------- -------- ------- ------- ------ ------
+B --------     543.7     370.2    131.6      3.8     1.9      13     13    142
+  Other        365.4                         2.6     1.7      13     13    142
+  Freeable     130.2        .0               1.2      .9       9           109
+  PL/SQL        33.8       3.4                .2      .1       0      0    140
+  SQL           14.4       3.9                .1      .1       1      7    111
+E --------     546.2     371.6    132.4      3.9     2.0      13     13    141
+  Other        367.2                         2.6     1.7      13     13    141
+  Freeable     132.4        .0               1.2      .9       9           109
+  PL/SQL        34.3       3.1                .2      .1       0      0    139
+  SQL           12.3       1.9                .1      .0       0      7    111
+          -------------------------------------------------------------
+
+Top Process Memory (by component)  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by Begin/End snapshot, Alloc (MB) desc
+
+                        Alloc   Used   Freeabl     Max      Hist Max
+     PId Category       (MB)    (MB)     (MB)   Alloc (MB) Alloc (MB)
+- ------ ------------- ------- ------- -------- ---------- ----------
+B     20 LGWR --------    12.7    11.9       .0       12.7       12.7
+         Other            12.7                        12.7       12.7
+         PL/SQL             .0      .0                  .0         .0
+      38 CJQ0 --------    11.4     2.4      8.6       11.4       11.4
+         Freeable          8.6      .0                 8.6
+         Other             2.7                         2.7        2.7
+         SQL                .1      .0                  .1        4.6
+         PL/SQL             .0      .0                  .0         .0
+      13 LMD0 --------    11.1    10.9       .0       11.1       11.1
+         Other            11.1                        11.1       11.1
+         PL/SQL             .0      .0                  .0         .0
+      32 TNS V1-V3 ---     9.5     2.8      6.1        9.5       11.0
+         Freeable          6.1      .0                 6.1
+         Other             3.0                         3.0        3.0
+         PL/SQL             .2      .2                  .2         .2
+         SQL                .1      .0                  .1        6.9
+      17 DBW0 --------     8.5     7.5       .3        8.5        8.5
+         Other             8.2                         8.2        8.2
+         Freeable           .3      .0                  .3
+         PL/SQL             .0      .0                  .0         .0
+      30 MARK --------     8.2     8.1       .0        8.2        8.2
+         Other             8.2                         8.2        8.2
+         PL/SQL             .0      .0                  .0         .0
+      11 DIA0 --------     7.8     7.3       .2        7.8        7.8
+         Other             7.6                         7.6        7.6
+         Freeable           .2      .0                  .2
+         PL/SQL             .0      .0                  .0         .0
+      18 DBW1 --------     6.8     6.6       .0        6.8        6.8
+         Other             6.8                         6.8        6.8
+         PL/SQL             .0      .0                  .0         .0
+      19 DBW2 --------     6.8     6.6       .0        6.8        6.8
+         Other             6.8                         6.8        6.8
+         PL/SQL             .0      .0                  .0         .0
+      12 LMON --------     6.5     5.6       .0        6.5        6.5
+         Other             6.5                         6.5        6.5
+         PL/SQL             .0      .0                  .0         .0
+       6 DIAG --------     5.9     5.8       .0        5.9        5.9
+         Other             5.9                         5.9        5.9
+         PL/SQL             .0      .0                  .0         .0
+      26 MMON --------     5.6     3.0      2.3        5.6        5.6
+         Other             3.1                         3.1        3.1
+         Freeable          2.3      .0                 2.3
+         SQL                .2      .0                  .2        1.2
+         PL/SQL             .1      .1                  .1         .1
+      22 SMON --------     5.5     1.9      3.3        5.5        5.5
+         Freeable          3.3      .0                 3.3
+         Other             2.2                         2.2        2.2
+         SQL                .0      .0                  .0        2.1
+         PL/SQL             .0      .0                  .0         .0
+     113  ------------     4.3     3.2       .8        4.3        5.0
+         Other             3.2                         3.2        3.2
+         Freeable           .8      .0                  .8
+         PL/SQL             .3      .0                  .3         .5
+
+Top Process Memory (by component)  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by Begin/End snapshot, Alloc (MB) desc
+
+                        Alloc   Used   Freeabl     Max      Hist Max
+     PId Category       (MB)    (MB)     (MB)   Alloc (MB) Alloc (MB)
+- ------ ------------- ------- ------- -------- ---------- ----------
+B    113 SQL                .1      .0                  .1        2.2
+     137  ------------     4.3     3.2       .7        4.3        5.1
+         Other             3.2                         3.2        3.2
+         Freeable           .7      .0                  .7
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        2.2
+     139  ------------     4.2     2.3       .5        4.2        4.2
+         Other             3.4                         3.4        3.4
+         Freeable           .5      .0                  .5
+         PL/SQL             .2      .0                  .2         .5
+         SQL                .1      .0                  .1        1.4
+      45  ------------     4.1     2.6      1.3        4.1        6.1
+         Other             2.4                         2.4        2.4
+         Freeable          1.3      .0                 1.3
+         PL/SQL             .3      .1                  .3         .5
+         SQL                .1      .0                  .1        3.4
+      50  ------------     4.1     2.6      1.3        4.1        6.1
+         Other             2.5                         2.5        2.5
+         Freeable          1.3      .0                 1.3
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        3.4
+      51  ------------     4.1     2.6      1.2        4.1        6.1
+         Other             2.5                         2.5        2.5
+         Freeable          1.2      .0                 1.2
+         PL/SQL             .3      .1                  .3         .5
+         SQL                .1      .0                  .1        3.2
+      53  ------------     4.1     2.6      1.2        4.1        4.8
+         Other             2.5                         2.5        2.5
+         Freeable          1.2      .0                 1.2
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        2.1
+E     20 LGWR --------    12.7    11.9       .0       12.7       12.7
+         Other            12.7                        12.7       12.7
+         PL/SQL             .0      .0                  .0         .0
+      38 CJQ0 --------    11.4     2.4      8.6       11.4       11.4
+         Freeable          8.6      .0                 8.6
+         Other             2.7                         2.7        2.7
+         SQL                .1      .0                  .1        4.6
+         PL/SQL             .0      .0                  .0         .0
+      13 LMD0 --------    11.1    10.9       .0       11.1       11.1
+         Other            11.1                        11.1       11.1
+         PL/SQL             .0      .0                  .0         .0
+      32 TNS V1-V3 ---     9.7     2.9      6.3        9.7       11.0
+         Freeable          6.3      .0                 6.3
+         Other             3.1                         3.1        3.1
+         PL/SQL             .2      .2                  .2         .2
+         SQL                .1      .0                  .1        6.9
+      17 DBW0 --------     8.5     7.5       .3        8.5        8.5
+         Other             8.2                         8.2        8.2
+         Freeable           .3      .0                  .3
+         PL/SQL             .0      .0                  .0         .0
+      30 MARK --------     8.2     8.1       .0        8.2        8.2
+         Other             8.2                         8.2        8.2
+
+Top Process Memory (by component)  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by Begin/End snapshot, Alloc (MB) desc
+
+                        Alloc   Used   Freeabl     Max      Hist Max
+     PId Category       (MB)    (MB)     (MB)   Alloc (MB) Alloc (MB)
+- ------ ------------- ------- ------- -------- ---------- ----------
+E     30 PL/SQL             .0      .0                  .0         .0
+      18 DBW1 --------     7.8     7.5       .0        7.8        7.8
+         Other             7.8                         7.8        7.8
+         PL/SQL             .0      .0                  .0         .0
+      19 DBW2 --------     7.8     7.5       .0        7.8        7.8
+         Other             7.8                         7.8        7.8
+         PL/SQL             .0      .0                  .0         .0
+      11 DIA0 --------     7.8     7.3       .2        7.8        7.8
+         Other             7.6                         7.6        7.6
+         Freeable           .2      .0                  .2
+         PL/SQL             .0      .0                  .0         .0
+      12 LMON --------     6.5     5.6       .0        6.5        6.5
+         Other             6.5                         6.5        6.5
+         PL/SQL             .0      .0                  .0         .0
+       6 DIAG --------     5.9     5.8       .0        5.9        5.9
+         Other             5.9                         5.9        5.9
+         PL/SQL             .0      .0                  .0         .0
+      26 MMON --------     5.6     3.0      2.3        5.6        5.6
+         Other             3.1                         3.1        3.1
+         Freeable          2.3      .0                 2.3
+         SQL                .2      .0                  .2        1.2
+         PL/SQL             .1      .1                  .1         .1
+      22 SMON --------     5.5     1.9      3.3        5.5        5.5
+         Freeable          3.3      .0                 3.3
+         Other             2.2                         2.2        2.2
+         SQL                .0      .0                  .0        2.1
+         PL/SQL             .0      .0                  .0         .0
+     113  ------------     4.3     3.2       .8        4.3        5.0
+         Other             3.2                         3.2        3.2
+         Freeable           .8      .0                  .8
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        2.2
+     137  ------------     4.3     3.2       .7        4.3        5.1
+         Other             3.0                         3.0        3.0
+         Freeable           .7      .0                  .7
+         PL/SQL             .4      .2                  .4         .5
+         SQL                .2      .1                  .2        2.2
+     138  ------------     4.2     2.6      1.3        4.2        4.9
+         Other             2.5                         2.5        2.5
+         Freeable          1.3      .0                 1.3
+         PL/SQL             .3      .1                  .3         .5
+         SQL                .1      .0                  .1        2.2
+     139  ------------     4.2     2.6       .5        4.2        4.2
+         Other             3.3                         3.3        3.3
+         Freeable           .5      .0                  .5
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        1.4
+      45  ------------     4.1     2.6      1.2        4.1        6.1
+         Other             2.5                         2.5        2.5
+         Freeable          1.2      .0                 1.2
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        3.4
+      51  ------------     4.1     2.6      1.2        4.1        6.1
+
+Top Process Memory (by component)  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by Begin/End snapshot, Alloc (MB) desc
+
+                        Alloc   Used   Freeabl     Max      Hist Max
+     PId Category       (MB)    (MB)     (MB)   Alloc (MB) Alloc (MB)
+- ------ ------------- ------- ------- -------- ---------- ----------
+E     51 Other             2.5                         2.5        2.5
+         Freeable          1.2      .0                 1.2
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        3.2
+      53  ------------     4.1     2.6      1.2        4.1        4.8
+         Other             2.5                         2.5        2.5
+         Freeable          1.2      .0                 1.2
+         PL/SQL             .3      .0                  .3         .5
+         SQL                .1      .0                  .1        2.1
+          -------------------------------------------------------------
+Enqueue activity  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> only enqueues with waits are shown
+-> Enqueue stats gathered prior to 10g should not be compared with 10g data
+-> ordered by Wait Time desc, Waits desc
+
+Enqueue Type (Request Reason)
+------------------------------------------------------------------------------
+    Requests    Succ Gets Failed Gets       Waits Wt Time (s)  Av Wt Time(ms)
+------------ ------------ ----------- ----------- ------------ --------------
+TX-Transaction (row lock contention)
+      29,232       29,231           0      29,184          137           4.71
+HW-Segment High Water Mark
+         420          420           0          21            0           1.90
+FB-Format Block
+       3,762        3,762           0          17            0           2.35
+TX-Transaction
+     969,478      970,635           0          10            0           1.00
+          -------------------------------------------------------------
+
+Latch Activity  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->"Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+  willing-to-wait latch get requests
+->"NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+->"Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                              Get          Get   Slps   Time       NoWait NoWait
+Latch                       Requests      Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+AQ deq hash table latch               2    0.0             0            0
+AQ dequeue txn counter l             18    0.0             0            0
+ASM Keyed state latch                 7    0.0             0            0
+ASM allocation                        4    0.0             0            0
+ASM db client latch                  68    0.0             0            0
+ASM map operation freeli             14    0.0             0            0
+ASM map operation hash t        507,369    0.0    0.0      0            0
+ASM network background l             38    0.0             0            0
+ASM network state latch              10    0.0             0            0
+Change Notification Hash             29    0.0             0            0
+Consistent RBA                   61,855    0.0    0.9      0            0
+DML lock allocation           7,968,015    0.2    0.1      4            0
+Event Group Locks                     7    0.0             0            0
+FOB s.o list latch                   12    0.0             0            0
+File State Object Pool P              2    0.0             0            0
+I/O Staticstics latch                 2    0.0             0            0
+IPC other latch                       1    0.0             0            0
+IPC stats buffer allocat              8    0.0             0            4    0.0
+In memory undo latch         13,024,000    0.5    0.8     65      919,299    0.0
+JS Sh mem access                      2    0.0             0            0
+JS mem alloc latch                    1    0.0             0            0
+JS queue access latch                 3    0.0             0            0
+JS queue state obj latch            666    0.0             0            0
+JS slv state obj latch                6    0.0             0            0
+KFC FX Hash Latch                     2    0.0             0            0
+KFC Hash Latch                        2    0.0             0            0
+KFCL LE Freelist                      2    0.0             0            0
+KFK SGA Libload latch               108    0.0             0            0
+KFMD SGA                            123    2.4    0.0      0            0
+KGNFS-NFS:SHM structure               2    0.0             0            0
+KGNFS-NFS:SVR LIST                    2    0.0             0            0
+KJC message pool free li              2    0.0             0            0
+KJCT flow control latch               2    0.0             0            0
+KMG MMAN ready and start             29    0.0             0            0
+KTF sga latch                         2    0.0             0           28    0.0
+KWQP Prop Status                      2    0.0             0            0
+Locator state objects po              2    0.0             0            0
+Lsod array latch                    101    0.0             0            0
+MQL Tracking Latch                    0                    0            1    0.0
+Memory Management Latch               2    0.0             0           29    0.0
+Memory Queue                          2    0.0             0            0
+Memory Queue Message Sub              2    0.0             0            0
+Memory Queue Message Sub              2    0.0             0            0
+Memory Queue Message Sub              2    0.0             0            0
+Memory Queue Message Sub              2    0.0             0            0
+Memory Queue Subscriber               2    0.0             0            0
+Mutex                                 2    0.0             0            0
+Mutex Stats                           2    0.0             0            0
+OS process                           23    0.0             0            0
+OS process allocation               185    0.0             0            0
+Latch Activity  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->"Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+  willing-to-wait latch get requests
+->"NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+->"Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                              Get          Get   Slps   Time       NoWait NoWait
+Latch                       Requests      Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+OS process: request allo              5    0.0             0            0
+PL/SQL warning settings               6    0.0             0            0
+PX hash array latch                   2    0.0             0            0
+QMT                                   2    0.0             0            0
+SGA blob parent                       2    0.0             0            0
+SGA bucket locks                      2    0.0             0            0
+SGA heap locks                        2    0.0             0            0
+SGA pool locks                        2    0.0             0            0
+SQL memory manager latch              2    0.0             0           29    0.0
+SQL memory manager worka         63,370    0.0    0.0      0            0
+Shared B-Tree                        11    0.0             0            0
+Streams Generic                       2    0.0             0            0
+Testing                               2    0.0             0            0
+Token Manager                         2    0.0             0            0
+WCR: sync                             2    0.0             0            0
+Write State Object Pool               2    0.0             0            0
+XDB NFS Security Latch                2    0.0             0            0
+XDB unused session pool               2    0.0             0            0
+XDB used session pool                 2    0.0             0            0
+active checkpoint queue             323    0.0             0            0
+active service list                 198    0.0             0          203    0.0
+buffer pool                           2    0.0             0            0
+business card                         2    0.0             0            0
+cache buffer handles             64,520    0.2    0.1      0            0
+cache buffers chains        214,367,237    1.5    0.0    363      723,767    0.1
+cache buffers lru chain         691,106    0.3    0.2      2      547,832    0.4
+call allocation                      59    1.7    0.0      0            0
+cas latch                             2    0.0             0            0
+change notification clie              2    0.0             0            0
+channel handle pool latc              8    0.0             0            0
+channel operations paren            682    0.0             0            0
+checkpoint queue latch          354,262    0.0    0.3      0      343,893    0.0
+client/application info               9    0.0             0            0
+compile environment latc              3    0.0             0            0
+corrupted undo seg latch        105,482    0.0    0.0      0            0
+cp cmon/server latch                  2    0.0             0            0
+cp pool latch                         2    0.0             0            0
+cp server hash latch                  2    0.0             0            0
+cp sga latch                          2    0.0             0            0
+cvmap freelist lock                   2    0.0             0            0
+deferred cleanup latch                2    0.0             0            0
+dml lock allocation                   2    0.0             0            0
+done queue latch                      2    0.0             0            0
+dummy allocation                      9    0.0             0            0
+enqueue freelist latch                2    0.0             0       68,648    0.0
+enqueue hash chains          10,020,037    0.9    0.1     75           39    0.0
+enqueues                            234    0.0             0            0
+fifth spare latch                     2    0.0             0            0
+file cache latch                     45    0.0             0            0
+flashback copy                        2    0.0             0            0
+Latch Activity  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->"Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+  willing-to-wait latch get requests
+->"NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+->"Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                              Get          Get   Slps   Time       NoWait NoWait
+Latch                       Requests      Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+fourth Audit Vault latch              2    0.0             0            0
+gc element                            2    0.0             0            0
+gcs commit scn state                  2    0.0             0            0
+gcs partitioned table ha              2    0.0             0            0
+gcs pcm hashed value buc              2    0.0             0            0
+gcs resource freelist                 2    0.0             0            0
+gcs resource hash                     2    0.0             0            0
+gcs resource scan list                2    0.0             0            0
+gcs shadows freelist                  2    0.0             0            0
+ges caches resource list              0                    0           66    0.0
+ges domain table                      2    0.0             0            0
+ges enqueue table freeli              2    0.0             0            0
+ges group table                       2    0.0             0            0
+ges process hash list                39    0.0             0            0
+ges process parent latch              5    0.0             0            0
+ges process table freeli              5    0.0             0            0
+ges resource hash list                2    0.0             0            0
+ges resource scan list                2    0.0             0            0
+ges resource table freel              2    0.0             0            0
+ges value block free lis              2    0.0             0            0
+global tx hash mapping                2    0.0             0            0
+granule operation                     2    0.0             0            0
+hash table column usage               0                    0          179    0.0
+hash table modification               5    0.0             0            0
+heartbeat check                       2    0.0             0            9    0.0
+heartbeat structure mana              0                    0           17    0.0
+intra txn parallel recov              2    0.0             0            0
+io pool granule metadata              2    0.0             0            0
+job workq parent latch                3    0.0             0            1    0.0
+job_queue_processes free              7    0.0             0            0
+job_queue_processes para             19    0.0             0            0
+k2q lock allocation                   2    0.0             0            0
+kdlx hb parent latch                  2    0.0             0            0
+kgb parent                            2    0.0             0            0
+kgnfs mount latch                     2    0.0             0            0
+ksfv messages                         2    0.0             0            0
+ksim group membership ca              2    0.0             0            0
+kss move lock                         2    0.0             0            0
+ksuosstats global area               14    0.0             0            0
+ksv allocation latch                  3    0.0             0            0
+ksv class latch                      41    0.0             0            0
+ksv msg queue latch                   2    0.0             0            0
+ksxp shared latch                     5    0.0             0            0
+ksxp so latch                         5    0.0             0            0
+ksz_so allocation latch               9    0.0             0            0
+kwqbsn:qsga                           9    0.0             0            0
+lgwr LWN SCN                     62,268    0.2    0.0      0            0
+list of block allocation          1,578    0.0             0            0
+lob segment dispenser la              2    0.0             0            0
+lob segment hash table l              2    0.0             0            0
+Latch Activity  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->"Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+  willing-to-wait latch get requests
+->"NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+->"Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                              Get          Get   Slps   Time       NoWait NoWait
+Latch                       Requests      Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+lob segment query latch               2    0.0             0            0
+lock DBA buffer during m              2    0.0             0            0
+logical standby cache                 2    0.0             0            0
+logminer context allocat              2    0.0             0            0
+logminer work area                    2    0.0             0            0
+longop free list parent               2    0.0             0            0
+mapped buffers lru chain              2    0.0             0            0
+message pool operations              32    0.0             0            0
+messages                        129,818    0.4    0.1      0            0
+mostly latch-free SCN            73,229    3.8    0.0      0            0
+msg queue latch                       2    0.0             0            0
+multiblock read objects           7,627    0.0             0            0
+name-service memory obje            428    0.0             0            0
+name-service namespace b            633    0.0             0            0
+name-service pending que            428    0.0             0            0
+name-service request que          1,047    0.0             0            0
+ncodef allocation latch               2    0.0             0            0
+object queue header heap          2,905    0.0             0            6    0.0
+object queue header oper      1,030,993    0.1    0.2      0            0
+object stats modificatio            125    0.0             0            0
+parallel query alloc buf             20    0.0             0            0
+parallel query stats                  2    0.0             0            0
+parameter list                        2    0.0             0            0
+parameter table manageme             24    0.0             0            0
+peshm                                 2    0.0             0            0
+pesom_free_list                       2    0.0             0            0
+pesom_hash_node                       2    0.0             0            0
+post/wait queue                      98    0.0             0           92    0.0
+process allocation                  424    0.0             0            2    0.0
+process group creation                5    0.0             0            0
+process queue                         2    0.0             0            0
+process queue reference               2    0.0             0            0
+qmn task queue latch                 12    0.0             0            0
+query server freelists                2    0.0             0            0
+queued dump request                   1    0.0             0            0
+queuing load statistics               2    0.0             0            0
+recovery domain hash lis              2    0.0             0            0
+redo allocation               2,101,582    1.8    0.2     29    5,409,609    5.1
+redo copy                             2    0.0             0    5,444,635    1.5
+redo writing                    244,944    0.0    0.7      0            0
+reid allocation latch                 4    0.0             0            0
+resmgr group change latc              1    0.0             0            0
+resmgr:active threads                 9    0.0             0            0
+resmgr:actses change gro              3    0.0             0            0
+resmgr:actses change sta              2    0.0             0            0
+resmgr:free threads list              7    0.0             0            0
+resmgr:plan CPU method                2    0.0             0            0
+resmgr:resource group CP              2    0.0             0            0
+resmgr:schema config                  2    0.0             0            0
+resmgr:session queuing                2    0.0             0            0
+Latch Activity  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->"Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+  willing-to-wait latch get requests
+->"NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+->"Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                              Get          Get   Slps   Time       NoWait NoWait
+Latch                       Requests      Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+rm cas latch                          2    0.0             0            0
+row cache objects               292,365    0.3    0.0      0            0
+rules engine rule set st            200    0.0             0            0
+second Audit Vault latch              2    0.0             0            0
+second spare latch                    2    0.0             0            0
+sequence cache                       14    0.0             0            0
+session allocation            1,655,377    0.0    0.1      0    1,655,402    0.1
+session idle bit              3,065,843    0.0    0.1      1            0
+session queue latch                   2    0.0             0            0
+session state list latch             10    0.0             0            0
+session switching                     7    0.0             0            0
+session timer                        29    0.0             0            0
+shared pool                       4,792    0.0             0            0
+shared pool sim alloc                 2    0.0             0            0
+shared pool simulator                68    0.0             0            0
+sim partition latch                   2    0.0             0            0
+simulator hash latch          5,898,407    0.0    0.1      0            0
+simulator lru latch               1,699    0.6    0.2      0    5,854,392    1.0
+sort extent pool                      2    0.0             0            0
+space background task la             92    0.0             0           58    0.0
+storage server table man              9    0.0             0            0
+tablespace key chain                  2    0.0             0            0
+test excl. parent l0                  2    0.0             0            0
+test excl. parent2 l0                 2    0.0             0            0
+third spare latch                     2    0.0             0            0
+threshold alerts latch                1    0.0             0            0
+trace latch                           2    0.0             0            0
+transaction allocation            1,234    0.0             0            0
+undo global data              5,442,710    0.1    0.1      3           33    0.0
+virtual circuit buffers               2    0.0             0            0
+virtual circuit holder                2    0.0             0            0
+virtual circuit queues                2    0.0             0            0
+          -------------------------------------------------------------
+Latch Sleep breakdown  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by misses desc
+
+                                       Get                                 Spin
+Latch Name                        Requests       Misses      Sleeps        Gets
+-------------------------- --------------- ------------ ----------- -----------
+cache buffers chains           214,367,237    3,186,934      51,044   3,109,515
+enqueue hash chains             10,020,037       94,303      10,893      83,753
+In memory undo latch            13,024,000       66,069      54,723      12,763
+redo allocation                  2,101,582       37,090       8,117      29,396
+DML lock allocation              7,968,015       19,805       1,071      18,770
+undo global data                 5,442,710        5,128         585       4,564
+mostly latch-free SCN               73,229        2,750          80       2,672
+cache buffers lru chain            691,106        2,110         435       1,689
+simulator hash latch             5,898,407        1,339          99       1,244
+session idle bit                 3,065,843          973         117         858
+row cache objects                  292,365          821          19         803
+session allocation               1,655,377          821          70         751
+object queue header operat       1,030,993          575         100         480
+messages                           129,818          469          46         425
+cache buffer handles                64,520          131           9         123
+checkpoint queue latch             354,262          119          31          89
+Consistent RBA                      61,855           26          24           4
+redo writing                       244,944           12           8           4
+simulator lru latch                  1,699           11           2           9
+          -------------------------------------------------------------
+Latch Miss Sources  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> only latches with sleeps are shown
+-> ordered by name, sleeps desc
+
+                                                     NoWait              Waiter
+Latch Name               Where                       Misses     Sleeps   Sleeps
+------------------------ -------------------------- ------- ---------- --------
+DML lock allocation      ktaiam                           0        723      842
+DML lock allocation      ktaidm                           0        346      227
+In memory undo latch     ktiFlush: child                  0     48,065    9,353
+In memory undo latch     kticmt: child                    0      6,186    3,537
+In memory undo latch     ktichg: child                    0      1,199   41,859
+In memory undo latch     ktiFlushTopTxn                   0        119       46
+In memory undo latch     ktiFlushMe                       0         99       28
+In memory undo latch     kturbk                           0          6      850
+In memory undo latch     ktiTxnPoolFree                   0          2        1
+cache buffer handles     kcbzgs                           0          5        7
+cache buffer handles     kcbzfs                           0          4        2
+cache buffers chains     kcbgcur: fast path (shr)         0     34,319   32,836
+cache buffers chains     kcbget: release excl             0      5,724      706
+cache buffers chains     kcbgtcr: fast path               0      5,284   10,608
+cache buffers chains     kcbget: exchange                 0      3,652    1,347
+cache buffers chains     kcbget: pin buffer               0      2,438    2,966
+cache buffers chains     kcbgcur_4                        0        430    2,963
+cache buffers chains     kcbgcur_2                        0        184      234
+cache buffers chains     kcbgtcr: fast path (cr pin       0        174       18
+cache buffers chains     kcbnlc                           0         87       93
+cache buffers chains     kcbchg1: mod cr pin              0         53       32
+cache buffers chains     kcbget: fast exchange            0         38       14
+cache buffers chains     kcb_post_apply: kcbhq62          0         16        5
+cache buffers chains     kcbchg1: aux pin                 0         15        6
+cache buffers chains     kcbzwb                           0         12        3
+cache buffers chains     kcbchg1: clear MS bit            0         11        9
+cache buffers chains     kcbchg1: mod cur pin             0          9        9
+cache buffers chains     kcbzpbuf                         0          7      429
+cache buffers chains     kcbrls_2                         0          7       36
+cache buffers chains     kcb_commit                       0          7       90
+cache buffers chains     kcbget: release shr              0          5        7
+cache buffers chains     kcb_pre_apply: kcbhq61           0          4       17
+cache buffers chains     kcbzgb: scan from tail. no       0          4        0
+cache buffers chains     kcbrls: fast release             0          4       43
+cache buffers chains     kcbesc: escalate                 0          3        0
+cache buffers chains     kcbnew: new latch again          0          3        0
+cache buffers chains     kcbcge                           0          2        8
+cache buffers chains     kcbgtcr_2                        0          2       20
+cache buffers chains     kcbget: fast path                0          2       10
+cache buffers chains     kcbgkcbcr                        0          1        2
+cache buffers lru chain  kcbzgws                          0        177        0
+cache buffers lru chain  kcbzswcu                         0        101       43
+cache buffers lru chain  kcbzgb                           0         79      376
+cache buffers lru chain  kcbgtcr:CR Scan:KCBRSKIP_1       0         57        0
+cache buffers lru chain  kcbz_fix_pwbuf                   0         12       13
+cache buffers lru chain  kcbgtcr:CR Scan:KCBRSKIP_2       0          4        0
+cache buffers lru chain  kcbbic2                          0          1        1
+cache buffers lru chain  kcbo_link_q                      0          1        0
+cache buffers lru chain  kcbz_prewarm_islocal             0          1        0
+cache buffers lru chain  kcbzfw                           0          1        0
+checkpoint queue latch   kcbswcu: Switch buffers          0         17       31
+checkpoint queue latch   kcbklbc_cql                      0         14        0
+enqueue hash chains      ksqgtl3                          0      5,629    6,821
+Latch Miss Sources  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> only latches with sleeps are shown
+-> ordered by name, sleeps desc
+
+                                                     NoWait              Waiter
+Latch Name               Where                       Misses     Sleeps   Sleeps
+------------------------ -------------------------- ------- ---------- --------
+enqueue hash chains      ksqrcl                           0      5,211    4,048
+enqueue hash chains      ksqcmi: kslgpl                   0         22        5
+enqueue hash chains      ksqcmi: get hash chain lat       0         21        9
+lgwr LWN SCN             kcs023                           0         19        1
+messages                 ksaamb: after wakeup             0         45       42
+messages                 ksarcv                           0          1        4
+mostly latch-free SCN    kcslcu3                          0         61       79
+mostly latch-free SCN    kcs01                            0         21       24
+mostly latch-free SCN    kcsnew_scn_rba                   0          3        0
+object queue header oper kcbo_sw_buf                      0         65       38
+object queue header oper kcbo_switch_cq                   0         24       19
+object queue header oper kcbo_link_q                      0         10       42
+object queue header oper kcbo_switch_q_bg                 0          1        0
+redo allocation          kcrfw_redo_gen: redo alloc       0      4,986        0
+redo allocation          kcrfw_redo_gen: redo alloc       0      2,341    7,180
+redo allocation          kcrfw_redo_gen: redo alloc       0        340        0
+redo allocation          kcrfw_post: more space           0        247      860
+redo allocation          kcrfw_redo_write: before w       0        198       72
+redo allocation          kcrf_pvt_strand_bind             0          3        5
+redo allocation          kcrf_pvt_strand_unbind           0          2        0
+redo writing             kcrfw_post: rba scn pair         0          6        0
+redo writing             kcrfwcr                          0          1       11
+redo writing             kcrfw_cal_target_rba             0          1        0
+row cache objects        kqreqd: reget                    0         17        0
+row cache objects        kqrpre: find obj                 0          2       19
+session allocation       ksucri_int : SSO                 0         38        0
+session allocation       ksuxds                           0         32       70
+session idle bit         ksuxds                           0         93       68
+session idle bit         ksupuc: set busy                 0         24       24
+session idle bit         ksupuc: clear busy               0          1       26
+simulator hash latch     kcbsacc: lookup dba              0         98       97
+simulator hash latch     kcbsacc: insert dba              0          1        0
+simulator lru latch      kcbs_simulate: simulate se       0          2        0
+undo global data         ktusmupst: KSLBEGIN              0        204      204
+undo global data         ktudnx:child                     0        133       78
+undo global data         ktudba: KSLBEGIN                 0        128       78
+undo global data         ktubnd_4                         0         71        0
+undo global data         ktufrbs_2                        0         44      223
+undo global data         ktubnd_3                         0          4        1
+undo global data         ktubnd:child                     0          1        1
+          -------------------------------------------------------------
+Mutex Sleep  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> ordered by Wait Time desc
+
+                                                                         Wait
+Mutex Type         Location                                 Sleeps     Time (s)
+------------------ -------------------------------- -------------- ------------
+Cursor Pin         kksLockDelete [KKSCHLPIN6]                8,855          0.0
+Cursor Pin         kksfbc [KKSCHLFSP2]                      45,588          0.0
+Library Cache      kglReleaseHandleReference 125                 2          0.0
+Library Cache      kglpndl1  95                             15,255          0.0
+Library Cache      kglpin1   4                              15,075          0.0
+Library Cache      kglpnal1  90                              8,919          0.0
+Library Cache      kglhbh1   63                                  2          0.0
+          -------------------------------------------------------------
+Dictionary Cache Stats  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->"Pct Misses"  should be very low (< 2% in most cases)
+->"Final Usage" is the number of cache entries being used in End Snapshot
+
+                                   Get    Pct    Scan   Pct      Mod      Final
+Cache                         Requests   Miss    Reqs  Miss     Reqs      Usage
+------------------------- ------------ ------ ------- ----- -------- ----------
+dc_awr_control                       1    0.0       0              0          1
+dc_global_oids                      12   25.0       0              0         25
+dc_histogram_data                  141   17.7       0              0        470
+dc_histogram_defs                  196   28.6       0              0      2,398
+dc_objects                         419   16.2       0              4      1,099
+dc_profiles                          2    0.0       0              0          1
+dc_rollback_segments                96    0.0       0              0         95
+dc_segments                         78   11.5       0              0        393
+dc_sequences                         1  100.0       0              1          5
+dc_tablespaces                  65,404    0.0       0              0          6
+dc_users                        31,106    0.1       0              0         79
+global database name                59    0.0       0              0          1
+sch_lj_oids                          1    0.0       0              0          1
+          -------------------------------------------------------------
+
+
+Library Cache Activity  DB/Inst: TPCC/TPCC  Snaps: 5-7
+->"Pct Misses"  should be very low
+
+                         Get  Pct        Pin        Pct               Invali-
+Namespace           Requests  Miss     Requests     Miss     Reloads  dations
+--------------- ------------ ------ -------------- ------ ---------- --------
+BODY                       5   80.0        351,480   -0.0          0        0
+EDITION                    1    0.0              2    0.0          0        0
+QUEUE                     18    0.0             18    0.0          0        0
+SCHEMA                    33    0.0              0                 0        0
+SQL AREA                 424   85.6     18,394,501   -2.4          0        0
+SQL AREA BUILD            23   87.0              0                 0        0
+SQL AREA STATS            23  100.0             23  100.0          0        0
+TABLE/PROCEDURE          309   41.7      1,056,593   -0.0          0        0
+TRANSFORMATION             9    0.0              9    0.0          0        0
+          -------------------------------------------------------------
+Rule Sets  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> * indicates Rule Set activity (re)started between Begin/End snaps
+-> Top 25 ordered by Evaluations desc
+
+                                                               No-SQL  SQL
+Rule                                *     Eval/sec Reloads/sec Eval % Eval %
+----------------------------------- - ------------ ----------- ------ ------
+SYS.ALERT_QUE_R                                  0           0      0      0
+          -------------------------------------------------------------
+Shared Pool Advisory  DB/Inst: TPCC/TPCC  End Snap: 7
+-> SP: Shared Pool     Est LC: Estimated Library Cache   Factr: Factor
+-> Note there is often a 1:Many correlation between a single logical object
+   in the Library Cache, and the physical number of memory objects associated
+   with it.  Therefore comparing the number of Lib Cache objects (e.g. in
+   v$librarycache), with the number of Lib Cache Memory Objects is invalid
+
+                                        Est LC Est LC  Est LC Est LC
+    Shared    SP   Est LC                 Time   Time    Load   Load      Est LC
+      Pool  Size     Size       Est LC   Saved  Saved    Time   Time         Mem
+  Size (M) Factr      (M)      Mem Obj     (s)  Factr     (s)  Factr    Obj Hits
+---------- ----- -------- ------------ ------- ------ ------- ------ -----------
+       768    .2       30        2,265  27,824    1.0      14    1.0   8,701,640
+     1,152    .3       30        2,265  27,824    1.0      14    1.0   8,701,640
+     1,536    .4       30        2,265  27,824    1.0      14    1.0   8,701,640
+     1,920    .6       30        2,265  27,824    1.0      14    1.0   8,701,640
+     2,176    .6       30        2,265  27,824    1.0      14    1.0   8,701,640
+     2,304    .7       30        2,265  27,824    1.0      14    1.0   8,701,640
+     2,432    .7       30        2,265  27,824    1.0      14    1.0   8,701,640
+     2,560    .7       30        2,265  27,824    1.0      14    1.0   8,701,640
+     2,688    .8       30        2,265  27,824    1.0      14    1.0   8,701,640
+     2,816    .8       30        2,265  27,824    1.0      14    1.0   8,701,640
+     2,944    .9       30        2,265  27,824    1.0      14    1.0   8,701,640
+     3,072    .9       30        2,265  27,824    1.0      14    1.0   8,701,640
+     3,200    .9       30        2,265  27,824    1.0      14    1.0   8,701,640
+     3,328   1.0       30        2,265  27,824    1.0      14    1.0   8,701,640
+     3,456   1.0       30        2,265  27,824    1.0      14    1.0   8,701,646
+     3,584   1.0       30        2,265  27,824    1.0      14    1.0   8,701,652
+     3,712   1.1       30        2,265  27,824    1.0      14    1.0   8,701,652
+     3,840   1.1       30        2,265  27,824    1.0      14    1.0   8,701,652
+     3,968   1.1       30        2,265  27,824    1.0      14    1.0   8,701,652
+     4,096   1.2       30        2,265  27,824    1.0      14    1.0   8,701,652
+     4,224   1.2       30        2,265  27,824    1.0      14    1.0   8,701,652
+     4,352   1.3       30        2,265  27,824    1.0      14    1.0   8,701,652
+     4,480   1.3       30        2,265  27,824    1.0      14    1.0   8,701,652
+     4,608   1.3       30        2,265  27,824    1.0      14    1.0   8,701,652
+     4,992   1.4       30        2,265  27,824    1.0      14    1.0   8,701,652
+     5,376   1.6       30        2,265  27,824    1.0      14    1.0   8,701,652
+     5,760   1.7       30        2,265  27,824    1.0      14    1.0   8,701,652
+     6,144   1.8       30        2,265  27,824    1.0      14    1.0   8,701,652
+     6,528   1.9       30        2,265  27,824    1.0      14    1.0   8,701,652
+     6,912   2.0       30        2,265  27,824    1.0      14    1.0   8,701,652
+          -------------------------------------------------------------
+SGA Target Advisory  DB/Inst: TPCC/TPCC  End Snap: 7
+
+SGA Target SGA Size   Est DB      Est DB   Est Physical
+  Size (M)   Factor Time (s) Time Factor          Reads
+---------- -------- -------- ----------- --------------
+     6,400       .1   24,423         1.1      1,204,151
+    12,800       .3   23,116         1.0        746,616
+    19,200       .4   23,101         1.0        739,151
+    25,600       .5   23,110         1.0        739,151
+    32,000       .6   23,115         1.0        739,151
+    38,400       .8   23,120         1.0        739,151
+    44,800       .9   23,128         1.0        739,151
+    51,200      1.0   23,087         1.0        739,151
+    57,600      1.1   23,134         1.0        739,151
+    64,000      1.3   23,142         1.0        739,151
+    70,400      1.4   23,148         1.0        739,151
+    76,800      1.5   23,157         1.0        739,151
+    83,200      1.6   23,162         1.0        739,151
+    89,600      1.8   23,171         1.0        739,151
+    96,000      1.9   23,176         1.0        739,151
+   102,400      2.0   23,185         1.0        739,151
+          -------------------------------------------------------------
+SGA Memory Summary  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+                                                        End Size (Bytes)
+SGA regions                      Begin Size (Bytes)       (if different)
+------------------------------ -------------------- --------------------
+Database Buffers                     49,526,341,632
+Fixed Size                                2,240,984
+Redo Buffers                             26,505,216
+Variable Size                         3,892,317,736
+                               -------------------- --------------------
+sum                                  53,447,405,568
+          -------------------------------------------------------------
+
+
+SGA breakdown difference  DB/Inst: TPCC/TPCC  Snaps: 5-7
+-> Top 35 rows by size, ordered by Pool, Name (note rows with null values for
+   Pool column, or Names showing free memory are always shown)
+-> Null value for Begin MB or End MB indicates the size of that Pool/Name was
+   insignificant, or zero in that snapshot
+
+Pool   Name                                 Begin MB         End MB  % Diff
+------ ------------------------------ -------------- -------------- --------
+java p free memory                             128.0          128.0     0.00
+large  PX msg pool                               7.8            7.8     0.00
+large  free memory                             119.8          119.8     0.00
+shared ASH buffers                              48.0           48.0     0.00
+shared db_block_hash_buckets                   356.0          356.0     0.00
+shared free memory                           2,796.6        2,794.5    -0.08
+       buffer_cache                         47,232.0       47,232.0     0.00
+       fixed_sga                                 2.1            2.1     0.00
+       log_buffer                               25.3           25.3     0.00
+          -------------------------------------------------------------
+SQL Memory Statistics  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+                                   Begin            End         % Diff
+                          -------------- -------------- --------------
+   Avg Cursor Size (KB):           27.11          26.99           -.45
+ Cursor to Parent ratio:            1.09           1.09            .04
+          Total Cursors:             599            620           3.39
+          Total Parents:             548            567           3.35
+          -------------------------------------------------------------
+init.ora Parameters  DB/Inst: TPCC/TPCC  Snaps: 5-7
+
+                                                                  End value
+Parameter Name                Begin value                       (if different)
+----------------------------- --------------------------------- --------------
+audit_file_dest               /u01/app/oracle/admin/TPCC/adump
+audit_trail                   DB
+compatible                    11.2.0.2.0
+control_files                 +DATA_HUB/tpcc/controlfile/curren
+                              t.257.811352743
+db_block_size                 8192
+db_create_file_dest           +DATA_HUB
+db_domain
+db_name                       TPCC
+diagnostic_dest               /u01/app/oracle
+dispatchers                   (PROTOCOL=TCP) (SERVICE=TPCCXDB)
+local_listener                LISTENER_TPCC
+open_cursors                  300
+pga_aggregate_target          10142875648
+processes                     500
+remote_login_passwordfile     EXCLUSIVE
+sga_target                    53687091200
+spfile                        +DATA_HUB/tpcc/spfiletpcc.ora
+undo_tablespace               UNDOTBS1
+          -------------------------------------------------------------
+
+End of Report ( sp_5_7.lst )
+
