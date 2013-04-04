@@ -45,10 +45,21 @@ D_BACKUP_DIR=$1
 V_BACKUP_TYPE=$2
 V_CATALOG=$3
 
-
 check_parameter $D_BACKUP_DIR
 check_parameter $V_BACKUP_TYPE
 
+msgi "Sanity check. If the database we want to backup is up"
+TMP_CHK=`ps -ef | grep -v 'grep' | grep ora_pmon_${ORACLE_SID}`
+msgd "TMP_CHK: $TMP_CHK"
+TMP_CHK_NR=`ps -ef | grep -v 'grep' | grep ora_pmon_${ORACLE_SID} | wc -l`
+msgd "TMP_CHK_NR: $TMP_CHK_NR"
+
+if [ "$TMP_CHK_NR" -gt 0 ]; then
+  msgi "OK, DB ${ORACLE_SID} looks to be up. Continuing."
+else
+  msgi "No pmon for DB ${ORACLE_SID} is running. Exiting."
+  exit 0
+fi
 
 msgd "Analysing the whether we use the RMAN repository or not."
 if [ -z "$V_CATALOG" ] ; then
