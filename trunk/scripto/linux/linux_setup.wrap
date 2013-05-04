@@ -50,6 +50,32 @@ b_setup_yum_repository()
       msgi "RPMforge repository already installed"
     fi
     ;;
+  "Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+
+    msgi "Base CentOS repository"
+    if [ -f /etc/yum.conf ]; then
+      cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
+    fi
+    check_file "./sup_files/yum.conf.CentOS_5.8_x86_64"
+    run_command "cp ./sup_files/yum.conf.CentOS_5.8_x86_64 /etc/yum.conf"
+    run_command "yum clean all"
+
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+    ;;
+
+
   "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
     msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     
