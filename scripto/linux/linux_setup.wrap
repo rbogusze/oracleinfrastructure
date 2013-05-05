@@ -134,7 +134,7 @@ b_install_usefull_rpm()
       msgi "rlwrap is already installed"
     fi
     ;;
-  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64")
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
     if [ "$TMP_CHK" -lt 1 ]; then
