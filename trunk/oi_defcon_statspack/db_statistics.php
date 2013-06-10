@@ -27,7 +27,7 @@ if (is_file($dir . $filename) ) {
     // Spot sections start
     if (strstr ( $data, "Instance Activity Stats ")) { echo "<font color='black'>"; $section = 1; }
     // Spot section end, then exit the while loop.
-    if (strstr ( $data, "Instance Activity Stats - Absolute Values")) { echo "<font color='red'>"; $section = 0; break; }
+    if (strstr ( $data, "OS Statistics  DB/Inst")) { echo "<font color='red'>"; $section = 0; break; }
     if ( $section ) {
       // I need to stripe multiple spaces
 //      $data = preg_replace('/\s\s+/', ' ', $data);
