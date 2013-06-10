@@ -23,7 +23,7 @@ if (is_dir($dir)) {
       while (($file = readdir($dh)) !== false) {
         //echo "filename: $file : filetype: " . filetype($dir . $file) . "<BR>";
         if ( filetype($dir . $file) == file  ) {
-          if ( strstr( $file, ".txt") ) {
+          if ( strstr( $file, ".lst") ) {
             $filenames_array[$filenames_array_counter] = $file;
             $filenames_array_counter++;
           }
