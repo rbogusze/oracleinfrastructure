@@ -61,8 +61,10 @@ if (is_dir($dir)) {
 
 //Include link to raw statspack file
 echo "<BR>Raw statspack file : ";
-//echo "<a href=\"show_file.php?filename=$dir$filename\" >statspack </a>";
 echo "<a href=\"show_file.php?filename=$dir$filename\" >$filename </a>";
+echo "<BR><BR>";
+echo "<a href=\"db_statistics.php?dir=$dir&filename=$filename\" >Database Statistics</a>";
+
 
 //Show diagnostics for the current date
 echo "<BR><BR> Diagnostic scripts ( includes contents of cache ) <BR>";
