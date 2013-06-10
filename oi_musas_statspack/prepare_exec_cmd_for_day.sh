@@ -13,17 +13,17 @@ while [ ${CURRENT} -lt ${END} ]
 do
   OLD=${CURRENT}
   CURRENT=`expr ${CURRENT} + ${STEP}`
-  echo ${CURRENT}
+  #echo ${CURRENT}
 
   #have 0 at the beginning, when it is one number
   TMP_CHK=`echo ${CURRENT} | wc -m`
-  echo "TMP_CHK: $TMP_CHK"
+  #echo "TMP_CHK: $TMP_CHK"
   if [ $TMP_CHK -lt 3 ]; then
     CURRENT="0${CURRENT}"
   fi
 
-  echo ${CURRENT}
-  echo $OLD
+  #echo ${CURRENT}
+  #echo $OLD
   
 
   echo "./get_statspack.sh RAC1 perfstat 2013-06-03--$OLD:00 2013-06-03--${CURRENT}:00 > /dev/null 2>&1" 
