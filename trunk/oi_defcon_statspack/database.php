@@ -64,6 +64,8 @@ echo "<BR>Raw statspack file : ";
 echo "<a href=\"show_file.php?filename=$dir$filename\" >$filename </a>";
 echo "<BR><BR>";
 echo "<a href=\"db_statistics.php?dir=$dir&filename=$filename\" >Database Statistics</a>";
+echo "<BR><BR>";
+echo "<a href=\"db_wait_events.php?dir=$dir&filename=$filename\" >Database Wait Events</a>";
 
 
 //Show diagnostics for the current date
