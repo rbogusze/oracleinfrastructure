@@ -9,9 +9,15 @@ echo "<tt>Database Statistics History<BR></tt>";
 #echo "<table><td width=1000 valign=top border=1>";
 
 $dir=$_GET['dir'];
+//echo "<BR> dir: $dir";
 $statname=$_GET['statname'];
 
-//echo "<BR> dir: $dir";
+
+//dirty hack, extracting the database name from directory - as a name of the last directory
+$db_name=end(explode('/', rtrim($dir, '/')));
+//echo "<BR> db_name: $db_name";
+
+
 //echo "<BR> statname: $statname";
 
 $filenames_array = array();
@@ -95,7 +101,7 @@ for($i=0; $i<count($filenames_array); $i++)
 } // for($i=0; $i<count($filenames_array
 
 //show_array($data_values3);
-echo "<br> $filenames_array[0]";
+//echo "<br> $filenames_array[0]";
 // Extract from the filename data time of creation 
 for($i=0; $i<count($filenames_array); $i++)
 {
@@ -107,10 +113,7 @@ for($i=0; $i<count($filenames_array); $i++)
 echo "<br>";
 
 
-draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Total", 0, "");
-//draw_chart($data_values2, $filenames_array, ("Statistik: " . $statname), "per Second", 0, "");
-//draw_chart($data_values3, $filenames_array, ("Statistik: " . $statname), "per Trans", 0, "");
-
+draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), $db_name, 0, "");
 
 
 //Include footer file with navigation links
