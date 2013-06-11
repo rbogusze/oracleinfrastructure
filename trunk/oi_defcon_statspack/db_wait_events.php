@@ -4,7 +4,7 @@
 //Include HTML header
 require_once("/home/orainf/scripto/php/my_library.php");
 require("header.php");
-echo "<tt>Database Statistics <BR></tt>";
+echo "<tt>Database Wait Events <BR></tt>";
 #echo "<table><td width=1000 valign=top border=1>";
 
 $dir=$_GET['dir'];
@@ -14,7 +14,7 @@ echo "<BR> dir: $dir";
 echo "<BR> filename: $filename";
 
 echo "<table border=1>";
-echo "<tr><td>Statistic</td><td>Total</td><td>per Second</td><td>per Trans</td></tr>";
+echo "<tr><td>Event</td><td>Waits</td><td>%Timout</td><td>Total Wait Time (s)</td><td>Avg wait (ms)</td></tr>";
 //Open the file and read the Statistics section
 if (is_file($dir . $filename) ) {
   $fh = fopen ($dir . $filename, "r") or die("Could not open file");
@@ -25,9 +25,9 @@ if (is_file($dir . $filename) ) {
 //    $data = str_replace("\f",'',$data);
     if (strlen($data) == 0) { continue; }
     // Spot sections start
-    if (strstr ( $data, "Instance Activity Stats ")) { echo "<font color='black'>"; $section = 1; }
+    if (strstr ( $data, "Wait Events (fg and bg) ")) { echo "<font color='black'>"; $section = 1; }
     // Spot section end, then exit the while loop.
-    if (strstr ( $data, "OS Statistics  DB/Inst")) { echo "<font color='red'>"; $section = 0; break; }
+    if (strstr ( $data, "Wait Event Histogram")) { echo "<font color='red'>"; $section = 0; break; }
     if ( $section ) {
       // I need to stripe multiple spaces
 //      $data = preg_replace('/\s\s+/', ' ', $data);
@@ -38,14 +38,16 @@ if (is_file($dir . $filename) ) {
       //list($trash1, $trash2, $trash3, $trash4, $trash5, $trash6, $trash7) = split('  ',$data);
       list($trash1, $trash2, $trash3, $trash4, $trash5, $trash6, $trash7) = preg_split("/[\s][\s]+/",$data);
       //echo "<br> trash1: $trash1 | trash2: $trash2 | trash3: $trash3 | trash4: $trash4 <br>";
-     
-      $trash2 = str_replace(",", "", $trash2);  // | Total   |
-      $trash3 = str_replace(",", "", $trash3);  // | per Second   |
-      $trash4 = str_replace(",", "", $trash4);  // | per Trans   |
+    
+      //tras1 - event name 
+      $trash2 = str_replace(",", "", $trash2);  // | Waits   |
+      $trash3 = str_replace(",", "", $trash3);  // | %Timout   |
+      $trash4 = str_replace(",", "", $trash4);  // | Total Wait Time (s)   |
+      $trash5 = str_replace(",", "", $trash5);  // | Avg wait (ms)   |
 
       if ( is_numeric($trash2) && is_numeric($trash3)  ) {
         //echo "<br> data: $data <br>";
-        echo "<tr><td><a href=\"db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash3</td><td>$trash4</td></tr>";
+        echo "<tr><td><a href=\"db_wait_events_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash3</td><td>$trash4</td><td>$trash5</td></tr>";
       } // if ( is_numeric($trash2)
 
     } // if ( $section )
