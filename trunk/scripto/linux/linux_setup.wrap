@@ -10,8 +10,8 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-#INFO_MODE=DEBUG
-INFO_MODE=INFO
+INFO_MODE=DEBUG
+#INFO_MODE=INFO
 
 b_setup_yum_repository()
 {
@@ -567,7 +567,59 @@ b_clean_up()
   msgb "${FUNCNAME[0]} Finished."
 } #b_clean_up
 
-# 6 lines to yank
+b_disable_IP6()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgd "Checking if IPv6 works"
+  eval ping6 -c 2 ::1
+  if [ $? -ne 0 ]; then
+    msgi "IPv6 does not work. OK. Nothing to do."
+    return 0
+  else
+    msgi "IPv6 seems to work fine. Disabling it."
+
+    case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+    "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
+      msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+      run_command "echo 'NETWORKING_IPV6=no' >> /etc/sysconfig/network"
+      run_command "echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf"
+      run_command "service ip6tables save"
+      run_command "service ip6tables stop"
+      run_command "chkconfig ip6tables off"
+      msga "It is required to reboot the host now to make the setting work."
+      USER_ANSWER=''
+      EXIT_WHILE=''
+      while [ ! "$EXIT_WHILE" ]
+      do
+        read -p "[wait] Do you want to reboot now? (yes/no)" USER_ANSWER
+        if [ "$USER_ANSWER" = "yes" ]; then
+          msgi "Rebooting NOW."
+          run_command "reboot"
+          run_command "exit 0"
+          EXIT_WHILE=1
+        fi
+        if [ "$USER_ANSWER" = "no" ]; then
+          msgi "Doing nothing."
+          EXIT_WHILE=1
+        fi
+      done
+
+
+
+      ;;
+    *)
+      msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+      exit 1
+      ;;
+    esac
+  fi #eval ping6 -c 4 ::1
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_disable_IP6
+
+# 7 lines to yank
 b_template()
 {
   msgb "${FUNCNAME[0]} Beginning."
@@ -623,6 +675,9 @@ case $SELECT_BLOCK in
   "b_clean_up")
     b_clean_up
     ;;
+  "b_disable_IP6")
+    b_disable_IP6
+    ;;
   "ALL")
     b_clean_up
     b_copy_auth_keys
@@ -633,6 +688,7 @@ case $SELECT_BLOCK in
     b_time_synchro
     b_scripto_for_oracle
     b_disable_SE_firewall
+    b_disable_IP6
     b_install_vmware_tools
     ;; 
   *)
@@ -647,6 +703,7 @@ case $SELECT_BLOCK in
     echo " b_time_synchro"
     echo " b_scripto_for_oracle"
     echo " b_disable_SE_firewall"
+    echo " b_disable_IP6"
     echo " b_install_vmware_tools"
     echo ""
     echo "Available sets of blocks:"
