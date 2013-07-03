@@ -113,10 +113,10 @@ b_setup_yum_repository()
 b_install_usefull_rpm()
 {
   msgb "${FUNCNAME[0]} Beginning."
-  TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" -e "^subversion" | wc -l`
-  if [ "$TMP_CHK" -lt 6 ]; then
+  TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" -e "^subversion" -e "^nmon" | wc -l`
+  if [ "$TMP_CHK" -lt 7 ]; then
     msga "Installing mutt rsync lynx dialog ..."
-    run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced"
+    run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced nmon"
   else
     msgi "mutt rsync lynx dialog ... already installed. Doing nothing."
   fi 
