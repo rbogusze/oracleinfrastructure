@@ -28,10 +28,12 @@ LOG_NAME=auto_restore_from_location.log
 LOCKFILE=/tmp/auto_restore_from_location.lock
 
 INFO_MODE=INFO
+#INFO_MODE=DEBUG
 
 if [ ! -f /on_this_system_db_will_be_deleted_and_created_from_backup_dir ]; then
   exit 0
 fi
+
 
 
 # Sanity checks
@@ -48,7 +50,7 @@ check_lock $LOCKFILE
 touch $LOCKFILE
 
 D_BACKUP_DIR=$1
-check_parameter $D_BACKUP_DIR
+check_directory $D_BACKUP_DIR
 
 msgi "Get ORACLE_SID from dir name"
 export ORACLE_SID=`echo $D_BACKUP_DIR | awk -F"/" '{print $NF}'`
