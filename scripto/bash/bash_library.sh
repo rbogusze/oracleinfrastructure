@@ -6,7 +6,12 @@
 # ala ma kota
 
 # if RECIPIENTS value is set, preserve it.
+# RECIPIENTS not set, ~/.scripto_recipients found, setting from file
+if [ -z "$RECIPIENTS" ] && [ -f ~/.scripto_recipients ]; then
+  RECIPIENTS=`cat ~/.scripto_recipients`
+fi
 
+# if RECIPIENTS was somehow not set in ~/.scripto_recipients
 [ -z "$RECIPIENTS" ] && RECIPIENTS='remigiusz.boguszewicz@gmail.com'
 
 # Level of messages
