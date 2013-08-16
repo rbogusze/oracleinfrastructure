@@ -94,9 +94,9 @@ check_file $D_BACKUP_DIR/$V_LAST_PFILE
 V_CONTROL_FILE=`cat $D_BACKUP_DIR/$V_LAST_PFILE | grep -i control_files | awk -F"=" '{print $2}' | awk -F"/" '{print $1"/"$2"/controlfile_01.ctl\047"}'`
 msgd "V_CONTROL_FILE: $V_CONTROL_FILE"
 
-
-run_command "cat $D_BACKUP_DIR/$V_LAST_PFILE | grep -i -v db_cache_size | grep -i -v java_pool_size | grep -i -v large_pool_size | grep -i -v shared_pool_size | grep -i -v streams_pool_size | grep -i -v db_recovery_file_dest_size | grep -i -v pga_aggregate_target | grep -i -v remote_listener | grep -i -v sga_target | grep -i -v control_files > $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
-run_command "echo 'db_recovery_file_dest_size=20G' >> $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
+# disabling FRA to avoid
+# RMAN RESTORE FAILS WITH RMAN-06023 BUT THERE ARE BACKUPS AVAILABLE (Doc ID 965122.1)
+run_command "cat $D_BACKUP_DIR/$V_LAST_PFILE | grep -i -v db_cache_size | grep -i -v java_pool_size | grep -i -v large_pool_size | grep -i -v shared_pool_size | grep -i -v streams_pool_size | grep -i -v db_recovery_file_dest_size | grep -i -v db_recovery_file_dest | grep -i -v pga_aggregate_target | grep -i -v remote_listener | grep -i -v sga_target | grep -i -v control_files > $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
 run_command "echo 'pga_aggregate_target=500M' >> $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
 run_command "echo 'sga_target=2G' >> $ORACLE_HOME/dbs/init$ORACLE_SID.ora"
 echo "control_files=$V_CONTROL_FILE" >> $ORACLE_HOME/dbs/init$ORACLE_SID.ora
@@ -133,7 +133,15 @@ msgi "Instance XXX, status RESTRICTED, has 1 handler(s) for this service..."
 msgi "Which results from the auto registered when the DB is in mounted state ?? (I suspect)"
 f_execute_sql "shutdown immediate;"
 cat $F_EXECUTE_SQL
-f_execute_sql "startup;"
+
+msgi "Disabling archivelog mode"
+f_execute_sql "startup mount;"
+cat $F_EXECUTE_SQL
+f_execute_sql "alter database noarchivelog;"
+cat $F_EXECUTE_SQL
+
+msgi "Startup"
+f_execute_sql "alter database open;"
 cat $F_EXECUTE_SQL
 
 msgi "Remove lock file"
