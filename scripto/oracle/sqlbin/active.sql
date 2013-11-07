@@ -1,6 +1,6 @@
 prompt Active session with sql text
 column USERNAME format a14
-select distinct ses.SID, ses.sql_hash_value, ses.USERNAME, pro.SPID "OS PID", substr(stx.sql_text,1,200)
+select distinct ses.SID, ses.sql_hash_value, stx.old_hash_value, ses.USERNAME, pro.SPID "OS PID", substr(stx.sql_text,1,200)
 from V$SESSION ses
     ,V$SQL stx
     ,V$PROCESS pro
