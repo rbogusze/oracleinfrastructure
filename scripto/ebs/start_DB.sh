@@ -4,4 +4,4 @@ set -x
 
 cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
 ./addbctl.sh start
-./addlnctl.sh start VIS
+./addlnctl.sh start $ORACLE_SID
