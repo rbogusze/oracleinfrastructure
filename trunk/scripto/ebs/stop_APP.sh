@@ -2,6 +2,8 @@
 set -x
 . /home/oracle/scripto/ebs/app_env
 
-cd $COMMON_TOP/admin/scripts/$CONTEXT_NAME
+#11.5 cd $COMMON_TOP/admin/scripts/$CONTEXT_NAME
+#12.1
+cd $INST_TOP/admin/scripts
 ./adstpall.sh apps/apps
 
