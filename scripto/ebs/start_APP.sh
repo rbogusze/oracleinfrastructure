@@ -13,5 +13,7 @@ else
   echo "Reached DB. OK. Continuing with APPS startup."
 fi
 
-cd $COMMON_TOP/admin/scripts/$CONTEXT_NAME
+# 11.5 cd $COMMON_TOP/admin/scripts/$CONTEXT_NAME
+# 12.1
+cd $INST_TOP/admin/scripts
 ./adstrtal.sh apps/apps
