@@ -1,44 +1,20 @@
-Oracle E-Business Suite Release 12.1.1 Rapid Install Start Here 
+* Installing Oracle E-Business Suite Release 12.1.1 under OEL 5.8
+** OS general guidelines
+Unofficial install guides
+- http://www.oraclenerd.com/2009/12/ebs-install-guide-part-1.html
+- http://gerardnico.com/wiki/ebs/installation
+
+User and Group
 {{{
-# mv B53824-01_* ../oracle_EBS_R12.1.1_linux_x86-64/
-# unzip B53824-01_1of4.zip
-# unzip B53824-01_2of4.zip 
-# unzip B53824-01_3of4.zip 
-# unzip B53824-01_4of4.zip 
-# mv *.zip ../donez/
--> startCD
+# groupadd oinstall
+# groupadd dba
+# useradd -d /home/oracle -g oinstall -G dba -s /bin/bash oracle
 }}}
 
-Oracle E-Business Suite Release 12.1.1 for Linux x86-64 Rapid Install RDBMS
-{{{
-# mv V15679-01_* ../oracle_EBS_R12.1.1_linux_x86-64/
-# ls -1 *.zip | awk '{print "unzip " $0}' > lunzip
-# . ./lunzip
-# mv *.zip ../donez/
--> oraDB
-}}}
-
-Oracle E-Business Suite Release 12.1.1 for Linux x86-64 Rapid Install Databases
-{{{
-# mv V1568* ../oracle_EBS_R12.1.1_linux_x86-64/
-# ls -1 *.zip | awk '{print "unzip " $0}' > lunzip
-# . ./lunzip
-replace oraAppDB/dvd.label?
-replace oraAppDB/component.label?
-# mv *.zip ../donez
--> oraAppDB oraAS
-}}}
-
-Oracle E-Business Suite Release 12.1.1 for Linux x86-64 Rapid Install APPL_TOP
-{{{
-# mv V1569* ../oracle_EBS_R12.1.1_linux_x86-64/
-# ls -1 *.zip | awk '{print "unzip " $0}' > lunzip
-# . ./lunzip
--> oraApps
-}}}
-
-** MD5 Checksums for R12.1.1 Rapid Install Media [ID 802195.1]
-Check
-{{{
-$ md5sum --check md5sum_Linux64.txt > md5sum_result.txt
-}}}
+Steps:
+1. Prepre the destination host, do all the steps untill downloading EBS binaries
+1. Run preclone procedure on apps and DB tiers
+1. Shutdown APP and DB tiers
+1. Do the backup, in our example we just take all /u01 directory
+1. Restore the backup on destination host
+1. Perform the postclone procedures, which will be discussed here in detail
