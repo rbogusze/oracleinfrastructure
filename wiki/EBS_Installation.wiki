@@ -1,8 +1,8 @@
 * Installing Oracle E-Business Suite Release 12.1.1 under OEL 5.8
 ** OS general guidelines
 Unofficial install guides
-- http://www.oraclenerd.com/2009/12/ebs-install-guide-part-1.html
-- http://gerardnico.com/wiki/ebs/installation
+  * http://www.oraclenerd.com/2009/12/ebs-install-guide-part-1.html
+  * http://gerardnico.com/wiki/ebs/installation
 
 User and Group
 {{{
