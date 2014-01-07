@@ -12,9 +12,9 @@ User and Group
 }}}
 
 Steps:
-1. Prepre the destination host, do all the steps untill downloading EBS binaries
-1. Run preclone procedure on apps and DB tiers
-1. Shutdown APP and DB tiers
-1. Do the backup, in our example we just take all /u01 directory
-1. Restore the backup on destination host
-1. Perform the postclone procedures, which will be discussed here in detail
+  # Prepre the destination host, do all the steps untill downloading EBS binaries
+  # Run preclone procedure on apps and DB tiers
+  # Shutdown APP and DB tiers
+  # Do the backup, in our example we just take all /u01 directory
+  # Restore the backup on destination host
+  # Perform the postclone procedures, which will be discussed here in detail
