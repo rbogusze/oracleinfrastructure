@@ -1,1 +1,940 @@
-= Hello World =
+= Installing Oracle E-Business Suite Release 12.1.1 under OEL 5.8 =
+== OS general guidelines ==
+Unofficial install guides
+  * http://www.oraclenerd.com/2009/12/ebs-install-guide-part-1.html
+  * http://gerardnico.com/wiki/ebs/installation
+
+Nice links
+  * Oracle Applications System Administration Scripts [ID 214088.1]
+  * 761566.1 Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64
+
+Install Oracle Enterprise Linux 5.8 64-bit
+  * no firewall,
+  * selinux disabled,
+  * IPv6 disabled
+  * 8G RAM,
+  * 250G HDD available, after installation media is unpacked. Media + unpack + installation requires ~ 450G
+
+User and Group
+{{{
+# groupadd oinstall
+# groupadd dba
+# useradd -d /home/oracle -g oinstall -G dba -s /bin/bash oracle
+}}}
+
+== annoying free space missing from 250G? ==
+
+It is OK. Linux by default reserves 5% of each partition for the root user. With ext4 filesystems you can check the amount of reserved blocks with
+
+{{{
+# tune4fs -l /dev/sdb1 | grep -i "block count"
+}}}
+
+How to release this reserve to all?
+
+{{{
+# tune4fs -m 0 /dev/sda1
+}}}
+
+
+
+
+== OS setup not required ==
+Some OS setup checks I have automated, and run through scripts. I say about it because I do it and want describe the whole procedure exactly how I did it, but they are not required. What is dangerous is that I place my public key in .ssh to allow passwordless connection and install vmware tools because I do it under ESX. You probably do not want to do this :)
+
+All the scripts are available under public SVN repository, created during http://code.google.com/p/oracleinfrastructure/ project. I use it for other purposes also. Feel free of cource to use it for your own good, if you find any errors please let me know.
+
+After clean OEL installation I just need the 'svn' binary to download the mentioned scripts. For that I need a working yum repository, I will use reely available Oracle repository.
+
+Enable Oracle yum repository, http://public-yum.oracle.com/
+{{{
+# cd /etc/yum.repos.d
+# wget http://public-yum.oracle.com/public-yum-el5.repo
+}}}
+
+Now I can install SVN
+{{{
+# yum install subversion
+}}}
+
+{{{
+# cd
+# svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto
+}}}
+
+Now this is my unusual IP, domain, public key, vmware tools, etc. setup
+{{{
+# cd ~/scripto/linux/
+# ./linux_setup.sh ALL
+(repeated few times untill no reboots are required)
+}}}
+
+
+
+
+== OS preparation as per MOS 761566.1 ==
+
+Oracle yum repository, http://public-yum.oracle.com/ (if not done before)
+{{{
+# cd /etc/yum.repos.d
+# wget http://public-yum.oracle.com/public-yum-el5.repo
+# vim public-yum-el5.repo
+Change enabled=0 to enabled=1 in ol5_u8_base
+}}}
+
+{{{
+# vi /etc/hosts
+  #2.168.1.112   jazz.remik.org  jazz            # EBS 12.1.1 on OEL 5.8
+}}}
+
+{{{
+# vi /etc/sysconfig/network
+NETWORKING=yes
+NETWORKING_IPV6=no
+HOSTNAME=jazz.remik.org
+# reboot
+}}}
+
+== Following 761566.1 Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64 ==
+
+Download from
+http://oss.oracle.com/projects/compat-oracle/files/Enterprise_Linux/
+{{{
+# yum install libXp.so.6
+# rpm -Uvh openmotif21-2.1.30-11.EL5.i386.rpm
+# rpm -Uvh xorg-x11-libs-compat-6.8.2-1.EL.33.0.1.i386.rpm
+}}}
+
+{{{
+# yum install --nogpgcheck gcc gcc-c++ glibc glibc.i686 glibc-common glibc-devel glibc-devel.i386 libgcc libgcc.i386 libstdc++-devel libstdc++-devel.i386 libstdc++ libstdc++.i386 make gdbm gdbm.i386 libXp libXp.i386 libaio libaio.i386 libgomp sysstat util-linux compat-libstdc++-296 compat-libstdc++-33
+}}}
+
+{{{
+# yum install --nogpgcheck compat-libstdc++-33 elfutils-libelf-devel elfutils-libelf-devel-static libaio-devel unixODBC.i386 unixODBC-devel.i386 unixODBC unixODBC-devel kernel-headers
+# ldconfig -v
+}}}
+
+{{{
+# yum install oracle-validated
+# passwd oracle
+}}}
+
+
+== OS Library Patch for Oracle HTTP Server (on Oracle Linux 5, RHEL 5, Oracle Linux 6 and RHEL 6 only) ==
+
+Install patch 6078836
+{{{
+# md5sum p6078836_101330_LINUX.zip
+33281645539e5225c8b83d827469def4  p6078836_101330_LINUX.zip
+# unzip p6078836_101330_LINUX.zip
+# mv /usr/lib/libdb.so.2 /usr/lib/libdb.so.2.6078836
+mv: cannot stat `/usr/lib/libdb.so.2': No such file or directory
+# cd 6078836
+# cp libdb.so.2 /usr/lib
+}}}
+
+== Link to Motif library in Oracle Application Server 10.1.2 (on Oracle Linux 5, RHEL 5, Oracle Linux 6 and RHEL 6 only) ==
+{{{
+# unlink /usr/lib/libXtst.so.6
+# ln -s /usr/X11R6/lib/libXtst.so.6.1 /usr/lib/libXtst.so.6
+}}}
+
+
+== Unpack the downloaded EBS ==
+
+Download EBS binaries to /u01/stageR12/
+{{{
+# cd /u01/stageR12/
+# ls *.zip
+B53824-01_1of4.zip  V15680-01_2of3.zip  V15683-01_2of3.zip  V15686-01_2of3.zip  V15690-01_2of3.zip
+B53824-01_2of4.zip  V15680-01_3of3.zip  V15683-01_3of3.zip  V15686-01_3of3.zip  V15690-01_3of3.zip
+B53824-01_3of4.zip  V15681-01_1of3.zip  V15684-01_1of3.zip  V15687-01_1of3.zip  V15691-01_1of3.zip
+B53824-01_4of4.zip  V15681-01_2of3.zip  V15684-01_2of3.zip  V15687-01_2of3.zip  V15691-01_2of3.zip
+B53825-01.zip       V15681-01_3of3.zip  V15684-01_3of3.zip  V15687-01_3of3.zip  V15691-01_3of3.zip
+V15679-01_1of3.zip  V15682-01_1of3.zip  V15685-01_1of3.zip  V15688-01_1of2.zip  V17202-01.zip
+V15679-01_2of3.zip  V15682-01_2of3.zip  V15685-01_2of3.zip  V15688-01_2of2.zip  V18735-01_1of2.zip
+V15679-01_3of3.zip  V15682-01_3of3.zip  V15685-01_3of3.zip  V15689-01.zip       V18735-01_2of2.zip
+V15680-01_1of3.zip  V15683-01_1of3.zip  V15686-01_1of3.zip  V15690-01_1of3.zip  V18967-01.zip
+}}}
+
+
+Make sure the checksum is OK for downloaded files
+MOS links:
+  * MD5 Checksums for R12.1.1 Rapid Install Media [ID 802195.1]
+
+Check
+{{{
+$ md5sum --check md5sum_Linux64.txt > md5sum_result.txt
+}}}
+
+Oracle E-Business Suite Release 12.1.1 Rapid Install Start Here
+{{{
+# mv B53824-01_* ../oracle_EBS_R12.1.1_linux_x86-64/
+# unzip B53824-01_1of4.zip
+# unzip B53824-01_2of4.zip
+# unzip B53824-01_3of4.zip
+# unzip B53824-01_4of4.zip
+# mv *.zip ../donez/
+  *> startCD
+}}}
+
+Oracle E-Business Suite Release 12.1.1 for Linux x86-64 Rapid Install RDBMS
+{{{
+# mv V15679-01_* ../oracle_EBS_R12.1.1_linux_x86-64/
+# ls -1 *.zip | awk '{print "unzip " $0}' > lunzip
+# . ./lunzip
+# mv *.zip ../donez/
+  *> oraDB
+}}}
+
+Oracle E-Business Suite Release 12.1.1 for Linux x86-64 Rapid Install Databases
+{{{
+# mv V1568* ../oracle_EBS_R12.1.1_linux_x86-64/
+# ls -1 *.zip | awk '{print "unzip " $0}' > lunzip
+# . ./lunzip
+replace oraAppDB/dvd.label?
+replace oraAppDB/component.label?
+# mv *.zip ../donez
+  *> oraAppDB oraAS
+}}}
+
+Oracle E-Business Suite Release 12.1.1 for Linux x86-64 Rapid Install APPL_TOP
+{{{
+# mv V1569* ../oracle_EBS_R12.1.1_linux_x86-64/
+# ls -1 *.zip | awk '{print "unzip " $0}' > lunzip
+# . ./lunzip
+  *> oraApps
+}}}
+
+== Prepare EBS binaries for installation ==
+== Before Installing or Upgrading ==
+If the Release 12.1.1 installation or upgrade is performed with the Rapid Install wizard (either a new R12 installation or upgrade from 11i to R12), ensure you have the latest Rapid Install patch as described in Oracle Applications Release Notes, Release 12.1.1 (My Oracle Support Document 798258.1) before you begin your installation or upgrade.
+
+The most current version of the Rapid Install wizard is 12.1.1.13. You can obtain this version by applying Patch 11072566
+
+Now I have:
+{{{
+# cd /u01/stageR12/startCD/Disk1/rapidwiz
+# ./RapidWizVersion
+Version 12.1.1.9
+}}}
+
+{{{
+# cd /Stage12
+# md5sum p11072566_R12_GENERIC.zip
+2e4a98f9dba7a4c1e2948e83ae031d28  p11072566_R12_GENERIC.zip
+# unzip -o p11072566_R12_GENERIC.zip
+}}}
+
+{{{
+# cd /u01/stageR12/startCD/Disk1/rapidwiz
+# ./RapidWizVersion
+Version 12.1.1.13
+}}}
+
+
+(back to the main Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64 [ID 761566.1] )
+== Do the actual install (as root) ==
+
+{{{
+# unset ENV
+# cd /u01/stageR12/startCD/Disk1/rapidwiz
+# ./rapidwiz
+}}}
+
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallingOracleApplications038.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsComponentInstallationReview036.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsConfigurationChoice029.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsDatabaseNode031.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsDatabaseNode032.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsFinish040.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsGlobalSystemSettings030.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsNodeInformation034.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsOracleConfigurationManagerDetails028.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsPostInstallChecks039.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsPreInstallChecks035.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsPrimaryApplicationsNode033.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsWelcome026.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsWizardOperation027.png]]
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/OracleApplicationsRapidInstallWizardAlert037.png]]
+
+
+
+== Connecting to EBS ==
+
+This is very often the tricky part. First try the proven client configurations:
+
+  * Fresh install of Windows XP Professional SP3 32-bit, that comes with Internet Explorer 6, then the install of JRE 6U7 will be done automatically during opening forms session.
+
+Do not try to run EBS under your favoirate browser yet. It will probably not run for now, but what is worse it will create some wird errors that can be easily considered as EBS installation problems - which they are not.
+
+Common problems when running with JRE 7 and browser incomatibilities are:
+  * FRM-92095: Oracle Jnitiator version too low - please install version 1.1.8.2 or higher
+  * Error FRM-92129 Registry.dat or FRM-92120 Registry.dat
+
+If this is what you are experiencing see the Troubleschooting section
+
+Login page should be reachable under:
+
+http://jazz.remik.org:8000
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/logon1.PNG]]
+
+login as
+sysadmin : sysadmin
+
+== Forms interface ==
+After loging as sysadmin in Navigator column go to: System Administrator,
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/sys_adm.PNG]]
+
+then Concurrent section and go to 'Requests'.
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/requests.PNG]]
+
+Here all the magic begins. If this is the firs run, you will be presented with an option to install JRE 6, you have to allow java scrips, pop up windows, etc. And finally (if you are lucky) you are presented with a forms window.
+
+#+ATTR_LaTeX: width=12cm
+[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/find_request.PNG]]
+
+Let's call it a day for now.
+
+
+== Application manager ==
+http://jazz.remik.org:8000/OA_HTML/weboam/oam/components$target=VIS
+
+== Basic environment setup ==
+
+Environment Application tier
+/u01/oracle/VIS/apps/apps_st/appl/APPSVIS_jazz.env
+
+Environment DB tier
+/u01/oracle/VIS/db/tech_st/11.1.0/VIS_jazz.env
+
+Start DB
+{{{
+$ . /u01/oracle/VIS/db/tech_st/11.1.0/VIS_jazz.env
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./addbctl.sh start
+$ ./addlnctl.sh start VIS
+}}}
+
+APP
+{{{
+$ . /u01/oracle/VIS/apps/apps_st/appl/APPSVIS_jazz.env
+$ cd $INST_TOP/admin/scripts
+Start
+$ ./adstrtal.sh apps/apps
+Stop
+$ ./adstpall.sh apps/apps
+}}}
+
+Apache logs:
+/u01/oracle/VIS/inst/apps/VIS_jazz/logs/ora/10.1.3/Apache
+
+Convienient start/stop scripts available under ~/$HOME/scripto/ebs
+
+
+== After Installing or Upgrading ==
+
+Still following MOS: Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64 (Doc ID 761566.1)
+
+Section: AFTER INSTALLING OR UPGRADING
+
+Manually fix database dbf file for Fresh production (PROD) database installs
+  *> not required, we already used RapidWizVersion Version 12.1.1.13
+
+Relink Advanced Supply Chain Planning executables (for SLES 10 and 11, Oracle Linux/RHEL 5.4 or higher and Oracle Linux/RHEL 6 only)
+
+Shutdown apps tier.
+
+{{{
+$ . app_env
+$ mkdir ~/backup
+$ cp $AD_TOP/bin/adrelinknew.sh ~/backup/adrelinknew.sh_`date -I`
+$ vi $AD_TOP/bin/adrelinknew.sh
+replace
+CPP_LDFLAGS=' -L$(ORACLE_HOME)/lib -L$(ORACLE_HOME)/lib/stubs -lclntsh'
+with
+CPP_LDFLAGS=' -L$(ORACLE_HOME)/lib -L$(ORACLE_HOME)/lib/stubs -lclntsh -Wl,--noinhibit-exec'
+}}}
+
+{{{
+$ adadmin
+(all default answers)
+system : manager
+apps : apps
+2.    Maintain Applications Files menu
+  #    Relink Applications programs
+}}}
+
+
+== Summary ==
+
+Now we have RDBMS in version 11.1.0.7.0, EBS application stack in version 12.1.1.
+
+= Autoconfig =
+== Application tier ==
+{{{
+$ . $HOME/scripto/ebs/app_env
+R11
+$ cd $COMMON_TOP/admin/scripts/$CONTEXT_NAME/
+R12
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adautocfg.sh
+}}}
+
+== Database tier ==
+{{{
+$ . $HOME/scripto/ebs/db_env
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./adautocfg.sh
+}}}
+
+== Tutorial ==
+Autoconfig usues context file to generate configuration files spread all over application or database tier. It is time to introduce the context file. This is just an XML file, found in:
+
+{{{
+$ . app_env
+$ env | grep CONTEXT_FILE
+CONTEXT_FILE=/u01/oracle/VIS/inst/apps/VIS_jazz/appl/admin/VIS_jazz.xml
+}}}
+
+For example, there is a variable
+<apache_loglevel oa_var="s_apache_loglevel">warn</apache_loglevel>
+
+Which is good for our example because it is rather self exlanatiory - it decides the level at which apache writes its logfile. Usually working with apache you set this kind of variables directly at the apache configuration file. Let's look there too
+
+{{{
+$ vi /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf
+}}}
+
+And we find the parameter that sets the log level, namely
+LogLevel warn
+
+Lets just see what will happen if we change it there to 'debug'
+LogLevel debug
+
+OK, we can restart the app tier and enjoy the debug level. But what will happen if we run the autoconfig now? Lets try it.
+
+{{{
+$ . $HOME/scripto/ebs/app_env
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adautocfg.sh
+}}}
+
+And now again see the apache config file
+{{{
+$ less /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf
+}}}
+
+Well, we again go back to
+LogLevel warn
+
+What has happened? Autoconfig has overwritten our Apache config file. The lesson: if you want change some obvious parameter and want it to be a permanent change - you have to change the appropriate variable in the context file and run autoconfig. Otherwise the change will be overwritten the next time the autoconfig is run.
+
+Autoconfig is run sometimes automatically during application of some EBS patches, so you better keep your configuration clean and avoid 'hacking' configuration files by hand.
+
+How is it done? Looking at the Autoconfig log file we can see:
+
+{{{
+$ less /u01/oracle/VIS/inst/apps/VIS_jazz/admin/log/01061802/adconfig.log
+source : /u01/oracle/VIS/apps/apps_st/appl/fnd/12.0.0/admin/template/httpd_conf_1013.tmp
+dest   : /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf
+backup : /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf to /u01/oracle/VIS/inst/apps/VIS_jazz/admin/out/01061802/httpd.conf
+}}}
+
+What we can interpret as:
+  # There is a template of every configuration file generated by Autoconfig. Together with values from Context file the destination file is generated.
+2. Before the new destination file is generated the backup is done.
+
+First let us explore the fact that every run of Autoconfig generates backups of every configuration file it intends to overwrite. This is exactly for ocasions where you made some changes directly to configuration file and forgot to update the context file. There is hope, you can restore those changes.
+
+This procedure is rather for emergencies, where after running Autoconfig nothing works any more. Lets look at the directory where the backup is created, hete at:
+
+{{{
+$ cd /u01/oracle/VIS/inst/apps/VIS_jazz/admin/out/01061802
+}}}
+
+We can see how many different configuration files are managed through Autoconfig. Also there is script with friendly name 'restore.sh'. Running it rolls back the changes done by this Autoconfig run.
+
+Let's do it.
+{{{
+$ ./restore.sh
+}}}
+
+And now again see the apache config file
+{{{
+$ less /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf
+LogLevel debug
+}}}
+
+OK, so we restored the previos version of this (and many others) config files.
+
+== How properly perform the change? ==
+
+Through the Context file of course.
+
+{{{
+$ . ~/scripto/ebs/app_env
+$ env | grep CONTEXT_FILE
+CONTEXT_FILE=/u01/oracle/VIS/inst/apps/VIS_jazz/appl/admin/VIS_jazz.xml
+}}}
+
+Let's change the variable to debug
+<apache_loglevel oa_var="s_apache_loglevel">warn</apache_loglevel>
+
+{{{
+$ cp $CONTEXT_FILE ~/backup/CONTEXT_FILE_`date -I`
+$ vi $CONTEXT_FILE
+change
+<apache_loglevel oa_var="s_apache_loglevel">warn</apache_loglevel>
+to
+<apache_loglevel oa_var="s_apache_loglevel">debug</apache_loglevel>
+}}}
+
+And run the Autoconfig
+{{{
+$ . $HOME/scripto/ebs/app_env
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adautocfg.sh
+}}}
+
+The httpd.conf file should have the desired 'debug' value.
+{{{
+$ less /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf
+LogLevel debug
+}}}
+
+== What is the name of the variable to change ==
+
+Yes, that was easy. But how to find the name of the variable that will be responsible for setting the value of the parameter we want to change.
+
+The easiest way is to look at the template file, continuing our example:
+
+The Autoconfig log file says:
+{{{
+$ less /u01/oracle/VIS/inst/apps/VIS_jazz/admin/log/01061802/adconfig.log
+source : /u01/oracle/VIS/apps/apps_st/appl/fnd/12.0.0/admin/template/httpd_conf_1013.tmp
+dest   : /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf
+backup : /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.conf to /u01/oracle/VIS/inst/apps/VIS_jazz/admin/out/01061802/httpd.conf
+}}}
+
+And gives the file location where it stores the template file, namely
+{{{
+$ less /u01/oracle/VIS/apps/apps_st/appl/fnd/12.0.0/admin/template/httpd_conf_1013.tmp
+}}}
+
+There we see
+LogLevel %s_apache_loglevel%
+
+Where 's_apache_loglevel' is exactly the parameter we were changing in the Context file.
+
+== ToDo ==
+  * changing templates
+  * supported methods of editing Context file
+
+== Updating Autoconfig scripts on DB tier ==
+
+Every time the AutoConfig patch is applied on the apps tier, the db tier apps stack needs to be updated. See Note:218089.1, Autoconfig FAQ, but you should be instructed to run such an update in a readme of the patch beeing applied.
+
+The database server and the database listener must remain available during the Autoconfig run. All the other database tier services should be shut down.
+
+
+
+
+= Cloning =
+The cloning procedure will be explained in more details in tasks section. Here just the scripts to run.
+
+== Preclone APP ==
+Preclone should be done on a properly running DB and APP tiers
+{{{
+$ . $HOME/scripto/ebs/app_env
+$ cd $INST_TOP/admin/scripts
+$ perl adpreclone.pl appsTier
+}}}
+
+
+== Preclne DB ==
+Preclone should be done on a properly running DB and APP tiers
+{{{
+$ . $HOME/scripto/ebs/db_env
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ perl adpreclone.pl dbTier
+}}}
+
+
+== Postclone DB ==
+We do not have the enironment files setup yet. We need to go to
+{{{
+$ cd $ORACLE_HOME/appsutil/clone/bin
+}}}
+
+Which is
+{{{
+$ cd /u01/oracle/VIS/db/tech_st/11.1.0/appsutil/clone/bin
+}}}
+
+{{{
+$ perl adcfgclone.pl dbTier
+}}}
+
+
+
+== Tutorial ==
+== Classic approach - clone from cold backup, as little changes as possible ==
+Here we just want to have a copy of our running EBS on another host, for whatever purpose, eg for development.
+
+Cloning is kind of special. You do not install anything from scratch on destination host. You just kind of grabs everything from the source and configures it on destination. This procedure is kind of against the good practice every DBA should follow. Pure DBA man would install the RDBMS binaries and restored the DB from backup - this approach is not followed in EBS world :) Here we just copy DB datafiles, DB binaries and APP binaries, do some magic and puff - we have a clone.
+
+The 'magic' is actually very close to standard RDBMS installation - binaries will be relinked, inventory created and RDBMS binaries registered.
+
+Steps:
+  # Prepre the destination host, do all the steps untill downloading EBS binaries
+  # Run preclone procedure on apps and DB tiers
+  # Shutdown APP and DB tiers
+  # Do the backup, in our example we just take all /u01 directory
+  # Restore the backup on destination host
+  # Perform the postclone procedures, which will be discussed here in detail
+
+In our example we have the 'jazz' host on which we installed EBS. Now let's call the new host 'mozaik'.
+
+Postclone DB tier
+{{{
+$ cd /u01/oracle/VIS/db/tech_st/11.1.0/appsutil/clone/bin
+$ perl adcfgclone.pl dbTier
+}}}
+
+Enter the APPS password :
+
+Target System Hostname (virtual or normal) [mozaik] :
+
+Target Instance is RAC (y/n) [n] :
+
+Target System Database SID : BLUE
+
+Target System Base Directory : /u01/oracle/VIS
+
+Target System utl_file_dir Directory List : /tmp
+
+Number of DATA_TOP's on the Target System [1] :
+
+Target System DATA_TOP Directory 1 [/u01/oracle/VIS/db/apps_st/data] :
+
+Target System RDBMS ORACLE_HOME Directory [/u01/oracle/db/tech_st/11.1.0] : /u01/oracle/VIS/db/tech_st/11.1.0
+
+Do you want to preserve the Display [null] (y/n) ? : y
+
+Do you want the the target system to have the same port values as the source system (y/n) [y] ? : y
+
+The new database context file has been created :
+/u01/oracle/VIS/db/tech_st/11.1.0/appsutil/BLUE_mozaik.xml
+
+(...)
+addlnctl.sh: exiting with status 0
+
+If we are lucky, we should have a running DB named BLUE.
+
+It is time to do the post cloning procedure on the application tier.
+
+Postclone APP tier
+{{{
+$ cd /u01/oracle/VIS/apps/apps_st/comn/clone/bin
+$ perl ./adcfgclone.pl appsTier
+}}}
+
+Target System Hostname (virtual or normal) [mozaik] :
+
+Target System Database SID : BLUE
+
+Target System Database Server Node [mozaik] :
+
+Target System Base Directory : /u01/oracle/VIS
+
+Target System Tools ORACLE_HOME Directory [/u01/oracle/VIS/apps/tech_st/10.1.2] :
+
+Target System Web ORACLE_HOME Directory [/u01/oracle/VIS/apps/tech_st/10.1.3] :
+
+Target System APPL_TOP Directory [/u01/oracle/VIS/apps/apps_st/appl] :
+
+Target System COMMON_TOP Directory [/u01/oracle/VIS/apps/apps_st/comn] :
+
+Target System Instance Home Directory [/u01/oracle/VIS/inst] :
+
+Target System Root Service [enabled] :
+
+Target System Web Entry Point Services [enabled] :
+
+Target System Web Application Services [enabled] :
+
+Target System Batch Processing Services [enabled] :
+
+Target System Other Services [disabled] :
+
+Do you want to preserve the Display [jazz:0.0] (y/n) ? : y
+
+Do you want the the target system to have the same port values as the source system (y/n) [y] ? :
+Complete port information available at /u01/oracle/VIS/apps/apps_st/comn/clone/bin/out/BLUE_mozaik/portpool.lst
+
+UTL_FILE_DIR on database tier consists of the following directories.
+
+  # /usr/tmp
+2. /tmp
+Choose a value which will be set as APPLPTMP value on the target node [1] : 2
+
+
+The new APPL_TOP context file has been created :
+/u01/oracle/VIS/inst/apps/BLUE_mozaik/appl/admin/BLUE_mozaik.xml
+
+This is it. If we are lucky we have APP tier running. Now we can log in under
+
+http://mozaik.remik.org:8000
+
+What is very important is to note the location of the environment files that was created during the cloning process.
+
+On APP tier it is
+/u01/oracle/VIS/apps/apps_st/appl/APPSBLUE_mozaik.env
+
+On DB tier it is
+/u01/oracle/VIS/db/tech_st/11.1.0/BLUE_mozaik.env
+
+
+== Changed a lot ==
+
+OK, so far so good. Lets go beserk now.
+
+What will we change:
+  # DB name to RED (this actually nothing new, we changed it already from VIS to BLUE)
+2. Base directory from /u01/oracle/VIS to /u01/oracle/RED
+3. Port pool from 0 to 3
+
+First lets change the directories by hand
+{{{
+$ mv /u01/oracle/VIS /u01/oracle/RED
+}}}
+
+Now it is time to start cloning
+
+Postclone DB tier
+{{{
+$ cd /u01/oracle/RED/db/tech_st/11.1.0/appsutil/clone/bin
+$ perl adcfgclone.pl dbTier
+}}}
+
+Target System Hostname (virtual or normal) [mozaik] :
+
+Target Instance is RAC (y/n) [n] :
+
+Target System Database SID : RED
+
+Target System Base Directory : /u01/oracle/RED
+
+Target System utl_file_dir Directory List : /tmp
+
+Number of DATA_TOP's on the Target System [1] :
+
+Target System DATA_TOP Directory 1 [/u01/oracle/VIS/db/apps_st/data] : /u01/oracle/RED/db/apps_st/data
+
+Target System RDBMS ORACLE_HOME Directory [/u01/oracle/RED/db/tech_st/11.1.0] :
+
+Do you want to preserve the Display [null] (y/n) ? : y
+
+Target System Port Pool [0-99] : 3
+
+Checking the port pool 3
+
+
+
+Postclone APP tier
+{{{
+$ cd /u01/oracle/RED/apps/apps_st/comn/clone/bin
+$ perl ./adcfgclone.pl appsTier
+}}}
+
+Target System Hostname (virtual or normal) [mozaik] :
+
+Target System Database SID : RED
+
+Target System Database Server Node [mozaik] :
+
+Target System Base Directory : /u01/oracle/RED
+
+Target System Tools ORACLE_HOME Directory [/u01/oracle/RED/apps/tech_st/10.1.2] :
+
+Target System Web ORACLE_HOME Directory [/u01/oracle/RED/apps/tech_st/10.1.3] :
+
+Target System APPL_TOP Directory [/u01/oracle/RED/apps/apps_st/appl] :
+
+Target System COMMON_TOP Directory [/u01/oracle/RED/apps/apps_st/comn] :
+
+Target System Instance Home Directory [/u01/oracle/RED/inst] :
+
+Target System Root Service [enabled] :
+
+Target System Web Entry Point Services [enabled] :
+
+Target System Web Application Services [enabled] :
+
+Target System Batch Processing Services [enabled] :
+
+Target System Other Services [disabled] :
+
+Do you want to preserve the Display [mozaik:0.0] (y/n) ? : y
+
+Target System Port Pool [0-99] : 3
+
+UTL_FILE_DIR on database tier consists of the following directories.
+
+  # /usr/tmp
+2. /tmp
+3. /u01/oracle/RED/db/tech_st/11.1.0/appsutil/outbound/RED_mozaik
+4. /usr/tmp
+Choose a value which will be set as APPLPTMP value on the target node [1] : 2
+
+The new APPL_TOP context file has been created :
+/u01/oracle/RED/inst/apps/RED_mozaik/appl/admin/RED_mozaik.xml
+
+
+
+
+= Troubleschooting =
+Below are problems that should not happen if the tutorial is followed. All required patches, workarounds should be in the main installation section. Here only extra errors that can happen.
+
+== libopmnoraclenls.so: unable to load ==
+Starting OPMN managed Oracle HTTP Server (OHS) instance ...
+libopmnoraclenls.so: unable to load
+/u01/oracle/VIS/inst/apps/VIS_krakus/ora/10.1.3/opmn/bin/opmnctl: line 898:  3928 Naruszenie ochrony pamięci   (core dumped) $OPMNADMIN ping
+libopmnoraclenls.so: unable to load
+
+MOS:
+  * Oracle Application Server 10.1.3.0.0 OPMN Configuration Assistant Fails Due to Problems in Loading libopmnoraclenls.so [ID 422562.1]
+{{{
+# ./adapcctl.sh start
+}}}
+
+Deinstall this failed installation.
+
+4. Remove contents of /tmp and /var/tmp.
+
+
+
+== FRM-92095: Oracle Jnitiator version too low - please install version 1.1.8.2 or higher ==
+Nice links:
+  * https://blogs.oracle.com/ptian/entry/solution_for_error_frm_92095
+
+It means that there was already JRE 7 installed. Uninstall your JRE 7, and re-install JRE 6
+
+== Error FRM-92129 Registry.dat or FRM-92120 Registry.dat ==
+
+This is the browser problem. Happens to me when using Chrome 23.0.1271.95 from Debian. What is strange is that the JRE is run, but just at the end this error is displayed. I have spend a lot of time trying to troubleschoot this - but this is pointless, just use Internet Explorer.
+
+/u01/oracle/VIS/apps/tech_st/10.1.2/forms/java/oracle/forms/registry/Registry.dat
+/u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Registry.dat
+
+http://jazz.remik.org:8000/forms/oracle/forms/registry/Registry.dat
+  *> not found
+
+http://jazz.remik.org:8000/forms/java/oracle/forms/registry/Registry.dat
+  *> found
+
+{{{
+$ pwd
+/u01/oracle/VIS/apps/tech_st/10.1.2/forms
+$ mkdir -p oracle/forms/registry/
+$ cp java/oracle/forms/registry/Registry.dat oracle/forms/registry/
+}}}
+
+/u01/oracle/VIS/apps/apps_st/comn/java/classes
+ls -l oracle/forms/registry/Registry.dat
+  *> found
+
+ls -l
+
+Apache logs
+cd /u01/oracle/VIS/apps/tech_st/10.1.2/Apache/Apache/logs/
+
+/u01/oracle/VIS/apps/tech_st/10.1.2/Apache/Apache
+
+/u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Registry.dat
+http://jazz.remik.org:8000/forms/java/oracle/forms/registry/Registry.dat
+
+http://jazz.remik.org:8000/forms/oracle/forms/registry/Registry.dat
+
+
+GET /forms/oracle/forms/registry/Registry.dat HTTP/1.1" 404 164 0 "-" "Mozilla/4.0 (Linux 2.6.32-5-686) Java/1.6.0_30"
+
+  #2.168.1.101 - - [30/Oct/2012:07:55:56 +0100] "GET /forms/java/oracle/forms/registry/Registry.dat HTTP/1.1" 304 0 0 "-" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.66 Safari/535.11"
+
+/u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Registry.dat
+/forms/java/oracle/forms/registry/Registry.dat HTTP/1.1" 304
+/forms/oracle/forms/registry/Registry.dat HTTP/1.1" 404
+
+
+{{{
+$ mkdir -p $COMMON_TOP/java/oracle/forms/registry/
+$ touch $COMMON_TOP/java/oracle/forms/registry/Registry.dat
+}}}
+
+{{{
+$ cd /u01/oracle/VIS/apps/apps_st/comn/java
+$ mkdir -p forms/oracle/forms/registry
+$ cp /u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Registry.dat forms/oracle/forms/registry/
+}}}
+
+
+ServerRoot "/u01/oracle/VIS/apps/tech_st/10.1.3/Apache/Apache"
+
+{{{
+$ find ./ -name Registry.dat
+./VIS/apps/tech_st/10.1.2/forms/java/oracle/forms/registry/Registry.dat
+./VIS/apps/tech_st/10.1.2/forms/oracle/forms/registry/Registry.dat
+./VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Registry.dat
+./VIS/apps/a1ps_st/comn/java/forms/oracle/forms/registry/Registry.dat
+./VIS/apps/apps_st/comn/java/oracle/forms/registry/Registry.dat
+}}}
+
+
+{{{
+$ cd /u01/oracle/VIS/apps/tech_st/10.1.3/Apache/Apache
+$ mkdir -p forms/oracle/forms/registry
+$ cp /u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Registry.dat forms/oracle/forms/registry
+}}}
+
+
+
+== SP2-0642: SqlPlus Internal Error State 2165, Context 4294967295:0:0 [ID 396154.1] ==
+
+
