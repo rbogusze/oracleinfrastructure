@@ -1,3 +1,6 @@
+Table of contents
+<wiki:toc max_depth="3" />
+
 = Installing Oracle E-Business Suite Release 12.1.1 under OEL 5.8 =
 == OS general guidelines ==
 Unofficial install guides
@@ -936,5 +939,3 @@ $ cp /u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Regist
 
 
 == SP2-0642: SqlPlus Internal Error State 2165, Context 4294967295:0:0 [ID 396154.1] ==
-
-
