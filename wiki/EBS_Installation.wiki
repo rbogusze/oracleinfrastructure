@@ -25,7 +25,7 @@ User and Group
 # useradd -d /home/oracle -g oinstall -G dba -s /bin/bash oracle
 }}}
 
-== annoying free space missing from 250G? ==
+=== annoying free space missing from 250G? ===
 
 It is OK. Linux by default reserves 5% of each partition for the root user. With ext4 filesystems you can check the amount of reserved blocks with
 
@@ -98,7 +98,7 @@ HOSTNAME=jazz.remik.org
 # reboot
 }}}
 
-== Following 761566.1 Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64 ==
+=== Following 761566.1 Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64 ===
 
 Download from
 http://oss.oracle.com/projects/compat-oracle/files/Enterprise_Linux/
@@ -123,7 +123,7 @@ http://oss.oracle.com/projects/compat-oracle/files/Enterprise_Linux/
 }}}
 
 
-== OS Library Patch for Oracle HTTP Server (on Oracle Linux 5, RHEL 5, Oracle Linux 6 and RHEL 6 only) ==
+=== OS Library Patch for Oracle HTTP Server (on Oracle Linux 5, RHEL 5, Oracle Linux 6 and RHEL 6 only) ===
 
 Install patch 6078836
 {{{
@@ -136,7 +136,7 @@ mv: cannot stat `/usr/lib/libdb.so.2': No such file or directory
 # cp libdb.so.2 /usr/lib
 }}}
 
-== Link to Motif library in Oracle Application Server 10.1.2 (on Oracle Linux 5, RHEL 5, Oracle Linux 6 and RHEL 6 only) ==
+=== Link to Motif library in Oracle Application Server 10.1.2 (on Oracle Linux 5, RHEL 5, Oracle Linux 6 and RHEL 6 only) ===
 {{{
 # unlink /usr/lib/libXtst.so.6
 # ln -s /usr/X11R6/lib/libXtst.so.6.1 /usr/lib/libXtst.so.6
@@ -210,7 +210,7 @@ Oracle E-Business Suite Release 12.1.1 for Linux x86-64 Rapid Install APPL_TOP
 }}}
 
 == Prepare EBS binaries for installation ==
-== Before Installing or Upgrading ==
+=== Before Installing or Upgrading ===
 If the Release 12.1.1 installation or upgrade is performed with the Rapid Install wizard (either a new R12 installation or upgrade from 11i to R12), ensure you have the latest Rapid Install patch as described in Oracle Applications Release Notes, Release 12.1.1 (My Oracle Support Document 798258.1) before you begin your installation or upgrade.
 
 The most current version of the Rapid Install wizard is 12.1.1.13. You can obtain this version by applying Patch 11072566
@@ -237,7 +237,7 @@ Version 12.1.1.13
 
 
 (back to the main Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64 [ID 761566.1] )
-== Do the actual install (as root) ==
+=== Do the actual install (as root) ===
 
 {{{
 # unset ENV
@@ -371,7 +371,7 @@ Apache logs:
 Convienient start/stop scripts available under ~/$HOME/scripto/ebs
 
 
-== After Installing or Upgrading ==
+=== After Installing or Upgrading ===
 
 Still following MOS: Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.1.1) for Linux x86-64 (Doc ID 761566.1)
 
@@ -405,7 +405,7 @@ apps : apps
 }}}
 
 
-== Summary ==
+=== Summary ===
 
 Now we have RDBMS in version 11.1.0.7.0, EBS application stack in version 12.1.1.
 
@@ -507,7 +507,7 @@ LogLevel debug
 
 OK, so we restored the previos version of this (and many others) config files.
 
-== How properly perform the change? ==
+=== How properly perform the change? ===
 
 Through the Context file of course.
 
@@ -542,7 +542,7 @@ $ less /u01/oracle/VIS/inst/apps/VIS_jazz/ora/10.1.3/Apache/Apache/conf/httpd.co
 LogLevel debug
 }}}
 
-== What is the name of the variable to change ==
+=== What is the name of the variable to change ===
 
 Yes, that was easy. But how to find the name of the variable that will be responsible for setting the value of the parameter we want to change.
 
@@ -566,11 +566,11 @@ LogLevel %s_apache_loglevel%
 
 Where 's_apache_loglevel' is exactly the parameter we were changing in the Context file.
 
-== ToDo ==
+=== ToDo ===
   * changing templates
   * supported methods of editing Context file
 
-== Updating Autoconfig scripts on DB tier ==
+=== Updating Autoconfig scripts on DB tier ===
 
 Every time the AutoConfig patch is applied on the apps tier, the db tier apps stack needs to be updated. See Note:218089.1, Autoconfig FAQ, but you should be instructed to run such an update in a readme of the patch beeing applied.
 
@@ -618,7 +618,7 @@ $ perl adcfgclone.pl dbTier
 
 
 == Tutorial ==
-== Classic approach - clone from cold backup, as little changes as possible ==
+=== Classic approach - clone from cold backup, as little changes as possible ===
 Here we just want to have a copy of our running EBS on another host, for whatever purpose, eg for development.
 
 Cloning is kind of special. You do not install anything from scratch on destination host. You just kind of grabs everything from the source and configures it on destination. This procedure is kind of against the good practice every DBA should follow. Pure DBA man would install the RDBMS binaries and restored the DB from backup - this approach is not followed in EBS world :) Here we just copy DB datafiles, DB binaries and APP binaries, do some magic and puff - we have a clone.
@@ -735,7 +735,7 @@ On DB tier it is
 /u01/oracle/VIS/db/tech_st/11.1.0/BLUE_mozaik.env
 
 
-== Changed a lot ==
+=== Changed a lot ===
 
 OK, so far so good. Lets go beserk now.
 
@@ -939,3 +939,5 @@ $ cp /u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Regist
 
 
 == SP2-0642: SqlPlus Internal Error State 2165, Context 4294967295:0:0 [ID 396154.1] ==
+
+
