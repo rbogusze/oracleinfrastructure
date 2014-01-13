@@ -25,23 +25,6 @@ User and Group
 # useradd -d /home/oracle -g oinstall -G dba -s /bin/bash oracle
 }}}
 
-=== annoying free space missing from 250G? ===
-
-It is OK. Linux by default reserves 5% of each partition for the root user. With ext4 filesystems you can check the amount of reserved blocks with
-
-{{{
-# tune4fs -l /dev/sdb1 | grep -i "block count"
-}}}
-
-How to release this reserve to all?
-
-{{{
-# tune4fs -m 0 /dev/sda1
-}}}
-
-
-
-
 == OS setup not required ==
 Some OS setup checks I have automated, and run through scripts. I say about it because I do it and want describe the whole procedure exactly how I did it, but they are not required. What is dangerous is that I place my public key in .ssh to allow passwordless connection and install vmware tools because I do it under ESX. You probably do not want to do this :)
 
