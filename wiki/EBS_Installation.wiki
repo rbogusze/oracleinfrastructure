@@ -898,6 +898,9 @@ $ cp /u01/oracle/VIS/apps/apps_st/comn/java/classes/oracle/forms/registry/Regist
 
 
 
-== SP2-0642: SqlPlus Internal Error State 2165, Context 4294967295:0:0 [ID 396154.1] ==
+== SP2-0642: SqlPlus Internal Error ==
+
+MOS Links:
+  * SP2-0642: Sql*Plus Internal Error State 2165, Context 4294967295:0:0 [ID 396154.1]
 
 
