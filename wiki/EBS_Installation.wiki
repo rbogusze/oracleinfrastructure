@@ -245,38 +245,35 @@ Version 12.1.1.13
 # ./rapidwiz
 }}}
 
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsWelcome026.png" width='648' height='506' />
 
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallingOracleApplications038.png" width='648' height='506' />
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsWizardOperation027.png" width='648' height='506' />
 
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsComponentInstallationReview036.png" width='648' height='506' />
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsOracleConfigurationManagerDetails028.png" width='648' height='506' />
 
 <img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsConfigurationChoice029.png" width='648' height='506' />
+
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsGlobalSystemSettings030.png" width='648' height='506' />
 
 <img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsDatabaseNode031.png" width='648' height='506' />
 
 <img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsDatabaseNode032.png" width='648' height='506' />
 
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsFinish040.png" width='648' height='506' />
-
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsGlobalSystemSettings030.png" width='648' height='506' />
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPrimaryApplicationsNode033.png" width='648' height='506' />
 
 <img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsNodeInformation034.png" width='648' height='506' />
 
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsOracleConfigurationManagerDetails028.png" width='648' height='506' />
-
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPostInstallChecks039.png" width='648' height='506' />
-
 <img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPreInstallChecks035.png" width='648' height='506' />
 
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPrimaryApplicationsNode033.png" width='648' height='506' />
-
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsWelcome026.png" width='648' height='506' />
-
-<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsWizardOperation027.png" width='648' height='506' />
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsComponentInstallationReview036.png" width='648' height='506' />
 
 <img src="http://oracleinfrastructure.googlecode.com/files/OracleApplicationsRapidInstallWizardAlert037.png" width='648' height='506' />
 
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallingOracleApplications038.png" width='648' height='506' />
 
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPostInstallChecks039.png" width='648' height='506' />
+
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsFinish040.png" width='648' height='506' />
 
 == Connecting to EBS ==
 
