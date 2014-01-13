@@ -1,5 +1,5 @@
 Table of contents
-<wiki:toc max_depth="3" />
+<wiki:toc max_depth="4" />
 
 = Installing Oracle E-Business Suite Release 12.1.1 under OEL 5.8 =
 == OS general guidelines ==
