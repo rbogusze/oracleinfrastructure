@@ -246,50 +246,35 @@ Version 12.1.1.13
 }}}
 
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallingOracleApplications038.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallingOracleApplications038.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsComponentInstallationReview036.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsComponentInstallationReview036.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsConfigurationChoice029.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsConfigurationChoice029.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsDatabaseNode031.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsDatabaseNode031.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsDatabaseNode032.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsDatabaseNode032.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsFinish040.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsFinish040.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsGlobalSystemSettings030.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsGlobalSystemSettings030.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsNodeInformation034.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsNodeInformation034.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsOracleConfigurationManagerDetails028.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsOracleConfigurationManagerDetails028.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsPostInstallChecks039.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPostInstallChecks039.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsPreInstallChecks035.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPreInstallChecks035.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsPrimaryApplicationsNode033.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsPrimaryApplicationsNode033.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsWelcome026.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsWelcome026.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/InstallOracleApplicationsWizardOperation027.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/InstallOracleApplicationsWizardOperation027.png" width='648' height='506' />
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/OracleApplicationsRapidInstallWizardAlert037.png]]
+<img src="http://oracleinfrastructure.googlecode.com/files/OracleApplicationsRapidInstallWizardAlert037.png" width='648' height='506' />
 
 
 
@@ -311,8 +296,7 @@ Login page should be reachable under:
 
 http://jazz.remik.org:8000
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/logon1.PNG]]
+<img src="http://oracleinfrastructure.googlecode.com/files/logon1.PNG" width='648' height='506' />
 
 login as
 sysadmin : sysadmin
@@ -320,18 +304,15 @@ sysadmin : sysadmin
 == Forms interface ==
 After loging as sysadmin in Navigator column go to: System Administrator,
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/sys_adm.PNG]]
+<img src="http://oracleinfrastructure.googlecode.com/files/sys_adm.PNG" width='648' height='506' />
 
 then Concurrent section and go to 'Requests'.
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/requests.PNG]]
+<img src="http://oracleinfrastructure.googlecode.com/files/requests.PNG" width='648' height='506' />
 
 Here all the magic begins. If this is the firs run, you will be presented with an option to install JRE 6, you have to allow java scrips, pop up windows, etc. And finally (if you are lucky) you are presented with a forms window.
 
-#+ATTR_LaTeX: width=12cm
-[[/home/remik/osobiste/docs/oracle/images/EBS1211Install/find_request.PNG]]
+<img src="http://oracleinfrastructure.googlecode.com/files/find_request.PNG" width='648' height='506' />
 
 Let's call it a day for now.
 
