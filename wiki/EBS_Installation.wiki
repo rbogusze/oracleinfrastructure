@@ -527,16 +527,15 @@ LogLevel %s_apache_loglevel%
 
 Where 's_apache_loglevel' is exactly the parameter we were changing in the Context file.
 
-=== ToDo ===
-  * changing templates
-  * supported methods of editing Context file
-
 === Updating Autoconfig scripts on DB tier ===
 
 Every time the AutoConfig patch is applied on the apps tier, the db tier apps stack needs to be updated. See Note:218089.1, Autoconfig FAQ, but you should be instructed to run such an update in a readme of the patch beeing applied.
 
 The database server and the database listener must remain available during the Autoconfig run. All the other database tier services should be shut down.
 
+=== Tutorial next ideas ===
+  * changing templates
+  * supported methods of editing Context file
 
 
 
