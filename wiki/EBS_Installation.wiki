@@ -7,6 +7,13 @@ Manuals:
   * Oracle E-Business Suite System Administrator's Guide - Maintenance, Release 12.1, Part Number E12894-04
   * Oracle E-Business Suite Maintenance Utilities, Release 12.1, Part Number E13676-03
 
+MOS Must Read Notes:
+  * Using AutoConfig to Manage System Configurations in Oracle E-Business Suite Release 12 (Doc ID 387859.1)
+  * Cloning Oracle Applications Release 12 with Rapid Clone (Doc ID 406982.1)
+  * Recommended Browsers for Oracle E-Business Suite Release 12 (Doc ID 389422.1)
+  * 393931.1 Deploying Sun JRE (Native Plug-in) for Windows Clients in Oracle E-Business Suite Release 12
+  * Troubleshooting RapidClone issues with Oracle Applications R12 (Doc ID 603104.1)
+
 MOS notes:
   * 798258.1 Oracle Applications Release Notes, Release 12.1.1
   * 788053.1 Oracle Applications NLS Release Notes, Release 12.1
@@ -18,18 +25,14 @@ MOS notes:
   * 549263.1 R12 EMEA Add-on Localizations - Poland
   * 976188.1 Patch Wizard Utility
   * 976188.1 How To Use Patch Wizard Without Setting Up Internet Connection
-  * Using AutoConfig to Manage System Configurations in Oracle E-Business Suite Release 12 (Doc ID 387859.1)
-  * Cloning Oracle Applications Release 12 with Rapid Clone (Doc ID 406982.1)
-  * Recommended Browsers for Oracle E-Business Suite Release 12 (Doc ID 389422.1)
   * 788053.1 Oracle Applications NLS Release Notes, Release 12.1
   * 1080973.1 Oracle E-Business Suite Release 12.1.3 Readme
   * 761570.1 Database Preparation Guidelines for an E-Business Suite Release 12.1.1 Upgrade
   * 437878.1 Upgrading OracleAS 10g Forms and Reports in Oracle E-Business Suite Release 12
   * 418664.1 Using Latest Java 6.0 Update With Oracle E-Business Suite Release 12
   * 454811.1 Upgrading to the Latest OracleAS 10g 10.1.3.x Patch Set in Oracle E-Business Suite Release 12
-  * 393931.1 Deploying Sun JRE (Native Plug-in) for Windows Clients in Oracle E-Business Suite Release 12
   * 1058763.1 Interoperability Notes EBS R12 with Database 11gR2
-  * Troubleshooting RapidClone issues with Oracle Applications R12 (Doc ID 603104.1)
+
 
 
 = Installing Oracle E-Business Suite Release 12.1.1 under OEL 5.8 =
