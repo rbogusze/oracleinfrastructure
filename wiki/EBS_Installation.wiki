@@ -1,5 +1,36 @@
 Table of contents
 <wiki:toc max_depth="4" />
+= Master Docs =
+Manuals:
+  * Oracle E-Business Suite Documentation Library (12.1.3+)
+  * Oracle E-Business Suite Installation Guide: Using Rapid Install Release 12.1 (12.1.1) Part Number E12842-04
+  * Oracle E-Business Suite System Administrator's Guide - Maintenance, Release 12.1, Part Number E12894-04
+  * Oracle E-Business Suite Maintenance Utilities, Release 12.1, Part Number E13676-03
+
+MOS notes:
+  * 798258.1 Oracle Applications Release Notes, Release 12.1.1
+  * 788053.1 Oracle Applications NLS Release Notes, Release 12.1
+  * 169706.1 Oracle Database on Unix AIX,HP-UX,Linux,Mac OS X,Solaris,Tru64 Unix Operating Systems Installation and Configuration Requirements Quick Reference (8.0.5 to 11.2)
+  * 563019.1 Complying with Daylight Saving Time (DST) and Time Zone Rule Changes in E-Business Suite 12
+  * 756671.1 Oracle Recommended Patches – Oracle Database
+  * 1147107.1 Database Patch Set Update Overlay Patches Required for Use with PSUs and Oracle E-Business Suite
+  * 1392633.1 Things to Consider Before Upgrading to 11.2.0.3 to Avoid Poor Performance or Wrong Results
+  * 549263.1 R12 EMEA Add-on Localizations - Poland
+  * 976188.1 Patch Wizard Utility
+  * 976188.1 How To Use Patch Wizard Without Setting Up Internet Connection
+  * Using AutoConfig to Manage System Configurations in Oracle E-Business Suite Release 12 (Doc ID 387859.1)
+  * Cloning Oracle Applications Release 12 with Rapid Clone (Doc ID 406982.1)
+  * Recommended Browsers for Oracle E-Business Suite Release 12 (Doc ID 389422.1)
+  * 788053.1 Oracle Applications NLS Release Notes, Release 12.1
+  * 1080973.1 Oracle E-Business Suite Release 12.1.3 Readme
+  * 761570.1 Database Preparation Guidelines for an E-Business Suite Release 12.1.1 Upgrade
+  * 437878.1 Upgrading OracleAS 10g Forms and Reports in Oracle E-Business Suite Release 12
+  * 418664.1 Using Latest Java 6.0 Update With Oracle E-Business Suite Release 12
+  * 454811.1 Upgrading to the Latest OracleAS 10g 10.1.3.x Patch Set in Oracle E-Business Suite Release 12
+  * 393931.1 Deploying Sun JRE (Native Plug-in) for Windows Clients in Oracle E-Business Suite Release 12
+  * 1058763.1 Interoperability Notes EBS R12 with Database 11gR2
+  * Troubleshooting RapidClone issues with Oracle Applications R12 (Doc ID 603104.1)
+
 
 = Installing Oracle E-Business Suite Release 12.1.1 under OEL 5.8 =
 == OS general guidelines ==
@@ -270,7 +301,11 @@ Common problems when running with JRE 7 and browser incomatibilities are:
   * FRM-92095: Oracle Jnitiator version too low - please install version 1.1.8.2 or higher
   * Error FRM-92129 Registry.dat or FRM-92120 Registry.dat
 
-If this is what you are experiencing see the Troubleschooting section
+If this is what you are experiencing see the Troubleschooting section.
+
+If you feel brave and want to try with different browsers, try MOS Doc:
+  * Recommended Browsers for Oracle E-Business Suite Release 12 (Doc ID 389422.1)
+
 
 Login page should be reachable under:
 
@@ -371,6 +406,12 @@ apps : apps
 Now we have RDBMS in version 11.1.0.7.0, EBS application stack in version 12.1.1.
 
 = Autoconfig =
+Must Read:
+  * Using AutoConfig to Manage System Configurations in Oracle E-Business Suite Release 12 (Doc ID 387859.1)
+
+Read:
+
+
 == Application tier ==
 {{{
 $ . $HOME/scripto/ebs/app_env
@@ -541,6 +582,12 @@ The database server and the database listener must remain available during the A
 
 = Cloning =
 The cloning procedure will be explained in more details in tasks section. Here just the scripts to run.
+
+Must Read:
+  * Cloning Oracle Applications Release 12 with Rapid Clone (Doc ID 406982.1)
+
+Read:
+  * Troubleshooting RapidClone issues with Oracle Applications R12 (Doc ID 603104.1)
 
 == Preclone APP ==
 Preclone should be done on a properly running DB and APP tiers
@@ -789,6 +836,75 @@ Choose a value which will be set as APPLPTMP value on the target node [1] : 2
 
 The new APPL_TOP context file has been created :
 /u01/oracle/RED/inst/apps/RED_mozaik/appl/admin/RED_mozaik.xml
+
+
+
+
+select count(*), owner from dba_objects where status !='VALID' group by owner order by 1 desc;
+
+COUNT(*) OWNER
+  *--------- ------------------------------
+5 APPS
+4 PUBLIC
+2 FLOWS_010500
+2 CA
+2 ORDSYS
+  #SYS
+  #RE
+  #HERMAN
+
+OBJECT_NAME		       OWNER		    OBJECT_TYPE
+  *----------------------------- -------------------- -------------------
+MSD_DEM_OBI_DEMANTRA_MV        APPS		    MATERIALIZED VIEW
+XLA_20065_AAD_C_000030_PKG     APPS		    PACKAGE BODY
+FSAH_DUPLICATE_PKG	       APPS		    PACKAGE BODY
+XLA_00707_AAD_C_000044_PKG     APPS		    PACKAGE BODY
+XLA_00707_AAD_C_000026_PKG     APPS		    PACKAGE BODY
+G			       CA		    TABLE
+F			       CA		    TABLE
+ImportExport		       FLOWS_010500	    JAVA SOURCE
+ImportExport		       FLOWS_010500	    JAVA CLASS
+RDT_1			       HERMAN		    TABLE
+ORDIMG_PKG		       ORDSYS		    PACKAGE BODY
+ORDIMGEXTCODEC_PKG	       ORDSYS		    PACKAGE BODY
+WWV_FLOW_FIELD_TEMPLATES       PUBLIC		    SYNONYM
+WWV_FLOW_GENERIC	       PUBLIC		    SYNONYM
+WWV_FLOW_LISTS_OF_VALUES$      PUBLIC		    SYNONYM
+WWV_FLOW_LIST_OF_VALUES_DATA   PUBLIC		    SYNONYM
+RE_PROFILER		       RE		    PACKAGE BODY
+PRVT_WORKLOAD		       SYS		    PACKAGE BODY
+
+@?/rdbms/admin/utlrp
+
+COUNT(*) OWNER
+  *--------- --------------------
+5 APPS
+4 PUBLIC
+2 FLOWS_010500
+2 CA
+  #HERMAN
+  #RE
+
+OBJECT_NAME		       OWNER		    OBJECT_TYPE
+  *----------------------------- -------------------- -------------------
+XLA_00707_AAD_C_000026_PKG     APPS		    PACKAGE BODY
+MSD_DEM_OBI_DEMANTRA_MV        APPS		    MATERIALIZED VIEW
+XLA_00707_AAD_C_000044_PKG     APPS		    PACKAGE BODY
+FSAH_DUPLICATE_PKG	       APPS		    PACKAGE BODY
+XLA_20065_AAD_C_000030_PKG     APPS		    PACKAGE BODY
+G			       CA		    TABLE
+F			       CA		    TABLE
+ImportExport		       FLOWS_010500	    JAVA SOURCE
+ImportExport		       FLOWS_010500	    JAVA CLASS
+RDT_1			       HERMAN		    TABLE
+WWV_FLOW_FIELD_TEMPLATES       PUBLIC		    SYNONYM
+WWV_FLOW_GENERIC	       PUBLIC		    SYNONYM
+WWV_FLOW_LISTS_OF_VALUES$      PUBLIC		    SYNONYM
+WWV_FLOW_LIST_OF_VALUES_DATA   PUBLIC		    SYNONYM
+RE_PROFILER		       RE		    PACKAGE BODY
+
+  # rows selected.
+
 
 
 
