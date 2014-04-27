@@ -1,4 +1,6 @@
-. /u01/oracle/VIS/db/tech_st/11.1.0/VIS_jazz.env
+#12.1 . /u01/oracle/VIS/db/tech_st/11.1.0/VIS_jazz.env
+#12.2
+. /d01/oracle/VIS/11.2.0/VIS_jazz.env
 
 SQLPATH=$HOME/scripto/oracle/sqlbin
 export SQLPATH
