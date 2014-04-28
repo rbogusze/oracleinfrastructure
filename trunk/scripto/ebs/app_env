@@ -1,1 +1,2 @@
-. /u01/oracle/VIS/apps/apps_st/appl/APPSVIS_jazz.env
+#12.1 . /u01/oracle/VIS/apps/apps_st/appl/APPSVIS_jazz.env
+. /d01/oracle/VIS/fs1/EBSapps/appl/VIS_jazz.env

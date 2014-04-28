@@ -15,5 +15,8 @@ fi
 
 # 11.5 cd $COMMON_TOP/admin/scripts/$CONTEXT_NAME
 # 12.1
-cd $INST_TOP/admin/scripts
+#cd $INST_TOP/admin/scripts
+#./adstrtal.sh apps/apps
+# 12.2
+cd $ADMIN_SCRIPTS_HOME
 ./adstrtal.sh apps/apps
