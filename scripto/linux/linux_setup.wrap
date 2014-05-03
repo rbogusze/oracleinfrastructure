@@ -75,6 +75,22 @@ b_setup_yum_repository()
     fi
     ;;
 
+  "Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64")
+    msgi "Not changing default OEM repositories"
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+    ;;
+
 
   "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
     msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
@@ -139,7 +155,7 @@ b_install_usefull_rpm()
       msgi "rlwrap is already installed"
     fi
     ;;
-  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64")
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
     if [ "$TMP_CHK" -lt 1 ]; then
@@ -268,7 +284,7 @@ b_time_synchro()
     run_command "ntpdate pool.ntp.org"
     run_command "/etc/init.d/ntpd start"
     ;;
-  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64")
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     run_command "chkconfig ntpd on"
     run_command "/etc/init.d/ntpd start"
@@ -590,7 +606,7 @@ b_disable_IP6()
     msgi "IPv6 seems to work fine. Disabling it."
 
     case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
-    "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64")
+    "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64")
       msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
       run_command "echo 'NETWORKING_IPV6=no' >> /etc/sysconfig/network"
       run_command "echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf"
