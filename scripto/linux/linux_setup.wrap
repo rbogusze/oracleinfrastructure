@@ -137,7 +137,7 @@ b_install_usefull_rpm()
   TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" -e "^subversion" -e "^nmon" -e "^iftop" | wc -l`
   if [ "$TMP_CHK" -lt 8 ]; then
     msga "Installing mutt rsync lynx dialog ..."
-    run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced nmon iftop"
+    run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced nmon iftop screen"
   else
     msgi "mutt rsync lynx dialog ... already installed. Doing nothing."
   fi 
