@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 . $HOME/scripto/ebs/app_env
 
 # 11.5 cd $COMMON_TOP/admin/scripts/$CONTEXT_NAME
