@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 . $HOME/scripto/ebs/db_env
 
 cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
