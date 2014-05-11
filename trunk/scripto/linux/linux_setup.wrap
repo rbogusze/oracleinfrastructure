@@ -608,8 +608,6 @@ b_disable_IP6()
     case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
     "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64")
       msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
-
-WIP
       run_command "cp /etc/sysconfig/network /etc/sysconfig/network.$V_UNIQ"
       run_command "cat /etc/sysconfig/network | grep -v NETWORKING_IPV6 > /tmp/network.tmp"
       run_command "cp /tmp/network.tmp /etc/sysconfig/network"
