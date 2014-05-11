@@ -531,7 +531,7 @@ b_configure_static_ip()
  
   msga "Construct the new /etc/resolv.conf"
   run_command "mv /etc/resolv.conf /var/tmp/resolv.conf.$V_UNIQ"
-  run_command "echo 'search remik.org' > /etc/resolv.conf"
+  run_command "echo 'search $V_DOMAIN' > /etc/resolv.conf"
   run_command "echo 'nameserver 192.168.1.10' >> /etc/resolv.conf"
   
   msga "It is advisable to reboot the host now to refresh the hostname"
