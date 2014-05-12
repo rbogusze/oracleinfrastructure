@@ -18,9 +18,9 @@ V40139-01.iso	MD5		1AA0A1246B1A55108ABF20AA2BCAC00E
 I used two hosts. One for APP tier and one for DB tier. This is the configuration that you will find in most production environments.
 
 Resources:
-| Tier | u01 size  | RAM    | CPU              |
-| APP  | 150G disk | 3G RAM | 1 socket 2 cores |
-| DB   | 250G disk | 4G RAM | 1 socket 2 cores |
+|| Tier || u01 size  || RAM    || CPU              ||
+|| APP  || 150G disk || 3G RAM || 1 socket 2 cores ||
+|| DB   || 250G disk || 4G RAM || 1 socket 2 cores ||
 
 Notes:
   * additionally 20G for OS isntallation, including 4G swap
