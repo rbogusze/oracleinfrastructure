@@ -4,7 +4,6 @@ Table of contents
 = Installing Oracle E-Business Suite Release 12.2 under OEL 5.10 x86-64 =
 MOS:
   * Oracle E-Business Suite Release 12.2: Online Patching FAQ (Doc ID 1583902.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1583902.1.html
   * Oracle E-Business Suite Maintenance Guide Release 12.2
   * http://docs.oracle.com/cd/E26401_01/doc.122/e22954/T202991T206856.htm
   * Oracle E-Business Suite Concepts
@@ -168,7 +167,6 @@ DO NOT unpack the downloaded files.
 
 MOS:
   * MD5 Checksums for R12.2 Rapid Install Media (Doc ID 1505510.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1505510.1.html
 
 Download the md5_linux.txt file.
 
@@ -301,7 +299,6 @@ First line of the etc/hosts file should be:
 rw-50011
 MOS:
   * R12i: Pre-Install Check Fails RW-50011 (Doc ID 951783.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/951783.1.html
 
 Installation
 http://docs.oracle.com/cd/B53825_03/current/acrobat/121oaig.pdf
@@ -309,13 +306,11 @@ http://docs.oracle.com/cd/B53825_03/current/acrobat/121oaig.pdf
 == Post-install steps ==
 MOS:
   * Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.2) for Linux x86-64 (Doc ID 1330701.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1330701.1.html
   * http://chavalis.blogspot.com/2013/10/installing-oracle-ebs-122-vision-on.html
 
 === Following Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1) ===
 MOS:
   * Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1320300.1.html
 
 3. Notes for New Installation Customers
 
@@ -398,13 +393,11 @@ Customers are required to apply the latest available AD and TXK Release Update P
 
 MOS:
   * Oracle E-Business Suite Release 12.2: Suite-Wide Rollup and AD/TXK Delta Information (Doc ID 1583092.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1583092.1_20140428.html
 
 
 ==== R12.AD.C.delta.4 (Patchset) ====
 p17766337_R12.AD.C_R12_LINUX.zip        MD5	1DC21E3C8D3302C3063C5DAB320778B0
 
-file:///home/remik/Dropbox/docs/oracle/metalink_notes/17766337.html
 
 {{{
 $ md5sum p17766337_R12.AD.C_R12_LINUX.zip
@@ -430,19 +423,16 @@ $ sqlplus /nolog
 }}}
 
 Then instructed to follow Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
-file:///home/remik/Dropbox/docs/oracle/metalink_notes/1617461.1.html
 
 ==== Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1) ====
 MOS:
   * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1617461.1.html
 
 ==== 2. Required Database Patches ====
 Before proceeding with next step, ensure to review My Oracle Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes and apply all patches for Database 11.2.0.3.
 
 MOS:
   * Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1594274.1.html
 
 I used startCD Version 12.2.0.47
 
@@ -475,7 +465,6 @@ OPatch Version: 11.2.0.3.6
 }}}
 
 ==== 17600719 ====
-file:///home/remik/Dropbox/docs/oracle/metalink_notes/17600719.txt
 
 DBMS_UTILITY.INVALIDATE ORA-3113 ORA-7445 CORE DUMP [OPIGLN] (Patch)
 p17600719_112030_Linux-x86-64.zip	MD5	39D742550866A206A444DA8E01320D7E
@@ -516,7 +505,6 @@ Postinstallation
 
 
 ==== 17875948 ====
-file:///home/remik/Dropbox/docs/oracle/metalink_notes/17875948.txt
 
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 16587934 17654622 (Patch)
 p17875948_112030_Linux-x86-64.zip	MD5	F7FD987FC9BA4BADACD0E2BB3EC592A9
@@ -580,7 +568,6 @@ If you continue, patch(es) [  17461865 ] will be rolled back and the new Patch  
 
 MOS:
   * Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1594274.1.html
 
 Footnote 7 - Database bug fix 16187992 has been replaced with database bug fix 18241194, this is included in Patch 18259911 and should be installed instead of Patch 17461865.
 
@@ -610,9 +597,7 @@ All the required one-offs are present in Oracle Database Home
 Still following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
 MOS:
   * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1617461.1.html
   * Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1355068.1.html
 
 
 ==== 3. Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs ====
@@ -716,7 +701,6 @@ BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
 R12.TXK.C.DELTA.4 (Patchset)
 p17893964_R12.TXK.C_R12_GENERIC.zip	MD5	148815EDD925F1F327AB9714BD8127DE
 
-file:///home/remik/Dropbox/docs/oracle/metalink_notes/17893964.html
 
 QREP1224.2:AD/TXK RUP4 D6:AC-50606: EXCEPTION OCCURRED WHILE RELEASING LOCK (Patch)
 p18332816_R12.TXK.C_R12_GENERIC.zip	MD5	67367EF4F004D01B3FEA0F99889A2B7C
@@ -816,11 +800,9 @@ a. Patch to the 12.2.3
 
 
 Readme:
-file:///home/remik/Dropbox/docs/oracle/metalink_notes/17020683.html
 
 MOS:
   * 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1586214.1.html
 
 
 ORACLE E-BUSINESS SUITE 12.2.3 RELEASE UPDATE PACK (Patchset)
@@ -948,11 +930,9 @@ $ . $RUN_BASE/EBSapps/appl/APPS${CONTEXT_NAME}.env
 ==== to avoid Dictionary Corrupted HAB_RT_EXEC_PROC_RUN_METRICS TS mismatch ====
 MOS:
   * R12.2 Dictionary Corrupted While Running adop - "TS Mismatch" Error (Doc ID 1576086.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1576086.1.html
 
 Follow:
   * Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1320300.1.html
 
 Section: Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body
 
@@ -963,7 +943,6 @@ p17268684_R12.AD.C_R12_GENERIC.zip	MD5	5F108A4F0CB51559C2643FB32D475513
 
 Do not apply the Patch 17268684 (17268684:R12.AD.C). You should instead execute instructions in the patch readme to fix timestamp mismatches for Synonym, View, Package and Package Body.
 
-file:///home/remik/Dropbox/docs/oracle/metalink_notes/17268684.html
 
 On the DB tier
 
@@ -995,7 +974,6 @@ Apply the latest Application tier technology patches documented in 'Section 3: A
 
 MOS:
   * Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1594274.1.html
 
 I used the startCD 12.2.0.47 for the installation, but I still need to apply the patches listed under 'Not included in any startCD' for each of the technology components.
 
@@ -1018,7 +996,6 @@ $ . /u01/oracle/VIS/EBSapps.env
 How to determine which home is which technology?
 MOS:
   * Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1355068.1.html
 
 ==== /u01/oracle/VIS/fs1/FMW_Home/webtier/OPatch/opatch ====
 {{{
@@ -1276,7 +1253,6 @@ p17495356_1036_Generic.zip	MD5	6D7C562BE2D908321CFD033099F482B2
 
 MOS:
   * How to Apply WebLogic Server (WLS) Patches Using Smart Update [Video] (Doc ID 876004.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/876004.1.html
 
 {{{
 # md5sum p17495356_1036_Generic.zip
@@ -1309,9 +1285,7 @@ adop exiting with status = 2 (Fail)
 
 MOS:
   * 12.2 E-Business Suite - Collecting Online Patching and fs_clone Log Files (Doc ID 1542162.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1542162.1.html
   * Oracle E-Business Suite Release 12.2: Backup and Recovery Guidelines For Online Patching Cutover (Doc ID 1584097.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1584097.1.html
 
 {{{
 $ adop -status
@@ -1361,7 +1335,6 @@ I start the whole app stack.
 How does one handle eg Forms update when we have fs1 and fs2?
 MOS:
   * Upgrading Oracle Fusion Middleware Technology Stack of Oracle E-Business Suite Release 12.2 to 11.1.1.7(11gR1 PS6) (Doc ID 1590356.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1590356.1.html
 
 
 To jest wszystko zle!!!
@@ -1381,7 +1354,6 @@ Czyli odkrecam do snapschota (dobrze, ze go zrobilem), sprawdzam w jakim statusi
 Still Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
 MOS:
   * 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1586214.1.html
 
 ==== 4. Apply Oracle E-Business Suite Release 12.2.3. ====
 
@@ -1462,7 +1434,6 @@ So still the run edition has no changed. The patch edition has the Forms patched
 Still Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
 MOS:
   * 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1586214.1.html
 
 ==== 5. Instantiate the Oracle HTTP Server configuration files admin.conf, ssl.conf, and mod_wl_ohs.conf. ====
 
@@ -1619,9 +1590,7 @@ So /d01/oracle/VIS/fs1/EBSapps/appl/VIS_jazz.env is the current, active edition.
 Freezes constantly during
 MOS:
   * Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1320300.1.html
   * Troubleshooting Rapid Install for E-Business Suite Release 12.2 (Doc ID 1378579.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1378579.1.html
   * Oracle E-Business Suite Release 12.2 Information Center - Announcements (Doc ID 1583109.1)
 
 apply the patch to startCD
@@ -1709,7 +1678,6 @@ Database Connection String - jdbc:oracle:thin:@ebsdb1.remik.org:1521:VIS
 
 MOS:
   * Troubleshooting Rapid Install for E-Business Suite Release 12.2 (Doc ID 1378579.1)
-  * file:///home/remik/Dropbox/docs/oracle/metalink_notes/1378579.1_20140504.html
 
 looking at:
 /tmp/05041500/05041500.log
