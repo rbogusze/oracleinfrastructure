@@ -1,5 +1,5 @@
 Table of contents
-<wiki:toc max_depth="4" />
+<wiki:toc max_depth="8" />
 
 = Installing Oracle E-Business Suite Release 12.2 under OEL 5.10 x86-64 =
 MOS:
@@ -395,7 +395,7 @@ MOS:
   * Oracle E-Business Suite Release 12.2: Suite-Wide Rollup and AD/TXK Delta Information (Doc ID 1583092.1)
 
 
-==== R12.AD.C.delta.4 (Patchset) ====
+===== R12.AD.C.delta.4 (Patchset) =====
 p17766337_R12.AD.C_R12_LINUX.zip        MD5	1DC21E3C8D3302C3063C5DAB320778B0
 
 
@@ -424,11 +424,11 @@ $ sqlplus /nolog
 
 Then instructed to follow Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
 
-==== Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1) ====
+====== Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1) ======
 MOS:
   * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
 
-==== 2. Required Database Patches ====
+======= 2. Required Database Patches =======
 Before proceeding with next step, ensure to review My Oracle Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes and apply all patches for Database 11.2.0.3.
 
 MOS:
@@ -451,7 +451,7 @@ Shutdown APP and DB tiers
 $ do it
 }}}
 
-==== OPatch ====
+======== OPatch ========
 OPatch patch of version 11.2.0.3.6 for Oracle software releases 11.2.0.x (DEC 2013) (Patch)
 p6880880_112000_Linux-x86-64.zip	MD5	2AB78CB17174C3A49DF560F05E3352C6
 
@@ -464,7 +464,7 @@ $ opatch version
 OPatch Version: 11.2.0.3.6
 }}}
 
-==== 17600719 ====
+======== 17600719 ========
 
 DBMS_UTILITY.INVALIDATE ORA-3113 ORA-7445 CORE DUMP [OPIGLN] (Patch)
 p17600719_112030_Linux-x86-64.zip	MD5	39D742550866A206A444DA8E01320D7E
@@ -482,7 +482,7 @@ Patch  17600719     : applied on Mon Apr 28 20:28:48 CEST 2014
 
 No Postinstallation
 
-==== 17693770 ====
+======== 17693770 ========
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 17502060 17487358 (Patch)
 p17693770_112030_Linux-x86-64.zip	MD5	2AB47B81CD24E5EDEC557E8332D6FFC8
 
@@ -504,7 +504,7 @@ Postinstallation
 }}}
 
 
-==== 17875948 ====
+======== 17875948 ========
 
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 16587934 17654622 (Patch)
 p17875948_112030_Linux-x86-64.zip	MD5	F7FD987FC9BA4BADACD0E2BB3EC592A9
@@ -532,7 +532,7 @@ Oracle XML Database		    VALID	    11.2.0.3.0
 > shutdown immediate
 }}}
 
-==== 18116376 ====
+======== 18116376 ========
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 17047617 12811829 (Patch)
 p18116376_112030_Linux-x86-64.zip	MD5	E10F7E87397573624A948CA6FA5C05E7
 
@@ -546,7 +546,7 @@ $ opatch apply
 
 No Postinstallation steps.
 
-==== 18259911 ====
+======== 18259911 ========
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 16163946 16833977 4189542 11896575 (Patch)
 p18259911_112030_Linux-x86-64.zip	MD5	8D5701B5CDBD649E5D67A6B10AE0F27D
 
@@ -574,7 +574,7 @@ Footnote 7 - Database bug fix 16187992 has been replaced with database bug fix 1
 Continuing with the patching.
 
 
-==== EBS Database Codelevel Checker ====
+======= EBS Database Codelevel Checker =======
 
 EBS Database Codelevel Checker (Patch)
 p17537119_R12_GENERIC.zip	MD5	095E006B61296033ABD67A58FCAB838B
@@ -593,14 +593,14 @@ $ ./checkDBpatch.sh
 All the required one-offs are present in Oracle Database Home
 }}}
 
-==== Continuing with R12.AD.C.delta.4 (Patchset) ====
+====== Continuing with R12.AD.C.delta.4 (Patchset) ======
 Still following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
 MOS:
   * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
   * Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
 
 
-==== 3. Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs ====
+======= 3. Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs =======
 
 New Installation Customers, Path A
 
@@ -922,12 +922,12 @@ BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
 
 ==== 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack ====
 
-==== 1. Source the run edition applications environment. ====
+====== 1. Source the run edition applications environment. ======
 {{{
 $ . $RUN_BASE/EBSapps/appl/APPS${CONTEXT_NAME}.env
 }}}
 
-==== to avoid Dictionary Corrupted HAB_RT_EXEC_PROC_RUN_METRICS TS mismatch ====
+===== to avoid Dictionary Corrupted HAB_RT_EXEC_PROC_RUN_METRICS TS mismatch =====
 MOS:
   * R12.2 Dictionary Corrupted While Running adop - "TS Mismatch" Error (Doc ID 1576086.1)
 
@@ -962,13 +962,13 @@ $ cat adzddtfix.out
   *> should be empty this time
 }}}
 
-==== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack ====
-==== 2. Start an online patching cycle. ====
+===== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack =====
+====== 2. Start an online patching cycle. ======
 {{{
 $ adop phase=prepare
 }}}
 
-==== 3. Application Tier Technology Patches ====
+====== 3. Application Tier Technology Patches ======
 
 Apply the latest Application tier technology patches documented in 'Section 3: Application Tier Technology Patches and Bug Numbers' of My Oracle Support Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes.
 
@@ -992,12 +992,12 @@ How to source patch filesystem?
 $ . /u01/oracle/VIS/EBSapps.env
 }}}
 
-==== Which homes are for what? ====
+====== Which homes are for what? ======
 How to determine which home is which technology?
 MOS:
   * Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
 
-==== /u01/oracle/VIS/fs1/FMW_Home/webtier/OPatch/opatch ====
+======= /u01/oracle/VIS/fs1/FMW_Home/webtier/OPatch/opatch =======
 {{{
 $ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/webtier
 $ cd $ORACLE_HOME/OPatch
@@ -1012,7 +1012,7 @@ Indicate, that this is:
 Web Tier and Utilities (OHS) 11.1.1.6
 
 
-==== /u01/oracle/VIS/fs1/FMW_Home/Oracle_EBS-app1/OPatch/opatch ====
+======= /u01/oracle/VIS/fs1/FMW_Home/Oracle_EBS-app1/OPatch/opatch =======
 {{{
 $ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/Oracle_EBS-app1
 $ cd $ORACLE_HOME/OPatch
@@ -1026,7 +1026,7 @@ There are no Interim patches installed in this Oracle Home.
 
 
 
-==== /u01/oracle/VIS/fs1/FMW_Home/oracle_common/OPatch/opatch ====
+======= /u01/oracle/VIS/fs1/FMW_Home/oracle_common/OPatch/opatch =======
 {{{
 $ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/oracle_common
 $ cd $ORACLE_HOME/OPatch
@@ -1040,7 +1040,7 @@ Which indicates, that this is:
 Oracle Fusion Middleware Common 11.1.1.6, but this 11.1.1.2.0? 11.1.1.6? Anyway, this is the best match.
 
 
-==== /u01/oracle/VIS/fs1/EBSapps/10.1.2/OPatch/opatch ====
+======= /u01/oracle/VIS/fs1/EBSapps/10.1.2/OPatch/opatch =======
 {{{
 $ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
 $ cd $ORACLE_HOME/OPatch
@@ -1052,7 +1052,7 @@ $ ./opatch lsinventory
 'Forms and Reports 10.1.2.3'
 
 
-==== Section 3.1: Forms and Reports 10.1.2.3 Patches and Bug Numbers ====
+====== Section 3.1: Forms and Reports 10.1.2.3 Patches and Bug Numbers ======
 Here we have patches for versions 10.1.2.3.0 or 10.1.0.5.0. Which is the one I need?
 
 We have 10.1.2.3
@@ -1069,7 +1069,7 @@ $ opatch lsinventory
 
 Apply those Not included in any startCD
 
-==== 5659594 ====
+======= 5659594 =======
 {{{
 $ opatch lsinventory | grep 5659594
 }}}
@@ -1087,7 +1087,7 @@ $ opatch lsinventory | grep 5659594
   # Patch  5659594 applied on Tue May 06 06:03:27 EDT 2014
 }}}
 
-==== 8943095 ====
+======= 8943095 =======
 APPS1012: ALIGNMENT INCORRECT WHEN USING VIETNAMESE COMBINING CHARACTERS (Patch)
 p8943095_10123_LINUX.zip	MD5	19CD850DD59E9F7CE995C17BC6E03F3B
 
@@ -1100,7 +1100,7 @@ $ opatch lsinventory | grep 8943095
 }}}
 
 
-==== 15900214 ====
+======= 15900214 =======
 APPS6: RUNNING RWCONVERTER SHOWS PARAMETERS PASSED IN PS -EF (Patch)
 p15900214_10123_LINUX.zip	MD5	6B82F41683BA0CA83DED03CCAA95FCCB
 
@@ -1114,7 +1114,7 @@ $ opatch lsinventory | grep 15900214
 
 
 
-==== 17645157 ====
+======= 17645157 =======
 APPS6:GETTING JAVA SERVER VM WARNING WITH 10.1.2 ORACLE_HOME EXE , JDK 1.7.0_40 (Patch)
 p17645157_10123_LINUX.zip	MD5	697A9EC1567213779C400BBAD2B8F322
 
@@ -1140,7 +1140,7 @@ $ make -f ins_reports.mk install
 }}}
 
 
-==== 17907988 ====
+======= 17907988 =======
 MERGE REQUEST ON TOP OF 10.1.2.3.0 FOR BUGS 7121788 17594101 (Patch)
 p17907988_10123_LINUX.zip	MD5	D100E84C1980079E1AC458955FCFD5DD
 
@@ -1165,7 +1165,7 @@ $ opatch lsinventory
 43 patches installed (5 installed 2 rollback)
 }}}
 
-==== Section 3.2: Web Tier & Utilities (OHS) 11.1.1.6 Patches and Bug Numbers ====
+====== Section 3.2: Web Tier & Utilities (OHS) 11.1.1.6 Patches and Bug Numbers ======
 Web Tier and Utilities (OHS) 11.1.1.6 Patches
 IAS_ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/webtier
 {{{
@@ -1177,7 +1177,7 @@ Interim patches (7) :Patch  16199894 14616819 10638758 17325559 13643211 1294990
 
 No patches to apply.
 
-==== Section 3.3: Oracle Fusion Middleware Common 11.1.1.6 Patches and Bug Numbers ====
+====== Section 3.3: Oracle Fusion Middleware Common 11.1.1.6 Patches and Bug Numbers ======
 {{{
 $ relogin to clear env
 $ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/oracle_common
@@ -1191,7 +1191,7 @@ $ opatch lsinventory
 
 Apply those Not included in any startCD
 
-==== 9905685 ====
+======= 9905685 =======
 MISSING COMMONS-CLI-1.1.JAR IN WEBTIER ORACLE_COMMON/SOA/MODULES (Patch)
 p9905685_111160_Generic.zip	78.8 KB	(80669 bytes)
 SHA-1	B0BD74EB7EFD0AB8BEFA8DD33618AA6A8E0CCA85
@@ -1207,7 +1207,7 @@ $ opatch lsinventory | grep 9905685
 Patch  9905685      : applied on Tue May 06 08:39:12 EDT 2014
 }}}
 
-==== 13947608 ====
+======= 13947608 =======
 RUP4: JPS-02592 FAILED TO PUSH LDAP CONFIG DATA TO LIBOVD IN HCM DTE ENV (Patch)
 p13947608_111160_Generic.zip	MD5	3138AE776F8F1F3435117C5A52478D3F
 
@@ -1221,7 +1221,7 @@ $ opatch lsinventory | grep 13947608
 Patch  13947608     : applied on Tue May 06 10:12:33 EDT 2014
 }}}
 
-==== 17394319 ====
+======= 17394319 =======
 
 PASTBINARY NOT RETURNING CORRECT STATUS IN CASE OF CTRL+C (Patch)
 p17394319_111160_Generic.zip	MD5	8A34BC75E733059BF9CD2FAEDD5D080D
@@ -1237,7 +1237,7 @@ Patch  17394319     : applied on Tue May 06 10:13:12 EDT 2014
 }}}
 
 
-==== Section 3.4: Oracle Weblogic Server 10.3.6.0 Patches and Bug Numbers ====
+====== Section 3.4: Oracle Weblogic Server 10.3.6.0 Patches and Bug Numbers ======
 {{{
 $ cd $FMW_HOME/utils/bsu
 $ bsu.sh -report -bea_home=$FMW_HOME -output_format=text
@@ -1246,7 +1246,7 @@ Product Version........... 10.3.6.0
 
 Patches Not included in any startCD	17495356
 
-==== 17495356 ====
+======= 17495356 =======
 
 SU Patch [CIH8]: TRACKING BUG FOR SMARTUPDATE PATCH OF MLR BUG 17431995 (Patch)
 p17495356_1036_Generic.zip	MD5	6D7C562BE2D908321CFD033099F482B2
@@ -1271,12 +1271,12 @@ $ ./bsu.sh -prod_dir=$FMW_HOME/wlserver_10.3 -patchlist=CIH8 -verbose -install
 }}}
 
 
-==== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack ====
+===== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack =====
 Still Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
 MOS:
   * 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
 
-==== 4. Apply Oracle E-Business Suite Release 12.2.3. ====
+====== 4. Apply Oracle E-Business Suite Release 12.2.3. ======
 
 Start up only the Weblogic AdminServer service on the Run File System.
 {{{
@@ -1338,12 +1338,12 @@ $ ./opatch lsinventory
 
 So still the run edition has no changed. The patch edition has the Forms patched and the whole patch app has 17020683, which is 12.2.3 applied.
 
-==== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack ====
+===== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack =====
 Still Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
 MOS:
   * 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
 
-==== 5. Instantiate the Oracle HTTP Server configuration files admin.conf, ssl.conf, and mod_wl_ohs.conf. ====
+====== 5. Instantiate the Oracle HTTP Server configuration files admin.conf, ssl.conf, and mod_wl_ohs.conf. ======
 
 Source the patch edition environment file:
 {{{
@@ -1370,7 +1370,7 @@ $ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -d $FND_T
 $ perl $FND_TOP/patch/115/bin/txkSetAppsConf.pl -contextfile=$CONTEXT_FILE -outfile=$INST_TOP/logs/appl/rgf/TXK/test.log
 }}}
 
-==== 6. Complete the online patching cycle by running the following commands in the order shown. ====
+====== 6. Complete the online patching cycle by running the following commands in the order shown. ======
 
 Source the run edition environment file:
 {{{
@@ -1423,7 +1423,7 @@ $ ./opatch lsinventory
 43) Patch
 }}}
 
-==== 7. Synchronize file systems ====
+====== 7. Synchronize file systems ======
 This action will copy the new run edition code and configuration to the other file system, to help the next online patching cycle complete faster.
 
 {{{
@@ -1460,7 +1460,7 @@ $ ./opatch lsinventory
 }}}
 
 
-==== 6. Post-Update Steps ====
+===== 6. Post-Update Steps =====
 Nice:
 source /u01/oracle/VIS/EBSapps.env run|patch
 
@@ -1468,7 +1468,7 @@ If you are upgrading from Release 11i, 12.0.x or 12.1.x to Release 12.2.3, then 
 
 I have done the upgrade from 12.2 to 12.2.3, so those post install steps do not apply.
 
-==== Done ====
+===== Done =====
 
 We have 12.2.3 installed.
 
