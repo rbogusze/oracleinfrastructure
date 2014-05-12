@@ -1271,85 +1271,6 @@ $ ./bsu.sh -prod_dir=$FMW_HOME/wlserver_10.3 -patchlist=CIH8 -verbose -install
 }}}
 
 
-==== After the fs1 patching ====
-WIP. Should I synchronise the fs2? NIE, zobacz caly paragraf. Przejdz do aplikowania glownego patcha.
-
-Jak zrobilem po wypatchowaniu formsow, itp (przed tez)
-{{{
-$ adop phase=fs_clone
-Using ADOP Session ID from currently incomplete patching cycle
-[UNEXPECTED]FS clone cannot be called while a patching cycle is active
-}}}
-
-adop exiting with status = 2 (Fail)
-
-MOS:
-  * 12.2 E-Business Suite - Collecting Online Patching and fs_clone Log Files (Doc ID 1542162.1)
-  * Oracle E-Business Suite Release 12.2: Backup and Recovery Guidelines For Online Patching Cutover (Doc ID 1584097.1)
-
-{{{
-$ adop -status
-Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
-  *-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
-ebs2		master		PREPARE     COMPLETED	    05-MAY-14 14:19:07 -04:00	   05-MAY-14 15:21:17 -04:00	  1:02:10
-APPLY	    NOT STARTED
-CUTOVER     NOT STARTED
-CLEANUP     NOT STARTED
-FINALIZE    NOT STARTED
-}}}
-
-{{{
-$ adop phase=apply
-He continues with standard adpatch :) Ho to abort it?
-}}}
-
-{{{
-$ adop phase=abort
-adop exiting with status = 0 (Success)
-}}}
-
-{{{
-$ adop -status
-ebs2		master		PREPARE     SESSION ABORTED 05-MAY-14 14:19:07 -04:00	   05-MAY-14 15:21:17 -04:00	  1:02:10
-APPLY	    SESSION ABORTED 07-MAY-14 06:56:26 -04:00	   07-MAY-14 07:19:56 -04:00	  0:23:30
-CUTOVER     SESSION ABORTED
-CLEANUP     SESSION ABORTED
-FINALIZE    SESSION ABORTED
-}}}
-
-OK, I should be able to do the fs_clone now.
-{{{
-$ adop phase=fs_clone
-adop exiting with status = 2 (Fail)
-[STATEMENT] There is a pending clone session for /u01/oracle/VIS/fs2.
-}}}
-
-to sie wywalalo: txkADOPPreparePhaseSynchronize.pl
-Puscilem z reki cale polecenie i wywalilo sie na:
-
-The Node Manager for machine ebs2 failed to start.
-Try to start it manually
-
-I start the whole app stack.
-
-How does one handle eg Forms update when we have fs1 and fs2?
-MOS:
-  * Upgrading Oracle Fusion Middleware Technology Stack of Oracle E-Business Suite Release 12.2 to 11.1.1.7(11gR1 PS6) (Doc ID 1590356.1)
-
-
-To jest wszystko zle!!!
-
-Ja mialem caly system w statusie PREPARE, zgodnie z dokumentacja podczas aplikowania 12.2.3
-
-Potem aplikowalem Application Tier Technology Patches, gdzie jest napisane:
-
-Application tier technology patches must be applied to the PATCH file system.
-
-Czyli odkrecam do snapschota (dobrze, ze go zrobilem), sprawdzam w jakim statusie jest adop, aplikuje patche Formsow, FMW na !!!PATCH!!! file system i dopiero potem jade z patchem 12.2.3.
-
-
-
-
 ==== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack ====
 Still Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
 MOS:
@@ -1369,23 +1290,11 @@ $ start_APP
 
 START 2014/05/06 15:33:57
 
-  *--
-?? This is online patch, I have not done the resync, there are many new patches on fs1 but the patch will be applied to fs2??? Does it makes sense?
-{{{
-$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
-$ cd $ORACLE_HOME/OPatch
-$ ./opatch lsinventory
-43) Patch
-}}}
+The adop will apply the patches to the PATCH edition filesystem. That is why were also applying the Forms and FMW patches to the patch edition, which is now fs2.
 
-{{{
-$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
-$ cd $ORACLE_HOME/OPatch
-$ ./opatch lsinventory
-40) Patch
-}}}
+Just a check.
 
-THIS IS OK. Actually it should be otherwise, the patch filesystem, assuming fs2 should have applied new patches, but the running not. It is supposed to be so.
+The fs2 should have applied new patches, but the running not. It is supposed to be so.
 
 {{{
 $ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
@@ -1403,7 +1312,6 @@ $ ./opatch lsinventory
 
 There is no need to run any resync. It will be all done after the patch
 
-  *--
 
 Perform the actual online patching exercise
 {{{
@@ -1707,6 +1615,88 @@ Pay attention to what passwords are asked for.
 Apps OS User Password: this the Linux password for user applmgr.
 
 Apps DB User Password: this the database password for user APPS, which is by default apps.
+
+=== Trying (wrongly) to manualy synchronise fs2 ===
+
+After the fs1 patching
+
+WIP. Should I synchronise the fs2? NO! Just apply the patch.
+
+Jak zrobilem po wypatchowaniu formsow, itp (przed tez)
+{{{
+$ adop phase=fs_clone
+Using ADOP Session ID from currently incomplete patching cycle
+[UNEXPECTED]FS clone cannot be called while a patching cycle is active
+}}}
+
+adop exiting with status = 2 (Fail)
+
+MOS:
+  * 12.2 E-Business Suite - Collecting Online Patching and fs_clone Log Files (Doc ID 1542162.1)
+  * Oracle E-Business Suite Release 12.2: Backup and Recovery Guidelines For Online Patching Cutover (Doc ID 1584097.1)
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+  *-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+ebs2		master		PREPARE     COMPLETED	    05-MAY-14 14:19:07 -04:00	   05-MAY-14 15:21:17 -04:00	  1:02:10
+APPLY	    NOT STARTED
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+}}}
+
+{{{
+$ adop phase=apply
+He continues with standard adpatch :) Ho to abort it?
+}}}
+
+{{{
+$ adop phase=abort
+adop exiting with status = 0 (Success)
+}}}
+
+{{{
+$ adop -status
+ebs2		master		PREPARE     SESSION ABORTED 05-MAY-14 14:19:07 -04:00	   05-MAY-14 15:21:17 -04:00	  1:02:10
+APPLY	    SESSION ABORTED 07-MAY-14 06:56:26 -04:00	   07-MAY-14 07:19:56 -04:00	  0:23:30
+CUTOVER     SESSION ABORTED
+CLEANUP     SESSION ABORTED
+FINALIZE    SESSION ABORTED
+}}}
+
+OK, I should be able to do the fs_clone now.
+{{{
+$ adop phase=fs_clone
+adop exiting with status = 2 (Fail)
+[STATEMENT] There is a pending clone session for /u01/oracle/VIS/fs2.
+}}}
+
+to sie wywalalo: txkADOPPreparePhaseSynchronize.pl
+Puscilem z reki cale polecenie i wywalilo sie na:
+
+The Node Manager for machine ebs2 failed to start.
+Try to start it manually
+
+I start the whole app stack.
+
+How does one handle eg Forms update when we have fs1 and fs2?
+MOS:
+  * Upgrading Oracle Fusion Middleware Technology Stack of Oracle E-Business Suite Release 12.2 to 11.1.1.7(11gR1 PS6) (Doc ID 1590356.1)
+
+
+To jest wszystko zle!!!
+
+Ja mialem caly system w statusie PREPARE, zgodnie z dokumentacja podczas aplikowania 12.2.3
+
+Potem aplikowalem Application Tier Technology Patches, gdzie jest napisane:
+
+Application tier technology patches must be applied to the PATCH file system.
+
+Czyli odkrecam do snapschota (dobrze, ze go zrobilem), sprawdzam w jakim statusie jest adop, aplikuje patche Formsow, FMW na !!!PATCH!!! file system i dopiero potem jade z patchem 12.2.3.
+
+
+
 
 
 
