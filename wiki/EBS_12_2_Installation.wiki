@@ -273,35 +273,88 @@ Run as root
 }}}
 
 == Validate completed installation ==
+My installation fails on the following checks. After leaving is for a while and rechecking the only still failing is SSH, which runs fine when executed manually.
 
-
-Database Availability
-command: su applmgr -c "/STAGING/oracle_EBS_R12.2_linux_x86-64/startCD/Disk1/rapidwiz/bin/riwTDBup.sh /u01/oracle/VIS/fs1/inst/apps/VIS_ebs1/ora/10.1.2/VIS_ebs1.env APPS/*****"
-
-/STAGING/oracle_EBS_R12.2_linux_x86-64/startCD/Disk1/rapidwiz/bin/riwTDBup.sh /u01/oracle/VIS/fs1/inst/apps/VIS_ebs1/ora/10.1.2/VIS_ebs1.env APPS/APPS
-
-to mi dziala jak odpaloone z reki.
+=== Virtual Directory ===
+The error log:
+  *--
+Virtual Directory
+checking URL = http://ebs1.remik.org:8000/OA_MEDIA/FNDLOGOL.gif
+RW-50016: Error: - {0} was not created:
+File = {1}   checking URL = http://ebs1.remik.org:8000/OA_JAVA/oracle/apps/fnd/admin/server/server.xml
+RW-50016: Error: - {0} was not created:
+File = {1}   checking URL = http://ebs1.remik.org:8000/OA_CGI/FNDWRR.exe
+RW-50016: Error: - {0} was not created:
+File = {1}
+  *--
 
 MOS:
-  * "No such file or directory: FastCGI: read() from pipe failed (0)" When Starting Oracle HTTP Server (Doc ID 1115253.1)
-
-Edit the file /etc/hosts to use the following format:
-
-ip_address fully_qualified_hostname short_hostname
-
-First line of the etc/hosts file should be:
-
-
-  #7.0.0.1 localhost
+  * Troubleshooting Rapid Install for E-Business Suite Release 12.2 (Doc ID 1378579.1)
 
 
 
-rw-50011
-MOS:
-  * R12i: Pre-Install Check Fails RW-50011 (Doc ID 951783.1)
+=== Login Page ===
+Login Page
+checking URL = http://ebs3.remik.org:8000/OA_HTML/AppsLogin
+RW-50016: Error: - {0} was not created:
+File = {1}
+=== SSH verification check ===
+  *-- Error
+Unable to execute command:
+perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+  *--
 
-Installation
-http://docs.oracle.com/cd/B53825_03/current/acrobat/121oaig.pdf
+Trying from hand:
+$ perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+ERROR DESCRIPTION:
+(
+failed to create node-cmd.txt file Permission denied
+)
+
+$ ls -l /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/node-cmd.txt
+  *rw-r--r-- 1 root root 27 May 12 23:56 /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/node-cmd.txt
+
+# chown applmgr:oinstall /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/node-cmd.txt
+# chown applmgr:oinstall /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/verifyssh.log
+
+$ perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+Logfile location /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/verifyssh.log
+xml output = /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/out.xml
+
+And he said that user equivalency is established. ???
+
+Again running all the post install checks. This time only SSH connecion is failed :)
+$ cat verifyssh.log
+Failed to execute Remote API
+Check the log file /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK for details
+
+[applmgr@ebs3 TXK]$ ssh -l applmgr ebs3
+works without password
+
+Trying from root
+# perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+# cat verifyssh.log
+Reading /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/out.xml file
+SSH equivalence setup verification completed successfully
+
+
+
+
+=== JSP ===
+  *-- Error
+JSP
+checking URL = http://ebs3.remik.org:8000/OA_HTML/jtfTestCookie.jsp
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding
+  *--
+
 
 == Post-install steps ==
 MOS:
@@ -316,7 +369,39 @@ MOS:
 
 After the 12.2.0 installation is complete:
 
-==== 1. Apply Consolidated Seed Table Upgrade Patch 17204589 (17204589:12.2.0) ====
+
+
+
+
+== 12.2.3 patch ==
+Basically what we need to do to have 12.2.3 running is:
+
+  # Clean 12.2 install downloaded from edelivery with 12.2.0.47 rapid install
+This is what we have already done.
+
+2. Following Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
+2a. Seed Table Upgrade Patch 17204589
+2b. Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body Patch 17268684
+
+3. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+3a. RDBMS oneoff patches on top of 11.2.0.3 (17600719, 17693770, 17875948, 18116376, 18259911)
+3b. RDBMS passes the EBS Database Codelevel Checker
+
+4. Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+4a. apply the main R12.AD.C.Delta.4 Patch 17766337 merged with suggested 18628932,18470942,18274429
+4b. apply the main R12.TXK.C.Delta.4 Patch 17893964 merged with suggested 18332816
+
+5. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+5a. Apply the latest Application tier technology patches
+
+6. Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
+6a. Patch to the 12.2.3
+
+
+=== 2. Following Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1) ===
+==== 2a. Seed Table Upgrade Patch 17204589 ====
+Apply Consolidated Seed Table Upgrade Patch 17204589 (17204589:12.2.0)
+
 This is a superseed of the earlier Patch 16605855.
 
 {{{
@@ -385,52 +470,50 @@ BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
 913954 17064510			  28-APR-14
 }}}
 
-
-==== 2. Apply the latest AD and TXK Release Update Pack for Release 12.2 ====
-WIP
-
-Customers are required to apply the latest available AD and TXK Release Update Pack (RUP) for Oracle E-Business Suite Release 12.2 by referring to My Oracle Support Knowledge Document 1583092.1, E-Business Suite-wide RUP, AD and TXK RUP Information, Release 12.2.
+==== 2b. Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body Patch 17268684 ====
+To avoid Dictionary Corrupted HAB_RT_EXEC_PROC_RUN_METRICS TS mismatch
 
 MOS:
-  * Oracle E-Business Suite Release 12.2: Suite-Wide Rollup and AD/TXK Delta Information (Doc ID 1583092.1)
+  * R12.2 Dictionary Corrupted While Running adop - "TS Mismatch" Error (Doc ID 1576086.1)
+
+Follow:
+  * Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
+
+Section: Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body
+
+Download Patch 17268684 (17268684:R12.AD.C).
+
+R12.2: Timestamp Mismatch Fixer for View, Synonym, Package and Package Body (Patch)
+p17268684_R12.AD.C_R12_GENERIC.zip	MD5	5F108A4F0CB51559C2643FB32D475513
+
+Do not apply the Patch 17268684 (17268684:R12.AD.C). You should instead execute instructions in the patch readme to fix timestamp mismatches for Synonym, View, Package and Package Body.
 
 
-===== R12.AD.C.delta.4 (Patchset) =====
-p17766337_R12.AD.C_R12_LINUX.zip        MD5	1DC21E3C8D3302C3063C5DAB320778B0
-
+On the DB tier
 
 {{{
-$ md5sum p17766337_R12.AD.C_R12_LINUX.zip
-  #c21e3c8d3302c3063c5dab320778b0  p17766337_R12.AD.C_R12_LINUX.zip
-$ unzip p17766337_R12.AD.C_R12_LINUX.zip
+$ md5sum p17268684_R12.AD.C_R12_GENERIC.zip
+5f108a4f0cb51559c2643fb32d475513  p17268684_R12.AD.C_R12_GENERIC.zip
+$ unzip p17268684_R12.AD.C_R12_GENERIC.zip
+$ cd 17268684
+$ cp admin/ADZDDTFIX.sql $ORACLE_HOME/appsutil/admin
+> connect system/manager
+> @$ORACLE_HOME/appsutil/admin/ADZDDTFIX.sql
+$ sqlplus / as sysdba
+> @adzddtfix.out
+> connect system/manager
+> @$ORACLE_HOME/appsutil/admin/ADZDDTFIX.sql
+$ cat adzddtfix.out
+  *> should be empty this time
 }}}
 
-Source DB env
-{{{
-$ mkdir $ORACLE_HOME/appsutil/admin
-}}}
 
-Copy adgrants.sql from APP to DB tier
-{{{
-$ scp /u01/oracle/VIS/fs1/EBSapps/appl/admin/adgrants.sql oracle@ebsdb2:/tmp
-}}}
 
-On DB tier
-{{{
-$ cp /tmp/adgrants.sql $ORACLE_HOME/appsutil/admin
-$ sqlplus /nolog
-> @$ORACLE_HOME/appsutil/admin/adgrants.sql apps
-}}}
 
-Then instructed to follow Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
 
-====== Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1) ======
-MOS:
-  * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
 
-======= 2. Required Database Patches =======
-Before proceeding with next step, ensure to review My Oracle Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes and apply all patches for Database 11.2.0.3.
-
+=== 3. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1) ===
+==== 3a. RDBMS oneoff patches on top of 11.2.0.3 (17600719, 17693770, 17875948, 18116376, 18259911) ====
 MOS:
   * Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
 
@@ -451,7 +534,7 @@ Shutdown APP and DB tiers
 $ do it
 }}}
 
-======== OPatch ========
+===== OPatch =====
 OPatch patch of version 11.2.0.3.6 for Oracle software releases 11.2.0.x (DEC 2013) (Patch)
 p6880880_112000_Linux-x86-64.zip	MD5	2AB78CB17174C3A49DF560F05E3352C6
 
@@ -464,7 +547,7 @@ $ opatch version
 OPatch Version: 11.2.0.3.6
 }}}
 
-======== 17600719 ========
+===== 17600719 =====
 
 DBMS_UTILITY.INVALIDATE ORA-3113 ORA-7445 CORE DUMP [OPIGLN] (Patch)
 p17600719_112030_Linux-x86-64.zip	MD5	39D742550866A206A444DA8E01320D7E
@@ -482,7 +565,7 @@ Patch  17600719     : applied on Mon Apr 28 20:28:48 CEST 2014
 
 No Postinstallation
 
-======== 17693770 ========
+===== 17693770 =====
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 17502060 17487358 (Patch)
 p17693770_112030_Linux-x86-64.zip	MD5	2AB47B81CD24E5EDEC557E8332D6FFC8
 
@@ -504,7 +587,7 @@ Postinstallation
 }}}
 
 
-======== 17875948 ========
+===== 17875948 =====
 
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 16587934 17654622 (Patch)
 p17875948_112030_Linux-x86-64.zip	MD5	F7FD987FC9BA4BADACD0E2BB3EC592A9
@@ -532,7 +615,7 @@ Oracle XML Database		    VALID	    11.2.0.3.0
 > shutdown immediate
 }}}
 
-======== 18116376 ========
+===== 18116376 =====
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 17047617 12811829 (Patch)
 p18116376_112030_Linux-x86-64.zip	MD5	E10F7E87397573624A948CA6FA5C05E7
 
@@ -546,7 +629,7 @@ $ opatch apply
 
 No Postinstallation steps.
 
-======== 18259911 ========
+===== 18259911 =====
 MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 16163946 16833977 4189542 11896575 (Patch)
 p18259911_112030_Linux-x86-64.zip	MD5	8D5701B5CDBD649E5D67A6B10AE0F27D
 
@@ -574,8 +657,7 @@ Footnote 7 - Database bug fix 16187992 has been replaced with database bug fix 1
 Continuing with the patching.
 
 
-======= EBS Database Codelevel Checker =======
-
+==== 3b. RDBMS passes the EBS Database Codelevel Checker ====
 EBS Database Codelevel Checker (Patch)
 p17537119_R12_GENERIC.zip	MD5	095E006B61296033ABD67A58FCAB838B
 
@@ -593,14 +675,56 @@ $ ./checkDBpatch.sh
 All the required one-offs are present in Oracle Database Home
 }}}
 
-====== Continuing with R12.AD.C.delta.4 (Patchset) ======
+
+=== 4. Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1) ===
+==== 4a. apply the main R12.AD.C.Delta.4 Patch 17766337 merged with suggested 18628932,18470942,18274429 ====
+Customers are required to apply the latest available AD and TXK Release Update Pack (RUP) for Oracle E-Business Suite Release 12.2 by referring to My Oracle Support Knowledge Document 1583092.1, E-Business Suite-wide RUP, AD and TXK RUP Information, Release 12.2.
+
+MOS:
+  * Oracle E-Business Suite Release 12.2: Suite-Wide Rollup and AD/TXK Delta Information (Doc ID 1583092.1)
+
+
+p17766337_R12.AD.C_R12_LINUX.zip        MD5	1DC21E3C8D3302C3063C5DAB320778B0
+
+
+{{{
+$ md5sum p17766337_R12.AD.C_R12_LINUX.zip
+  #c21e3c8d3302c3063c5dab320778b0  p17766337_R12.AD.C_R12_LINUX.zip
+$ unzip p17766337_R12.AD.C_R12_LINUX.zip
+}}}
+
+Source DB env
+{{{
+$ mkdir $ORACLE_HOME/appsutil/admin
+}}}
+
+Copy adgrants.sql from APP to DB tier
+{{{
+$ scp /u01/oracle/VIS/fs1/EBSapps/appl/admin/adgrants.sql oracle@ebsdb2:/tmp
+?? this is probably bug, we should copy adgrants from the patch
+
+}}}
+
+On DB tier
+{{{
+$ cp /tmp/adgrants.sql $ORACLE_HOME/appsutil/admin
+$ sqlplus /nolog
+> @$ORACLE_HOME/appsutil/admin/adgrants.sql apps
+}}}
+
+MOS:
+  * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+
+Before proceeding with next step, ensure to review My Oracle Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes and apply all patches for Database 11.2.0.3.
+
+  *> already done.
+
+
 Still following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
 MOS:
   * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
   * Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
 
-
-======= 3. Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs =======
 
 New Installation Customers, Path A
 
@@ -613,7 +737,8 @@ $ . $HOME/scripto/ebs/app_env
 DB patches applied.
 
 App patches:
-??? Do I need to apply them if I am going to install 12.2.3 shortly ???
+
+Do I need to apply them if I am going to install 12.2.3 shortly? Yes, but they will be applied to the patch edition shortly before online adop 12.2.3 patching session.
 
 3. Run adgrants.
   *> already done
@@ -695,6 +820,11 @@ BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
 913967 18274429			  05-MAY-14
 }}}
 
+==== 4b. apply the main R12.TXK.C.Delta.4 Patch 17893964 merged with suggested 18332816 ====
+Still following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+MOS:
+  * Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+  * Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
 
 5. Apply R12.TXK.C.Delta.4 Patch 17893964 by merging it with 18332816:R12.TXK.C in hotpatch mode on the run edition application tier file system:
 
@@ -774,31 +904,18 @@ BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
 
 
 
-== 12.2.3 patch ==
-Basically what we need to do to have 12.2.3 running is:
-
-  # Clean 12.2 install downloaded from edelivery with 12.2.0.47 rapid install
-This is what we have already done.
-
-2. Following Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
-a. Seed Table Upgrade Patch 17204589
-b. Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body Patch 17268684
-
-3. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
-a. RDBMS oneoff patches on top of 11.2.0.3 (17600719, 17693770, 17875948, 18116376, 18259911)
-b. RDBMS passes the EBS Database Codelevel Checker
-
-4. Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
-a. apply the main R12.AD.C.Delta.4 Patch 17766337 merged with suggested 18628932,18470942,18274429
-b. apply the main R12.TXK.C.Delta.4 Patch 17893964 merged with suggested 18332816
-
-5. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
-a. Apply the latest Application tier technology patches
-
-6. Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
-a. Patch to the 12.2.3
 
 
+
+
+=== 5. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1) ===
+==== 5a. Apply the latest Application tier technology patches ====
+
+??? i tutaj nie wiem, czy musze miec faze prepare zanim zaczne aplikacje patchy na app tier?
+
+
+
+== ---WIP where this? ==
 Readme:
 
 MOS:
@@ -812,6 +929,8 @@ p17020683_R12_LINUX_3of6.zip	MD5	2293DDFBB5805B91C799C736D34903ED
 p17020683_R12_LINUX_4of6.zip	MD5	3AC8B195D0BAD8AA3B3226BE9F9B0906
 p17020683_R12_LINUX_5of6.zip	MD5	C55FFE5AE4EE4D975E99595C7AA7B4D8
 p17020683_R12_LINUX_6of6.zip	MD5	C7576B678DD595C684C8FFC2220974B9
+  *--WIP where this?
+
 
 === Prerequisite Patches ===
 ORACLE APPLICATIONS DBA 12.2.3 PRODUCT RELEASE UPDATE PACK (Patchset)
@@ -927,40 +1046,6 @@ BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
 $ . $RUN_BASE/EBSapps/appl/APPS${CONTEXT_NAME}.env
 }}}
 
-===== to avoid Dictionary Corrupted HAB_RT_EXEC_PROC_RUN_METRICS TS mismatch =====
-MOS:
-  * R12.2 Dictionary Corrupted While Running adop - "TS Mismatch" Error (Doc ID 1576086.1)
-
-Follow:
-  * Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
-
-Section: Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body
-
-Download Patch 17268684 (17268684:R12.AD.C).
-
-R12.2: Timestamp Mismatch Fixer for View, Synonym, Package and Package Body (Patch)
-p17268684_R12.AD.C_R12_GENERIC.zip	MD5	5F108A4F0CB51559C2643FB32D475513
-
-Do not apply the Patch 17268684 (17268684:R12.AD.C). You should instead execute instructions in the patch readme to fix timestamp mismatches for Synonym, View, Package and Package Body.
-
-
-On the DB tier
-
-{{{
-$ md5sum p17268684_R12.AD.C_R12_GENERIC.zip
-5f108a4f0cb51559c2643fb32d475513  p17268684_R12.AD.C_R12_GENERIC.zip
-$ unzip p17268684_R12.AD.C_R12_GENERIC.zip
-$ cd 17268684
-$ cp admin/ADZDDTFIX.sql $ORACLE_HOME/appsutil/admin
-> connect system/manager
-> @$ORACLE_HOME/appsutil/admin/ADZDDTFIX.sql
-$ sqlplus / as sysdba
-> @adzddtfix.out
-> connect system/manager
-> @$ORACLE_HOME/appsutil/admin/ADZDDTFIX.sql
-$ cat adzddtfix.out
-  *> should be empty this time
-}}}
 
 ===== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack =====
 ====== 2. Start an online patching cycle. ======
@@ -1493,6 +1578,35 @@ $ grep EDITION /d01/oracle/VIS/fs*/EBSapps/appl/*env
 So /d01/oracle/VIS/fs1/EBSapps/appl/VIS_jazz.env is the current, active edition. And fs2 the patch one.
 
 == troubleschooting ==
+=== Database Availability check riwTDBup.sh ===
+Database Availability
+command: su applmgr -c "/STAGING/oracle_EBS_R12.2_linux_x86-64/startCD/Disk1/rapidwiz/bin/riwTDBup.sh /u01/oracle/VIS/fs1/inst/apps/VIS_ebs1/ora/10.1.2/VIS_ebs1.env APPS/*****"
+
+/STAGING/oracle_EBS_R12.2_linux_x86-64/startCD/Disk1/rapidwiz/bin/riwTDBup.sh /u01/oracle/VIS/fs1/inst/apps/VIS_ebs1/ora/10.1.2/VIS_ebs1.env APPS/APPS
+
+to mi dziala jak odpaloone z reki.
+
+MOS:
+  * "No such file or directory: FastCGI: read() from pipe failed (0)" When Starting Oracle HTTP Server (Doc ID 1115253.1)
+
+Edit the file /etc/hosts to use the following format:
+
+ip_address fully_qualified_hostname short_hostname
+
+First line of the etc/hosts file should be:
+
+
+  #7.0.0.1 localhost
+
+
+
+rw-50011
+MOS:
+  * R12i: Pre-Install Check Fails RW-50011 (Doc ID 951783.1)
+
+Installation
+http://docs.oracle.com/cd/B53825_03/current/acrobat/121oaig.pdf
+
 === Installation Freezes constantly during ===
 
 Freezes constantly during
@@ -1502,23 +1616,6 @@ MOS:
   * Oracle E-Business Suite Release 12.2 Information Center - Announcements (Doc ID 1583109.1)
 
 apply the patch to startCD
-
-
-=== post-install checks failed: Virtual Directory ===
-The error log:
-  *--
-Virtual Directory
-checking URL = http://ebs1.remik.org:8000/OA_MEDIA/FNDLOGOL.gif
-RW-50016: Error: - {0} was not created:
-File = {1}   checking URL = http://ebs1.remik.org:8000/OA_JAVA/oracle/apps/fnd/admin/server/server.xml
-RW-50016: Error: - {0} was not created:
-File = {1}   checking URL = http://ebs1.remik.org:8000/OA_CGI/FNDWRR.exe
-RW-50016: Error: - {0} was not created:
-File = {1}
-  *--
-
-MOS:
-  * Troubleshooting Rapid Install for E-Business Suite Release 12.2 (Doc ID 1378579.1)
 
 
 === /etc/hosts ===
