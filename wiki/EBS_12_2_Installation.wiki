@@ -356,22 +356,6 @@ JSP is not responding
   *--
 
 
-== Post-install steps ==
-MOS:
-  * Oracle E-Business Suite Installation and Upgrade Notes Release 12 (12.2) for Linux x86-64 (Doc ID 1330701.1)
-  * http://chavalis.blogspot.com/2013/10/installing-oracle-ebs-122-vision-on.html
-
-=== Following Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1) ===
-MOS:
-  * Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
-
-3. Notes for New Installation Customers
-
-After the 12.2.0 installation is complete:
-
-
-
-
 
 == 12.2.3 patch ==
 Basically what we need to do to have 12.2.3 running is:
