@@ -1,0 +1,105 @@
+#!/bin/bash
+# $Header: /home/remik/osobiste/cvs_repo/scripto/oracle/replay_sh/replay.wrap,v 1.1 2012-05-07 13:49:15 remik Exp $
+#
+# !!!! D A N G E R !!!
+#
+# This script is very powerfull and as such very dangerous. 
+# Use with utmost caution
+#
+# Used to issue the same SQL statement on multiple databases simultaniusly
+# Assumes, that after the login the environment is properly set and that
+# I am able to connect using sqlplus "/ as sysdba" which gives me total power.
+# It is also assumed that I am able to connect to those hosts using priv-key
+#
+# The list of username#hostname pairs is stored in $HOST_LIST
+# The commands to be executed are stored in $COMMAND_FILE
+#
+
+LOCKFILE=/tmp/replay.lock
+TMP_FILE=/tmp/replay_sh.tmp
+
+COMMAND_FILE=${HOME}/scripto/oracle/replay_sh/replay.commands
+
+HOST_LIST=${HOME}/scripto/oracle/replay_sh/replay.hostlist
+
+
+# Load usefull functions
+if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
+  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
+  exit 1
+else
+  . $HOME/scripto/bash/bash_library.sh
+fi
+
+RECIPIENTS='remigiusz_boguszewicz'
+check_lock $LOCKFILE
+check_file $COMMAND_FILE
+check_file $HOST_LIST
+
+# Set lock file
+touch $LOCKFILE
+
+date
+echo -n -e '\E[35m'
+echo "The following command:"
+echo -n -e '\E[30m'
+
+COMMAND_FILE_CONTENT=`cat ${COMMAND_FILE}`
+echo $COMMAND_FILE_CONTENT
+
+echo -n -e '\E[35m'
+echo "Is going to be executed on the following hosts:"
+echo -n -e '\E[30m'
+cat $HOST_LIST
+
+echo -n -e '\E[35m'
+read -p "Do you REALLY want to execute the above commands on databases in selected hosts (yes/no)? " REPLY
+echo -n -e '\E[30m'
+if [ ! "$REPLY" = "yes" ]; then 
+  echo "User aborded mission." 
+  rm -f $LOCKFILE
+  exit 0
+fi
+
+
+
+# Loop through HOST_LIST try to PING all entries
+exec 3<> $HOST_LIST
+while read line <&3
+do {
+  # filter out lines that are comments
+  line=`echo $line | grep -v "^#" | grep -v "^--"`
+  if [ -z "$line" ]; then
+    continue
+  fi
+  
+  OS_USER_NAME=`echo $line | awk -F"#" '{ print $1 }'`
+  HOST_NAME=`echo $line | awk -F"#" '{ print $2 }'`
+  LDAP_CN=`echo $line | awk -F"#" '{ print $3 }'`
+  
+  #echo $OS_USER_NAME $HOST_NAME
+  #echo -e '\E[30m black \E[31mred \E[32mgreen \E[33myellow \E[34mblue \E[35mmagenta \E[36mcyan \E[37mwhite'
+  #echo -e '\E[30m black'
+  
+  # Sanity check: for ping reachability of star server
+  ping -c 1 $HOST_NAME >/dev/null 2>&1
+  if [ $? -eq 0 ]; then
+    echo -e -n '\E[32m'
+    echo "[info] System $OS_USER_NAME @ $HOST_NAME found (ping). Continuing $LDAP_CN."
+    echo -e -n '\E[30m'
+  else
+    echo -e -n '\E[31m'
+    echo "[warning] Host $HOST_NAME not found (ping). Skipping $LDAP_CN."
+    echo -e -n '\E[30m'
+    continue
+  fi
+
+  echo $COMMAND_FILE_CONTENT | ssh -T -o BatchMode=yes -o ChallengeResponseAuthentication=no -o PasswordAuthentication=no -o PubkeyAuthentication=yes -o RSAAuthentication=no -2 -l $OS_USER_NAME $HOST_NAME
+  
+}  
+done
+exec 3>&-
+
+# Upon exit, remove lockfile.
+rm -f $LOCKFILE
+rm -f ${TMP_FILE}
