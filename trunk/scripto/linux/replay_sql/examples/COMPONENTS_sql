@@ -1,0 +1,4 @@
+column status format a15;
+column version format a15;
+column comp_name format a35;
+SELECT comp_name, status, substr(version,1,10) as version from dba_registry order by modified;
