@@ -1,0 +1,17 @@
+connect replik_adm/tj13w;
+select JOB, WHAT, NEXT_DATE, BROKEN from user_jobs
+where BROKEN = 'Y';
+
+set echo off;
+set heading off;
+set verify off;
+set feedback off;
+set sqlprompt "";
+spool tmp.sql;
+
+select 'exec dbms_job.run('||JOB||');' a from user_jobs
+where BROKEN = 'Y'
+/
+spool off;
+@tmp;
+exit;
