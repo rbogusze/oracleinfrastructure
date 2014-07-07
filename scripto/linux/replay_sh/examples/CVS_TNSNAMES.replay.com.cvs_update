@@ -1,0 +1,1 @@
+cd $ORACLE_HOME/network/admin; pwd; cvs update tnsnames.ora

@@ -1,0 +1,35 @@
+# Zaaplikowanie na wszystkich bazach komend zawartych w pliku.
+cd $ORACLE_HOME/scripto; cvs update -d dziennik_pokladowy; ls;
+cd $ORACLE_HOME/scripto; cvs update -d dziennik_pokladowy; ls; cd $ORACLE_HOME/scripto/dziennik_pokladowy/HAL; ls; sqlplus "/ as sysdba" < utlpwdmg.sql;
+
+# Gdzie jeszcze uzywamy .profile_crontab
+ls -l $HOME/.profile_crontab 2>&1 | grep -v "No such file or directory"
+
+# *************************************************************************
+# Infrastructure changes - according to /HalInfrastructureDziennikPokladowy
+# *************************************************************************
+# 
+
+# HalInfrastructureProfile
+cd $HOME/scripto/bash; cvs update; cd $HOME/scripto/oracle/utilities/; cvs update -d infra; cd $HOME/scripto/oracle; cvs update -d sqlbin; $HOME/scripto/oracle/utilities/infra/setup_infra.sh
+
+# OracleCorruption#Checking_for_corruptions - Implementing check for corruptions - crontab work
+cd $HOME/scripto/bash; cvs update; cd $HOME/scripto/oracle; cvs update -d RMAN; $HOME/scripto/oracle/RMAN/implement_CFC.sh;
+ls -l $HOME/.profile_crontab;
+
+# Check if 10g databases have standard init contents
+cd $HOME/scripto/bash; cvs update; cd $HOME/scripto/oracle/create_db_scripts; cvs update -d; cd $HOME/scripto/oracle/create_db_scripts/oracle_setup; ./oracle_setup.sh b_basic_db_healthcheck
+
+# Promon implementation
+cd $HOME/scripto/bash; cvs update; cd $HOME/scripto/oracle; cvs update -d monitoring; cd $HOME/scripto/oracle/monitoring/promon; ./implement_promon.sh
+
+# Set audit_file_dest
+cd $HOME/scripto/bash; cvs update; cd $HOME/scripto/oracle/create_db_scripts; cvs update -d; cd $HOME/scripto/oracle/create_db_scripts/oracle_setup; ./oracle_setup.sh b_set_audit_file_dest
+
+# Update the arch_gz_rm.sh file
+cd $HOME/scripto/bash; cvs update; cd $HOME/scripto/oracle/arch_gz_rm; cvs update arch_gz_rm.sh
+
+# Check version of the startup/shutdown scripts
+cat /etc/init.d/oracle* | grep rc_
+cd $ORACLE_HOME/network/log; tail -1000 listener.log | grep mf_
+cd $HOME/scripto/oracle/sqlbin; cvs update; cd $HOME/scripto/oracle/monitoring/; cvs update -d recomp; cd $HOME/scripto/oracle/monitoring/recomp; ./implement_SRI.sh
