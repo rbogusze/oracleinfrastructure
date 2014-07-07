@@ -1195,8 +1195,22 @@ case `uname` in
     MAILCMD=mailx
     PING=/bin/ping
     ;;
+  "CYGWIN_NT-6.1")
+    ORATAB=/etc/oratab
+    FIND=/usr/bin/find
+    CVS=/usr/bin/cvs
+    GREP=/usr/bin/grep
+    AWK=/usr/bin/awk
+    SED=/usr/bin/sed
+    DATE=/usr/bin/date
+    #USERNAME=`who am I | awk '{print $1}'` - does not work from crontab
+    # The next line is bizare, but I found no elegant way
+    USERNAME=`id | awk -F"(" '{print $2}' |  awk -F")" '{print $1}'`
+    MAILCMD=/usr/bin/email
+    PING=/usr/bin/ping
+    ;;
   *)
-    echo "Unknown OS!!! Exiting."
+    echo "Unknown OS: `uname`. Exiting."
     exit 1
     ;;
 esac
