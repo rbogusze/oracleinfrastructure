@@ -1,8 +1,17 @@
 #!/usr/bin/expect -f
 set timeout -1
-spawn ssh -l oracle 192.168.1.159
+
+set username [lindex $argv 0]
+set hostname [lindex $argv 1]
+set password [lindex $argv 2]
+set commands [lindex $argv 3]
+
+spawn ssh -l $username $hostname
 sleep 1
 expect "password:"
-send "ora\r"
-
+send "$password\r"
+sleep 1
+send "$commands\r"
+sleep 1
+send "exit\r"
 interact
