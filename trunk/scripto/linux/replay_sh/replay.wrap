@@ -18,9 +18,9 @@
 LOCKFILE=/tmp/replay.lock
 TMP_FILE=/tmp/replay_sh.tmp
 
-COMMAND_FILE=${HOME}/scripto/oracle/replay_sh/replay.commands
+COMMAND_FILE=${HOME}/scripto/linux/replay_sh/replay.commands
 
-HOST_LIST=${HOME}/scripto/oracle/replay_sh/replay.hostlist
+HOST_LIST=${HOME}/scripto/linux/replay_sh/replay.hostlist
 
 
 # Load usefull functions
@@ -31,10 +31,15 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
+INFO_MODE=DEBUG
 RECIPIENTS='remigiusz_boguszewicz'
 check_lock $LOCKFILE
 check_file $COMMAND_FILE
 check_file $HOST_LIST
+
+
+msgd "COMMAND_FILE: $COMMAND_FILE"
+msgd "HOST_LIST: $HOST_LIST"
 
 # Set lock file
 touch $LOCKFILE
@@ -42,14 +47,14 @@ touch $LOCKFILE
 date
 echo -n -e '\E[35m'
 echo "The following command:"
-echo -n -e '\E[30m'
+echo -n -e '\E[33m'
 
 COMMAND_FILE_CONTENT=`cat ${COMMAND_FILE}`
 echo $COMMAND_FILE_CONTENT
 
 echo -n -e '\E[35m'
 echo "Is going to be executed on the following hosts:"
-echo -n -e '\E[30m'
+echo -n -e '\E[33m'
 cat $HOST_LIST
 
 echo -n -e '\E[35m'
