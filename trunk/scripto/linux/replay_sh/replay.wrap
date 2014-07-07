@@ -31,7 +31,7 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 RECIPIENTS='remigiusz_boguszewicz'
 check_lock $LOCKFILE
 check_file $COMMAND_FILE
@@ -87,15 +87,12 @@ do {
   #echo -e '\E[30m black'
   
   # Sanity check: for ping reachability of star server
-  ping -c 1 $HOST_NAME >/dev/null 2>&1
+  msgd "HOST_NAME: $HOST_NAME"
+  $PING -n 1 $HOST_NAME >/dev/null 2>&1
   if [ $? -eq 0 ]; then
-    echo -e -n '\E[32m'
-    echo "[info] System $OS_USER_NAME @ $HOST_NAME found (ping). Continuing $LDAP_CN."
-    echo -e -n '\E[30m'
+    msgi "System $OS_USER_NAME @ $HOST_NAME found (ping). Continuing $LDAP_CN."
   else
-    echo -e -n '\E[31m'
-    echo "[warning] Host $HOST_NAME not found (ping). Skipping $LDAP_CN."
-    echo -e -n '\E[30m'
+    msgi "[warning] Host $HOST_NAME not found (ping). Skipping $LDAP_CN."
     continue
   fi
 
