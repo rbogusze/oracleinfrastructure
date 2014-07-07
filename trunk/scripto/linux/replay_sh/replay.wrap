@@ -59,13 +59,15 @@ cat $HOST_LIST
 
 echo -n -e '\E[35m'
 read -p "Do you REALLY want to execute the above commands on databases in selected hosts (yes/no)? " REPLY
-echo -n -e '\E[30m'
 if [ ! "$REPLY" = "yes" ]; then 
   echo "User aborded mission." 
   rm -f $LOCKFILE
   exit 0
 fi
 
+# this is what I use if I need to provide the password
+msgw "Provide the password:"
+read -s PASSWORD
 
 
 # Loop through HOST_LIST try to PING all entries
@@ -97,11 +99,11 @@ do {
   fi
 
   # this is what I use if I have private key stored on destination server
-  # which enables password less connection
+  # which enables password-less connection
   #echo $COMMAND_FILE_CONTENT | ssh -T -o BatchMode=yes -o ChallengeResponseAuthentication=no -o PasswordAuthentication=no -o PubkeyAuthentication=yes -o RSAAuthentication=no -2 -l $OS_USER_NAME $HOST_NAME
 
   # this is what I use if I need to provide the password
-  ./ssh_expect.exp $OS_USER_NAME $HOST_NAME ora $COMMAND_FILE_CONTENT
+  ./ssh_expect.exp $OS_USER_NAME $HOST_NAME $PASSWORD "$COMMAND_FILE_CONTENT"
   
 }  
 done
