@@ -111,7 +111,5 @@ exec 3>&-
 rm -f $LOCKFILE
 rm -f ${TMP_FILE}
 
-msgi "Grepping output"
-msgd "LOG: $LOG"
-run_command "cat $LOG"
+msgi "Logs from this replay: $LOG"
 

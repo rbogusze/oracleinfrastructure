@@ -6,12 +6,9 @@ set hostname [lindex $argv 1]
 set password [lindex $argv 2]
 set commands [lindex $argv 3]
 
-spawn ssh -l $username $hostname
+spawn ssh -l $username $hostname $commands
 sleep 1
 expect "password:"
 send "$password\r"
 sleep 1
-send "$commands\r"
-sleep 1
-send "exit\r"
 interact
