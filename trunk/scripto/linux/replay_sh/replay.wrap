@@ -29,7 +29,7 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 RECIPIENTS='remigiusz_boguszewicz'
 check_lock $LOCKFILE
 check_file $COMMAND_FILE
@@ -68,6 +68,7 @@ msgw "Provide the password:"
 read -s PASSWORD
 
 
+msgi "Logs from this replay: $LOG"
 # Loop through HOST_LIST try to PING all entries
 exec 3<> $HOST_LIST
 while read line <&3
@@ -90,7 +91,10 @@ do {
   msgd "HOST_NAME: $HOST_NAME"
   $PING -n 1 $HOST_NAME >/dev/null 2>&1
   if [ $? -eq 0 ]; then
-    msgi "System $OS_USER_NAME @ $HOST_NAME found (ping). Continuing $LDAP_CN."
+    msgd "System $OS_USER_NAME @ $HOST_NAME found (ping). Continuing $LDAP_CN."
+    echo "------"
+    echo "$LDAP_CN"
+    echo "------"
   else
     msgi "[warning] Host $HOST_NAME not found (ping). Skipping $LDAP_CN."
     continue
@@ -111,5 +115,5 @@ exec 3>&-
 rm -f $LOCKFILE
 rm -f ${TMP_FILE}
 
-msgi "Logs from this replay: $LOG"
-
+msgi "Raw output"
+run_command "cat $LOG | grep --after-context=10000 'Logs from this replay:' | grep -v spawn | grep -v 'password:' | grep -v 'Raw output'"
