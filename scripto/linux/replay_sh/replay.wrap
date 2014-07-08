@@ -6,9 +6,7 @@
 # This script is very powerfull and as such very dangerous. 
 # Use with utmost caution
 #
-# Used to issue the same SQL statement on multiple databases simultaniusly
-# Assumes, that after the login the environment is properly set and that
-# I am able to connect using sqlplus "/ as sysdba" which gives me total power.
+# Used to issue the same shell commands statement on multiple hosts
 # It is also assumed that I am able to connect to those hosts using priv-key
 #
 # The list of username#hostname pairs is stored in $HOST_LIST
@@ -31,7 +29,7 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 RECIPIENTS='remigiusz_boguszewicz'
 check_lock $LOCKFILE
 check_file $COMMAND_FILE
@@ -88,7 +86,7 @@ do {
   #echo -e '\E[30m black \E[31mred \E[32mgreen \E[33myellow \E[34mblue \E[35mmagenta \E[36mcyan \E[37mwhite'
   #echo -e '\E[30m black'
   
-  # Sanity check: for ping reachability of star server
+  # Sanity check: for ping reachability
   msgd "HOST_NAME: $HOST_NAME"
   $PING -n 1 $HOST_NAME >/dev/null 2>&1
   if [ $? -eq 0 ]; then
@@ -112,3 +110,8 @@ exec 3>&-
 # Upon exit, remove lockfile.
 rm -f $LOCKFILE
 rm -f ${TMP_FILE}
+
+msgi "Grepping output"
+msgd "LOG: $LOG"
+run_command "cat $LOG"
+
