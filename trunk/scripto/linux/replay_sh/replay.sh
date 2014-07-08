@@ -6,5 +6,9 @@
 # This script is very powerfull and as such very dangerous. 
 # Use with utmost caution
 #
-mkdir -p log
-(. ./replay.wrap 2>&1) | tee log/replay.`date '+%Y-%m-%d--%H:%M:%S'`
+LOG_DIR=log
+LOG_NAME=replay_log
+LOG=${LOG_DIR}/${LOG_NAME}.`date '+%Y-%m-%d--%H:%M:%S'`
+
+mkdir -p $LOG_DIR
+(. ./replay.wrap 2>&1) | tee $LOG
