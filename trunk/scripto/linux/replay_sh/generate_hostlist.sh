@@ -1,3 +1,7 @@
+#
+# under development
+#
+
 #!/bin/bash
 # $Header: /home/remik/osobiste/cvs_repo/scripto/oracle/replay_sh/generate_hostlist.sh,v 1.1 2012-05-07 13:32:52 remik Exp $
 
