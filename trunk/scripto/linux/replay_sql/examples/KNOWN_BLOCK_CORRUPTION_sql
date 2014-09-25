@@ -1,1 +1,0 @@
-select FILE#, BLOCK#, BLOCKS, CORRUPTION_CHANGE#, CORRUPTION_TYPE from v\$database_block_corruption;

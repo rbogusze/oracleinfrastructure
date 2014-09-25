@@ -1,3 +1,0 @@
-connect replik_adm/zzz;
-select JOB, WHAT, NEXT_DATE, BROKEN from user_jobs
-where BROKEN = 'Y';
