@@ -4,11 +4,30 @@ set timeout -1
 set username [lindex $argv 0]
 set hostname [lindex $argv 1]
 set password [lindex $argv 2]
-set commands [lindex $argv 3]
+set commands1 [lindex $argv 3]
+set commands2 [lindex $argv 4]
 
-spawn ssh -l $username $hostname $commands
+spawn ssh -l $username $hostname
 sleep 1
-expect "password:"
+expect "Password:"
 send "$password\r"
 sleep 1
+
+expect ""
+send "$commands1\r"
+sleep 1
+
+expect ""
+send "$commands2\r"
+sleep 1
+
+expect ""
+send "exit\r"
+sleep 1
+
+expect ""
+send "exit\r"
+sleep 1
+
+#puts [string range $expect_out(buffer) 0 [expr $expect_out(0,start) - 1]]
 interact
