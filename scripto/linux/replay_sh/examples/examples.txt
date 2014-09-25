@@ -33,3 +33,4 @@ cd $HOME/scripto/bash; cvs update; cd $HOME/scripto/oracle/arch_gz_rm; cvs updat
 cat /etc/init.d/oracle* | grep rc_
 cd $ORACLE_HOME/network/log; tail -1000 listener.log | grep mf_
 cd $HOME/scripto/oracle/sqlbin; cvs update; cd $HOME/scripto/oracle/monitoring/; cvs update -d recomp; cd $HOME/scripto/oracle/monitoring/recomp; ./implement_SRI.sh
+echo "select 1 from dual;" | sqlplus -s '/ as sysdba';
