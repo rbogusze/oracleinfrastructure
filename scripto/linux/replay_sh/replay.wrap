@@ -12,6 +12,15 @@
 # The list of username#hostname pairs is stored in $HOST_LIST
 # The commands to be executed are stored in $COMMAND_FILE
 #
+# Sample replay.commands
+# $ cat replay.commands
+# ps -ef | grep pmon; pwd; uname -a
+
+# Sample replay.hostlist
+# $ cat replay.hostlist
+# oracle#192.168.1.159#EBSDB#uname -a
+#
+#
 
 LOCKFILE=/tmp/replay.lock
 TMP_FILE=/tmp/replay_sh.tmp
