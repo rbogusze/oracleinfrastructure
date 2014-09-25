@@ -29,7 +29,7 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 RECIPIENTS='remigiusz_boguszewicz'
 check_lock $LOCKFILE
 check_file $COMMAND_FILE
@@ -101,28 +101,13 @@ do {
     continue
   fi
 
-  # If first host command was found execute it first
-  msgd "COMMAND_FILE_CONTENT: $COMMAND_FILE_CONTENT"
-  msgd "FIRST_CMD: $FIRST_CMD"
-  V_COMMAND_FILE_CONTENT=$COMMAND_FILE_CONTENT
-  if [ -z "${FIRST_CMD}" ]; then
-    msgd "No first command found."
-  else
-    msgd "Found first command: ${FIRST_CMD}"
-    COMMAND_FILE_CONTENT="${FIRST_CMD};${COMMAND_FILE_CONTENT}"
-    msgd "COMMAND_FILE_CONTENT: $COMMAND_FILE_CONTENT"
-  fi
-
   # this is what I use if I have private key stored on destination server
   # which enables password-less connection
   #echo $COMMAND_FILE_CONTENT | ssh -T -o BatchMode=yes -o ChallengeResponseAuthentication=no -o PasswordAuthentication=no -o PubkeyAuthentication=yes -o RSAAuthentication=no -2 -l $OS_USER_NAME $HOST_NAME
 
   # this is what I use if I need to provide the password
-  ./ssh_expect.exp $OS_USER_NAME $HOST_NAME $PASSWORD "$COMMAND_FILE_CONTENT"
+  ./ssh_expect.exp $OS_USER_NAME $HOST_NAME $PASSWORD "${FIRST_CMD}" "$COMMAND_FILE_CONTENT"
  
-  # restore the default commands 
-  COMMAND_FILE_CONTENT=$V_COMMAND_FILE_CONTENT
-  msgd "COMMAND_FILE_CONTENT: $COMMAND_FILE_CONTENT"
 }  
 done
 exec 3>&-
@@ -131,5 +116,5 @@ exec 3>&-
 rm -f $LOCKFILE
 rm -f ${TMP_FILE}
 
-msgi "Raw output"
-run_command "cat $LOG | grep --after-context=10000 'Logs from this replay:' | grep -v spawn | grep -v 'password:' | grep -v 'Raw output'"
+#msgi "Raw output"
+#run_command "cat $LOG | grep --after-context=10000 'Logs from this replay:' | grep -v spawn | grep -v 'password:' | grep -v 'Raw output'"
