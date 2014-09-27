@@ -8,25 +8,6 @@ else
 fi
 
 
-check_directory "$HOME/scripto/oracle/create_db_scripts"
-cd $HOME/scripto/oracle/create_db_scripts
-cvs update -d
-
-check_directory "$HOME/scripto/oracle"
-cd $HOME/scripto/oracle
-cvs update -d monitoring
-
-check_directory "$HOME/scripto/oracle"
-cd $HOME/scripto/oracle
-cvs update -d RMAN
-
-check_directory "$HOME/scripto"
-cd $HOME/scripto
-cvs update -d solaris
-
-check_directory "$HOME/scripto/oracle/monitoring/promon"
-cd $HOME/scripto/oracle/monitoring/promon
-
 # Set random time of check start to avoid running everything on the same time
 RND_MM=`random_int "0" "60"`
 RND_HH=`random_int "14" "19"`
@@ -38,8 +19,9 @@ if [ ! -z "$MSG" ]; then
 else
   msge "promon.sh has NOT been implemented. It should."
   msga "This script will implement the promon.sh procedure to be run on host"
-  run_command "cd $HOME/scripto/crontabs"
+  run_command_e "cd $HOME/local_scripto/crontabs"
   run_command "crontab -l > crontab_${USER}_${HOSTNAME}"
+  run_command "cvs add crontab_${USER}_${HOSTNAME}"
   run_command "cvs commit -m 'Before promon.sh implementation' crontab_${USER}_${HOSTNAME}"
   #msga "Removing the current line with promon.sh from crontab if exists"
   #crontab -l | grep -v 'promon.sh' > crontab_${USER}_${HOSTNAME}
