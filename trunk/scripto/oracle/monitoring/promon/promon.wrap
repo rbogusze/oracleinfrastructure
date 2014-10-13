@@ -36,7 +36,7 @@ f_standalone_file_to_cvs()
     #echo $V_CVSDIFF
     cvs diff $3
   fi
-  cvs commit -m "[f_standalone_file_to_cvs] $V_CVSDIFF" $3 > /dev/null 2>&1
+  cvs commit -m "[auto_commit_to_cvs] $V_CVSDIFF" $3 > /dev/null 2>&1
 
 } #f_standalone_file_to_cvs
 
