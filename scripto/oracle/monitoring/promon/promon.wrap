@@ -68,10 +68,17 @@ do
   case $V_TYPE in
   "file")
     msgd "Type: file"
-    f_standalone_file_to_cvs $V_ARGUMENT $HOME/local_scripto/oracle/logs profile_${USERNAME}_${HOSTNAME}
+    # I will construct the name of the file in CVS based on the filename provided
+    V_CVS_FILENAME=`basename $V_ARGUMENT | sed -e s/\.//`
+    V_CVS_FILENAME=${HOSTNAME}_${USERNAME}_${V_CVS_FILENAME}
+    msgd "V_CVS_FILENAME: $V_CVS_FILENAME"
+    f_standalone_file_to_cvs $V_ARGUMENT $HOME/local_scripto/oracle/logs $V_CVS_FILENAME
     ;;
   "sql")
     msgd "Type: sql"
+    ;;
+  "sh")
+    msgd "Type: sh"
     ;;
   *)
     echo "Unknown type!!! Exiting."
