@@ -2,7 +2,6 @@
 #$Id: promon.wrap,v 1.1 2012-05-07 13:48:52 remik Exp $
 #
 # This script should perform no changes, only notice non standard configurations
-# See https://twiki.pgf.com.pl/cgi-bin/twiki/view/Main/OraclePromonMonitoring
 #
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -16,6 +15,77 @@ F_OUTPUT=/tmp/promon.output.tmp
 #INFO_MODE=ERROR
 INFO_MODE=DEBUG
 export INFO_MODE
+
+#### BEGIN FUNCTIONS SECTION
+# Take file privided as $1
+# Copy to directory already in CVS provided as $2
+# store it in CVS as filename provided as $3
+f_standalone_file_to_cvs()
+{
+  msgi "[f_standalone_file_to_cvs] Storing the: $1 in CVS"
+  msgi "[f_standalone_file_to_cvs] In dir: $2 as filename: $3"
+  check_file "$1"
+  check_directory "$2"
+  check_parameter "$3"
+
+  cd $2
+  cp $1 $3
+  cvs add $3 > /dev/null 2>&1
+  V_CVSDIFF=`cvs diff $3 | $GREP -e "^>" -e "^<"`
+  if [ `echo $V_CVSDIFF | grep -v '^ *$' | wc -l ` -gt 0 ]; then
+    #echo $V_CVSDIFF
+    cvs diff $3
+  fi
+  cvs commit -m "[f_standalone_file_to_cvs] $V_CVSDIFF" $3 > /dev/null 2>&1
+
+} #f_standalone_file_to_cvs
+
+
+#### END FUNCTIONS SECTION
+
+msgd "Check if configuration file is already present"
+F_CONF=$HOME/local_scripto/promon/promon_${USERNAME}_${HOSTNAME}.conf
+msgd "F_CONF: $F_CONF"
+
+if [ -f "$F_CONF" ]; then
+  msgd "Conf file found."
+else
+  msgd "No Conf file found."
+  msge "Exiting. Not yet implemented."
+  exit 1
+fi
+
+msgd "Read the conf file"
+while read F_CONF_LINE
+do
+  msgd "F_CONF_LINE: $F_CONF_LINE"
+  V_TYPE=`echo $F_CONF_LINE | awk -F"#" '{print $1}'`
+  msgd "V_TYPE: $V_TYPE"
+
+  V_ARGUMENT=`echo $F_CONF_LINE | awk -F"#" '{print $2}'`
+  msgd "V_ARGUMENT: $V_ARGUMENT"
+
+  case $V_TYPE in
+  "file")
+    msgd "Type: file"
+    f_standalone_file_to_cvs $V_ARGUMENT $HOME/local_scripto/oracle/logs profile_${USERNAME}_${HOSTNAME}
+    ;;
+  "sql")
+    msgd "Type: sql"
+    ;;
+  *)
+    echo "Unknown type!!! Exiting."
+    exit 1
+    ;;
+  esac
+
+done < $F_CONF
+
+
+exit 0
+f_standalone_file_to_cvs
+# old stuff, do not know what to do with it
+
 
 check_file $HOME/scripto/oracle/create_db_scripts/oracle_setup/oracle_setup.sh
 cd $HOME/scripto/oracle/create_db_scripts/oracle_setup
@@ -69,11 +139,6 @@ do
   msgi "V_BIN: $V_BIN"
 
   msgi "##########################################################################"
-  msgi "################ Actions for binaries: $ORATAB_LINE  ################"
-  msgi "###### ./oracle_setup.sh b_check_and_fix_orphan_links_resulting_from_rsync_copy CHECK ##########"
-  ORACLE_HOME=$V_BIN
-  export ORACLE_HOME
-  ./oracle_setup.sh b_check_and_fix_orphan_links_resulting_from_rsync_copy CHECK | tee -a $F_OUTPUT
 done < $F_ORATAB_FILTERED
 
 msgi "######## Reseting the environment to easily spot #######"
@@ -86,18 +151,18 @@ unset ORACLE_HOME
 unset SQLPATH
 run_command_d "env"
 
-msgi "######## Checks done only once on a host                         #######"
-msgi "################ ./oracle_setup.sh b_forward_mail CHECK ################"
-./oracle_setup.sh b_forward_mail CHECK | tee -a $F_OUTPUT
-msgi "################ ./oracle_setup.sh b_check_mail_queue CHECK ################"
-./oracle_setup.sh b_check_mail_queue CHECK | tee -a $F_OUTPUT
-msgi "################ ./oracle_setup.sh b_basic_os_healthcheck ################"
-./oracle_setup.sh b_basic_os_healthcheck | tee -a $F_OUTPUT
+#msgi "######## Checks done only once on a host                         #######"
+#msgi "################ ./oracle_setup.sh b_forward_mail CHECK ################"
+#./oracle_setup.sh b_forward_mail CHECK | tee -a $F_OUTPUT
+#msgi "################ ./oracle_setup.sh b_check_mail_queue CHECK ################"
+#./oracle_setup.sh b_check_mail_queue CHECK | tee -a $F_OUTPUT
+#msgi "################ ./oracle_setup.sh b_basic_os_healthcheck ################"
+#./oracle_setup.sh b_basic_os_healthcheck | tee -a $F_OUTPUT
 
-msgi "################ ./implement_CFC.sh CHECK ################"
-check_file $HOME/scripto/oracle/RMAN/implement_CFC.sh
-cd $HOME/scripto/oracle/RMAN
-./implement_CFC.sh CHECK | tee -a $F_OUTPUT
+#msgi "################ ./implement_CFC.sh CHECK ################"
+#check_file $HOME/scripto/oracle/RMAN/implement_CFC.sh
+#cd $HOME/scripto/oracle/RMAN
+#./implement_CFC.sh CHECK | tee -a $F_OUTPUT
 
 # WIP
 #msgi "################ ./check_password.sh ################"
@@ -105,7 +170,9 @@ cd $HOME/scripto/oracle/RMAN
 #  cd $HOME/scripto/solaris/check_password
 #  ./check_password.sh | tee -a $F_OUTPUT
 #fi
-
+# OLD Stuff
+#  msgi "################ Actions for binaries: $ORATAB_LINE  ################"
+#  ./oracle_setup.sh b_check_and_fix_orphan_links_resulting_from_rsync_copy CHECK | tee -a $F_OUTPUT
 
 
 #echo "Exiting without sending mail. "
