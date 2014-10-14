@@ -25,7 +25,20 @@ f_standalone_file_to_cvs()
   msgi "[f_standalone_file_to_cvs] Storing the: $1 in CVS"
   msgi "[f_standalone_file_to_cvs] In dir: $2 as filename: $3"
   check_file "$1"
-  check_directory "$2"
+  
+  # if the directory does not exists, try to create it and add to CVS
+  if [ -d $2 ]; then
+    msgd "Dir: $2 exists. OK."
+  else
+    msgd "Dir: $2 NOT exists. Creating one and adding to CVS."
+    run_command_e "mkdir -p $2"
+    run_command_e "cd $2"
+    run_command_e "cd .."
+    V_CVS_DIR=`basename $2`
+    msgd "V_CVS_DIR: $V_CVS_DIR"
+    cvs add $V_CVS_DIR > /dev/null 2>&1
+  fi
+
   check_parameter "$3"
 
   cd $2
@@ -70,9 +83,9 @@ do
     msgd "Type: file"
     # I will construct the name of the file in CVS based on the filename provided
     V_CVS_FILENAME=`basename $V_ARGUMENT | sed -e s/\.//`
-    V_CVS_FILENAME=${HOSTNAME}_${USERNAME}_${V_CVS_FILENAME}
+    V_CVS_FILENAME=${V_CVS_FILENAME}
     msgd "V_CVS_FILENAME: $V_CVS_FILENAME"
-    f_standalone_file_to_cvs $V_ARGUMENT $HOME/local_scripto/oracle/logs $V_CVS_FILENAME
+    f_standalone_file_to_cvs $V_ARGUMENT $HOME/local_scripto/oracle/logs/${HOSTNAME}_${USERNAME} $V_CVS_FILENAME
     ;;
   "sql")
     msgd "Type: sql"
