@@ -54,6 +54,32 @@ f_standalone_file_to_cvs()
 } #f_standalone_file_to_cvs
 
 
+f_sql_results_to_cvs()
+{
+  msgd "Store sql results in CVS"
+  F_SQL_FILENAME=$1
+  D_CVS_DIR=$2
+  F_CVS_FILENAME=$3
+
+  check_parameter $F_SQL_FILENAME
+  check_parameter $D_CVS_DIR
+  check_parameter $F_CVS_FILENAME
+
+  D_SQL_DIR=$HOME/scripto/oracle/monitoring/promon/sql
+  check_directory $D_SQL_DIR
+  check_file $D_SQL_DIR/$F_SQL_FILENAME
+
+  V_TMP=`cat $D_SQL_DIR/$F_SQL_FILENAME`
+  msgd "V_TMP: $V_TMP"
+  f_execute_sql "$V_TMP"
+
+  msgd "F_EXECUTE_SQL: $F_EXECUTE_SQL"
+  run_command_d "cat $F_EXECUTE_SQL"
+
+exit 0
+
+} #f_sql_results_to_cvs
+
 #### END FUNCTIONS SECTION
 
 msgd "Check if configuration file is already present"
@@ -82,13 +108,14 @@ do
   "file")
     msgd "Type: file"
     # I will construct the name of the file in CVS based on the filename provided
-    V_CVS_FILENAME=`basename $V_ARGUMENT | sed -e s/\.//`
+    V_CVS_FILENAME=`basename $V_ARGUMENT | sed 's/\.//'`
     V_CVS_FILENAME=${V_CVS_FILENAME}
     msgd "V_CVS_FILENAME: $V_CVS_FILENAME"
     f_standalone_file_to_cvs $V_ARGUMENT $HOME/local_scripto/oracle/logs/${HOSTNAME}_${USERNAME} $V_CVS_FILENAME
     ;;
   "sql")
     msgd "Type: sql"
+    f_sql_results_to_cvs $V_ARGUMENT $HOME/local_scripto/oracle/logs/${HOSTNAME}_${USERNAME} ${V_ARGUMENT}.out
     ;;
   "sh")
     msgd "Type: sh"
