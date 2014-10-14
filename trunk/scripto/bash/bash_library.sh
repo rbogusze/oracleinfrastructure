@@ -70,6 +70,8 @@ check_file()
   if [ ! -f "$1" ]; then
     error_log "[ error ] $1 not found. Exiting. " ${RECIPIENTS}
     exit 1
+  else
+    msgd "$1 found."
   fi
 }
 
