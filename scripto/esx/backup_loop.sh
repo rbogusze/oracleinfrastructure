@@ -32,6 +32,8 @@ F_SH_CMND=/tmp/backup_loop.tmp.F_SH_CMND
 #INFO_MODE=DEBUG
 INFO_MODE=INFO
 
+exit 0
+
 D_BACKUP_LIST=~/scripto/esx/backup_list.txt
 D_BACKUP_DIR=/media/b3ed505a-ef12-477e-bf9a-9e6eb8e7dd2c
 
