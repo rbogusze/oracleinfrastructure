@@ -100,11 +100,10 @@ EOF
 
 
   msgi "Doing the actuall backup"
-  ## WIP -p
-  run_command "mkdir -p $VM_TO_BACKUP_BCK_DIR" 
-  run_command "cd $VM_TO_BACKUP_BCK_DIR"
-  run_command "pwd"
-  run_command "scp -r root@esx:$VM_TO_BACKUP_PATH ."
+  run_command_e "mkdir -p $VM_TO_BACKUP_BCK_DIR" 
+  run_command_e "cd $VM_TO_BACKUP_BCK_DIR"
+  run_command_e "pwd"
+  run_command_e "scp -r root@esx:$VM_TO_BACKUP_PATH ."
 
   msgi "Starting the VM if it was up."
   if [ "$VM_TO_BACKUP_STATUS" = "Powered on" ]; then
@@ -121,9 +120,9 @@ EOF
   msgi "Taring and gziping the backup"
   msgd "VM_TO_BACKUP_BCK_DIR: $VM_TO_BACKUP_BCK_DIR" 
   check_directory $VM_TO_BACKUP_BCK_DIR
-  run_command "cd $D_BACKUP_DIR"
-  run_command "pwd"
-  run_command "tar cvzf ${VM_TO_BACKUP_BCK_NAME}.tar.gz $VM_TO_BACKUP_BCK_DIR"
+  run_command_e "cd $D_BACKUP_DIR"
+  run_command_e "pwd"
+  run_command_e "tar cvzf ${VM_TO_BACKUP_BCK_NAME}.tar.gz $VM_TO_BACKUP_BCK_DIR"
   msgi "Done with this VM: $VM_TO_BACKUP"
 
   msgi "Removing the $VM_TO_BACKUP_BCK_DIR"
