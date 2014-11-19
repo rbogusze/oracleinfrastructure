@@ -3,7 +3,7 @@
 #
 # Prepare the backup_list.txt file eg like this:
 # on ESX
-# # vim-cmd vmsvc/getallvms | awk '{print $2}' | sort
+# # vim-cmd vmsvc/getallvms | awk '{print $2}' | sort | grep -v "^Name$"
 #
 #
 # Sample usage: 
@@ -29,13 +29,12 @@ LOG=${LOG_DIR}/${LOG_NAME}.`date '+%Y-%m-%d--%H:%M:%S'`
 #exec > $LOG 2>&1
 F_SH_CMND=/tmp/backup_loop.tmp.F_SH_CMND
 
-#INFO_MODE=DEBUG
-INFO_MODE=INFO
+INFO_MODE=DEBUG
+#INFO_MODE=INFO
 
-exit 0
 
 D_BACKUP_LIST=~/scripto/esx/backup_list.txt
-D_BACKUP_DIR=/media/b3ed505a-ef12-477e-bf9a-9e6eb8e7dd2c
+D_BACKUP_DIR=/SYNOLOGY_NFS
 
 check_file $D_BACKUP_LIST
 
@@ -48,13 +47,17 @@ do
   msgi "##########################"
   msgi "Backup routine for: $VM_TO_BACKUP"
   VM_TO_BACKUP_BCK_DIR=$D_BACKUP_DIR/${VM_TO_BACKUP}_`date -I`
+  msgd "VM_TO_BACKUP_BCK_DIR: $VM_TO_BACKUP_BCK_DIR"
   VM_TO_BACKUP_BCK_NAME=${VM_TO_BACKUP}_`date -I`
+  msgd "VM_TO_BACKUP_BCK_NAME: $VM_TO_BACKUP_BCK_NAME"
   
   cat > $F_SH_CMND << EOF
 uname -a;
 date;
 esxcli vm process list
 EOF
+  run_command_d "cat $F_SH_CMND"
+
   f_run_sh_on_remote_host root esx $F_SH_CMND > /tmp/backup_loop.tmp.output
   run_command_d "cat /tmp/backup_loop.tmp.output"
   msgd "Searching for World ID:"
