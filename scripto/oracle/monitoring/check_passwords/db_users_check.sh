@@ -1,5 +1,5 @@
 #!/bin/bash
-#$Id: backup_loop.sh,v 1.9 2013-05-13 11:27:11 remik Exp $
+#$Id$
 #
 # This script will try to login to DB account as a user and password 
 # provided in db_users_list.txt
