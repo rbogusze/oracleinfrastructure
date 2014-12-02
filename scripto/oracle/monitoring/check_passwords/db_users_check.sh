@@ -1,5 +1,6 @@
 #!/bin/bash
-#$Id$
+# $Id$
+# $Revision$
 #
 # This script will try to login to DB account as a user and password 
 # provided in db_users_list.txt
