@@ -21,8 +21,8 @@ else
   . ~/scripto/bash/bash_library.sh
 fi
 
-INFO_MODE=DEBUG
-#INFO_MODE=INFO
+#INFO_MODE=DEBUG
+INFO_MODE=INFO
 
 V_SQLPLUS=`which sqlplus`
 msgd "V_SQLPLUS: $V_SQLPLUS"
@@ -69,36 +69,24 @@ do
     msgd "V_PASSWORD: $V_PASSWORD"
     check_parameter $V_PASSWORD
 
+    echo "select fnd_web_sec.validate_login('${V_USERNAME}','${V_PASSWORD}') R from dual;" | $V_SQLPLUS -s apps/$V_APPS_PASS > $F_TMP
+    run_command_d "cat $F_TMP"
+
+    TPM_CHK=`cat $F_TMP | grep "Y" | wc -l`
+    msgd "TPM_CHK: $TPM_CHK"
+
+    if [ $TPM_CHK -eq 1 ]; then
+      echo "Account $V_USERNAME can be accessed using password: $V_PASSWORD"
+    else
+      msgd "Unable to login to $V_USERNAME using password $V_PASSWORD"
+    fi
+
   }  
   done #$F_APP_PASS_LIST
 done  #$F_TMP_USERS_LIST
 
 
 
-exit 0
-
-msgi "Looping through users and trying to log in:"
-while read LINE
-do
-  msgd "Checking $LINE"
-  V_USERNAME=`echo $LINE | awk '{print $1}'`
-
-  V_PASSWORD=`echo $LINE | awk '{print $2}'`
-  
-  echo "select fnd_web_sec.validate_login('${V_USERNAME}','${V_PASSWORD}') R from dual;" | $V_SQLPLUS -s apps/$V_APPS_PASS > $F_TMP
-  run_command_d "cat $F_TMP"
-
-  TPM_CHK=`cat $F_TMP | grep "Y" | wc -l`
-  msgd "TPM_CHK: $TPM_CHK"
-
-  if [ $TPM_CHK -eq 1 ]; then
-    echo "Account $V_USERNAME can be accessed using password: $V_PASSWORD"
-  else
-    msgd "Unable to login to $V_USERNAME using password $V_PASSWORD"
-  fi
-
-
-done < $F_APP_PASS_LIST
 
 rm -f $F_TMP
 rm -f $F_TMP_USERS_LIST

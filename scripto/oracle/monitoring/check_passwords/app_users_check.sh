@@ -3,6 +3,9 @@
 #
 # This script will try to login to known application accounts 
 # using their default passwords
+# 
+# I was inspired by $FND_TOP/patch/115/sql/fnddefpw.sql (thank you Sudhakar)
+# but added some accounts and passwords
 #
 # Sample usage: 
 #
