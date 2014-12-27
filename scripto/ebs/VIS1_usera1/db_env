@@ -2,7 +2,7 @@
 #12.2
 #. /u01/oracle/VIS/11.2.0/VIS_ebsdb2.env
 #set -x
-. /u01/oracle/VIS/11.2.0/VIS1_`uname -n | awk -F"." '{print $1}'`.env
+. /u01/oracle/VIS/11.2.0/VIS2_`uname -n | awk -F"." '{print $1}'`.env
 
 SQLPATH=$HOME/scripto/oracle/sqlbin
 export SQLPATH
