@@ -1,7 +1,7 @@
 #!/bin/bash
 #set -x
-. $HOME/scripto/ebs/db_env
+. $HOME/scripto/ebs/VIS2_usera2/db_env
 
 cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
 ./addbctl.sh stop
-./addlnctl.sh stop $ORACLE_SID
+./addlnctl.sh stop VIS
