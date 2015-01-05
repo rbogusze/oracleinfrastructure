@@ -5,4 +5,10 @@
 #./adstpall.sh apps/apps
 # 12.2
 cd $ADMIN_SCRIPTS_HOME
-./adstpall.sh apps/apps
+
+export APPSUSER=apps
+export APPSPASS=apps
+export WLSADMIN=welcome1
+
+{ echo $APPSUSER ; echo $APPSPASS ; echo $WLSADMIN ; }| adstpall.sh @ -nopromptmsg
+
