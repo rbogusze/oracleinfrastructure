@@ -16,4 +16,9 @@
 #./adstrtal.sh apps/apps
 # 12.2
 cd $ADMIN_SCRIPTS_HOME
-./adstrtal.sh apps/apps
+export APPSUSER=apps
+export APPSPASS=apps
+export WLSADMIN=welcome1
+
+{ echo $APPSUSER ; echo $APPSPASS ; echo $WLSADMIN ; }| adstrtal.sh @ -nopromptmsg
+#./adstrtal.sh apps/apps
