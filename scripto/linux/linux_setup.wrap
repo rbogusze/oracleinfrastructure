@@ -91,6 +91,21 @@ b_setup_yum_repository()
     fi
     ;;
 
+  "Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686")
+    msgi "Not changing default OEM repositories"
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el5.rf.i386.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el5.rf.i386.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+    ;;
 
   "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
     msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
@@ -161,12 +176,27 @@ b_install_usefull_rpm()
     if [ "$TMP_CHK" -lt 1 ]; then
       msgi "Installing rlwrap"
       run_command "cd /tmp"
-      run_command "wget http://dl.fedoraproject.org/pub/epel/5/x86_64/rlwrap-0.41-1.el5.x86_64.rpm"
-      run_command "rpm -i rlwrap-0.37-1.el5.x86_64.rpm"
+      run_command "wget http://dl.fedoraproject.org/pub/epel/5/x86_64/rlwrap-0.42-1.el5.x86_64.rpm"
+      run_command "rpm -i rlwrap-0.42-1.el5.x86_64.rpm"
     else
       msgi "rlwrap is already installed"
     fi
     ;;
+
+
+  "Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "Installing rlwrap"
+      run_command "cd /tmp"
+      run_command "wget http://dl.fedoraproject.org/pub/epel/5/i386/rlwrap-0.42-1.el5.i386.rpm"
+      run_command "rpm -i rlwrap-0.42-1.el5.i386.rpm"
+    else
+      msgi "rlwrap is already installed"
+    fi
+    ;;
+
   "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
