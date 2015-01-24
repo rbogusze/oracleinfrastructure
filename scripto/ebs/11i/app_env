@@ -1,0 +1,7 @@
+# 12.1 . /u01/oracle/VIS/apps/apps_st/appl/APPSVIS_jazz.env
+# 12.2
+#. /d01/oracle/VIS/fs1/EBSapps/appl/VIS_jazz.env
+#. /u01/oracle/VIS/fs1/EBSapps/appl/VIS_ebs2.env
+#. /u01/oracle/VIS/fs1/EBSapps/appl/VIS_`uname -n | awk -F"." '{print $1}'`.env
+#. /u01/oracle/VIS/EBSapps.env run
+. /u01/oracle/visappl/VIS_ebs11ap1.env
