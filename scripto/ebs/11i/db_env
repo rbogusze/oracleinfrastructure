@@ -1,0 +1,9 @@
+#12.1 . /u01/oracle/VIS/db/tech_st/11.1.0/VIS_jazz.env
+#12.2
+#. /u01/oracle/VIS/11.2.0/VIS_ebsdb2.env
+#set -x
+#. /u01/oracle/VIS/11.2.0/VIS_`uname -n | awk -F"." '{print $1}'`.env
+. /u01/oracle/visdb/9.2.0/VIS_ebs11db1.env
+
+SQLPATH=$HOME/scripto/oracle/sqlbin
+export SQLPATH
