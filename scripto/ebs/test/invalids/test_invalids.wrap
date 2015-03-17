@@ -10,7 +10,24 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-INFO_MODE=DEBUG
-#INFO_MODE=INFO
+#INFO_MODE=DEBUG
+INFO_MODE=INFO
 
-msgi "Hello."
+while read LINE
+do
+  echo "-------------------------------------------------"
+  f_user_execute_sql "select count(1) from dba_objects where status != 'VALID';" "apps/apps"
+  V_INVALID_BEFORE=$V_EXECUTE_SQL
+  
+  f_user_execute_sql "select edition_name from dba_objects where object_name='$LINE';" "apps/apps"
+  V_EDITION=$V_EXECUTE_SQL
+  
+  f_user_execute_sql "grant select on $LINE to BOLINF;" "apps/apps"
+  V_GRANT_RESULT=$V_EXECUTE_SQL
+
+  f_user_execute_sql "select count(1) from dba_objects where status != 'VALID';" "apps/apps"
+  V_INVALID_AFTER=$V_EXECUTE_SQL
+
+  echo "$LINE $V_INVALID_BEFORE $V_EDITION $V_GRANT_RESULT $V_INVALID_AFTER" 
+#exit 0
+done < tables.lst
