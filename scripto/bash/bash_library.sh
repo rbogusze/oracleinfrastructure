@@ -510,6 +510,33 @@ EOF
   fi
 } #f2_execute_sql
 
+# For running SQL connected as provided user. Connection as $2 in format "user/password"
+f_user_execute_sql()
+{
+  check_parameter $ORACLE_HOME
+  SQLPLUS=$ORACLE_HOME/bin/sqlplus
+  check_file $SQLPLUS
+  check_parameter $2
+
+  F_EXECUTE_SQL=/tmp/sql_output.tmp_${USERNAME}_${ORACLE_SID}
+ 
+  msga "Executing SQL: $1"
+  $SQLPLUS -S "$2" <<EOF > $F_EXECUTE_SQL
+set heading off
+set linesize 200
+$1
+EOF
+  V_EXECUTE_SQL=`cat $F_EXECUTE_SQL | grep -v '^ *$' | tr -d "\n" | tr "\t" " " | tr -s '[:blank:]'`
+
+  TMP_CHK=`echo $V_EXECUTE_SQL | grep "ORA-01034"`
+  if [ `echo $TMP_CHK | grep -v '^ *$' | wc -l` -ne 0 ]; then
+    echo $V_EXECUTE_SQL
+    msge "ORACLE not available. Exiting."
+    exit 1
+  fi
+} #f_user_execute_sql
+
+
 # Return error if any rows from query are returned
 f_execute_sql_no_rows_expected()
 {
