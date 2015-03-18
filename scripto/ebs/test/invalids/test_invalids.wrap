@@ -15,7 +15,6 @@ INFO_MODE=INFO
 
 while read LINE
 do
-  echo "-------------------------------------------------"
   f_user_execute_sql "select count(1) from dba_objects where status != 'VALID';" "apps/apps"
   V_INVALID_BEFORE=$V_EXECUTE_SQL
   
