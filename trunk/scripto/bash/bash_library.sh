@@ -520,7 +520,7 @@ f_user_execute_sql()
 
   F_EXECUTE_SQL=/tmp/sql_output.tmp_${USERNAME}_${ORACLE_SID}
  
-  msga "Executing SQL: $1"
+  msgd "Executing SQL: $1"
   $SQLPLUS -S "$2" <<EOF > $F_EXECUTE_SQL
 set heading off
 set linesize 200
