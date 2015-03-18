@@ -28,9 +28,8 @@ do
   V_INVALID_AFTER=$V_EXECUTE_SQL
 
   echo "$LINE $V_INVALID_BEFORE $V_EDITION $V_GRANT_RESULT $V_INVALID_AFTER" 
-  if ["$V_INVALID_AFTER" -gt "$V_INVALID_BEFORE" ]; then
-    echo "Recompiling invalids"
-    f_user_execute_sql "@?/rdbms/admin/utlrp" "apps/apps"
+  if [ "$V_INVALID_AFTER" -gt "$V_INVALID_BEFORE" ]; then
+    echo "New invalids"
   fi
 
 
