@@ -16,6 +16,9 @@ INFO_MODE=INFO
 f_execute_sql "create user BOLINF identified by xxx;"
 cat $F_EXECUTE_SQL
 
+f_execute_sql "@valid;"
+cat $F_EXECUTE_SQL
+
 while read LINE
 do
   f_user_execute_sql "select count(1) from dba_objects where status != 'VALID';" "apps/apps"
@@ -30,7 +33,10 @@ do
   f_user_execute_sql "select count(1) from dba_objects where status != 'VALID';" "apps/apps"
   V_INVALID_AFTER=$V_EXECUTE_SQL
 
-  echo "$LINE $V_INVALID_BEFORE $V_EDITION $V_GRANT_RESULT $V_INVALID_AFTER" 
+  f_user_execute_sql "select edition_name from dba_objects where object_name='$LINE';" "apps/apps"
+  V_EDITION_AFTER=$V_EXECUTE_SQL
+
+  echo "$LINE $V_INVALID_BEFORE $V_EDITION $V_GRANT_RESULT $V_INVALID_AFTER $V_EDITION_AFTER" 
   if [ "$V_INVALID_AFTER" -gt "$V_INVALID_BEFORE" ]; then
     echo "New invalids"
   fi
@@ -53,7 +59,10 @@ do
   f_user_execute_sql "select count(1) from dba_objects where status != 'VALID';" "apps/apps"
   V_INVALID_AFTER=$V_EXECUTE_SQL
 
-  echo "$LINE $V_INVALID_BEFORE $V_EDITION $V_GRANT_RESULT $V_INVALID_AFTER" 
+  f_user_execute_sql "select edition_name from dba_objects where object_name='$LINE';" "apps/apps"
+  V_EDITION_AFTER=$V_EXECUTE_SQL
+
+  echo "$LINE $V_INVALID_BEFORE $V_EDITION $V_GRANT_RESULT $V_INVALID_AFTER $V_EDITION_AFTER" 
   if [ "$V_INVALID_AFTER" -gt "$V_INVALID_BEFORE" ]; then
     echo "New invalids"
   fi
@@ -62,3 +71,5 @@ do
 done < tables.lst
 
 
+f_execute_sql "@valid;"
+cat $F_EXECUTE_SQL
