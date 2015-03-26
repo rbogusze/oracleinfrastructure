@@ -1100,7 +1100,7 @@ EOF
   V_TMP=`cat $F_TMP` 
 
   f_execute_sql "$V_TMP" > /dev/null
-  cat $F_EXECUTE_SQL
+  cat $F_EXECUTE_SQL | grep -v "Session altered"
 
   msgd "${FUNCNAME[0]} End."
 } #f_R12_ADZDSHOWED
@@ -1587,7 +1587,7 @@ EOF
   V_TMP=`cat $F_TMP` 
 
   f_execute_sql "$V_TMP" > /dev/null
-  cat $F_EXECUTE_SQL
+  cat $F_EXECUTE_SQL | grep -v "Session altered" | grep -v "^$"
 
   msgd "${FUNCNAME[0]} End."
 } #f_R12_ADOP_STATUS
