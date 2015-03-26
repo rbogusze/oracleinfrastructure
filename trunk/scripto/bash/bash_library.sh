@@ -1049,6 +1049,549 @@ check_log()
   msgd "${FUNCNAME[0]} End."
 } #check_log
 
+# EBS R12 $AD_TOP/sql/ADZDSHOWED.sql
+f_R12_ADZDSHOWED()
+{
+  msgd "${FUNCNAME[0]} Begin."
+
+  F_TMP=/tmp/${USERNAME}_${ORACLE_SID}_f_R12_ADZDSHOWED.tmp
+
+  cat > $F_TMP << EOF
+alter session set current_schema = APPS;
+
+SET FEEDBACK OFF;
+SET ECHO OFF;
+
+set trimspool on
+set pagesize 1000
+set linesize 200
+set lines 80
+
+column "Edition Name" format a15
+column "Type"         format a8
+column "Status"       format a8
+column "Current?"     format a8
+
+prompt =========================================================================
+prompt =                             Editions
+prompt =========================================================================
+
+
+select
+    aed.edition_name "Edition Name"
+  , ad_zd.get_edition_type(aed.edition_name) "Type"
+  , decode(use.privilege, 'USE', 'ACTIVE', 'RETIRED') "Status"
+  , decode(aed.edition_name, sys_context('userenv', 'current_edition_name'),
+'CURRENT', '') "Current?"
+from
+    all_editions aed
+  , database_properties prop
+  , dba_tab_privs use
+where prop.property_name = 'DEFAULT_EDITION'
+  and use.privilege(+)   = 'USE'
+  and use.owner(+)       = 'SYS'
+  and use.grantee(+)     = 'PUBLIC'
+  and use.table_name(+)  = aed.edition_name
+order by 1
+/
+
+EOF
+
+  V_TMP=`cat $F_TMP` 
+
+  f_execute_sql "$V_TMP" > /dev/null
+  cat $F_EXECUTE_SQL
+
+  msgd "${FUNCNAME[0]} End."
+} #f_R12_ADZDSHOWED
+
+# EBS R12 $AD_TOP/sql/ADZDSHOWSTATUS.sql (partially)
+f_R12_ADOP_STATUS()
+{
+  msgd "${FUNCNAME[0]} Begin."
+
+  F_TMP=/tmp/${USERNAME}_${ORACLE_SID}_f_R12_ADZDSHOWED.tmp
+
+  cat > $F_TMP << EOF
+alter session set current_schema = APPS;
+
+WHENEVER OSERROR EXIT FAILURE ROLLBACK;
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK;
+
+SET FEEDBACK OFF;
+SET ECHO OFF;
+SET VERIFY OFF;
+SET PAGESIZE 10000
+SET LINESIZE 165
+SET NEWPAGE NONE
+SET TRIMSPOOL ON
+SET SERVEROUT ON
+
+REM  Spool results to adzdshowstatus.out file.
+spool adzdshowstatus.out
+
+SET TERMOUT OFF
+ALTER SESSION SET NLS_TIMESTAMP_FORMAT = 'DD-MON-YY HH:MI:SS';
+ALTER SESSION SET NLS_TIMESTAMP_TZ_FORMAT = 'DD-MON-YY HH:MI:SS TZR';
+SET TERMOUT ON
+
+-- #################################
+-- ## CURRENT PATCHING SESSION ID ##
+-- #################################
+
+
+SET TERMOUT OFF
+COLUMN P1 NEW_VALUE 1
+select null P1 from dual where 1=2;
+
+VARIABLE parm VARCHAR2(20);
+VARIABLE g_clone_at_next_s number;
+VARIABLE g_clone_at_present_s number;
+VARIABLE g_abandon_node_exists number;
+-- initialize the bind variables
+begin
+  :g_clone_at_next_s := 0;
+  :g_clone_at_present_s := 0;
+  :g_abandon_node_exists := 0;
+end;
+/
+begin
+  select NVL('&1', 'NOVALUESPECIFIED')P1 into :parm from dual;
+end;
+/
+
+SET TERMOUT on
+
+-- This bind variable will hold the report session id (PATCH or RUN)
+VARIABLE report_session_id NUMBER
+
+declare
+  l_session_id         number;
+  l_session_id_patches number;
+  l_bug_number         varchar2(30);
+begin
+  if (:parm = 'NOVALUESPECIFIED') then --no session id passed, use RUN session id
+    begin
+       select max(adop_session_id) into l_session_id from ad_adop_sessions;
+    exception
+      when others then
+       RAISE_APPLICATION_ERROR (-20001, 'No Session ID found.');
+    end;
+
+    if (l_session_id is null)
+    then
+       RAISE_APPLICATION_ERROR (-20001, 'Status report cannot be generated until an online patching session has been run.');
+    end if;
+    select adop_session_id into l_session_id_patches from ad_adop_session_patches
+           where
+           adop_session_id = (select max(adop_session_id) from ad_adop_session_patches)
+           and bug_number in ('CLONE','CONFIG_CLONE') and rownum = 1;
+    if (l_session_id_patches > l_session_id) then
+         :g_clone_at_next_s := 1;
+         :report_session_id := l_session_id_patches;
+    elsif (l_session_id_patches = l_session_id) then
+         :g_clone_at_present_s := 1;
+         :report_session_id := l_session_id_patches;
+    else
+         :report_session_id := l_session_id;
+    end if;
+  else
+    begin
+       select bug_number into l_bug_number
+           from (select ap.bug_number from ad_adop_session_patches ap
+           where ap.adop_session_id =  :parm
+           and not exists ( select ad.adop_session_id
+                            from ad_adop_sessions ad
+                            where ad.adop_session_id = :parm ) ) where rownum=1;
+       if(l_bug_number = 'CLONE' or l_bug_number = 'CONFIG_CLONE') then
+           :g_clone_at_next_s := 1;
+       else
+           :g_clone_at_next_s := 0;
+       end if;
+    exception
+       when others then
+           :g_clone_at_next_s := 0;
+    end;
+    :report_session_id := :parm;
+  end if;
+exception
+  when others then
+    :report_session_id := l_session_id;
+end;
+/
+
+DEFINE s_report_session_id = 0;
+COLUMN SESSION_ALIAS NEW_VALUE s_report_session_id NOPRINT
+
+-- Use the TRIM command to chop off leading white space in the display
+select TRIM(:report_session_id) SESSION_ALIAS
+  from dual;
+
+DEFINE s_clone_at_next_s =0;
+COLUMN REPORT_ALIAS NEW_VALUE s_clone_at_next_s NOPRINT
+select TRIM(:g_clone_at_next_s) REPORT_ALIAS from dual;
+
+-- #############################
+-- ## CHECK IF SESSION EXISTS ##
+-- #############################
+
+declare
+  l_adop_session_id number;
+begin
+select 1 into l_adop_session_id from dual
+    where exists (select distinct adop_session_id
+          from ad_adop_sessions
+           where adop_session_id=&s_report_session_id)
+    or
+          exists (select distinct adop_session_id
+          from ad_adop_session_patches
+           where adop_session_id=&s_report_session_id);
+
+exception
+   when others then
+        RAISE_APPLICATION_ERROR (-20001, 'No such SESSION_ID found.  Please
+recheck SESSION_ID.');
+end;
+/
+
+prompt Current Patching Session ID: &s_report_session_id
+prompt
+
+-- ##########################
+-- ## CURRENT PHASE DETAIL ##
+-- ##########################
+BREAK ON "Node Name" SKIP 1 -
+      ON "Node Type"
+
+column "Node Name" format a15
+column "Node Type" format a15
+column "Phase"     format a15
+column "Status"    format a15
+column "Started"   format a30
+column "Finished"  format a30
+column "Elapsed"   format a12
+
+select * from (
+  select ap.node_name "Node Name",
+       CASE
+       WHEN exists (select fc.node_name from FND_OAM_CONTEXT_FILES fc
+                where fc.NAME not in ('TEMPLATE','METADATA','config.txt')
+                      and fc.CTX_TYPE='A' and (fc.status is null or upper(fc.status) in ('S','F'))
+                      and EXTRACTVALUE(XMLType(TEXT),'//file_edition_type') = 'run'
+                      and EXTRACTVALUE(XMLType(TEXT),'//oa_service_group_status[@oa_var=''s_web_admin_status'']')='enabled'
+                      and EXTRACTVALUE(XMLType(TEXT),'//oa_service_list/oa_service[@type=''admin_server'']/oa_service_status')='enabled'
+                      and fc.node_name = ap.node_name)
+         THEN 'master'
+         ELSE 'slave'
+       END "Node Type",
+       case
+         when ap.bug_number = 'CLONE'
+         then 'FS_CLONE'
+         else ap.bug_number
+        end "Phase",
+       case
+         when ap.status='Y' and ap.clone_status = 'COMPLETED'
+            then 'COMPLETED'
+          when ap.status='F' and ap.clone_status <> 'COMPLETED'
+            then 'FAILED'
+          when ap.status='R' and ap.clone_status <> 'COMPLETED'
+             then 'RUNNING'
+          when ap.status='N' and ap.clone_status = 'NOT-STARTED'
+             then 'NOT STARTED'
+          else
+            'NOT APPLICABLE'
+       end "Status",
+       to_timestamp_tz(to_char(ap.start_date, 'DD-MON-YY HH:MI:SS'), 'DD-MON-YY HH:MI:SS TZR') "Started",
+       to_timestamp_tz(to_char(ap.end_date, 'DD-MON-YY HH:MI:SS'), 'DD-MON-YY HH:MI:SS TZR') "Finished",
+       floor((ap.end_date-ap.start_date)*24)||
+       decode(TRUNC(ap.end_date-ap.start_date),null,' ',':')||
+       lpad(floor(((ap.end_date-ap.start_date)*24-
+       floor((ap.end_date-ap.start_date)*24))*60), 2, '0')||
+       decode(TRUNC(ap.end_date-ap.start_date),null,' ',':')||
+       lpad(mod(round((ap.end_date-ap.start_date)*86400), 60),
+       2, '0') "Elapsed"
+from ad_adop_session_patches ap
+   where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =1
+UNION ALL
+select node_name "Node Name",
+       to_char(NULL) "Node Type",
+       'PREPARE' "Phase",
+       'NOT APPLICABLE' "Status",
+       to_timestamp_tz(NULL) "Started",
+       to_timestamp_tz(NULL) "Finished",
+       to_char(NULL) "Elapsed"
+from ad_adop_session_patches ap
+   where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =1
+UNION ALL
+select node_name "Node Name",
+       to_char(NULL) "Node Type",
+       'APPLY' "Phase",
+       'NOT APPLICABLE' "Status",
+       to_timestamp_tz(NULL) "Started",
+       to_timestamp_tz(NULL) "Finished",
+       to_char(NULL) "Elapsed"
+from ad_adop_session_patches ap
+   where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =1
+UNION ALL
+select node_name "Node Name",
+       to_char(NULL) "Node Type",
+       'CUTOVER' "Phase",
+       'NOT APPLICABLE' "Status",
+       to_timestamp_tz(NULL) "Started",
+       to_timestamp_tz(NULL) "Finished",
+       to_char(NULL) "Elapsed"
+from ad_adop_session_patches ap
+   where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =1
+UNION ALL
+select node_name "Node Name",
+       to_char(NULL) "Node Type",
+       'CLEANUP' "Phase",
+       'NOT APPLICABLE' "Status",
+       to_timestamp_tz(NULL) "Started",
+       to_timestamp_tz(NULL) "Finished",
+       to_char(NULL) "Elapsed"
+from ad_adop_session_patches ap
+   where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =1)
+ORDER  BY "Node Name",
+          DECODE("Phase",
+                 'FS_CLONE',    10,
+                 'CONFIG_CLONE',20,
+                 'PREPARE',     30,
+                 'APPLY',       40,
+                 'FINALIZE',    50,
+                 'CUTOVER',     60,
+                 'CLEANUP',     70,
+                                80);
+
+
+select * from (
+  select
+    node_name "Node Name",
+    node_type "Node Type",
+    'PREPARE' "Phase",
+    case
+      when abort_status='Y'
+        then 'SESSION ABORTED'
+      else
+        case
+          when prepare_status='Y'
+            then 'COMPLETED'
+          when prepare_status='R' and status='F'
+             then
+              case
+                 when exists(select 1 from ad_adop_sessions
+                           where abandon_flag is null 
+                           and node_type='master'
+                           and adop_session_id = &s_report_session_id
+                          )
+                 then 'ABANDONED'
+              else
+                 'FAILED'
+              end
+          when prepare_status='R'
+            then 'RUNNING'
+          when prepare_status='N'
+            then 'NOT STARTED'
+          when prepare_status='X'
+            then 'NOT APPLICABLE'
+        end
+    end "Status",
+    to_timestamp_tz(to_char(prepare_start_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZR') "Started",
+    to_timestamp_tz(to_char(prepare_end_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZR') "Finished",
+    floor((prepare_end_date-prepare_start_date)*24)||
+    decode(TRUNC(prepare_end_date-prepare_start_date),null,' ',':')||
+    lpad(floor(((prepare_end_date-prepare_start_date)*24-
+    floor((prepare_end_date-prepare_start_date)*24))*60), 2, '0')||
+    decode(TRUNC(prepare_end_date-prepare_start_date),null,' ',':')||
+    lpad(mod(round((prepare_end_date-prepare_start_date)*86400), 60),
+         2, '0') "Elapsed"
+  from ad_adop_sessions
+  where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =0
+  UNION ALL
+  select
+    node_name "Node Name",
+    node_type "Node Type",
+    'APPLY' "Phase",
+    case
+      when abort_status='Y'
+        then 'SESSION ABORTED'
+      else
+        case
+          when apply_status='Y'
+            then 'COMPLETED'
+          when apply_status='P' and cutover_status in ('N','X') and prepare_status in ('Y','X') and status='F'
+             then
+              case
+                 when exists(select 1 from ad_adop_sessions
+                           where abandon_flag is null
+                           and node_type='master'
+                           and adop_session_id = &s_report_session_id
+                          )
+                 then 'ABANDONED'
+              else
+                 'FAILED'
+              end
+          when apply_status='P' and cutover_status in ('N','X') and prepare_status in ('Y','X') and status='R'
+            then 'RUNNING'
+          when apply_status='N'
+            then 'NOT STARTED'
+          else
+            'ACTIVE'
+        end
+    end "Status",
+    to_timestamp_tz(to_char(apply_start_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Started",
+    to_timestamp_tz(to_char(apply_end_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Finished",
+    floor((apply_end_date-apply_start_date)*24)||
+    decode(TRUNC(apply_end_date-apply_start_date),null,' ',':')||
+    lpad(floor(((apply_end_date-apply_start_date)*24-
+    floor((apply_end_date-apply_start_date)*24))*60), 2, '0')||
+    decode(TRUNC(apply_end_date-apply_start_date),null,' ',':')||
+    lpad(mod(round((apply_end_date-apply_start_date)*86400), 60),
+         2, '0') "Elapsed"
+  from ad_adop_sessions
+  where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =0
+  UNION ALL
+  select
+    node_name "Node Name",
+    node_type "Node Type",
+      'CUTOVER' "Phase",
+    case
+      when abort_status='Y'
+        then 'SESSION ABORTED'
+      else
+        case
+          when cutover_status='Y'
+            then 'COMPLETED'
+          when cutover_status not in ('N','Y','X') and status='F'
+             then
+              case
+                 when exists(select 1 from ad_adop_sessions
+                           where abandon_flag is null
+                           and node_type='master'
+                           and adop_session_id = &s_report_session_id
+                          )
+                 then 'ABANDONED'
+              else
+                 'FAILED'
+              end
+          when cutover_status not in ('N','Y','X') and status='R'
+            then 'RUNNING'
+          when cutover_status='N'
+            then 'NOT STARTED'
+          when cutover_status='X'
+            then 'NOT APPLICABLE'
+        end
+    end "Status",
+    to_timestamp_tz(to_char(cutover_start_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Started",
+    to_timestamp_tz(to_char(cutover_end_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Finished",
+    floor((cutover_end_date-cutover_start_date)*24)||
+    decode(TRUNC(cutover_end_date-cutover_start_date),null,' ',':')||
+    lpad(floor(((cutover_end_date-cutover_start_date)*24-
+    floor((cutover_end_date-cutover_start_date)*24))*60), 2, '0')||
+    decode(TRUNC(cutover_end_date-cutover_start_date),null,' ',':')||
+    lpad(mod(round((cutover_end_date-cutover_start_date)*86400), 60),
+         2, '0') "Elapsed"
+  from ad_adop_sessions
+  where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =0
+  UNION ALL
+  select
+    node_name "Node Name",
+    node_type "Node Type",
+    'CLEANUP' "Phase",
+    case
+           when cleanup_status='Y'
+              then 'COMPLETED'
+           when prepare_status in ('Y','X') and apply_status='Y' and cutover_status in ('Y','X') and cleanup_status='N' and status='F'
+              then 'FAILED'
+           when prepare_status in ('Y','X') and apply_status='Y' and cutover_status in ('Y','X') and cleanup_status='N' and status='R'
+              then 'RUNNING'
+           else
+              'NOT STARTED'
+    end "Status",
+    to_timestamp_tz(to_char(cleanup_start_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Started",
+    to_timestamp_tz(to_char(cleanup_end_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Finished",
+    floor((cleanup_end_date-cleanup_start_date)*24)||
+    decode(TRUNC(cleanup_end_date-cleanup_start_date),null,' ',':')||
+    lpad(floor(((cleanup_end_date-cleanup_start_date)*24-
+    floor((cleanup_end_date-cleanup_start_date)*24))*60), 2, '0')||
+    decode(TRUNC(cleanup_end_date-cleanup_start_date),null,' ',':')||
+    lpad(mod(round((cleanup_end_date-cleanup_start_date)*86400), 60),
+         2, '0') "Elapsed"
+  from ad_adop_sessions
+  where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =0
+  UNION ALL
+  select
+    node_name "Node Name",
+    node_type "Node Type",
+    'FINALIZE' "Phase",
+    case
+      when abort_status='Y'
+        then 'SESSION ABORTED'
+      else
+        case
+          when finalize_status='Y'
+            then 'COMPLETED'
+          when prepare_status ='Y' and apply_status in ('Y','N','X') and finalize_status='R' and status='F'
+             then
+              case
+                 when exists(select 1 from ad_adop_sessions
+                           where abandon_flag is null
+                           and node_type='master'
+                           and adop_session_id = &s_report_session_id
+                          )
+                 then 'ABANDONED'
+              else
+                 'FAILED'
+              end
+          when prepare_status ='Y' and apply_status in ('Y','N','X') and finalize_status='R' and status='R'
+            then 'RUNNING'
+          when finalize_status = 'X'
+            then 'NOT APPLICABLE'
+          else
+            'NOT STARTED'
+        end
+    end "Status",
+    to_timestamp_tz(to_char(finalize_start_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Started",
+    to_timestamp_tz(to_char(finalize_end_date, 'DD-MON-YY HH24:MI:SS'), 'DD-MON-YY HH24:MI:SS TZH:TZM') "Finished",
+    floor((finalize_end_date-finalize_start_date)*24)||
+    decode(TRUNC(finalize_end_date-finalize_start_date),null,' ',':')||
+    lpad(floor(((finalize_end_date-finalize_start_date)*24-
+    floor((finalize_end_date-finalize_start_date)*24))*60), 2, '0')||
+    decode(TRUNC(finalize_end_date-finalize_start_date),null,' ',':')||
+    lpad(mod(round((finalize_end_date-finalize_start_date)*86400), 60),
+         2, '0') "Elapsed"
+  from ad_adop_sessions
+  where adop_session_id = &s_report_session_id
+        and &s_clone_at_next_s =0
+) order by "Node Type","Node Name",
+  DECODE("Phase",
+         'PREPARE',  10,
+         'APPLY',    20,
+         'FINALIZE', 30,
+         'CUTOVER',  40,
+         'CLEANUP',  50,
+                     60);
+
+
+EOF
+
+  V_TMP=`cat $F_TMP` 
+
+  f_execute_sql "$V_TMP" > /dev/null
+  cat $F_EXECUTE_SQL
+
+  msgd "${FUNCNAME[0]} End."
+} #f_R12_ADOP_STATUS
+
 # Setting some global variables. Now I take care of wheter I am on Linux or Solaris,
 # so that I do not need to bother any further
 
