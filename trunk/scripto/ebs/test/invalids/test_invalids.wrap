@@ -51,7 +51,7 @@ b_grant_normal_packages()
       echo "New invalids"
     fi
 
-exit 0
+#exit 0
   done < packages.lst
 
   msgb "${FUNCNAME[0]} Finished."
@@ -83,7 +83,7 @@ b_grant_normal_tables()
       echo "New invalids"
     fi
 
-exit 0
+#exit 0
   done < tables.lst
 
   msgb "${FUNCNAME[0]} Finished."
@@ -92,6 +92,9 @@ exit 0
 # Execution of blocks
 # If parameter 'block_name' was provided I execute only specified block
 SELECT_BLOCK=$1
+
+msgi "Selectted block: $SELECT_BLOCK"
+
 case $SELECT_BLOCK in
   "b_grant_normal_tables")
     b_grant_normal_tables
