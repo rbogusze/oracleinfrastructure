@@ -48,7 +48,9 @@ if [ ! -f "$V_SECTION/$V_SCRIPT" ]; then
 fi #if [ -f "$V_SECTION/$V_SCRIPT" ]
 
 
-
+# I want this
+# http://xmodulo.com/create-dialog-boxes-interactive-shell-script.html
+# using whiptail
 
 
 
