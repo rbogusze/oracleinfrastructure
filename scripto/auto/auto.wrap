@@ -10,6 +10,26 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
+SCRIPTO_DIR=`pwd`
+
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
+
+V_SECTION=$1
+
+if [ -z "$V_SECTION" ]; then
+  msgi "No section was provided, please provide one as main parameter"
+  msgi "List of available sections:"
+  TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
+  find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
+  cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
+fi #if [ -z "$V_SECTION" ]
+if [ ! -d "$SCRIPTO_DIR/$V_SECTION" ]; then
+  msgi "Provided section(directory) does not exists."
+  msgi "List of available sections:"
+  TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
+  find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
+  cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
+fi #if [ ! -d "$V_SECTION" ]
+
 
