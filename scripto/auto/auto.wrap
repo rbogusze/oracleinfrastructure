@@ -17,19 +17,44 @@ INFO_MODE=DEBUG
 
 V_SECTION=$1
 
+TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
 if [ -z "$V_SECTION" ]; then
-  msgi "No section was provided, please provide one as main parameter"
+  msgi "No section was provided, please provide one as first parameter"
   msgi "List of available sections:"
-  TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
   find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
   cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
 fi #if [ -z "$V_SECTION" ]
 if [ ! -d "$SCRIPTO_DIR/$V_SECTION" ]; then
   msgi "Provided section(directory) does not exists."
   msgi "List of available sections:"
-  TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
   find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
   cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
 fi #if [ ! -d "$V_SECTION" ]
+
+V_SCRIPT=$2
+
+TMP_SCRIPT_LIST=/tmp/auto_${USER}_SCRIPT_LIST
+if [ -z "$V_SCRIPT" ]; then
+  msgi "No script was provided, please provide one as second parameter"
+  msgi "List of available scripts in section $V_SECTION:"
+  find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
+  cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
+fi #if [ -z "$V_SCRIPT" ]
+if [ ! -f "$V_SECTION/$V_SCRIPT" ]; then
+  msgi "Provided script name does not exists" 
+  msgi "List of available scripts in section $V_SECTION:"
+  find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
+  cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
+fi #if [ -f "$V_SECTION/$V_SCRIPT" ]
+
+
+
+
+
+
+
+
+
+
 
 
