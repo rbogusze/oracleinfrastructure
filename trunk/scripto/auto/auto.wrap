@@ -62,9 +62,48 @@ f_standard_input()
 # http://xmodulo.com/create-dialog-boxes-interactive-shell-script.html
 # using whiptail
 
+f_whiptail_menu()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgi "Par: $1"
+  if [ -z "$1" ]; then
+    msgd "No default option provided, starting with 1."
+    V_DEFAULT_OPTION=1
+  else
+    V_DEFAULT_OPTION=$1
+  fi
+ 
+  msgi "V_DEFAULT_OPTION: $V_DEFAULT_OPTION"
 
-f_standard_input $1 $2
+  TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
+  msgi "List of available sections:"
+  find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
+  V_SECTION_MENU=`cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$' | nl -b a`
 
+  OPTION=$(whiptail --title "Test Menu Dialog" --menu "Choose your option" 15 60 4 $V_SECTION_MENU --default-item $V_DEFAULT_OPTION 3>&1 1>&2 2>&3)
+  V_MENU_EXIT_STATUS=$?
+  msgd "V_MENU_EXIT_STATUS: $V_MENU_EXIT_STATUS"
+ 
+  if [ $V_MENU_EXIT_STATUS -eq 0 ]; then 
+
+    msgd "OPTION: $OPTION"
+    V_SELECTED_SECTION=`cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$' | nl -b a | grep $OPTION`
+    msgd "V_SELECTED_SECTION: $V_SELECTED_SECTION"
+    
+    f_whiptail_menu $OPTION
+  else
+    msgi "Cancel"
+  fi
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_whiptail_menu
+
+
+
+#f_standard_input $1 $2
+
+f_whiptail_menu
 
 
 
