@@ -15,45 +15,55 @@ SCRIPTO_DIR=`pwd`
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
-V_SECTION=$1
 
-TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
-if [ -z "$V_SECTION" ]; then
-  msgi "No section was provided, please provide one as first parameter"
-  msgi "List of available sections:"
-  find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
-  cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
-fi #if [ -z "$V_SECTION" ]
-if [ ! -d "$SCRIPTO_DIR/$V_SECTION" ]; then
-  msgi "Provided section(directory) does not exists."
-  msgi "List of available sections:"
-  find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
-  cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
-fi #if [ ! -d "$V_SECTION" ]
+f_standard_input()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  V_SECTION=$1
+  V_SCRIPT=$2
 
-V_SCRIPT=$2
+  TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
+  if [ -z "$V_SECTION" ]; then
+    msgi "No section was provided, please provide one as first parameter"
+    msgi "List of available sections:"
+    find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
+    cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
+    exit 1
+  fi #if [ -z "$V_SECTION" ]
+  if [ ! -d "$SCRIPTO_DIR/$V_SECTION" ]; then
+    msgi "Provided section(directory) does not exists."
+    msgi "List of available sections:"
+    find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
+    cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$'
 
-TMP_SCRIPT_LIST=/tmp/auto_${USER}_SCRIPT_LIST
-if [ -z "$V_SCRIPT" ]; then
-  msgi "No script was provided, please provide one as second parameter"
-  msgi "List of available scripts in section $V_SECTION:"
-  find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
-  cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
-fi #if [ -z "$V_SCRIPT" ]
-if [ ! -f "$V_SECTION/$V_SCRIPT" ]; then
-  msgi "Provided script name does not exists" 
-  msgi "List of available scripts in section $V_SECTION:"
-  find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
-  cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
-fi #if [ -f "$V_SECTION/$V_SCRIPT" ]
+    exit 1
+  fi #if [ ! -d "$V_SECTION" ]
 
+
+  TMP_SCRIPT_LIST=/tmp/auto_${USER}_SCRIPT_LIST
+  if [ -z "$V_SCRIPT" ]; then
+    msgi "No script was provided, please provide one as second parameter"
+    msgi "List of available scripts in section $V_SECTION:"
+    find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
+    cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
+    exit 1
+  fi #if [ -z "$V_SCRIPT" ]
+  if [ ! -f "$V_SECTION/$V_SCRIPT" ]; then
+    msgi "Provided script name does not exists" 
+    msgi "List of available scripts in section $V_SECTION:"
+    find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
+    cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
+    exit 1
+  fi #if [ -f "$V_SECTION/$V_SCRIPT" ]
+  msgb "${FUNCNAME[0]} Finished."
+} #f_standard_input
 
 # I want this
 # http://xmodulo.com/create-dialog-boxes-interactive-shell-script.html
 # using whiptail
 
 
-
+f_standard_input $1 $2
 
 
 
