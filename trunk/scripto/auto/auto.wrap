@@ -62,9 +62,11 @@ f_standard_input()
 # http://xmodulo.com/create-dialog-boxes-interactive-shell-script.html
 # using whiptail
 
-f_whiptail_menu()
+f_whiptail_menu_section()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  run_command_e "cd $SCRIPTO_DIR"
+
   msgi "Par: $1"
   if [ -z "$1" ]; then
     msgd "No default option provided, starting with 1."
@@ -92,23 +94,75 @@ f_whiptail_menu()
 
     D_SELECTED_SECTION=`echo $V_SELECTED_SECTION | awk '{print $2}'`
     msgd "D_SELECTED_SECTION: $D_SELECTED_SECTION"
+
+    run_command_e "cd $SCRIPTO_DIR/$D_SELECTED_SECTION"
+    run_command_d "pwd"
+
+    f_whiptail_menu_script
     
-    f_whiptail_menu $OPTION
+    f_whiptail_menu_section $OPTION
   else
     msgi "Cancel"
   fi
 
 
   msgb "${FUNCNAME[0]} Finished."
-} #f_whiptail_menu
+} #f_whiptail_menu_section
+
+
+f_whiptail_menu_script()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  run_command_d "pwd"
+  msgi "Par: $1"
+  if [ -z "$1" ]; then
+    msgd "No default option provided, starting with 1."
+    V_DEFAULT_OPTION=1
+  else
+    V_DEFAULT_OPTION=$1
+  fi
+
+  TMP_SCRIPT_LIST=/tmp/auto_${USER}_SCRIPT_LIST
+  find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
+  cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
+
+  V_SECTION_MENU=`cat $TMP_SCRIPT_LIST | sort | sed "s/\/$V_SECTION\///" | sed 's/\.//' | nl -b a`
+
+  OPTION=$(whiptail --title "Scripts Menu Dialog" --menu "Choose your option" 15 60 4 $V_SECTION_MENU --default-item $V_DEFAULT_OPTION 3>&1 1>&2 2>&3)
+  V_MENU_EXIT_STATUS=$?
+  msgd "V_MENU_EXIT_STATUS: $V_MENU_EXIT_STATUS"
+ 
+  if [ $V_MENU_EXIT_STATUS -eq 0 ]; then 
+
+    msgd "OPTION: $OPTION"
+    V_SELECTED_SECTION=`cat $TMP_SCRIPT_LIST | sort | sed "s/\/$V_SECTION\///" | sed 's/\.//' | nl -b a | grep $OPTION`
+    msgd "V_SELECTED_SECTION: $V_SELECTED_SECTION"
+
+    D_SELECTED_SECTION=`echo $V_SELECTED_SECTION | awk '{print $2}'`
+    msgd "D_SELECTED_SECTION: $D_SELECTED_SECTION"
+
+    #now run the command
+    clear
+    run_command "pwd"
+    run_command ". .$D_SELECTED_SECTION"   
+ 
+    msgw "Press any key to continue." 
+    read
+    # return to scripts   
+
+    f_whiptail_menu_script $OPTION
+    
+  else
+    msgi "Cancel. We should go up to the main menu now."
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_whiptail_menu_script
 
 
 
 #f_standard_input $1 $2
 
-f_whiptail_menu
-
-
-
+f_whiptail_menu_section
 
 
