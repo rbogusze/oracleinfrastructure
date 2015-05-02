@@ -78,7 +78,7 @@ f_whiptail_menu()
   TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
   msgi "List of available sections:"
   find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
-  V_SECTION_MENU=`cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$' | nl -b a`
+  V_SECTION_MENU=`cat $TMP_DIR_LIST | sort | sed 's/\.\///' | sed 's/\.//' | grep -v '^$' | nl -b a`
 
   OPTION=$(whiptail --title "Test Menu Dialog" --menu "Choose your option" 15 60 4 $V_SECTION_MENU --default-item $V_DEFAULT_OPTION 3>&1 1>&2 2>&3)
   V_MENU_EXIT_STATUS=$?
@@ -87,8 +87,11 @@ f_whiptail_menu()
   if [ $V_MENU_EXIT_STATUS -eq 0 ]; then 
 
     msgd "OPTION: $OPTION"
-    V_SELECTED_SECTION=`cat $TMP_DIR_LIST | sed 's/\.\///' | sed 's/\.//' | grep -v '^$' | nl -b a | grep $OPTION`
+    V_SELECTED_SECTION=`cat $TMP_DIR_LIST | sort | sed 's/\.\///' | sed 's/\.//' | grep -v '^$' | nl -b a | grep $OPTION`
     msgd "V_SELECTED_SECTION: $V_SELECTED_SECTION"
+
+    D_SELECTED_SECTION=`echo $V_SELECTED_SECTION | awk '{print $2}'`
+    msgd "D_SELECTED_SECTION: $D_SELECTED_SECTION"
     
     f_whiptail_menu $OPTION
   else
