@@ -8,11 +8,6 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-
-f3_execute_sql "show parameter cluster_database"
+msgi "Check current DST settings"
+f_execute_sql "@/autofs/upgrade/DB_AUTOMATION/DST_UPDATE/check_DST.sql"
 cat $F_EXECUTE_SQL
-echo
-
-f3_execute_sql "@/ood_repository/patches/$ORACLE_SID/DATABASE11G_AUTOMATION_11R204_WRK/sql/check_database"
-cat $F_EXECUTE_SQL
-echo
