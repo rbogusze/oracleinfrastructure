@@ -136,7 +136,6 @@ f_whiptail_menu_script()
     V_SELECTED_SECTION=`cat $TMP_SCRIPT_LIST | sort | sed "s/\/$V_SECTION\///" | sed 's/\.//' | nl -b a | tr -s '[:blank:]' | grep "^ $OPTION"`
     msgd "V_SELECTED_SECTION: $V_SELECTED_SECTION"
 
-exit 0
 
     D_SELECTED_SECTION=`echo $V_SELECTED_SECTION | awk '{print $2}'`
     msgd "D_SELECTED_SECTION: $D_SELECTED_SECTION"
@@ -181,13 +180,16 @@ f_human_readable_log()
   mv ${F_LOG}_hr_tmp ${F_LOG}_hr
 
   # remove script name
-  cat -v ${F_LOG}_hr | grep -v "$D_SELECTED_SECTION" > ${F_LOG}_hr_tmp
+  cat -v ${F_LOG}_hr | grep -v "^\.\/" > ${F_LOG}_hr_tmp
   mv ${F_LOG}_hr_tmp ${F_LOG}_hr
     
   # remove color
   cat -v ${F_LOG}_hr | sed 's/\^\[\[32m//' > ${F_LOG}_hr_tmp
   mv ${F_LOG}_hr_tmp ${F_LOG}_hr
 
+  # remove action tag
+  cat -v ${F_LOG}_hr | sed 's/\^\[\[34m\[action\]\ \^\[\[39m\^\[\[49m//' > ${F_LOG}_hr_tmp
+  mv ${F_LOG}_hr_tmp ${F_LOG}_hr
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_human_readable_log
