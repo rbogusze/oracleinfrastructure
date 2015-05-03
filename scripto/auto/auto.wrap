@@ -67,7 +67,7 @@ f_whiptail_menu_section()
   msgb "${FUNCNAME[0]} Beginning."
   run_command_e "cd $SCRIPTO_DIR"
 
-  msgi "Par: $1"
+  msgd "Par: $1"
   if [ -z "$1" ]; then
     msgd "No default option provided, starting with 1."
     V_DEFAULT_OPTION=1
@@ -75,10 +75,10 @@ f_whiptail_menu_section()
     V_DEFAULT_OPTION=$1
   fi
  
-  msgi "V_DEFAULT_OPTION: $V_DEFAULT_OPTION"
+  msgd "V_DEFAULT_OPTION: $V_DEFAULT_OPTION"
 
   TMP_DIR_LIST=/tmp/auto_${USER}_DIR_LIST
-  msgi "List of available sections:"
+  msgd "List of available sections:"
   find . -not -path '*/\.*' -type d > $TMP_DIR_LIST
   V_SECTION_MENU=`cat $TMP_DIR_LIST | sort | sed 's/\.\///' | sed 's/\.//' | grep -v '^$' | nl -b a`
 
@@ -96,13 +96,12 @@ f_whiptail_menu_section()
     msgd "D_SELECTED_SECTION: $D_SELECTED_SECTION"
 
     run_command_e "cd $SCRIPTO_DIR/$D_SELECTED_SECTION"
-    run_command_d "pwd"
 
     f_whiptail_menu_script
     
     f_whiptail_menu_section $OPTION
   else
-    msgi "Cancel"
+    msgd "Cancel"
   fi
 
 
@@ -114,7 +113,7 @@ f_whiptail_menu_script()
 {
   msgb "${FUNCNAME[0]} Beginning."
   run_command_d "pwd"
-  msgi "Par: $1"
+  msgd "Par: $1"
   if [ -z "$1" ]; then
     msgd "No default option provided, starting with 1."
     V_DEFAULT_OPTION=1
@@ -124,7 +123,6 @@ f_whiptail_menu_script()
 
   TMP_SCRIPT_LIST=/tmp/auto_${USER}_SCRIPT_LIST
   find ./$V_SECTION -not -path '*/\.*' -type f > $TMP_SCRIPT_LIST
-  cat $TMP_SCRIPT_LIST | sed "s/\/$V_SECTION\///" | sed 's/\.//'
 
   V_SECTION_MENU=`cat $TMP_SCRIPT_LIST | sort | sed "s/\/$V_SECTION\///" | sed 's/\.//' | nl -b a`
 
@@ -143,7 +141,7 @@ f_whiptail_menu_script()
 
     #now run the command
     clear
-    run_command "pwd"
+    #run_command "pwd"
     run_command ". .$D_SELECTED_SECTION"   
  
     msgw "Press any key to continue." 
@@ -153,16 +151,28 @@ f_whiptail_menu_script()
     f_whiptail_menu_script $OPTION
     
   else
-    msgi "Cancel. We should go up to the main menu now."
+    msgd "Cancel. We should go up to the main menu now."
   fi
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_whiptail_menu_script
 
 
+f_human_readable_log()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  F_LOG=$1
+  check_file $F_LOG
+  cat $F_LOG | grep -v '\[block\]' | grep -v '\[wait\]' | grep -v '\[debug\]' | sed 's/^|\ ........\ ..\:..\:..\ //' | sed 's/^"//' | sed 's/"$//' > ${F_LOG}_hr
+  
 
+  msgb "${FUNCNAME[0]} Finished."
+} #f_human_readable_log
+
+
+# Main section
 #f_standard_input $1 $2
 
 f_whiptail_menu_section
-
+f_human_readable_log "$LOG_NAME"
 
