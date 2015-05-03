@@ -112,7 +112,7 @@ f_whiptail_menu_section()
 f_whiptail_menu_script()
 {
   msgb "${FUNCNAME[0]} Beginning."
-  run_command_d "pwd"
+  #run_command_d "pwd"
   msgd "Par: $1"
   if [ -z "$1" ]; then
     msgd "No default option provided, starting with 1."
@@ -141,6 +141,7 @@ f_whiptail_menu_script()
 
     #now run the command
     clear
+    echo
     #run_command "pwd"
     run_command ". .$D_SELECTED_SECTION"   
  
@@ -164,7 +165,24 @@ f_human_readable_log()
   F_LOG=$1
   check_file $F_LOG
   cat $F_LOG | grep -v '\[block\]' | grep -v '\[wait\]' | grep -v '\[debug\]' | sed 's/^|\ ........\ ..\:..\:..\ //' | sed 's/^"//' | sed 's/"$//' > ${F_LOG}_hr
-  
+ 
+  # remove clear sign
+  cat -v ${F_LOG}_hr | sed 's/\^\[\[H\^\[\[2J//' > ${F_LOG}_hr_tmp
+  mv ${F_LOG}_hr_tmp ${F_LOG}_hr
+
+  # remove [info] with color
+  cat -v ${F_LOG}_hr | sed 's/\^\[\[32m\[info\]\ \ \ \ \ \^\[\[39m\^\[\[49m//' > ${F_LOG}_hr_tmp
+  mv ${F_LOG}_hr_tmp ${F_LOG}_hr
+
+  # remove control pwd in auto dir
+  cat -v ${F_LOG}_hr | grep -v "$SCRIPTO_DIR" > ${F_LOG}_hr_tmp
+  mv ${F_LOG}_hr_tmp ${F_LOG}_hr
+
+  # remove script name
+  cat -v ${F_LOG}_hr | grep -v "$D_SELECTED_SECTION" > ${F_LOG}_hr_tmp
+  mv ${F_LOG}_hr_tmp ${F_LOG}_hr
+    
+
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_human_readable_log
