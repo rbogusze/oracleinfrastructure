@@ -8,6 +8,9 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
+INFO_MODE=DEBUG
+#INFO_MODE=INFO
+
 
 f3_execute_sql "show parameter cluster_database"
 cat $F_EXECUTE_SQL
