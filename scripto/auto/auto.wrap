@@ -133,8 +133,10 @@ f_whiptail_menu_script()
   if [ $V_MENU_EXIT_STATUS -eq 0 ]; then 
 
     msgd "OPTION: $OPTION"
-    V_SELECTED_SECTION=`cat $TMP_SCRIPT_LIST | sort | sed "s/\/$V_SECTION\///" | sed 's/\.//' | nl -b a | grep $OPTION`
+    V_SELECTED_SECTION=`cat $TMP_SCRIPT_LIST | sort | sed "s/\/$V_SECTION\///" | sed 's/\.//' | nl -b a | tr -s '[:blank:]' | grep "^ $OPTION"`
     msgd "V_SELECTED_SECTION: $V_SELECTED_SECTION"
+
+exit 0
 
     D_SELECTED_SECTION=`echo $V_SELECTED_SECTION | awk '{print $2}'`
     msgd "D_SELECTED_SECTION: $D_SELECTED_SECTION"
@@ -143,7 +145,7 @@ f_whiptail_menu_script()
     clear
     echo
     #run_command "pwd"
-    run_command ". .$D_SELECTED_SECTION"   
+    run_command ".$D_SELECTED_SECTION"   
  
     msgw "Press any key to continue." 
     read
@@ -182,6 +184,9 @@ f_human_readable_log()
   cat -v ${F_LOG}_hr | grep -v "$D_SELECTED_SECTION" > ${F_LOG}_hr_tmp
   mv ${F_LOG}_hr_tmp ${F_LOG}_hr
     
+  # remove color
+  cat -v ${F_LOG}_hr | sed 's/\^\[\[32m//' > ${F_LOG}_hr_tmp
+  mv ${F_LOG}_hr_tmp ${F_LOG}_hr
 
 
   msgb "${FUNCNAME[0]} Finished."
