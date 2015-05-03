@@ -144,6 +144,11 @@ f_whiptail_menu_script()
     clear
     echo
     #run_command "pwd"
+    # Create a section name from the name of the script executed
+    V_SECTION_NAME=`echo $D_SELECTED_SECTION | sed 's/\///' | sed 's/_/\ /g' | sed 's/\.sh$//' | awk '{print "*** "$0}'`
+    msgd "V_SECTION_NAME: $V_SECTION_NAME"
+    echo "$V_SECTION_NAME"
+
     run_command ".$D_SELECTED_SECTION"   
  
     msgw "Press any key to continue." 
@@ -179,7 +184,7 @@ f_human_readable_log()
   cat -v ${F_LOG}_hr | grep -v "$SCRIPTO_DIR" > ${F_LOG}_hr_tmp
   mv ${F_LOG}_hr_tmp ${F_LOG}_hr
 
-  # remove script name
+  # remove script execution
   cat -v ${F_LOG}_hr | grep -v "^\.\/" > ${F_LOG}_hr_tmp
   mv ${F_LOG}_hr_tmp ${F_LOG}_hr
     
