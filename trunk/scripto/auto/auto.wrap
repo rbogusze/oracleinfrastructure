@@ -142,14 +142,15 @@ f_whiptail_menu_script()
 
     #now run the command
     clear
-    echo
+    echo | tee -a ${LOG_NAME}_raw
     #run_command "pwd"
     # Create a section name from the name of the script executed
     V_SECTION_NAME=`echo $D_SELECTED_SECTION | sed 's/\///' | sed 's/_/\ /g' | sed 's/\.sh$//' | awk '{print "*** "$0}'`
     msgd "V_SECTION_NAME: $V_SECTION_NAME"
-    echo "$V_SECTION_NAME"
+    echo "$V_SECTION_NAME" | tee -a ${LOG_NAME}_raw
 
-    run_command ".$D_SELECTED_SECTION"   
+    msgd "LOG_NAME: $LOG_NAME"
+    run_command ".$D_SELECTED_SECTION" | tee -a ${LOG_NAME}_raw
  
     msgw "Press any key to continue." 
     read
@@ -196,6 +197,11 @@ f_human_readable_log()
   cat -v ${F_LOG}_hr | sed 's/\^\[\[34m\[action\]\ \^\[\[39m\^\[\[49m//' > ${F_LOG}_hr_tmp
   mv ${F_LOG}_hr_tmp ${F_LOG}_hr
 
+  # change 'Executing SQL:' into 'SQL>'
+  cat -v ${F_LOG}_hr | sed 's/Executing\ SQL\:/SQL\>/' > ${F_LOG}_hr_tmp
+  mv ${F_LOG}_hr_tmp ${F_LOG}_hr
+   
+
   msgb "${FUNCNAME[0]} Finished."
 } #f_human_readable_log
 
@@ -204,5 +210,5 @@ f_human_readable_log()
 #f_standard_input $1 $2
 
 f_whiptail_menu_section
-f_human_readable_log "$LOG_NAME"
+f_human_readable_log "${LOG_NAME}_raw"
 
