@@ -2544,3 +2544,2549 @@ What I have tested and it worked:
 
 
 
+= Interesting tasks =
+== adop: do I have to run cleanup after cutover? ==
+Just apply two patches (irrelewant what they do) using only cycle prepare,apply,cutover
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+{{{
+$ adop phase=prepare
+[EVENT]     Calling cleanup since cleanup was not run in previous patching session.
+[EVENT]     [START 2015/03/20 12:38:08] Performing Cleanup steps
+[EVENT]     [START 2015/03/20 12:40:10] Sync FS of RUN and PATCH
+adop exiting with status = 0 (Success)
+}}}
+
+{{{
+$ adop phase=apply patches=18668337 patchtop=/STAGING/ebs12patches
+adop phase=apply - Completed Successfully
+}}}
+
+{{{
+$ adop phase=cutover
+adop phase=cutover - Completed Successfully
+}}}
+
+{{{
+###### Another adop cycle ######
+}}}
+
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+{{{
+$ adop phase=prepare
+[EVENT]     Calling cleanup since cleanup was not run in previous patching session.
+[EVENT]     [START 2015/03/20 14:27:42] Performing Cleanup steps
+[EVENT]     [START 2015/03/20 15:03:32] Sync FS of RUN and PATCH
+SUMMARY OF PATCHES BEING SYNCHRONIZED...
+[1] SINGLE PATCH (DRV=u18668337.drv):  18668337
+adop phase=prepare - Completed Successfully
+}}}
+
+{{{
+$ adop phase=apply patches=18376908 patchtop=/STAGING/ebs12patches
+adop phase=apply - Completed Successfully
+}}}
+
+{{{
+$ adop phase=cutover
+adop phase=cutover - Completed Successfully
+###### Another adop cycle ######
+}}}
+
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+{{{
+$ adop phase=prepare
+[EVENT]     Calling cleanup since cleanup was not run in previous patching session.
+[EVENT]     [START 2015/03/20 16:28:50] Performing Cleanup steps
+[EVENT]     [START 2015/03/20 16:37:24] Sync FS of RUN and PATCH
+SUMMARY OF PATCHES BEING SYNCHRONIZED...
+[1] SINGLE PATCH (DRV=u18376908.drv):  18376908
+adop phase=prepare - Completed Successfully
+}}}
+
+Conclusion: No, there is no need to run cleanup manually after cutover. No need to run fs_clone either. The prepare will run cleanup, that will run fs_clone if needed.
+
+
+
+== Grnating privileges causes masive invalidations ==
+MOS:
+* Granting Privileges On An Object May Cause Invalidations (Doc ID 1987947.1)
+* BUG:19674458 - GRANTING SELECT ON LARGE NUMBER OF OBJECTS TO A ROLE CAUSES MASSIVE INVALIDS
+
+Find some objects to experiment with
+
+set linesize 200
+col object_name for a40
+select object_name, owner, object_type from dba_objects where object_name like 'FND%' order by object_name;
+
+select object_name, owner, object_type from dba_objects where object_name like 'FND%' and owner = 'APPS' order by object_name;
+
+select object_name, owner, object_type from dba_objects where object_name like 'FND%' and owner = 'APPLSYS' and object_type = 'TABLE' order by object_name;
+
+
+=== testcase how to cause masive invalidations ===
+
+Current DB invalids
+{{{
+> select sysdate, count(1) from dba_objects where status != 'VALID'
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/12 12:49:57	    14
+}}}
+
+{{{
+> select object_name, owner, object_type from dba_objects where status != 'VALID' order by owner
+OBJECT_NAME		       OWNER		    OBJECT_TYPE
+------------------------------ -------------------- -------------------
+FFP55409_01012007	       APPS		    PACKAGE BODY
+FFP55409_01012011	       APPS		    PACKAGE BODY
+FFP55429_01011900	       APPS		    PACKAGE BODY
+FFP60280_01010001	       APPS		    PACKAGE BODY
+FFP60342_01010001	       APPS		    PACKAGE BODY
+FFP60342_01012006	       APPS		    PACKAGE BODY
+FFP61912_01010001	       APPS		    PACKAGE BODY
+FFP60342_01012009	       APPS		    PACKAGE BODY
+FFP60356_01011951	       APPS		    PACKAGE BODY
+FFP61161_01010001	       APPS		    PACKAGE BODY
+FFP61867_01010001	       APPS		    PACKAGE BODY
+FFP61871_01010001	       APPS		    PACKAGE BODY
+FFP61897_01010001	       APPS		    PACKAGE BODY
+FFP60342_01012008	       APPS		    PACKAGE BODY
+}}}
+
+# rows selected.
+
+
+=== Giving grant on editioned table to a user, try 1 ===
+{{{
+> connect apps/apps
+> grant select on FND_PROFILE to "BOLINF";
+ERROR at line 1:
+ORA-02225: only EXECUTE and DEBUG privileges are valid for procedures
+}}}
+
+{{{
+> select sysdate, count(1) from dba_objects where status != 'VALID'
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/12 12:55:06	  9503
+}}}
+
+Conclusion: a grant that has not even succedded caused 9503 - 14 objects to become invalid.
+
+=== Giving grant on editioned table to a user, try 2 ===
+Compile all invalids
+{{{
+> exec sys.utl_recomp.recomp_parallel(4);
+> select sysdate, count(1) from dba_objects where status != 'VALID'
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/12 21:52:24	    14
+}}}
+
+
+{{{
+> connect apps/apps
+> grant select on FND_TREE_FOLDERS to "BOLINF";
+Grant succeeded.
+}}}
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 22:02:42	    14
+
+
+grant select on FND_TRANSLATION_EXCEPTIONS to "BOLINF";
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 22:13:07	    14
+
+
+{{{
+> grant select on FND_OBJECTS to "BOLINF";
+}}}
+
+Grant succeeded.
+
+{{{
+> select sysdate, count(1) from dba_objects where status != 'VALID'
+}}}
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 22:14:45	   384
+
+{{{
+> exec sys.utl_recomp.recomp_parallel(4);
+}}}
+
+{{{
+> select sysdate, count(1) from dba_objects where status != 'VALID'
+}}}
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 22:52:31	    14
+
+{{{
+> grant select on FND_OBJECTS to "BOLINF";
+}}}
+
+Grant succeeded.
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 22:53:56	    14
+
+*> ok, granting again does not change anything.
+
+{{{
+> revoke select on FND_OBJECTS from "BOLINF";
+}}}
+
+Revoke succeeded.
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 22:55:58	    14
+
+*> revoke does not change anything
+
+{{{
+> grant select on FND_OBJECTS to "BOLINF";
+}}}
+
+Grant succeeded.
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 22:56:36	    14
+
+*> Granting again does not change anything.
+
+
+=== Granting using the API ===
+==== first test ====
+{{{
+> connect apps/apps
+> desc AD_ZD
+PROCEDURE GRANT_PRIVS
+Argument Name			Type			In/Out Default?
+------------------------------ ----------------------- ------ --------
+X_PERMISSIONS			VARCHAR2		IN
+X_OBJECT_NAME			VARCHAR2		IN
+X_GRANTEE			VARCHAR2		IN
+X_OPTIONS			VARCHAR2		IN     DEFAULT
+}}}
+
+{{{
+> exec AD_ZD.GRANT_PRIVS('SELECT','FND_TABLES','BOLINF');
+PL/SQL procedure successfully completed.
+}}}
+
+Invalids:
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 23:14:50	    14
+
+*> ok, no change in invalids
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_TABLES;
+}}}
+
+COUNT(1)
+*---------
+23393
+
+*> ok, so this works well
+
+How to revoke them? Don't see the api suitable for that.
+
+{{{
+> revoke select on FND_TABLES from "BOLINF";
+}}}
+
+This revoke command created lots of invalids:
+
+SYSDATE 	      COUNT(1)
+*------------------ ----------
+2015/03/12 23:23:32	   318
+
+Again let's try to grant first through API the by regular grant.
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_TABLESPACES;
+ORA-00942: table or view does not exist
+}}}
+
+OK, that is to be expected.
+
+{{{
+> connect apps/apps
+> exec AD_ZD.GRANT_PRIVS('SELECT','FND_TABLESPACES','BOLINF');
+}}}
+
+No new invalids.
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_TABLESPACES;
+COUNT(1)
+----------
+9
+OK, the grant works.
+}}}
+
+Trying to grant through the regular grant.
+
+{{{
+> connect apps/apps
+> grant select on FND_TABLESPACES to "BOLINF";
+}}}
+
+New invalids appear.
+
+Recompile
+
+{{{
+> exec sys.utl_recomp.recomp_parallel(4);
+}}}
+
+Back to 14 invalids.
+
+Adop cycle
+{{{
+$ adop phase=prepare,cutover
+}}}
+
+Invalids: 14
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_TABLESPACES;
+COUNT(1)
+----------
+9
+}}}
+
+{{{
+> select edition_name from dba_objects where object_name='FND_TABLESPACES';
+}}}
+
+EDITION_NAME
+*-----------------------------
+
+V_20150114_2127
+
+{{{
+$ adop phase=prepare,cutover
+}}}
+
+Again after an adop cycle
+
+==== Does granting again that what was causing invalidation will create another invalidations? ====
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_TABLESPACES';
+EDITION_NAME
+------------------------------
+V_20150114_2127
+}}}
+
+{{{
+> connect apps/apps
+> grant select on FND_TABLESPACES to "BOLINF";
+}}}
+
+Invalids: 14
+
+Conclusion -> no change
+
+==== Picking another table to grant select, just to repeat the procedure ====
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_SESSIONS';
+EDITION_NAME
+------------------------------
+V_20150114_2127
+V_20150114_2127
+}}}
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_SESSIONS;
+ORA-00942: table or view does not exist
+}}}
+
+{{{
+> connect apps/apps
+> exec AD_ZD.GRANT_PRIVS('SELECT','FND_SESSIONS','BOLINF');
+}}}
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_SESSIONS;
+COUNT(1)
+----------
+28751
+}}}
+
+Invalids: 14
+
+{{{
+> connect apps/apps
+> grant select on FND_SESSIONS to "BOLINF";
+}}}
+
+Invalids: 14
+
+==== Picking another table to grant select, just to repeat the procedure ====
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_TRACE_LOG';
+}}}
+
+EDITION_NAME
+*-----------------------------
+ORA$BASE
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_TRACE_LOG;
+ORA-00942: table or view does not exist
+}}}
+
+{{{
+> connect apps/apps
+> exec AD_ZD.GRANT_PRIVS('SELECT','FND_TRACE_LOG','BOLINF');
+}}}
+
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_TRACE_LOG';
+}}}
+
+EDITION_NAME
+*-----------------------------
+ORA$BASE
+
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_TRACE_LOG;
+COUNT(1)
+----------
+0
+}}}
+
+{{{
+> connect apps/apps
+> grant select on FND_TRACE_LOG to "BOLINF";
+}}}
+
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_TRACE_LOG';
+}}}
+
+EDITION_NAME
+*-----------------------------
+V_20150215_0032
+
+==== Picking another table to grant select, just to repeat the procedure ====
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_COLUMNS';
+}}}
+
+EDITION_NAME
+*-----------------------------
+ORA$BASE
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_COLUMNS;
+ORA-00942: table or view does not exist
+}}}
+
+{{{
+> connect apps/apps
+> exec AD_ZD.GRANT_PRIVS('SELECT','FND_COLUMNS','BOLINF');
+}}}
+
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_COLUMNS';
+}}}
+
+EDITION_NAME
+*-----------------------------
+ORA$BASE
+
+
+{{{
+> connect BOLINF/xxx
+> select count(1) from apps.FND_COLUMNS;
+COUNT(1)
+----------
+633831
+}}}
+
+{{{
+> connect apps/apps
+> grant select on FND_COLUMNS to "BOLINF";
+}}}
+
+Invalids: 14
+
+{{{
+> select edition_name from dba_objects where object_name='FND_COLUMNS';
+}}}
+
+EDITION_NAME
+*-----------------------------
+V_20150215_0032
+
+=== Giving grant explicitly to an edition ===
+
+select edition_name from dba_objects
+where owner = '<owner>'
+    and object_name='<object_name>'
+    and object_type='<object_type>'
+
+
+select edition_name from dba_objects where object_name='FND_TABLESPACES';
+
+EDITION_NAME
+*-----------------------------
+
+V_20150114_2127
+
+SQL> select edition_name from dba_objects where object_name='FND_VIEWS';
+
+EDITION_NAME
+*-----------------------------
+
+ORA$BASE
+
+{{{
+> grant select on FND_VIEWS to "BOLINF";
+}}}
+
+New invalids appear.
+
+{{{
+> select edition_name from dba_objects where object_name='FND_VIEWS';
+}}}
+
+EDITION_NAME
+*-----------------------------
+
+V_20150114_2127
+
+That is why invalidations occur. When we use explicit grant the edition of the object is created.
+
+=== Rollback and test some other scenarius ===
+Using vmware snap instead to rollback easily both app and db tiers.
+
+==== Automate testing: ====
+Pick 100 tables, 100 packages; grant select/execute. Count the invalids at every step.
+
+select object_name from dba_objects where object_name like 'FND%' and owner = 'APPLSYS' and object_type = 'TABLE';
+select object_name from dba_objects where object_name like 'FND%' and owner = 'APPS' and object_type = 'PACKAGE';
+
+==== Test scenarius with: ====
+# adop cycle: cutover complete (no cleanup)
+test_invalids_log_.2015-03-17--21:29:38 - 14 to 17 - not much few new invalids
+
+2. adop cycle: cleanup complete
+test_invalids_log_.2015-03-18--17:53:21 - 14 to 5614 - lots of invalids
+
+3. adop cycle: prepare complete (started adop cycle)
+# invalids
+{{{
+$ adop phase=prepare
+test_invalids_log_.2015-03-18--22:22:50 - 2921 invalids to 2925
+}}}
+
+{{{
+$ adop phase=cutover
+15 invalids
+test_invalids_log_.2015-03-19--09:17:58 - 15 to 25
+}}}
+
+==== Test 2 scenarius with: ====
+# adop cycle: cutover complete (no cleanup)
+test_invalids_log_.2015-03-23--09:49:00 - 2 invalids to 83
+
+2. adop cycle: cleanup complete
+62538 rows selected - invalids ?!
+
+=== automated tests ad.5 ===
+# adop cycle: cutover complete (no cleanup)
+{{{
+$ ./test_invalids.sh b_grant_normal_tables
+test_invalids_log_b_grant_normal_tables.2015-03-27--11:52:09 14 - 17 invalids
+$ ./test_invalids.sh b_grant_normal_packages
+test_invalids_log_b_grant_normal_packages.2015-03-27--12:24:23 17 - 33 invalids
+}}}
+
+2. adop cycle: cleanup complete (no restore)
+{{{
+$ adop phase=cleanup
+> @vc
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/27 19:01:55	 64722
+}}}
+
+{{{
+> @utlrp
+}}}
+
+{{{
+> @vc
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/29 20:04:32	    14
+}}}
+
+{{{
+$ ./test_invalids.sh b_grant_normal_tables
+test_invalids_log_b_grant_normal_tables.2015-03-29--20:05:59 14 - 14 invalids
+$ ./test_invalids.sh b_grant_normal_packages
+test_invalids_log_b_grant_normal_packages.2015-03-29--20:40:36 14 - 14 invalids
+}}}
+
+
+3. adop cycle: prepare complete (started adop cycle)
+{{{
+$ adop phase=prepare
+> @vc
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/29 22:14:38	    14
+}}}
+
+{{{
+$ ./test_invalids.sh b_grant_normal_tables
+test_invalids_log_b_grant_normal_tables.2015-03-29--22:15:03 14 - 14 invalids
+$ ./test_invalids.sh b_grant_normal_packages
+test_invalids_log_b_grant_normal_packages.2015-03-30--11:56:45 14 - 14 invalids
+}}}
+
+4. rollback all changes (back to snapschot)
+Done - to snapschot "before_invalids_test"
+{{{
+$ cd scripto/
+$ svn update
+}}}
+
+5. adop cycle: cleanup complete
+{{{
+$ adop phase=cleanup
+Check how was it set under the old binaries
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/30 13:30:47	    14
+}}}
+
+6. Test
+{{{
+$ cd scripto/ebs/test/invalids/
+$ ./test_invalids.sh b_grant_normal_tables
+test_invalids_log_b_grant_normal_tables.2015-03-30--13:37:35 14 - 17 invalids
+> @utlrp
+!!! Something is weird !!!
+The recompile for 3 invalids took: 9h ?!
+2015/03/30 15:27:33
+2015/03/31 00:50:46
+}}}
+
+{{{
+> @vc
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/31 14:42:02	    14
+}}}
+
+{{{
+$ ./test_invalids.sh b_grant_normal_packages
+test_invalids_log_b_grant_normal_packages.2015-03-31--14:42:44 14 - 28321 invalids
+}}}
+
+
+=== automated tests ad.6 ===
+# adop cycle: cutover complete (no cleanup)
+{{{
+> @vc
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/31 22:56:44	  2515
+> @utlrp
+2015/03/31 22:57:08
+2015/03/31 23:04:04 - finished in 7min !?
+}}}
+
+{{{
+$ cd scripto
+$ svn update
+$ cd scripto/ebs/test/invalids/
+$ ./test_invalids.sh b_grant_normal_tables
+test_invalids_log_b_grant_normal_tables.2015-03-31--23:08:54 14 - 24 invalids
+$ ./test_invalids.sh b_grant_normal_packages
+test_invalids_log_b_grant_normal_packages.2015-03-31--23:27:50 24 - 40 invalids
+}}}
+
+2. adop cycle: cleanup complete (no restore)
+{{{
+$ adop phase=cleanup
+> @vc
+SYSDATE 	      COUNT(1)
+------------------- ----------
+2015/03/31 23:55:30	 64724
+> @utlrp
+}}}
+
+
+
+
+== Hostname change on MT ==
+MOS:
+* 11i: How to change the hostname of an Applications Tier using AutoConfig (Doc ID 341322.1)
+
+* Oracle Application Server with Oracle E-Business Suite Release 12 FAQ (Doc ID 415007.1)
+
+* Adding an Alias Hostname with Oracle E-Business Suite Release 12 (Doc ID 603883.1)
+*> very similar to what I have done
+
+* How to change the IP Address on a R12 EBusiness Suite Installation (Doc ID 554843.1)
+
+I have conducted the following exercise, which partly looks like cloning:
+# Run preclone
+2. Shutdown MT
+3. Do the backup
+4. Change the hostname
+5. Do nothing (simulating the MT backup restore on the new hostname)
+6. Perform postclone on MT
+
+=== 1. Run preclone ===
+==== Preclone APP ====
+Preclone should be done on a properly running DB and APP tiers
+{{{
+$ source /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+
+
+DB Host: ebsdb2.remik.org  Service/SID: VIS
+
+
+$ cd $INST_TOP/admin/scripts
+$ perl adpreclone.pl appsTier
+}}}
+
+=== 2. Shutdown MT ===
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adstpall.sh apps/apps
+}}}
+
+=== 3. Do the backup ===
+*> post_preclone snapschot
+
+=== 4. Change the hostname ===
+Originaly:
+{{{
+# uname -a
+Linux ebs2.remik.org 2.6.32-300.10.1.el5uek #1 SMP Wed Feb 22 17:37:40 EST 2012 x86_64 x86_64 x86_64 GNU/Linux
+}}}
+
+{{{
+# cat /etc/hosts
+192.168.1.158 ebs2.remik.org ebs2
+192.168.1.159 ebsdb2.remik.org ebsdb2
+}}}
+
+I will change both the hostname and IP.
+
+After change:
+{{{
+# uname -a
+Linux ebs2new.remik.org 2.6.32-300.10.1.el5uek #1 SMP Wed Feb 22 17:37:40 EST 2012 x86_64 x86_64 x86_64 GNU/Linux
+}}}
+
+{{{
+# cat /etc/hosts
+192.168.1.162 ebs2new.remik.org ebs2new
+192.168.1.159 ebsdb2.remik.org ebsdb2
+}}}
+
+
+Add new line in /etc/hosts on DB tier
+
+=== 5. Do nothing (simulating the backup restore on the new hostname) ===
+DB is up and running. Not restored from backup.
+
+Actually there is some cleaning to be done, which mimic what would be done during cloning.
+
+According to Note 1383621.1 we only need
+<APPL_TOP>
+<COMMON_TOP>
+<OracleAS Tools 10.1.2 ORACLE_HOME>
+
+APPL_TOP   =/u01/oracle/VIS/fs2/EBSapps/appl
+COMMON_TOP =/u01/oracle/VIS/fs2/EBSapps/comn
+ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+
+Cleaning up:
+mkdir -p /u01/trash/fs2
+mv /u01/oracle/VIS/fs2/FMW_Home /u01/trash/fs2
+mv /u01/oracle/VIS/fs2/inst /u01/trash/fs2
+mv /u01/oracle/VIS/fs1 /u01/trash
+mv /u01/oracle/VIS/fs_ne /u01/trash
+mv /u01/oracle/VIS/EBSapps.env /u01/trash
+
+
+And we need to let the cloning to create the global inventory
+{{{
+$ cat /etc/oraInst.loc
+inventory_loc=/u01/oraInventory
+$ mv /u01/oraInventory /u01/oraInventory_`date -I`
+}}}
+
+
+
+=== 6. Perform postclone on DB ===
+This step is required to cleanup the node configuration on DB. Without that the DB expects the old MT host to be present and adop fs_clone fails.
+
+This postclone on DB somehow cleans the configuration. There should be other way to do it, but for now this works.
+
+Perform postclone on DB
+
+* shutdown DB tier
+!
+! Only if this is the only Oracle product on this host
+!
+And we need to let the cloning to create the global inventory
+{{{
+$ cat /etc/oraInst.loc
+inventory_loc=/u01/oraInventory
+$ mv /u01/oraInventory /u01/oraInventory_`date -I`
+}}}
+
+{{{
+$ cd /u01/oracle/VIS/11.2.0/appsutil/clone/bin
+$ perl adcfgclone.pl dbTier
+}}}
+
+Target System Hostname (virtual or normal) [ebsdb4] :
+
+Target Instance is RAC (y/n) [n] :
+
+Target System Database SID : VIS
+
+Target System Base Directory : /u01/oracle/VIS
+
+Target System utl_file_dir Directory List : /tmp
+
+Number of DATA_TOP's on the Target System [1] :
+
+Target System DATA_TOP Directory 1 [/u01/oracle/VIS/data] :
+
+Target System RDBMS ORACLE_HOME Directory [/u01/oracle/VIS/11.2.0] :
+
+Do you want to preserve the Display [null] (y/n)  : y
+
+Target System Port Pool [0-99] : 0
+
+?? sometimes Do you want the target system to have the same port values as the source system (y/n) [y] ? :
+
+Checking the port pool 0
+
+Completed Apply...
+
+
+=== 7. Perform postclone on MT ===
+
+==== run postclone on RUN edition ====
+If DB node is using tcp.validnode_checking disable it, or add new hostname
+
+Login to DB node
+{{{
+$ cd $ORACLE_HOME/network/admin/$CONTEXT_NAME
+$ vim sqlnet.ora
+#tcp.validnode_checking = yes
+#tcp.invited_nodes=(EBS2.remik.org, EBSDB2.remik.org)
+}}}
+
+Go to run edition on new MT perform postclone
+{{{
+$ cd /u01/oracle/VIS/fs2/EBSapps/comn/clone/bin  (which should be like: $ cd $COMMON_TOP/clone/bin)
+$ perl adcfgclone.pl appsTier
+}}}
+
+Enter the APPS password :
+Enter the Weblogic AdminServer password :
+Do you want to add a node (yes/no) [no] :
+Target System File Edition type [run] :
+
+Provide the values required for creation of the new APPL_TOP Context file.
+
+Target System Hostname (virtual or normal) [ebs2new] :
+
+Target System Database SID : VIS
+
+Target System Database Server Node [ebs2new] : ebsdb2
+
+Target System Database Domain Name [remik.org] :
+
+Target System Base Directory : /u01/oracle/VIS
+
+Target System Base Directory set to /u01/oracle/VIS
+
+Target System Current File System Base set to /u01/oracle/VIS/fs2
+
+Target System Other File System Base set to /u01/oracle/VIS/fs1
+
+Target System Fusion Middleware Home set to /u01/oracle/VIS/fs2/FMW_Home
+
+Target System Web Oracle Home set to /u01/oracle/VIS/fs2/FMW_Home/webtier
+
+Target System Appl TOP set to /u01/oracle/VIS/fs2/EBSapps/appl
+
+Target System COMMON TOP set to /u01/oracle/VIS/fs2/EBSapps/comn
+
+Target System Instance Home Directory [/u01/oracle/VIS] :
+
+Target System Instance Top set to /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new
+
+Do you want to preserve the Display [ebs2:0.0] (y/n)  : n
+
+Target System Display [ebs2new:0.0] :
+
+Target System Root Service [enabled] :
+
+Target System Web Administration [enabled] :
+
+Target System Web Entry Point Services [enabled] :
+
+Target System Web Application Services [enabled] :
+
+Target System Batch Processing Services [enabled] :
+
+Target System Other Services [disabled] :
+
+Do you want the target system to have the same port values as the source system (y/n) [y] ? : y
+Complete port information available at /u01/oracle/VIS/fs2/EBSapps/comn/clone/bin/out/VIS_ebs2new/portpool.lst
+
+
+UTL_FILE_DIR on database tier consists of the following directories.
+
+# /usr/tmp
+2. /usr/tmp
+3. /u01/oracle/VIS/11.2.0/appsutil/outbound/VIS_ebsdb2
+4. /usr/tmp
+Choose a value which will be set as APPLPTMP value on the target node [1] :
+
+Creating the new APPL_TOP Context file from :
+/u01/oracle/VIS/fs2/EBSapps/comn/clone/context/apps/adxmlctx.tmp
+
+The new APPL_TOP context file has been created :
+/u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/appl/admin/VIS_ebs2new.xml
+
+*---
+
+Do you want to startup the Application Services for VIS? (y/n) [n] : n
+
+==== Fix the issue with listener: adalnctl.sh: exiting with status 1 ====
+
+Relogin, source the run env.
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+File System Type          : SINGLE
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : NOT APPLICABLE
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+}}}
+
+
+DB Host: ebsdb2.remik.org  Service/SID: VIS
+
+Check if there are some zombie app processes left
+{{{
+$ ps -ef | grep applmgr
+}}}
+
+
+{{{
+$ cp /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/ora/10.1.2/network/admin/sqlnet.ora /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/ora/10.1.2/network/admin/sqlnet.ora_`date -I`
+$ vim /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/ora/10.1.2/network/admin/sqlnet.ora
+#tcp.validnode_checking = yes
+#tcp.invited_nodes = (EBS2.remik.org, EBSDB2.remik.org, EBS2NEW.remik.org)
+}}}
+
+Start the app tier.
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adstrtal.sh apps/apps
+}}}
+
+==== Run adpreclone.pl on the run edition file system ====
+
+{{{
+$ source /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+File System Type          : SINGLE
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : NOT APPLICABLE
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+}}}
+
+{{{
+$ cd $INST_TOP/admin/scripts
+$ perl adpreclone.pl appsTier
+}}}
+
+==== copy from the run edition file system to the patch edition file system ====
+see Maintenance cloning: copy from the run edition file system to the patch edition file system
+
+==== logon to the patch edition file system and run postclone ====
+
+see Maintenance cloning: logon to the patch edition file system and run postclone
+
+==== Running fs_clone ====
+Relogin, source run edition.
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+}}}
+
+
+DB Host: ebsdb2.remik.org  Service/SID: VIS
+
+
+Sourcing the RUN File System ...
+
+{{{
+$ adop phase=fs_clone
+Enter the APPS password:
+Enter the SYSTEM password:
+Enter the WLSADMIN password:
+}}}
+
+
+
+
+
+=== troubleschooting ===
+==== Exiting cloning as FMW Home already exists ====
+MOS:
+* 12.2.X Rapid Clone fails with error "Exiting cloning as FMW Home already exists." (Doc ID 1900583.1)
+
+# According to Note 1383621.1--> step 3.2.2.2, copy following directories:
+
+<APPL_TOP> 
+
+<COMMON_TOP>
+
+<OracleAS Tools 10.1.2 ORACLE_HOME>
+
+2. The FMW home should not be copied.
+
+3. And for step 3.2.3.2.3 "Copy Oracle E-Business Suite application directories from the run edition file system to the patch edition file system in the Target System", users should copy the same three directories as above. Do not copy the whole fs directory.
+
+*--
+APPL_TOP   =/u01/oracle/VIS/fs2/EBSapps/appl
+COMMON_TOP =/u01/oracle/VIS/fs2/EBSapps/comn
+ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+
+Cleaning up:
+mkdir /u01/trash
+mv /u01/oracle/VIS/fs2/FMW_Home /u01/trash
+mv /u01/oracle/VIS/fs2/inst /u01/trash
+mv /u01/oracle/VIS/fs1 /u01/trash
+mv /u01/oracle/VIS/fs_ne /u01/trash
+mv /u01/oracle/VIS/EBSapps.env /u01/trash
+
+{{{
+$ pwd
+/u01/oracle/VIS
+$ ls
+fs2
+$ cd fs2
+[applmgr@ebs2new fs2]$ ls
+EBSapps
+$ cd EBSapps/
+[applmgr@ebs2new EBSapps]$ ls
+10.1.2  appl  comn
+}}}
+
+==== Below Oracle Homes are already registered in the global inventory ====
+Below Oracle Homes are already registered in the global inventory:
+/u01/oracle/VIS/fs2/FMW_Home/Oracle_EBS-app1
+/u01/oracle/VIS/fs2/FMW_Home/webtier
+/u01/oracle/VIS/fs2/FMW_Home/oracle_common
+
+Exiting Cloning...
+
+Ensure that the above Oracle Homes are unregistered from the global inventory "/u01/oraInventory/ContentsXML/inventory.xml" and re-run adcfgclone.pl script
+
+*--
+MOS:
+* Troubleshooting RapidClone issues with Oracle Applications R12 (Doc ID 603104.1)
+
+I will let the clone to recreate global inventory
+
+{{{
+$ cat /etc/oraInst.loc
+inventory_loc=/u01/oraInventory
+$ mv /u01/oraInventory /u01/oraInventory_`date -I`
+}}}
+
+
+
+
+==== Web Administration         OracleTNSListenerAPPS_VIS_ebs2new       adalnctl.sh                Failed ====
+adalnctl.sh version 120.3.12020000.2
+
+Checking for FNDFS executable.
+Starting listener process APPS_VIS.
+
+adalnctl.sh: exiting with status 1
+
+
+adalnctl.sh: check the logfile /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/logs/appl/admin/log/adalnctl.txt for more information ..
+.
+Connecting to (ADDRESS=(PROTOCOL=TCP)(Host=ebs2new)(Port=1626))
+TNS-12541: TNS:no listener
+TNS-12560: TNS:protocol adapter error
+TNS-00511: No listener
+Linux Error: 111: Connection refused
+
+07/10/14-04:46:59 :: adalnctl.sh: Starting listener process APPS_VIS.
+TNSLSNR for Linux: Version 10.1.0.5.0 - Production
+System parameter file is /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/ora/10.1.2/network/admin/listener.ora
+Log messages written to /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/logs/ora/10.1.2/network/apps_vis.log
+Error listening on: (ADDRESS=(PROTOCOL=TCP)(Host=ebs2new)(Port=1626))
+TNS-12533: TNS:illegal ADDRESS parameters
+TNS-12560: TNS:protocol adapter error
+TNS-00503: Illegal ADDRESS parameters
+
+*--
+
+{{{
+$ cp /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/ora/10.1.2/network/admin/sqlnet.ora /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/ora/10.1.2/network/admin/sqlnet.ora_`date -I`
+$ vim /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/ora/10.1.2/network/admin/sqlnet.ora
+#tcp.validnode_checking = yes
+#tcp.invited_nodes = (EBS2.remik.org, EBSDB2.remik.org, EBS2NEW.remik.org)
+$ cd /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/admin/scripts
+$ ./adalnctl.sh start
+adalnctl.sh: exiting with status 0
+}}}
+
+OK, let's restart everything.
+
+==== ERRORMSG: 'fs_clone' is not a valid phase with a single APPL_TOP ====
+{{{
+$ adop phase=fs_clone
+*******FATAL ERROR*******
+PROGRAM : (/u01/oracle/VIS/fs2/EBSapps/appl/ad/12.0.0/bin/adzdoptl.pl)
+TIME    : Thu Jul 10 06:38:51 2014
+FUNCTION: ADOP::GlobalVars::_ValidateArgs [ Level 1 ]
+ERRORMSG: 'fs_clone' is not a valid phase with a single APPL_TOP. Valid phases are 'apply' and 'cleanup'.
+}}}
+
+adop exiting with status = 2 (Fail)
+
+"The target <s_base> directory will be /d05/test. Copy the source run edition file system into the target /d05/test/fs2 directory to initially act as run edition file system, and into the target /d05/test/fs1 to act as patch edition file system."
+
+So based on source run edition we should create both target run and patch editions.
+
+What if I jus copy from target run to target patch?
+{{{
+$ mkdir /u01/oracle/VIS/fs1
+$ cp -RH /u01/oracle/VIS/fs2/EBSapps /u01/oracle/VIS/fs1
+}}}
+
+{{{
+$ adop phase=fs_clone
+(...)
+ERROR: Specified context file not found.
+}}}
+
+PATCH file system context file: /u01/oracle/VIS/fs1/inst/apps/VIS_ebs2new/appl/admin/VIS_ebs2new.xml
+
+(...)
+
+{{{
+$ cd /u01/oracle/VIS
+$ mv fs1 fs1_copy_from_fs2
+$ mv /u01/trash/fs1 .
+}}}
+
+But I somehow do not like it.
+
+I repeated everything, leaving fs1 with only EBSapps. Same error.
+{{{
+$ adop phase=fs_clone
+}}}
+
+PATCH file system context file: /u01/oracle/VIS/fs1/inst/apps/VIS_ebs2new/appl/admin/VIS_ebs2new.xml
+ERROR: Specified context file not found.
+
+{{{
+$ ls -l /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/appl/admin/VIS_ebs2new.xml
+-rw-r--r-- 1 applmgr oinstall 117487 Jul 10 16:46 /u01/oracle/VIS/fs2/inst/apps/VIS_ebs2new/appl/admin/VIS_ebs2new.xml
+$ ls /u01/oracle/VIS/fs1/inst/apps/VIS_ebs2new/appl/admin/VIS_ebs2new.xml
+ls: /u01/oracle/VIS/fs1/inst/apps/VIS_ebs2new/appl/admin/VIS_ebs2new.xml: No such file or directory
+}}}
+
+What if I do:
+
+{{{
+$ cp -RH /u01/oracle/VIS/fs2/inst /u01/oracle/VIS/fs1
+}}}
+
+Still errors.
+
+Next try:
+* copy run edition to patch edition.
+* make sure which is run edition
+* confirm cd <COMMON_TOP>/clone/bin
+
+*> you are doing this wrong.
+According to: Cloning Oracle E-Business Suite Release 12.2 with Rapid Clone (Doc ID 1383621.1)
+
+Section 3: Standard Cloning Tasks
+3.2 Standard Cloning Steps
+3. Configure the Target System
+
+* run post clone on run edition
+* run preclone on run edition
+* copy run to patch edition
+* run post clone on patch edition
+
+
+==== Current node ebs2new does not contain admin server ====
+{{{
+$ adop phase=fs_clone
+ERRORMSG: Not enough space available on the disk to proceed. Minimum free space required (in GB): 40
+}}}
+
+[ERROR]     Current node ebs2new does not contain admin server.
+
+[ERROR]     Current node ebs2new does not contain admin server.
+
+[UNEXPECTED]fs_clone phase completed with errors/warnings. Please check logfiles
+Log file: /u01/oracle/VIS/fs_ne/EBSapps/log/adop/6/adop_20140712_072059.log
+
+===== Shutdown everything, kill zombies and try again: =====
+Make sure, there is at least 40G free
+
+{{{
+$ adop phase=fs_clone
+}}}
+
+no luck.
+
+===== trying on new host ebs4 =====
+
+<Jul 14, 2014 2:50:38 PM CEST> <Info> <J2EE Deployment SPI> <BEA-260121> <Initiating update operation for application, forms-c4ws#1.0.0 [archive: null], to forms-c4ws_cluster1 .>
+.Completed the update of Application with status completed
+Current Status of your Deployment:
+Deployment command type: update
+Deployment State       : completed
+Deployment Message     : [Deployer:149034]An exception occurred for task [Deployer:149026]update application forms-c4ws [Version=1.0.0] on forms-c4ws_cluster1.: .
+Updating Application forms with deployment plan /u01/oracle/VIS/fs1/FMW_Home/Oracle_EBS-app1/deployment_plans/forms/plan.xml
+Redeploying application forms ...
+<Jul 14, 2014 2:50:43 PM CEST> <Info> <J2EE Deployment SPI> <BEA-260121> <Initiating redeploy operation for application, forms#1.0.0 [archive: null], to forms_cluster1 .>
+.Completed the redeployment of Application with status completed
+Current Status of your Deployment:
+Deployment command type: redeploy
+Deployment State       : completed
+Deployment Message     : [Deployer:149034]An exception occurred for task [Deployer:149026]redeploy application forms [Version=1.0.0] on forms_cluster1.: .
+Set JNDI name for data sourceEBSDataSource
+=======================================
+
+Connecting Source AdminServer
+=============================
+Connecting to t3://null.null:null with userid weblogic ...
+This Exception occurred at Mon Jul 14 14:50:46 CEST 2014.
+javax.naming.ServiceUnavailableException [Root exception is java.net.UnknownHostException: null.null]
+Error while connecting Admin Server !!!
+
+Script Executed in 59685 milliseconds, returning status 1
+ERROR: Failed to execute /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/adPostDomainCloneCfg.pl
+Inside exitClone....
+
+*--
+Main:
+
+[UNEXPECTED]Error occurred while executing "perl /u01/oracle/VIS/fs2/EBSapps/appl/ad/12.0.0/patch/115/bin/txkADOPPreparePhaseSynchronize.pl -contextfile=/u01/oracle/VIS/fs2/inst/apps/VIS_sun4/appl/admin/VIS_sun4.xml -patchcontextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_sun4/appl/admin/VIS_sun4.xml -promptmsg=hide -console=off -mode=create -sessionid=7 -timestamp=20140714_114713 -outdir=/u01/oracle/VIS/fs_ne/EBSapps/log/adop/7/fs_clone_20140714_114713/VIS_sun4"
+[UNEXPECTED]Error occurred while CLONE Patch File System from Run File System using command: "perl /u01/oracle/VIS/fs2/EBSapps/appl/ad/12.0.0/patch/115/bin/txkADOPPreparePhaseSynchronize.pl -contextfile=/u01/oracle/VIS/fs2/inst/apps/VIS_sun4/appl/admin/VIS_sun4.xml -patchcontextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_sun4/appl/admin/VIS_sun4.xml -promptmsg=hide -console=off -mode=create -sessionid=7 -timestamp=20140714_114713 -outdir=/u01/oracle/VIS/fs_ne/EBSapps/log/adop/7/fs_clone_20140714_114713/VIS_sun4".
+[ERROR]     Current node sun4 does not contain admin server.
+
+[ERROR]     Current node sun4 does not contain admin server.
+
+[UNEXPECTED]fs_clone phase completed with errors/warnings. Please check logfiles
+Log file: /u01/oracle/VIS/fs_ne/EBSapps/log/adop/7/adop_20140714_114713.log
+
+adop exiting with status = 2 (Fail)
+
+*--
+
+{{{
+> lets run the admin server?
+}}}
+
+Starting the APP
+
+Repeating, hm jak zapuscilem raz jeszcze to mi sie wywalil ze musi miec 40G miejsca, moze to o to chodzi?
+
+AC-10006: Exception - java.io.FileNotFoundException: /u01/oracle/VIS/fs2/inst/apps/VIS_ebs4/appl/admin/VIS_ebs4.xml (No such file or directory) thrown while creating OAVars object for file: /u01/oracle/VIS/fs2/inst/apps/VIS_ebs4/appl/admin/VIS_ebs4.xml
+
+on caly czas jakims cudem znajduje ebs4, jak juz jest sun4. Moze to przez to, ze baza nie jest ruszana?
+
+===== WIP zrob z klonem na DB, pomimo tego ze nic sie z nim nie dzieje =====
+
+Perform postclone on DB
+
+* shutdown DB tier
+!
+! Only if this is the only Oracle product on this host
+!
+And we need to let the cloning to create the global inventory
+{{{
+$ cat /etc/oraInst.loc
+inventory_loc=/u01/oraInventory
+$ mv /u01/oraInventory /u01/oraInventory_`date -I`
+}}}
+
+{{{
+$ cd /u01/oracle/VIS/11.2.0/appsutil/clone/bin
+$ perl adcfgclone.pl dbTier
+}}}
+
+Target System Hostname (virtual or normal) [ebsdb4] :
+
+Target Instance is RAC (y/n) [n] :
+
+Target System Database SID : VIS
+
+Target System Base Directory : /u01/oracle/VIS
+
+Target System utl_file_dir Directory List : /tmp
+
+Number of DATA_TOP's on the Target System [1] :
+
+Target System DATA_TOP Directory 1 [/u01/oracle/VIS/data] :
+
+Target System RDBMS ORACLE_HOME Directory [/u01/oracle/VIS/11.2.0] :
+
+Do you want to preserve the Display [null] (y/n)  : y
+
+Target System Port Pool [0-99] : 0
+
+?? sometimes Do you want the target system to have the same port values as the source system (y/n) [y] ? :
+
+Checking the port pool 0
+
+Completed Apply...
+
+Now, back to old procedure.
+
+adop exiting with status = 0 (Success)
+
+YES THAT WAS THAT!!!!
+
+
+
+
+
+
+
+==== RC-50208: Exception  in method TimedProcessProcess.run pasteBinary.sh": error=2, No such file or directory ====
+
+During postclone after changing hostname:
+Running /u01/oracle/VIS/fs2/EBSapps/comn/clone/FMW/pasteBinary.sh -javaHome /u01/oracle/VIS/fs2/EBSapps/comn/util/jdk64 -al /u01/oracle/VIS/fs2/EBSapps/comn/clone/FMW/FMW_Home.jar -tl /u01/oracle/VIS/fs2/FMW_Home -invPtrLoc /etc/oraInst.loc -ldl /u01/oracle/VIS/fs2/inst/apps/VIS_sun4/admin/log/clone/fmwT2PApply -silent true -executeSysPrereqs false
+RC-50208: Exception  in method TimedProcessProcess.run
+Raised by oracle.apps.ad.util.TimedProcess$TimedProcessProcess: java.io.IOException: Cannot run program "/u01/oracle/VIS/fs2/EBSapps/comn/clone/FMW/pasteBinary.sh": error=2, No such file or directory
+Script Executed in 100 milliseconds, returning status -1
+Script timed out.
+
+MOS:
+* RC-50208 Error results After Cloning R12.2.3 (Doc ID 1904408.1)
+
+To implement the solution, please execute the following steps:
+
+# Copy FMW_Home.jar file from the source to the target.
+2. Execute the pre-clone command again.
+
+But here it has happened during postclone.
+{{{
+$ cd /u01/oracle/VIS/fs2/EBSapps/comn/clone
+$ find ./ | grep -i FMW_Home.jar
+-> nothing.
+}}}
+
+I will revert to snapschot and rerun the preclone.
+
+{{{
+$ cd /u01/oracle/VIS/fs2/EBSapps/comn/clone
+$ find ./ | grep -i FMW_Home.jar
+./FMW/FMW_Home.jar
+}}}
+
+*> The only change is that before there was fs_sync run performed. So it looks like fs_sync has deleted my FMW_Home.jar!!! Potential bug.
+
+
+
+
+==== Wrong Weblogic password ====
+I do not know why he does not accept my WLS password.
+Trying to rest it:
+* How To Change or Reset The WebLogic Administration Password In 12.2 E-Business Suite (Doc ID 1385751.1)
+*> no use
+http://oracle-magician.blogspot.com/2010/12/changing-weblogic-admin-password.html
+
+{{{
+$ . /u01/oracle/VIS/fs2/FMW_Home/user_projects/domains/EBS_domain_VIS/bin/setDomainEnv.sh
+$ java -cp /u01/oracle/VIS/fs2/FMW_Home/wlserver_10.3/server/lib/weblogic.jar:$CLASSPATH weblogic.security.utils.AdminAccount weblogic mypass1 .
+$ java weblogic.security.utils.AdminAccount weblogic mypass1 .
+}}}
+
+*> no luck, still reports invalid password
+
+That is the probable cause.
+
+DO NOT RUN THE PRECLONE WITH ONLY DB TIER RUNNING ON DB.
+
+
+
+=== check [50%] ===
+* [ ] read it: Configuring Applications Node Services in Oracle E-Business Suite Release 12 (Doc ID 406558.1)
+* [X] try to do standard cloning to another host
+it works! along the way with fs_sync
+* [X] if $COMMON_TOP/clone/bin = /u01/oracle/VIS/fs2/EBSapps/comn/clone/bin
+
+
+== Which WLS is active now? ==
+Only one should be activ, but I check.
+
+=== How to check the port pool? ===
+http://blog.csdn.net/pan_tian/article/details/8710654
+
+# How to check used ports in oracle application system
+Navigation: System Administrator ->  Oracle Application Manager - > Dashboard -> click the link of the apps server in the HOST column -> On the page Oracle Applications Hosts: <your_hostname>, click the "View configuration" button.
+
+???? but I do not find port 7003, under which the WLS admin console is running.
+
+2. There is file portpool.lst
+/u01/oracle/VIS/fs1/EBSapps/comn/adopclone_sun4/bin/out/VIS_sun4/portpool.lst
+
+WLS Admin Server Port  :  7002 ?? but mine is running on 7003
+
+
+=== checking when fs1 is run ===
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+
+http://sun4.remik.org:8000 - EBS login page
+
+http://sun4.remik.org:7003/console - WLS admin console
+username: weblogic
+
+Name 	Cluster 	Machine 	State 	Health 	Listen Port 
+AdminServer(admin)		sun4	RUNNING	 OK	7003
+forms-c4ws_server1	forms-c4ws_cluster1	sun4	RUNNING	 OK	7803
+forms_server1	forms_cluster1	sun4	RUNNING	 OK	7403
+oacore_server1	oacore_cluster1	sun4	RUNNING	 OK	7203
+oafm_server1	oafm_cluster1	sun4	RUNNING	 OK	7603
+
+?? why this 7003, should be rather 7002
+
+{{{
+$ ps -ef | grep weblogic | grep -i admin
+applmgr   7177  4499  3 09:34 ?        00:02:17 /u01/oracle/VIS/fs1/EBSapps/comn/util/jdk64/bin/java -Dweblogic.Name=oafm_server1 -Djava.security.policy=null -Djava.library.path=/u01/oracle/VIS/fs1/FMW_Home/patch_wls1036/profiles/default/native:/u01/oracle/VIS/fs1/EBSapps/comn/util/jdk32/jre/lib/i386/server:
+}}}
+
+*> so I can see that WLS is running from fs1
+
+http://sun4.remik.org:8000 - main page, yes
+http://sun4.remik.org:7002/console - no
+http://sun4.remik.org:7003/console - yes
+
+=== ok, now lets do the adop cycle and reverse the fs ===
+
+{{{
+$ adop phase=prepare
+$ adop phase=cutover
+}}}
+
+=== checking when fs2 is run ===
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+
+http://sun4.remik.org:8000 - main page, yes
+http://sun4.remik.org:7002/console - yes
+http://sun4.remik.org:7003/console - no
+
+=== start WLS on the patch fs ===
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+$ cd $ADMIN_SCRIPTS_HOME
+$ pwd
+/u01/oracle/VIS/fs1/inst/apps/VIS_sun4/admin/scripts
+$ ./adadminsrvctl.sh status
+The AdminServer is not running
+$ ./adadminsrvctl.sh start
+
+Starting from some patch level
+$ ./adadminsrvctl.sh start forcepatchfs
+}}}
+
+
+http://sun4.remik.org:8000 - main page, yes
+http://sun4.remik.org:7002/console - yes
+http://sun4.remik.org:7003/console - yes
+
+
+== Implementing customisations ==
+MOS:
+* Base on Creating a Custom Application in Oracle E-Business Suite Release 12.2 (Doc ID 1577707.1)
+* Developing and Deploying Customizations in Oracle E-Business Suite Release 12.2 (Doc ID 1577661.1)
+
+Following: Base on Creating a Custom Application in Oracle E-Business Suite Release 12.2 (Doc ID 1577707.1)
+
+Section 1: Create A Custom Application Using adsplice
+
+=== a. Download Patch 3636980 "Support Diagnostics (IZU) patch for AD Splice" from My Oracle Support. ===
+{{{
+$ cd /u01/trash
+}}}
+
+Support Diagnostics (IZU) patch for AD Splice (Patch)
+p3636980_R12_GENERIC.zip	12.7 KB	(13049 bytes) MD5	A8F9E77BE395F018D8EF0650A1019FBD
+{{{
+$ md5sum p3636980_R12_GENERIC.zip
+a8f9e77be395f018d8ef0650a1019fbd  p3636980_R12_GENERIC.zip
+$ unzip p3636980_R12_GENERIC.zip
+}}}
+
+=== b. Manually copy the three .txt files from the 3636980izuadmin directory to your own temporary directory. ===
+
+{{{
+$ cd $APPL_TOP/admin
+$ pwd
+/u01/oracle/VIS/fs2/EBSapps/appl/admin
+}}}
+
+{{{
+$ ls -l /u01/trash/3636980/izu/admin/*.txt
+-rwxr-xr-x 1 applmgr oinstall 4966 Jan  1  2002 /u01/trash/3636980/izu/admin/izuprod.txt
+-rwxr-xr-x 1 applmgr oinstall 2889 Jan  1  2002 /u01/trash/3636980/izu/admin/izuterr.txt
+-rwxr-xr-x 1 applmgr oinstall  365 Jan  1  2002 /u01/trash/3636980/izu/admin/newprods.txt
+}}}
+
+{{{
+$ cp -i /u01/trash/3636980/izu/admin/*.txt .
+}}}
+
+=== c. Rename izuprod.txt to <CUSTOM MODULE>prod.txt. In this example, we will be using "xxmzprod.txt". ===
+
+{{{
+$ cp -i izuprod.txt remikprod.txt
+}}}
+
+=== d. Rename izterr.txt to <CUSTOM MODULE>terr.txt. In this example, we will be using "xxmzterr.txt". ===
+
+{{{
+$ cp -i izuterr.txt remikterr.txt
+}}}
+
+=== e. Open newprods.txt in a text editor. ===
+{{{
+$ cp -i newprods.txt newprods.txt_`date -I`
+}}}
+
+i) Change all references of "izu" to <custom module> and all references of "IZU" to <CUSTOM MODULE> (i.e. keep the case sensitivity).
+
+{{{
+$ vi newprods.txt
+:%s/izu/remik/g
+:%s/IZU/REMIK/g
+}}}
+
+
+ii) Modify any other values as appropriate.
+To avoid work I use existing TBS
+{{{
+$ cat newprods.txt
+product=remik
+base_product_top=*APPL_TOP*
+oracle_schema=remik
+sizing_factor=100
+main_tspace=APPS_TS_TX_DATA
+index_tspace=APPS_TS_TX_IDX
+temp_tspace=TEMP
+default_tspace=APPS_TS_TX_DATA
+}}}
+
+=== f) Open xxmzprod.txt in a text editor. ===
+i) Change all references of "izu" to <custom module> and all references of "IZU" to <CUSTOM MODULE> (keeping the case sensitivity).
+
+{{{
+$ vi remikprod.txt
+:%s/izu/remik/g
+:%s/IZU/REMIK/g
+}}}
+
+
+ii) Change all references to prodid 278 to your own unique number.
+
+I pick 50001
+
+Check the free number
+connect apps/apps
+{{{
+> select decode(count ,0, 'Selected number is Available', 'Selected number already in use') Status, &&enter_custom_applID selected_number
+from
+(
+select count(*) as count from
+(
+select 'x' from fnd_oracle_userid
+where oracle_id= &&enter_custom_applID
+union
+select 'x' from fnd_application
+where application_id= &&enter_custom_applID
+)
+);
+}}}
+
+STATUS			       SELECTED_NUMBER
+*----------------------------- ---------------
+Selected number is Available		 50001
+
+{{{
+$ vi remikprod.txt
+:%s/278/50001/g
+}}}
+
+=== g) Open xxmzterr.txt in a text editor. ===
+i) Change all references of "izu" to <custom module> and all references of "IZU" to <CUSTOM MODULE> (keeping the case sensitivity)
+
+{{{
+$ vi remikterr.txt
+:%s/izu/remik/g
+:%s/IZU/REMIK/g
+}}}
+
+ii) Change the text "Oracle_Support_Diagnostic_Tools" to be "xxmz_custom_app".
+{{{
+$ vi remikterr.txt
+:%s/Oracle_Support_Diagnostic_Tools/remik_custom_app/g
+}}}
+
+=== h. Copy the following text files to the $APPL_TOP/admin directory ===
+Done already.
+
+=== i. Change directory to the admin directory under $APPL_TOP ===
+{{{
+$ cd $APPL_TOP/admin
+}}}
+
+=== j. Run adsplice ===
+
+{{{
+$ adsplice
+AD Splicer is complete.
+}}}
+
+Directory will be /u01/oracle/VIS/fs2/EBSapps/appl/remik/12.0.0
+
+=== Checks ===
+Statemenst should return one row
+
+connect apps/apps
+select * from fnd_application where application_short_name = 'REMIK';
+select * from fnd_product_installations where APPLICATION_ID = 50001;
+select * from dba_users where username = 'REMIK';
+
+connect remik/remik
+
+Relogin
+{{{
+$ env | grep -i remik | grep -i top
+REMIK_TOP=/u01/oracle/VIS/fs2/EBSapps/appl/remik/12.0.0
+}}}
+
+{{{
+$ ls $REMIK_TOP
+admin  log  mesg  out  sql
+}}}
+
+=== Other app tier ===
+If shared filesystem just run autoconfig.
+
+=== Propagate Changes to Other File System ===
+
+This was all done on the run filesystem. When you start the next online patching cycle, the prepare phase will run adsplice sync-up actions to synchronize the two file systems.
+
+
+== Implementing customisations 2 ==
+MOS:
+* Developing and Deploying Customizations in Oracle E-Business Suite Release 12.2 (Doc ID 1577661.1)
+
+=== no thinking approach ===
+
+Let's just do it:
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+
+{{{
+$ cd $JAVA_TOP
+$ pwd
+/u01/oracle/VIS/fs2/EBSapps/comn/java/classes
+}}}
+
+Simulating placing an new jar file
+{{{
+$ cp /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/oracle/apps/gl/jar/glgcs.jar /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+$ ls -l $JAVA_TOP/oracle/apps/gl/jar/remi.jar
+-rw-r--r-- 1 applmgr oinstall 65646 Sep 23 16:34 /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+}}}
+
+{{{
+$ ls -l /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+-rw-r--r-- 1 applmgr oinstall 65646 Sep 23 16:34 /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+}}}
+
+{{{
+$ ls -l /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+No such file or directory
+}}}
+
+So, we place some new files on run filesystem, use it... then it comes a time to do some patching.
+
+
+Simulate adop cycle
+{{{
+$ adop phase=prepare,cutover
+adop exiting with status = 0 (Success)
+}}}
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+
+{{{
+$ ls -l $JAVA_TOP/oracle/apps/gl/jar/remi.jar
+ls: /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar: No such file or directory
+}}}
+
+*> so, the run filesystem does not contain the file.
+
+{{{
+$ ls -l /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+-rw-r--r-- 1 applmgr oinstall 65646 Sep 23 16:34 /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+}}}
+
+{{{
+$ ls -l /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/oracle/apps/gl/jar/remi.jar
+No such file or directory
+}}}
+
+*> it is where it was, nothing has changed.
+
+This is what can cause the customisations to work one day and not after the adop patching.
+
+
+=== think before you do approach ===
+Setup new test
+{{{
+$ echo "ala ma kota" > $JAVA_TOP/customall.jar
+$ ls -l $JAVA_TOP/customall.jar
+-rw-r--r-- 1 applmgr oinstall 12 Sep 23 20:15 /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/customall.jar
+}}}
+
+Go through MOS
+* Developing and Deploying Customizations in Oracle E-Business Suite Release 12.2 (Doc ID 1577661.1)
+
+{{{
+$ ls -l $NE_BASE/EBSapps/appl/ad/custom/adop_sync.drv
+/u01/oracle/VIS/fs_ne/EBSapps/appl/ad/custom/adop_sync.drv
+}}}
+
+{{{
+$ cp $NE_BASE/EBSapps/appl/ad/custom/adop_sync.drv $NE_BASE/EBSapps/appl/ad/custom/adop_sync.drv_`date -I`
+$ less $NE_BASE/EBSapps/appl/ad/custom/adop_sync.drv
+The actions would be performed during ADOP synchronization phase.
+# | Custom synchronization which is called during PREPARE phase of ADOP will use
+# | values from RUN context file.
+# | All the custom commands used in this driver should have PATHs relative to
+# | s_current_base and s_other_base ONLY.
+# | -----------------------------------------------------------------------------
+}}}
+
+{{{
+$ vi $NE_BASE/EBSapps/appl/ad/custom/adop_sync.drv
+#Begin Customization
+}}}
+
+rsync -zr %s_current_base%/EBSapps/comn/java/classes/customall.jar %s_other_base%/EBSapps/comn/java/classes
+
+{{{
+#Copy Starts
+}}}
+
+Check the files you want to synch
+{{{
+$ ls $RUN_BASE/EBSapps/comn/java/classes/customall.jar
+/u01/oracle/VIS/fs1/EBSapps/comn/java/classes/customall.jar
+}}}
+
+Do we have rsync?
+{{{
+$ which rsync
+/usr/bin/rsync
+}}}
+
+Lets try this rsync command. We can substitute (just for test)
+%s_current_base% - $RUN_BASE
+%s_other_base%   - $PATCH_BASE
+
+{{{
+$ echo "ala ma kota2" > $JAVA_TOP/customall2.jar
+$ ls $JAVA_TOP/customall2.jar
+/u01/oracle/VIS/fs1/EBSapps/comn/java/classes/customall2.jar
+$ rsync -zr $RUN_BASE/EBSapps/comn/java/classes/customall2.jar $PATCH_BASE/EBSapps/comn/java/classes
+$ ls $RUN_BASE/EBSapps/comn/java/classes/customall2.jar
+/u01/oracle/VIS/fs1/EBSapps/comn/java/classes/customall2.jar
+$ ls $PATCH_BASE/EBSapps/comn/java/classes/customall2.jar
+/u01/oracle/VIS/fs2/EBSapps/comn/java/classes/customall2.jar
+-> so this is working fine
+}}}
+
+Now the adop cycle
+{{{
+$ adop phase=prepare,cutover
+}}}
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+
+
+Is there somewhere the log file from this rsync?
+Yes, check the adop logs
+/u01/oracle/VIS/fs_ne/EBSapps/log/adop/10/prepare_20140923_202455/VIS_sun4/TXK_SYNC_update_Tue_Sep_23_20_28_24_2014/txkADOPCustomSyncUp.log
+
+Checking if the rsync has copied the $JAVA_TOP/customall.jar
+{{{
+$ ls -l $JAVA_TOP/customall.jar
+-rw-r--r-- 1 applmgr oinstall 12 Sep 23 20:29 /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/customall.jar
+}}}
+
+And the now patch edition:
+{{{
+$ ls -l /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/customall.jar
+-rw-r--r-- 1 applmgr oinstall 12 Sep 23 20:15 /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/customall.jar
+}}}
+
+*> OK, so all is correctly copied.
+
+==== sync the whole directories ====
+
+{{{
+$ cd $JAVA_TOP
+$ pwd
+/u01/oracle/VIS/fs2/EBSapps/comn/java/classes
+# just a sample directory structure
+$ cp -r /home/applmgr/scripto .
+}}}
+
+{{{
+$ ls -ld $RUN_BASE/EBSapps/comn/java/classes/scripto
+drwxr-xr-x 12 applmgr oinstall 4096 Sep 24 10:06 /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/scripto
+}}}
+
+{{{
+$ ls -ld $PATCH_BASE/EBSapps/comn/java/classes/scripto
+No such file or directory
+}}}
+
+{{{
+$ vi $NE_BASE/EBSapps/appl/ad/custom/adop_sync.drv
+#Begin Customization
+}}}
+
+rsync -zr %s_current_base%/EBSapps/comn/java/classes/scripto %s_other_base%/EBSapps/comn/java/classes
+
+{{{
+#Copy Starts
+}}}
+
+Now the adop cycle
+{{{
+$ adop phase=prepare,cutover
+}}}
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+
+
+It is on both fs now.
+{{{
+$ ls -ld $RUN_BASE/EBSapps/comn/java/classes/scripto
+drwxr-xr-x 12 applmgr oinstall 4096 Sep 24 10:14 /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/scripto
+}}}
+
+{{{
+$ ls -ld $PATCH_BASE/EBSapps/comn/java/classes/scripto
+drwxr-xr-x 12 applmgr oinstall 4096 Sep 24 10:06 /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/scripto
+}}}
+
+What is worth noticing is that the rsync is happening during the prepare adop phase (is it because the prepare is implicitly running the fs_clone if it was not previously run?).
+
+=== checking if the sync is happening in prepare phase because of implicit fs_sync ===
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+
+{{{
+$ cd $JAVA_TOP
+$ pwd
+/u01/oracle/VIS/fs2/EBSapps/comn/java/classes
+# just a sample directory structure
+$ cp -r scripto dziobak
+}}}
+
+{{{
+$ ls -ld $RUN_BASE/EBSapps/comn/java/classes/dziobak
+drwxr-xr-x 12 applmgr oinstall 4096 Sep 27 19:25 /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/dziobak
+}}}
+
+{{{
+$ ls -ld $PATCH_BASE/EBSapps/comn/java/classes/dziobak
+No such file or directory
+}}}
+
+{{{
+$ adop phase=fs_clone
+$ ls -ld $RUN_BASE/EBSapps/comn/java/classes/dziobak
+drwxr-xr-x 12 applmgr oinstall 4096 Sep 27 19:25 /u01/oracle/VIS/fs1/EBSapps/comn/java/classes/dziobak
+}}}
+
+{{{
+$ ls -ld $PATCH_BASE/EBSapps/comn/java/classes/dziobak
+drwxr-xr-x 12 applmgr oinstall 4096 Sep 27 20:06 /u01/oracle/VIS/fs2/EBSapps/comn/java/classes/dziobak
+}}}
+
+*> so he did it during fs_clone
+
+
+
+
+
+
+=== ToDo [100%] ===
+* [X] where is the log file
+* [X] check rsync directories
+
+
+== Changing apache configuration ==
+=== LockFile directive ===
+In 11i this type of httpd.conf changes was done through context_file or templates. How is it in R12?
+
+Let's say that we want to make the following change.
+
+The "LockFile" directive in the Apache HTTP server configuration file <FMW HOME>/webtier/instances/<Instance  Name>/config/OHS/EBS_web_<SID>/httpd.conf should be set to "/var/opt/VIS_sun4/Apache/logs/httpd.lock".
+
+==== Lets do it the wrong way to make sure that the httpd.conf is still recreated during the autoconfig ====
+
+{{{
+$ ls -l $FMW_HOME/webtier/instances/EBS_web_${TWO_TASK}_OHS1/config/OHS/EBS_web_${TWO_TASK}/httpd.conf
+-rw------- 1 applmgr oinstall 37767 Sep 23 16:52 /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+}}}
+
+{{{
+$ md5sum httpd.conf
+9723fd1d82a216109b0940d7a5d77d8e  httpd.conf
+$ cp httpd.conf httpd.conf_`date -I`
+$ vim httpd.conf
+$ diff httpd.conf httpd.conf_`date -I`
+45,46d44
+< LockFile "/var/opt/VIS_sun4/Apache/logs/httpd.lock"
+<
+159c157
+<         #LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+---
+>         LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+179c177
+<         #LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+---
+>         LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+}}}
+
+{{{
+$ md5sum httpd.conf
+7357ce83e63c998ef9fa246afb17e291  httpd.conf
+}}}
+
+
+Restart apache
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adapcctl.sh stop
+}}}
+
+Does not want to start,
+{{{
+$ ./adapcctl.sh start
+}}}
+
+{{{
+$ less /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/diagnostics/logs/OHS/EBS_web_VIS/EBS_web_VIS.log
+[2014-10-02T15:31:45.1383+02:00] [OHS] [INCIDENT_ERROR:10] [OHS-9999] [core.c] [host_id: sun4.remik.org] [host_addr: 192.168.1.165] [pid: 25213] [tid: 140692010362672] [user: applmgr] [VirtualHost: main] (2)No such file or directory:  Couldn't create accept lock
+}}}
+
+So he needs probably the dir path
+{{{
+$ cd /var/opt
+$ touch ala
+touch: cannot touch `ala': Permission denied
+$ ls -ld .
+drwxr-xr-x 2 root root 4096 Feb 17  2010 .
+}}}
+
+Not nice, but I just want to make sure if he is able to create the dir path
+{{{
+# chmod 777 opt/
+}}}
+
+No, he is not.
+{{{
+$ mkdir -p /var/opt/VIS_sun4/Apache/logs/httpd.lock
+}}}
+
+OK, now it works
+{{{
+$ ./adapcctl.sh start
+adapcctl.sh: exiting with status 0
+}}}
+
+So now the autoconfig.
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adautocfg.sh
+}}}
+
+Hm, weird. untouched.
+{{{
+$ md5sum httpd.conf
+7357ce83e63c998ef9fa246afb17e291  httpd.conf
+}}}
+
+===== Ok, lets try the adop patching cycle. =====
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+
+
+{{{
+$ ls -l $FMW_HOME/webtier/instances/EBS_web_${TWO_TASK}_OHS1/config/OHS/EBS_web_${TWO_TASK}/httpd.conf
+-rw------- 1 applmgr oinstall 37767 Sep 23 16:52 /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+}}}
+
+{{{
+$ md5sum /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+7357ce83e63c998ef9fa246afb17e291
+$ grep LockFile /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+LockFile "/var/opt/VIS_sun4/Apache/logs/httpd.lock"
+#LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/accept.lock"
+#LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+#LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+}}}
+
+
+
+{{{
+$ md5sum /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+9b3613202576eab096a504feb993e690
+$ grep LockFile /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+#LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/accept.lock"
+LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+}}}
+
+{{{
+$ adop phase=prepare,cutover
+}}}
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+
+
+{{{
+$ md5sum /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+7357ce83e63c998ef9fa246afb17e291
+-> this is the same
+}}}
+
+{{{
+$ md5sum /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+453c95eebaaec400c91bf69010326eae
+-> this is new, why?
+}}}
+
+Looks like he did all the changes during the adop cycle
+{{{
+$ grep LockFile /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+LockFile "/var/opt/VIS_sun4/Apache/logs/httpd.lock"
+#LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/accept.lock"
+#LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+#LockFile "${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/http_lock"
+}}}
+
+Let's see what is in logs
+{{{
+$ cd $APPL_TOP_NE/../log/adop
+$ cd 13 # my last adop session number
+$ grep -R httpd.conf *
+Comparing /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf with /u01/oracle/VIS/fs1/inst/apps/VIS_sun4/appl/admin/cutover/OHS/EBS_web_VIS/httpd.conf
+HTTP Configuration change detected..
+}}}
+
+So he knows... :)
+
+So looks like during the adop cycle he synchronised the httpd.conf file from RUN filesystem to PATCH filesystem, which is rather unusuall.
+
+Just a stupid test to see if the synchronisation is done like this:
+# See if the httpd.conf has been changed, if yes go to 2.
+2. replace fs2/fs1 or other way around
+
+{{{
+$ cat /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf | sed s/fs2/fs1/g > /tmp/ala.txt
+$ md5sum /tmp/ala.txt
+7357ce83e63c998ef9fa246afb17e291  /tmp/ala.txt
+}}}
+
+And this md5sum is exactly how
+{{{
+$ md5sum /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+7357ce83e63c998ef9fa246afb17e291
+}}}
+
+So here is the magic :)
+
+
+
+==== Trying to approach the issue with 11i way where you were messing with templates ====
+
+I believe I read somewhere that you do not manage the changes to apache through teplate any more.
+
+And it turns out true. The httpd.conf header:
+
+{{{
+# This template is used to seed the initial httpd.conf. After that, AutoConfig does not manage httpd.conf changes.
+# It is advisable to perform OHS configuration changes through EM console.
+# The default EM console URL is  http://ebs2.remik.org:7001/em
+}}}
+
+Trying EM for Oracle Fusion Middleware Control
+http://sun4.remik.org:7003/em
+Username: weblogic
+
+
+How to see the template anyway?
+{{{
+$AD_TOP/bin/adtmplreport.sh contextfile=$CONTEXT_FILE target=/u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+[ FILE NOT FOUND ]
+AC-20029: Error: Cannot process the specified Target file - /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+Raised by oracle.apps.ad.tools.configuration.ATTemplateReport
+}}}
+
+So it does not work with httpd.conf any more. But works with other files that are still managed by the template, like trusted.conf
+
+{{{
+$ $AD_TOP/bin/adtmplreport.sh contextfile=$CONTEXT_FILE target=/u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/trusted.conf
+[FND_TOP]
+TEMPLATE FILE   : /u01/oracle/VIS/fs1/EBSapps/appl/fnd/12.0.0/admin/template/trusted_conf_FMW.tmp
+TARGET FILE     : /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/trusted.conf
+}}}
+
+
+So this note:
+
+MOS:
+* R12: How to Modify an iAS Configuration File? (Doc ID 1483137.1)
+
+is actually wrong in R12.
+
+Conclusion -> this approach does not work.
+
+==== Trying to change the httpd.conf using the approach to eg patch the WLS - first on the patch FS ====
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+
+{{{
+$ md5sum /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+453c95eebaaec400c91bf69010326eae
+}}}
+
+{{{
+$ md5sum /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+7357ce83e63c998ef9fa246afb17e291
+}}}
+
+Starting adop cycle
+{{{
+$ adop phase=prepare
+}}}
+
+Nothing yet in the logs:
+{{{
+$ less prepare_20141003_105524/VIS_sun4/adConfigChanges.log
+Comparing /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf with /u01/oracle/VIS/fs2/inst/apps/VIS_sun4/appl/admin/cutover/OHS/EBS_web_VIS/httpd.conf
+-> no change detected, because there is none (except the fs1/fs2 which this compare handles)
+}}}
+
+Changing something on the PATCH filesystem
+{{{
+$ vim /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+change
+Timeout 300
+to
+Timeout 4000
+$ md5sum /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+8ecfea7aec95e828243f0025b0dd9d6a
+}}}
+
+Now finishing the adop cycle
+{{{
+$ adop phase=cutover
+}}}
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+
+
+{{{
+$ md5sum /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+8ecfea7aec95e828243f0025b0dd9d6a
+-> not changed
+Timeout 4000
+}}}
+
+{{{
+$ md5sum /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+453c95eebaaec400c91bf69010326eae
+-> not changed
+Timeout 300
+}}}
+
+So we have a difference between the two, and one that does not come only from fs1/fs2 string difference.
+
+OK, lets see what will happen if I start fs_clone
+{{{
+$ adop phase=fs_clone
+}}}
+
+{{{
+$ md5sum /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+8ecfea7aec95e828243f0025b0dd9d6a
+Timeout 4000
+}}}
+
+{{{
+$ md5sum /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/httpd.conf
+f9acfa587035de9dd5cb481a824bc8f7
+-> changed
+Timeout 4000
+}}}
+
+Concusion -> this approach is valid, as fs_clone would be called during next prepare phase if not called here explicitly (this could be tested thou)
+
+
+=== rotation of the Apache error_log ===
+How does the log dir look now?
+{{{
+$ cd $FMW_HOME/webtier/instances/EBS_web_${TWO_TASK}_OHS1/diagnostics/logs/OHS/EBS_web_${TWO_TASK}
+there is only access_log
+}}}
+
+Probably configured with this entry in httpd.conf
+CustomLog "|${ORACLE_HOME}/ohs/bin/odl_rotatelogs ${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/access_log 43200" common
+
+{{{
+$ vi $FMW_HOME/webtier/instances/EBS_web_${TWO_TASK}_OHS1/config/OHS/EBS_web_${TWO_TASK}/httpd.conf
+ErrorLog "|${ORACLE_HOME}/ohs/bin/rotatelogs ${ORACLE_INSTANCE}/diagnostics/logs/${COMPONENT_TYPE}/${COMPONENT_NAME}/error_log 86400"
+}}}
+
+Apache bounce
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adapcctl.sh stop
+$ ./adapcctl.sh start
+}}}
+
+
+
+
+*---
+done at 11.5.10
+
+ErrorLog "|/dbtc1i/product/iAS/Apache/Apache/bin/rotatelogs /dbtc1i/product/DBTC1I_vmohsbtcp040/iAS/Apache/Apache/logs/error_log 86400"
+
+LogLevel warn
+
+
+TransferLog "|/dbtc1i/product/iAS/Apache/Apache/bin/rotatelogs /dbtc1i/product/DBTC1I_vmohsbtcp040/iAS/Apache/Apache/logs/access_log 86400"
+
+{{{
+# Logging mode is set to odl-text mode by default.
+# If you wish to use the apache type log instead then uncomment the
+# ErrorLog and LogLevel lines below and set OraLogMode to apache
+#
+}}}
+
+*> yes, this is it.
+
+http://docs.oracle.com/cd/E23943_01/web.1111/e10144/man_logs.htm
+
+
+== Does it bother MT if the listener on DB tier is down for a while? ==
+http://sun4.remik.org:8000
+
+Ok, I have opened the forms.
+
+Now I will just shutdown the DB listener.
+{{{
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./addlnctl.sh stop $ORACLE_SID
+}}}
+
+Forms are working fine in the session that was already open.
+
+Trying to login again:
+* left navigation is missing
+* Error message: You have encountered an unexpected error
+
+Starting the listener
+{{{
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./addlnctl.sh start $ORACLE_SID
+}}}
+
+Just starting the listener again makes it all work fine.
+
+Conslusion:
+* do not try to shutdown listener, new users will not be able to connect
+* if you did, just start it again, no need to restart the whole stack
+
+
+== DBCA fails Can not Connect to Database/Instance in Multiple Listener Environment ==
+MOS:
+* 11gR2 DBCA Can not Connect to Database/Instance in Multiple Listener Environment (Doc ID 1352890.1)
+
+{{{
+> show parameter local_listener
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+local_listener			     string	 VIS1_LOCAL
+}}}
+
+
+{{{
+$ cd $TNS_ADMIN
+$ cat tnsnames.ora
+}}}
+
+VIS1_LOCAL=
+(DESCRIPTION=
+(ADDRESS=(PROTOCOL=tcp)(HOST=usera1-vip.remik.org)(PORT=1526))
+)
+
+{{{
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./addlnctl.sh status VIS
+Connecting to (DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=usera1-vip.remik.org)(PORT=1526)(IP=FIRST)))
+STATUS of the LISTENER
+------------------------
+Alias                     VIS
+Version                   TNSLSNR for Linux: Version 11.2.0.3.0 - Production
+Start Date                13-JAN-2015 14:23:46
+Uptime                    0 days 0 hr. 24 min. 56 sec
+Trace Level               off
+Security                  ON: Local OS Authentication
+SNMP                      OFF
+Listener Parameter File   /u01/oracle/VIS/11.2.0/network/admin/VIS1_usera1/listener.ora
+Listener Log File         /u01/oracle/VIS/11.2.0/log/diag/tnslsnr/usera1/vis/alert/log.xml
+Listening Endpoints Summary...
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.52)(PORT=1526)))
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.50)(PORT=1526)))
+Services Summary...
+Service "VIS" has 1 instance(s).
+Instance "VIS1", status READY, has 1 handler(s) for this service...
+Service "VIS1" has 1 instance(s).
+Instance "VIS1", status UNKNOWN, has 1 handler(s) for this service...
+Service "ebs_patch" has 1 instance(s).
+Instance "VIS1", status READY, has 1 handler(s) for this service...
+The command completed successfully
+}}}
+
+Checking the Grid listener status
+ORACLE_SID: +ASM1
+ORACLE_HOME: /u01/app/11.2.0/grid
+
+{{{
+$ lsnrctl status
+Listener Parameter File   /u01/app/11.2.0/grid/network/admin/listener.ora
+Listener Log File         /u01/app/oracle/diag/tnslsnr/usera1/listener/alert/log.xml
+Listening Endpoints Summary...
+(DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=LISTENER)))
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.50)(PORT=1521)))
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.52)(PORT=1521)))
+Services Summary...
+Service "+ASM" has 1 instance(s).
+Instance "+ASM1", status READY, has 1 handler(s) for this service...
+}}}
+
+
+So I could use the full descriptor insted:
+{{{
+> alter system set local_listener='(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=usera1-vip.remik.org)(PORT=1526)))' sid='VIS1';
+}}}
+
+But the advise is to register instance to default listener in GRID_HOME on top of the listeners it's currently registered to
+
+{{{
+> alter system set local_listener='(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=usera1-vip.remik.org)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=usera1-vip.remik.org)(PORT=1526))))' sid='VIS1';
+> alter system register;
+}}}
+
+Checking the GRID listener:
+ORACLE_SID: +ASM1
+ORACLE_HOME: /u01/app/11.2.0/grid
+
+{{{
+$ lsnrctl status
+Listener Parameter File   /u01/app/11.2.0/grid/network/admin/listener.ora
+Listener Log File         /u01/app/oracle/diag/tnslsnr/usera1/listener/alert/log.xml
+Listening Endpoints Summary...
+(DESCRIPTION=(ADDRESS=(PROTOCOL=ipc)(KEY=LISTENER)))
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.50)(PORT=1521)))
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.52)(PORT=1521)))
+Services Summary...
+Service "+ASM" has 1 instance(s).
+Instance "+ASM1", status READY, has 1 handler(s) for this service...
+Service "VIS" has 1 instance(s).
+Instance "VIS1", status READY, has 1 handler(s) for this service...
+Service "ebs_patch" has 1 instance(s).
+Instance "VIS1", status READY, has 1 handler(s) for this service...
+The command completed successfully
+}}}
+
+Checking DB listener
+{{{
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./addlnctl.sh status VIS
+Listener Parameter File   /u01/oracle/VIS/11.2.0/network/admin/VIS1_usera1/listener.ora
+Listener Log File         /u01/oracle/VIS/11.2.0/log/diag/tnslsnr/usera1/vis/alert/log.xml
+Listening Endpoints Summary...
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.52)(PORT=1526)))
+(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=192.168.1.50)(PORT=1526)))
+Services Summary...
+Service "VIS" has 1 instance(s).
+Instance "VIS1", status READY, has 1 handler(s) for this service...
+Service "VIS1" has 1 instance(s).
+Instance "VIS1", status UNKNOWN, has 1 handler(s) for this service...
+Service "ebs_patch" has 1 instance(s).
+Instance "VIS1", status READY, has 1 handler(s) for this service...
+The command completed successfully
+}}}
+
+
+Changing on the second node:
+{{{
+> show parameter local_listener
+}}}
+
+NAME				     TYPE	 VALUE
+*----------------------------------- ----------- ------------------------------
+local_listener			     string	 VIS2_LOCAL
+
+VIS2_LOCAL=
+(DESCRIPTION=
+(ADDRESS=(PROTOCOL=tcp)(HOST=usera2-vip.remik.org)(PORT=1526))
+)
+
+{{{
+> alter system set local_listener='(DESCRIPTION=(ADDRESS_LIST=(ADDRESS=(PROTOCOL=TCP)(HOST=usera2-vip.remik.org)(PORT=1521))(ADDRESS=(PROTOCOL=TCP)(HOST=usera2-vip.remik.org)(PORT=1526))))' sid='VIS2';
+> alter system register;
+}}}
+
+Shutdown MT
+
+
+
+
+
+
+== Can adop cycle be interrupted by MT/DB restart ==
+What I have tested and it worked:
+
+# adop=prepare
+2. shutdown MT, DB
+3. startup DB
+4. adop=apply
+
+
+
+
