@@ -1,0 +1,1149 @@
+= Maintenance =
+== Cloning ==
+MOS:
+* Cloning Oracle E-Business Suite Release 12.2 with Rapid Clone (Doc ID 1383621.1)
+
+=== Preclone APP ===
+Preclone should be done on a properly running DB and APP tiers
+{{{
+$ source /u01/oracle/VIS/EBSapps.env run
+$ cd $INST_TOP/admin/scripts
+$ perl adpreclone.pl appsTier
+}}}
+
+=== Preclone DB ===
+Preclone should be done on a properly running DB and APP tiers
+{{{
+$ . $HOME/scripto/ebs/db_env
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ perl adpreclone.pl dbTier
+}}}
+
+
+=== Copy DB and MT from source to target ===
+On target (both):
+{{{
+# cd /u01
+# cat rsyncd.conf
+[tmp]
+path = /u01/tmp
+comment = write only
+use chroot = no
+max connections = 1
+read only = false
+write only = true
+transfer logging = true
+uid = root
+gid = root
+}}}
+
+Shutdown both app and DB (that way it will be easier)
+
+On source APP
+{{{
+# rsync -a --progress oracle target_app::tmp
+}}}
+
+On source DB
+{{{
+# rsync -a --progress oracle target_db::tmp
+}}}
+
+!!! Fix the rsyncd-munged
+
+=== Prepare target DB to postclone ===
+{{{
+# chown oracle:oinstall /u01
+# mv /u01/tmp/oracle /u01/
+}}}
+
+=== Postclone DB ===
+{{{
+$ cd /u01/oracle/VIS/11.2.0/appsutil/clone/bin
+$ perl adcfgclone.pl dbTier
+}}}
+
+
+Enter the APPS password :
+Target System Hostname (virtual or normal) [ebsdb4] :
+
+Target Instance is RAC (y/n) [n] :
+
+Target System Database SID : VIS
+
+Target System Base Directory : /u01/oracle/VIS
+
+Target System utl_file_dir Directory List : /tmp
+
+Number of DATA_TOP's on the Target System [1] :
+
+Target System DATA_TOP Directory 1 [/u01/oracle/VIS/data] :
+
+Target System RDBMS ORACLE_HOME Directory [/u01/oracle/VIS/11.2.0] :
+
+Do you want to preserve the Display [null] (y/n)  : y
+
+Do you want the target system to have the same port values as the source system (y/n) [y] ? :
+Complete port information available at /u01/oracle/VIS/11.2.0/appsutil/clone/bin/out/VIS_ebsdb4/portpool.lst
+
+Creating the new Database Context file from :
+/u01/oracle/VIS/11.2.0/appsutil/template/adxdbctx.tmp
+
+The new database context file has been created :
+/u01/oracle/VIS/11.2.0/appsutil/VIS_ebsdb4.xml
+
+Completed Apply...
+Starting database listener for VIS:
+
+=== Prepare target APP to postclone ===
+{{{
+# chown applmgr:oinstall /u01
+# mv /u01/tmp/oracle /u01/
+}}}
+
+Assuming that fs2 is the RUN edition
+
+According to Note 1383621.1 we only need
+<APPL_TOP>
+<COMMON_TOP>
+<OracleAS Tools 10.1.2 ORACLE_HOME>
+
+APPL_TOP   =/u01/oracle/VIS/fs2/EBSapps/appl
+COMMON_TOP =/u01/oracle/VIS/fs2/EBSapps/comn
+ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+
+Cleaning up:
+mkdir -p /u01/trash/fs2
+mv /u01/oracle/VIS/fs2/FMW_Home /u01/trash/fs2
+mv /u01/oracle/VIS/fs2/inst /u01/trash/fs2
+mv /u01/oracle/VIS/fs1 /u01/trash
+mv /u01/oracle/VIS/fs_ne /u01/trash
+mv /u01/oracle/VIS/EBSapps.env /u01/trash
+
+Fix the munged-rsyn links if required
+{{{
+$ wget http://download.vikis.lt/doc/rsync-3.0.6/support/munge-symlinks
+$ chmod 755 munge-symlinks
+$ ./munge-symlinks --unmunge
+}}}
+
+=== Postclone APP ===
+==== Postclone APP run edition ====
+{{{
+$ cd <COMMON_TOP>/clone/bin
+which is if fs2 is run edition
+$ cd /u01/oracle/VIS/fs2/EBSapps/comn/clone/bin
+$ perl adcfgclone.pl appsTier
+}}}
+
+Enter the APPS password :
+Enter the Weblogic AdminServer password :
+
+Do you want to add a node (yes/no) [no] :
+Target System File Edition type [run] :
+
+Provide the values required for creation of the new APPL_TOP Context file.
+
+Target System Hostname (virtual or normal) [ebs4] :
+
+Target System Database SID : VIS
+
+Target System Database Server Node [ebs4] : ebsdb4
+
+Target System Database Domain Name [remik.org] :
+
+Target System Base Directory : /u01/oracle/VIS
+
+Target System Base Directory set to /u01/oracle/VIS
+
+Target System Current File System Base set to /u01/oracle/VIS/fs2
+
+Target System Other File System Base set to /u01/oracle/VIS/fs1
+
+Target System Fusion Middleware Home set to /u01/oracle/VIS/fs2/FMW_Home
+
+Target System Web Oracle Home set to /u01/oracle/VIS/fs2/FMW_Home/webtier
+
+Target System Appl TOP set to /u01/oracle/VIS/fs2/EBSapps/appl
+
+Target System COMMON TOP set to /u01/oracle/VIS/fs2/EBSapps/comn
+
+Target System Instance Home Directory [/u01/oracle/VIS] :
+
+Target System Instance Top set to /u01/oracle/VIS/fs2/inst/apps/VIS_ebs4
+
+Do you want to preserve the Display [ebs2:0.0] (y/n)  : n
+
+Target System Display [ebs4:0.0] :
+
+Target System Root Service [enabled] :
+
+Target System Web Administration [enabled] :
+
+Target System Web Entry Point Services [enabled] :
+
+Target System Web Application Services [enabled] :
+
+Target System Batch Processing Services [enabled] :
+
+Target System Other Services [disabled] :
+
+Do you want the target system to have the same port values as the source system (y/n) [y] ? :
+Complete port information available at /u01/oracle/VIS/fs2/EBSapps/comn/clone/bin/out/VIS_ebs4/portpool.lst
+
+UTL_FILE_DIR on database tier consists of the following directories.
+
+# /usr/tmp
+2. /tmp
+3. /u01/oracle/VIS/11.2.0/appsutil/outbound/VIS_ebsdb4
+4. /usr/tmp
+Choose a value which will be set as APPLPTMP value on the target node [1] : 2
+
+Creating the new APPL_TOP Context file from :
+/u01/oracle/VIS/fs2/EBSapps/comn/clone/context/apps/adxmlctx.tmp
+
+The new APPL_TOP context file has been created :
+/u01/oracle/VIS/fs2/inst/apps/VIS_ebs4/appl/admin/VIS_ebs4.xml
+
+Do you want to startup the Application Services for VIS? (y/n) [n] :
+*>
+Wait a second. First edit:
+{{{
+$ vi /u01/oracle/VIS/fs2/inst/apps/VIS_ebs4/ora/10.1.2/network/admin/sqlnet.ora
+$ vi /u01/oracle/VIS/fs2/inst/apps/VIS_sun4/ora/10.1.2/network/admin/sqlnet.ora
+#tcp.validnode_checking = yes
+#tcp.invited_nodes = (EBS4.remik.org, EBSDB4.remik.org)
+}}}
+
+Then:
+Do you want to startup the Application Services for VIS? (y/n) [n] : y
+
+=== Run preclone on the run edition file system ===
+
+{{{
+$ source /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+File System Type          : SINGLE
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : NOT APPLICABLE
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+}}}
+
+{{{
+$ cd $INST_TOP/admin/scripts
+$ perl adpreclone.pl appsTier
+}}}
+
+=== copy from the run edition file system to the patch edition file system ===
+Stop MT
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adstpall.sh apps/apps
+}}}
+
+{{{
+$ cd /u01/oracle/VIS
+}}}
+
+We need only
+APPL_TOP   =/u01/oracle/VIS/fs1/EBSapps/appl
+COMMON_TOP =/u01/oracle/VIS/fs1/EBSapps/comn
+ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+
+Assuming, that fs2 is RUN edition
+{{{
+$ mkdir /u01/oracle/VIS/fs1
+$ cp -RH /u01/oracle/VIS/fs2/EBSapps /u01/oracle/VIS/fs1
+~ 40min
+}}}
+
+Check symbolic links after copy
+{{{
+$ ls -l /u01/oracle/VIS/fs2/EBSapps/10.1.2/precomp/public/SQLDA.H
+lrwxrwxrwx 1 applmgr oinstall 7 Jul 13 22:21 /u01/oracle/VIS/fs2/EBSapps/10.1.2/precomp/public/SQLDA.H -> sqlda.h
+$ ls -l /u01/oracle/VIS/fs1/EBSapps/10.1.2/precomp/public/SQLDA.H
+lrwxrwxrwx 1 applmgr oinstall 7 Jul 13 23:33 /u01/oracle/VIS/fs1/EBSapps/10.1.2/precomp/public/SQLDA.H -> sqlda.h
+}}}
+
+=== logon to the patch edition file system and run postclone ===
+Relogin, do not source any env, go to patch system clone/bin
+
+Assuming that fs1 is the PATCH edition
+{{{
+$ cd /u01/oracle/VIS/fs1/EBSapps/comn/clone/bin
+$ perl adcfgclone.pl appsTier
+}}}
+
+Enter the APPS password :
+Enter the Weblogic AdminServer password :
+Do you want to add a node (yes/no) [no] :
+Target System File Edition type [run] : patch
+Enter the full path of Run File System Context file : /u01/oracle/VIS/fs2/inst/apps/VIS_ebs4/appl/admin/VIS_ebs4.xml
+Target System Port Pool [0-99] : 2
+Choose a value which will be set as APPLPTMP value on the target node [1] :
+
+Looking for incomplete CLONE record in ad_adop_session_patches table
+The CLONE record status is no rows selected
+Updating incomplete CLONE record to COMPLETED
+
+=== Running fs_clone ===
+Relogin, source run edition.
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+}}}
+
+
+DB Host: ebsdb2.remik.org  Service/SID: VIS
+
+
+Sourcing the RUN File System ...
+
+{{{
+$ adop phase=fs_clone
+Enter the APPS password:
+Enter the SYSTEM password:
+Enter the WLSADMIN password:
+}}}
+
+adop exiting with status = 0 (Success)
+
+
+
+== Autoconfig ==
+Must Read:
+* Using AutoConfig to Manage System Configurations in Oracle E-Business Suite Release 12 (Doc ID 387859.1)
+
+=== See what will be changed when you run autoconfig ===
+(can be run on both app and DB tiers)
+
+adchkcfg.sh contextfile=$CONTEXT_FILE
+
+=== Application tier ===
+Stop the application tier services prior to run autoconfig.
+
+Confirmed (see below): Just run autoconfig on RUN fs, during fs_clone he will sync that to PATCH fs.
+
+Run AutoConfig on all application tier nodes
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+or
+$ cd $INST_TOP/admin/scripts
+$ ./adautocfg.sh
+}}}
+
+=== Database tier ===
+{{{
+$ . $HOME/scripto/ebs/db_env
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./adautocfg.sh
+}}}
+
+After running autoconfig on DB tier check file sqlnet.ora if it is ok to restrict access to DB. On Developmnet systems it is usually not. Then we need to comment the below lines out.
+{{{
+$ cd $TNS_ADMIN
+$ cat sqlnet.ora | grep tcp
+tcp.validnode_checking = yes
+tcp.invited_nodes=(...)
+}}}
+
+=== Autoconfig logs ===
+MOS:
+* How to find location of Install, Autoconfig, Patching , Clone and other logs in R12 [ID 804603.1]
+* Oracle Application Server Diagnostic Tools and Log Files in Applications Release 12 [ID 454178.1]
+
+Apps:
+{{{
+$INST_TOP/apps/$CONTEXT_NAME/admin/log/$MMDDHHMM/adconfig.log
+}}}
+
+Db:
+{{{
+$ORACLE_HOME/appsutil/log/$CONTEXT_NAME/<MMDDHHMM>/adconfig.log
+}}}
+
+
+=== Running autoconfig as a result of CONTEXT_FILE change ===
+Let's assume that we want to change the value of s_applptmp
+
+Shutdown MT
+
+Currently set:
+{{{
+$ env | grep APPLPTMP
+APPLPTMP=/tmp
+$ cat $CONTEXT_FILE | grep s_applptmp
+<APPLPTMP oa_var="s_applptmp" osd="UNIX">/tmp</APPLPTMP>
+}}}
+
+Changing CONTEXT_FILE value to /u01/oracle/tmp
+{{{
+$ vim $CONTEXT_FILE
+$ cat $CONTEXT_FILE | grep s_applptmp
+<APPLPTMP oa_var="s_applptmp" osd="UNIX">/u01/oracle/tmp</APPLPTMP>
+}}}
+
+Running autoconfig, relogin.
+{{{
+$ env | grep APPLPTMP
+APPLPTMP=/u01/oracle/tmp
+}}}
+
+OK, so he got it. Let's check how is it sen on patch edition.
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+$ env | grep APPLPTMP
+APPLPTMP=/tmp
+-> the old way.
+}}}
+
+Lets compare the context files:
+Run edition
+{{{
+$ cat $CONTEXT_FILE | grep s_applptmp
+<APPLPTMP oa_var="s_applptmp" osd="UNIX">/u01/oracle/tmp</APPLPTMP>
+}}}
+
+Patch edition
+{{{
+$ cat $CONTEXT_FILE | grep s_applptmp
+<APPLPTMP oa_var="s_applptmp" osd="UNIX">/tmp</APPLPTMP>
+}}}
+
+Ok, as expected. Lets go through the adop cycle.
+{{{
+$ adop phase=prepare
+$ adop phase=cutover
+}}}
+
+Relogin
+
+Run edition
+{{{
+$ cat $CONTEXT_FILE | grep s_applptmp
+<APPLPTMP oa_var="s_applptmp" osd="UNIX">/u01/oracle/tmp</APPLPTMP>
+$ env | grep APPLPTMP
+APPLPTMP=/u01/oracle/tmp
+}}}
+
+Patch edition
+{{{
+$ cat $CONTEXT_FILE | grep s_applptmp
+<APPLPTMP oa_var="s_applptmp" osd="UNIX">/u01/oracle/tmp</APPLPTMP>
+$ env | grep APPLPTMP
+APPLPTMP=/u01/oracle/tmp
+}}}
+
+Conclusion: all nice. Change to CONTEXT_FILE has been transfered to patch edition, and autoconfig was run on it which in turn resulted in consistent variable set between patch and run editions.
+
+We make changes to context file on run edition, they will be transfered to patch edition during the next adop cycle.
+
+
+
+== Purging out and log dir ==
+Just remove
+{{{
+$ find /u01/oracle/VIS/fs_ne/inst/VIS_sun4/logs/appl/conc/log/ -maxdepth 1 -name "*.req" -type f -mtime +60 -print -exec rm {} ;
+}}}
+
+Move and gzip
+{{{
+$ mkdir /u01/oracle/VIS/fs_ne/inst/VIS_sun4/logs/appl/conc/log/20141027
+$ find /u01/oracle/VIS/fs_ne/inst/VIS_sun4/logs/appl/conc/log/ -maxdepth 1 -name "*.req" -type f -mtime +60 -print -exec mv {} /u01/oracle/VIS/fs_ne/inst/VIS_sun4/logs/appl/conc/log/20141027 ;
+$ tar cvzf 20141027.tar.gz 20141027
+$ rm -Rf 20141027
+}}}
+
+
+
+== troubleschooting ==
+MOS:
+* Troubleshooting RapidClone issues with Oracle Applications R12 (Doc ID 603104.1)
+
+=== Control file creation failed ===
+During:
+{{{
+$ perl adcfgclone.pl dbTier
+}}}
+
+Seen in log:
+ORA-15180: could not open dynamic library odm library, error [open]
+
+MOS:
+* ORA-15180: Could not open dynamic library odm libraryump while doing startup (Doc ID 435826.1)
+
+That is because of rsync!
+{{{
+$ cd /u01/oracle/VIS/11.2.0/lib
+$ ls -l libocci.so
+lrwxrwxrwx 1 oracle oinstall        30 Jul 13 11:14 libocci.so -> /rsyncd-munged/libocci.so.11.1
+}}}
+
+{{{
+$ wget http://download.vikis.lt/doc/rsync-3.0.6/support/munge-symlinks
+$ chmod 755 munge-symlinks
+$ ./munge-symlinks --unmunge
+$ ls -l libocci.so
+lrwxrwxrwx 1 oracle oinstall 15 Jul 13 21:30 libocci.so -> libocci.so.11.1
+}}}
+
+
+
+=== sqlplus: error while loading shared libraries: libclntsh.so.10.1: cannot open shared object file: No such file or directory ===
+
+Fix the blody sym links! See above.
+
+
+
+=== ORA-04063: table "CSR.CSR_RULES_B" has errors ===
+
+{{{
+> connect apps
+> exec fnd_stats.gather_table_stats('CSR','CSR_RULES_B');
+ERROR at line 1:
+ORA-04063: table "CSR.CSR_RULES_B" has errors
+ORA-06512: at "APPS.FND_STATS", line 2905
+ORA-06512: at line 1
+}}}
+
+{{{
+> select count(*) from CSR.CSR_RULES_B;
+select count(*) from CSR.CSR_RULES_B
+*
+ERROR at line 1:
+ORA-04063: table "CSR.CSR_RULES_B" has errors
+}}}
+
+CSR_RULES_B                    CSR                  TABLE
+CSR_RULE_WINDOWS_B             CSR                  TABLE
+CSR_RULES_B#                   CSR                  VIEW
+
+==== Actions from (Doc ID 1221233.1) ====
+
+MOS:
+* Invalid CSR_RULES_B Table And Invalid Objects With CSRRSREG.sql (Doc ID 1221233.1)
+
+{{{
+> connect apps
+> PURGE RECYCLEBIN;
+> ALTER SESSION SET RECYCLEBIN=OFF;
+> BEGIN
+DBMS_XMLSCHEMA.deleteSchema(
+schemaurl => 'http://xmlns.oracle.com/CRM/Scheduler/Rules',
+delete_option => DBMS_XMLSCHEMA.DELETE_CASCADE_FORCE);
+}}}
+
+COMMIT;
+
+EXCEPTION
+WHEN OTHERS THEN
+dbms_output.put_line('Encountered ' || SQLERRM ||
+' when deleting Scheduler Rules XML Schema');
+END;
+
+SELECT *
+FROM user_xml_schemas
+WHERE schema_url = 'http://xmlns.oracle.com/CRM/Scheduler/Rules';
+*> no rows selected
+
+{{{
+> select OWNER, SCHEMA_OWNER, table_name, element_name
+from dba_xml_tables
+where xmlschema = 'http://xmlns.oracle.com/CRM/Scheduler/Rules';  2    3
+}}}
+
+? no rows selected
+
+On app tier:
+{{{
+$ cd $CSR_TOP/patch/115/sql/
+> connect apps
+> @csrrsreg.sql apps apps csr csr /u01/oracle/VIS/fs2/EBSapps/appl/csr/12.0.0
+}}}
+
+select object_name, owner, status
+from all_objects
+where object_name like 'spMinTaskLength%_TAB%';
+
+==== nothing is happening ====
+{{{
+> select count(*) from CSR.CSR_RULES_B;
+}}}
+
+COUNT(*)
+*---------
+#
+
+{{{
+> drop table CSR.CSR_RULES_B;
+> @csrrsreg.sql apps apps csr csr /u01/oracle/VIS/fs2/EBSapps/appl/csr/12.0.0
+> select count(*) from CSR.CSR_RULES_B
+2  ;
+select count(*) from CSR.CSR_RULES_B
+*
+ERROR at line 1:
+ORA-00942: table or view does not exist
+}}}
+
+
+CSR.CSR_RULES_B - not recreated
+
+How to recreate it?
+
+==== different script ====
+Based on SR 3-9803261077: INVALID CSR TABLES - CSR_RULES_B CSR_RULES_WINDOWS_B
+
+{{{
+> select count(*) from CSR.CSR_RULES_B;
+}}}
+
+COUNT(*)
+*---------
+#
+
+{{{
+> create table CSR.CSR_RULES_B_BCK_20141105 as select * from CSR.CSR_RULES_B;
+> drop table CSR.CSR_RULES_B;
+}}}
+
+{{{
+$ cd $CSR_TOP/patch/115/sql/
+> connect apps
+> @csrxmlebr.sql apps apps csr csr /u01/oracle/VIS/fs2/EBSapps/appl/csr/12.0.0
+}}}
+
+Asks for &6/&7
+
+yes that is right - the additional parameters are for the apps_ne schema (which does not exist before 12.2):
+
+the parameters expected by csrxmlebr.sql  are:
+&un_apps    --> apps schemaname (standard = APPS)
+&pw_apps    --> apps password
+&un_csr     --> CSR schema name (standard = CSR)
+&pw_csr     --> CSR schema password
+&top_csr    --> value of $CSR_TOP
+&un_apps_ne --> apps_ne schemaname (standard apps_ne)
+&pw_apps_ne --> apps_ne password
+
+{{{
+> connect apps
+> @csrxmlebr.sql apps apps csr csr /u01/oracle/VIS/fs2/EBSapps/appl/csr/12.0.0 apps_ne apps
+}}}
+
+{{{
+> select count(*) from CSR.CSR_RULES_B;
+}}}
+
+COUNT(*)
+*---------
+0
+
+So he did it, but somehow differently.
+
+select s.schema.getclobval()
+from user_xml_schemas s
+where s.schema_url like 'http://xmlns.oracle.com/CRM/Scheduler/Rules';
+
+select csr.rule_doc.getClobVal() from csr_rules_vl csr where csr.rule_id = 0;
+
+
+
+=== ORA-04063: table "AZ.AZ_DIFF_RESULTS" has errors ===
+MOS:
+* How to Cleanup Invalid Oracle iSetup (AZ) Tables (Doc ID 832459.1)
+
+{{{
+> SELECT username, account_status   FROM dba_users  WHERE username = 'XDB';
+USERNAME		       ACCOUNT_STATUS
+------------------------------ --------------------------------
+XDB			       EXPIRED & LOCKED
+}}}
+
+
+{{{
+> ALTER USER xdb IDENTIFIED BY xdb ACCOUNT UNLOCK;
+}}}
+
+{{{
+> SELECT username, account_status   FROM dba_users  WHERE username = 'XDB';
+}}}
+
+USERNAME		       ACCOUNT_STATUS
+*----------------------------- --------------------------------
+XDB			       OPEN
+
+SELECT 'drop type ' || owner || '.' || type_name || ' force;'
+FROM all_types
+WHERE type_name LIKE 'AZ%';
+
+drop type APPS_NE.AZ_RPTDATA_H force;
+drop type APPS_NE.AZ_RPTDATA_V_COLL force;
+drop type APPS_NE.AZ_RPTDATA_V_TAGS force;
+drop type APPS_NE.AZ_RPTDIFF_H force;
+drop type APPS_NE.AZ_RPTDIFF_V_COLL force;
+drop type APPS_NE.AZ_RPTDIFF_V_TAGS force;
+drop type APPS_NE.AZ_SELSETS_EXT force;
+drop type APPS_NE.AZ_SELSETS_H force;
+drop type APPS_NE.AZ_SELSETS_H_COLL force;
+drop type APPS_NE.AZ_SELSETS_V1484_T force;
+drop type APPS_NE.AZ_SELSETS_V_COLL force;
+
+
+{{{
+$ sqlplus az/az
+DROP TABLE AZ_REQUESTS;
+DROP TABLE AZ_REPORTER_DATA;
+DROP TABLE AZ_DIFF_RESULTS;
+exit;
+}}}
+
+cd $AZ_TOP/patch/115/xdf
+
+adjava "-mx128m" "-nojit" "oracle.apps.fnd.odf2.FndXdfCmp" "<az-user>" "<az-password>" "<apps-user>" "<apps-password>" "thin" "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=<database-host>)(PORT=<database-port>))(CONNECT_DATA=(SID=<database-SID>)))"
+"table" "az_diff_results.xdf" "$FND_TOP/patch/115/xdf/xsl"
+
+which is by me
+
+adjava "-mx128m" "-nojit" "oracle.apps.fnd.odf2.FndXdfCmp" "az" "az" "apps" "apps" "thin" "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=ebsdb4)(PORT=1521))(CONNECT_DATA=(SID=VIS)))" "table" "az_diff_results.xdf" "$FND_TOP/patch/115/xdf/xsl"
+
+adjava "-mx128m" "-nojit" "oracle.apps.fnd.odf2.FndXdfCmp" "az" "az" "apps" "apps" "thin" "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=ebsdb4)(PORT=1521))(CONNECT_DATA=(SID=VIS)))" "table" "az_reporter_data.xdf" "$FND_TOP/patch/115/xdf/xsl"
+
+adjava "-mx128m" "-nojit" "oracle.apps.fnd.odf2.FndXdfCmp" "az" "az" "apps" "apps" "thin" "(DESCRIPTION=(ADDRESS=(PROTOCOL=tcp)(HOST=ebsdb4)(PORT=1521))(CONNECT_DATA=(SID=VIS)))" "table" "az_requests.xdf" "$FND_TOP/patch/115/xdf/xsl"
+
+6. Restore the iSetup XMLDB Schemas by executing the following scripts:
+
+{{{
+$ sqlplus apps/apps @$AZ_TOP/patch/115/sql/azhDiffSchema.sql manager
+$ sqlplus apps/apps @$AZ_TOP/patch/115/sql/azhRptSchema.sql manager
+$ sqlplus apps/apps @$AZ_TOP/patch/115/sql/azhSelSetSchema.sql manager
+}}}
+
+7. Restore iSetup specific XMLTYPE columns by executing the following scripts:
+
+sqlplus apps/apps @$AZ_TOP/patch/115/sql/azhAddDiffCol.sql az az
+sqlplus apps/apps @$AZ_TOP/patch/115/sql/azhAddDriver.sql az az
+sqlplus apps/apps @$AZ_TOP/patch/115/sql/azhAddRptCol.sql az az
+sqlplus apps/apps @$AZ_TOP/patch/115/sql/azhAddSelSet.sql az az
+
+8. For 12.2 only
+{{{
+> connect apps
+exec ad_zd_table.patch('AZ','AZ_REQUESTS');
+exec ad_zd_table.patch('AZ','AZ_REPORTER_DATA');
+exec ad_zd_table.patch('AZ','AZ_DIFF_RESULTS');
+}}}
+
+9. Provide appropriate grants with the following script:
+
+{{{
+$ sqlplus apps/apps @$AZ_TOP/patch/115/sql/azR12grants.sql manager
+}}}
+
+{{{
+> @?/rdbms/admin/utlrp.sql
+}}}
+
+
+
+
+== Change default passwords ==
+Based on MOS:
+* Secure Configuration Guide for Oracle E-Business Suite Release 12 (Doc ID 403537.1)
+
+We need to change the Oracle RDBMS accounts connected with application - users that can be seen in DB view DBA_USERS and application users that can be seen in view APPL.FND_USERS.
+
+=== Change default application passwords ===
+To display application users that have default passwords set execute the following script
+
+Login to app node
+{{{
+$ sqlplus apps
+> @$FND_TOP/patch/115/sql/fnddefpw.sql
+}}}
+
+Example output:
+{{{
+USER_WITH_DEFAULT_PASSWORD
+----------------------------
+AME_INVALID_APPROVER
+ASGADM
+GUEST
+IRC_EMP_GUEST
+IRC_EXT_GUEST
+MOBILEADM
+XML_USER
+}}}
+
+For the displayed users change the password using the new AFPASSWD utility. Do NOT change the password for user GUEST (the utility will not allow that anyway).
+
+Login to app node
+{{{
+$ AFPASSWD -f AME_INVALID_APPROVER
+$ AFPASSWD -f ASGADM
+(...)
+}}}
+
+After the change run the test script again
+{{{
+$ sqlplus apps
+> @$FND_TOP/patch/115/sql/fnddefpw.sql
+USER_WITH_DEFAULT_PASSWORD
+----------------------------
+GUEST
+
+1 row selected.
+}}}
+
+It should show only one GUEST account.
+
+==== Changing APPLSYSPUB ====
+
+Shutdown MT
+
+Change password
+{{{
+$ FNDCPASS APPS/<apps_pwd> 0 Y SYSTEM/<system_pwd> ORACLE APPLSYSPUB <new_pwd>
+eg
+$ FNDCPASS APPS/apps 0 Y SYSTEM/manager ORACLE APPLSYSPUB ORACLE12
+}}}
+
+If we run autoconfig now and restart MT we probably bet the following error: The system has encountered an error when servicing the request. If the error persists, please contact the system administrator.
+
+That is why some extra action is needed:
+
+Edit Context file
+{{{
+$ cp $CONTEXT_FILE $CONTEXT_FILE_`date -I`
+$ vi $CONTEXT_FILE
+Change:
+<password oa_var="s_gwyuid_pass">PUB</password>
+<GWYUID oa_var="s_gwyuid">APPLSYSPUB/PUB</GWYUID>
+To:
+<password oa_var="s_gwyuid_pass">NEWPUBPASS</password>
+<GWYUID oa_var="s_gwyuid">APPLSYSPUB/NEWPUBPASS</GWYUID>
+}}}
+
+Run Autoconfig
+{{{
+$ cd $INST_TOP/admin/scripts
+$ ./adautocfg.sh
+AutoConfig completed successfully.
+}}}
+
+Startup MT
+
+===== Going through adop cycle, just as a test =====
+{{{
+$ adop phase=prepare
+========================================
+}}}
+
+SUMMARY OF PATCHES BEING SYNCHRONIZED...
+
+========================================
+[1] SINGLE PATCH (DRV=u17999920.drv):  17999920
+[2] SINGLE PATCH (DRV=u18054175.drv):  18054175
+
+LOGPATH is set to /u01/oracle/VIS/fs_ne/EBSapps/log/adop/17/prepare_20141210_152057/VIS_sun4/TXK_SYNC_update_Wed_Dec_10_15_25_33_2014/log
+
+AutoPatch error:
+ORA-01031: insufficient privileges
+ORA-06512: at "SYS.DBMS_SESSION", line 114
+ORA-06512: at "APPS.AD_JAR", line 17
+ORA-06512: at line 3
+
+*> aborting prepare, forcing complete fs_sync
+
+{{{
+$ adop phase=abort
+adop exiting with status = 1 (Fail)
+AutoPatch error:
+ORA-01031: insufficient privileges
+}}}
+
+OK, lets source patch edition and change context file there too
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+- change context file
+- run autoconfig on patch edition
+}}}
+
+{{{
+$ adop phase=abort
+adop phase=abort - Completed Successfully
+adop exiting with status = 0 (Success)
+}}}
+
+OK, so that was it. Prepare again.
+
+{{{
+$ adop phase=prepare
+AutoPatch error:
+ORA-01031: insufficient privileges
+Unable to get passwords from Vault
+}}}
+
+MOS: Unable To Apply Patch 17023760 - ORA-01031: Insufficient Privileges (Doc ID 1627896.1)
+{{{
+> @$ORACLE_HOME/appsutil/admin/adgrants.sql apps
+}}}
+
+Prepare again.
+{{{
+$ adop phase=prepare
+adop exiting with status = 0 (Success)
+}}}
+
+And cutover
+{{{
+$ adop phase=cutover
+}}}
+
+===== Repeating the password change, to make sure where is the problem =====
+Shutdown MT
+
+Change password
+{{{
+$ FNDCPASS APPS/apps 0 Y SYSTEM/manager ORACLE APPLSYSPUB AGAIN12
+}}}
+
+Edit Context file
+{{{
+$ vi $CONTEXT_FILE
+}}}
+
+Run Autoconfig
+{{{
+$ cd $INST_TOP/admin/scripts
+$ ./adautocfg.sh
+AutoConfig completed successfully.
+}}}
+
+Startup MT
+
+Login work fine.
+
+Patching cycle.
+{{{
+$ adop phase=prepare
+adop phase=prepare - Completed Successfully
+}}}
+
+{{{
+$ adop phase=cutover
+adop phase=cutover - Completed Successfully
+}}}
+
+Now, the question is: was the contex file synced?
+*> Yes, it was. So no need to change context file on the patch edition.
+
+{{{
+$ cat /u01/oracle/VIS/fs2/inst/apps/VIS_sun4/appl/admin/VIS_sun4.xml | grep -e s_gwyuid -e s_gwyuid_pass
+<username oa_var="s_gwyuid_user">APPLSYSPUB</username>
+<password oa_var="s_gwyuid_pass">AGAIN12</password>
+<GWYUID oa_var="s_gwyuid">APPLSYSPUB/AGAIN12</GWYUID>
+}}}
+
+{{{
+$ cat /u01/oracle/VIS/fs1/inst/apps/VIS_sun4/appl/admin/VIS_sun4.xml | grep -e s_gwyuid -e s_gwyuid_pass
+<username oa_var="s_gwyuid_user">APPLSYSPUB</username>
+<password oa_var="s_gwyuid_pass">AGAIN12</password>
+<GWYUID oa_var="s_gwyuid">APPLSYSPUB/AGAIN12</GWYUID>
+}}}
+
+
+
+
+
+
+
+
+=== Change Oracle Applications Database user ===
+Database users related to applications can be changed using the AFPASSWD as well, but with different parameter.
+
+Database provides a view that will list all the users with default passwords.
+
+{{{
+$ sqlplus apps
+> select USERNAME from DBA_USERS_WITH_DEFPWD;
+}}}
+
+Example output:
+{{{
+(...)
+USERNAME
+------------------------------
+ONT
+OPI
+PA
+PRP
+RRS
+SI_INFORMTN_SCHEMA
+SYS
+WSH
+WSM
+
+196 rows selected.
+}}}
+
+To change the password to all database accounts connected with applications we can use AFPASSWD -a, which is equivalent of the old $ FNDCPASS APPS/<apps_pwd> 0 Y SYSTEM/<system_pwd> ALLORACLE <NEW_PWD>
+
+{{{
+$ AFPASSWD -a
+Enter the ORACLE password of Application Object Library 'APPSUSER':    # this is just to login, the password
+Enter the password for your 'SYSTEM' ORACLE schema:                    # this is just to login too
+Enter new password for user:                     # that is the new password for accounts like AR, GL, etc.
+}}}
+
+After that change we should see substantially less accounts in DBA_USERS_WITH_DEFPWD view
+{{{
+$ sqlplus apps
+> select USERNAME from DBA_USERS_WITH_DEFPWD;
+}}}
+
+Example output:
+{{{
+(...)
+USERNAME
+------------------------------
+DBSNMP
+MDDATA
+ORDPLUGINS
+ORDSYS
+
+35 rows selected.
+}}}
+
+For the remaining Database users consult Appendix C: Database Schemas found in Oracle E-Business Suite, in mentioned (Doc ID 403537.1) on page 47.
+
+
+
+
+== Changing tnsnames on DB tier ==
+=== Location of TNS_ADMIN ===
+Sourcing the env file sets the TNS_ADMIN variable
+
+{{{
+$ grep TNS_ADMIN /u01/oracle/VIS/11204/VIS_ebsdb4.env
+TNS_ADMIN="/u01/oracle/VIS/11204/network/admin/VIS_ebsdb4"
+}}}
+
+Buth the actual location is set in CONTEXT_FILE
+
+{{{
+$ grep -i tnsadmin $CONTEXT_FILE
+<TNS_ADMIN oa_var="s_db_tnsadmin">/u01/oracle/VIS/11204/network/admin/VIS_ebsdb4</TNS_ADMIN>
+}}}
+
+If we want to change the location, say to /u01/oracle/VIS/11204/network/admin/VIS_blabla we have to do the following:
+
+Change the value of s_db_tnsadmin $CONTEXT_FILE
+{{{
+$ cp $CONTEXT_FILE ${CONTEXT_FILE}_`date -I`
+$ vim $CONTEXT_FILE
+$ diff $CONTEXT_FILE ${CONTEXT_FILE}_`date -I`
+157c157
+<          <TNS_ADMIN oa_var="s_db_tnsadmin">/u01/oracle/VIS/11204/network/admin/VIS_blabla</TNS_ADMIN>
+---
+>          <TNS_ADMIN oa_var="s_db_tnsadmin">/u01/oracle/VIS/11204/network/admin/VIS_ebsdb4</TNS_ADMIN>
+}}}
+
+
+Probably we need to change the location of ifile as well
+{{{
+$ grep VIS_ebsdb4 $CONTEXT_FILE | grep "network/admin"
+<IFILE oa_var="s_ifile">/u01/oracle/VIS/11204/network/admin/VIS_ebsdb4/VIS_ebsdb4_ifile.ora</IFILE>
+<LSNR_IFILE oa_var="s_lsnr_ifile">/u01/oracle/VIS/11204/network/admin/VIS_ebsdb4/listener_ifile.ora</LSNR_IFILE>
+<SQLNET_IFILE oa_var="s_sqlnet_ifile">/u01/oracle/VIS/11204/network/admin/VIS_ebsdb4/sqlnet_ifile.ora</SQLNET_IFILE>
+}}}
+
+{{{
+$ vim $CONTEXT_FILE
+}}}
+
+
+Now run autoconfig
+{{{
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./adautocfg.sh
+}}}
+
+Relogin, because the env file has been recreated too.
+{{{
+$ exit
+$ env | grep TNS
+TNS_ADMIN=/u01/oracle/VIS/11204/network/admin/VIS_blabla
+}}}
+
+
+
+
+
+
+
+
+
+
+== What is installed where ==
+Nice links:
+* http://onlineappsdba.com/index.php/2008/08/17/oracle-releaseversion-number-for-apps-forms-jinitiator-oid-sso-portal-ias-oc4j-unix-xxxx/
+* https://community.oracle.com/thread/2131716
+
+
+#.2.4
+#919161
+
+R12.AD.C.Delta.6
+#197270
+
+R12.TXK.C.Delta.6
+#330775
+
+R12.AD.C.Delta.5
+#283295
+
+R12.TXK.C.Delta.5
+#288881
+
+=== Basic info ===
+select name from v$database;
+select * from v$version;
+select COMMENTS from  registry$history where COMMENTS like 'PSU%';
+select release_name from apps.fnd_product_groups;
+select patch_level from apps.fnd_product_installations where patch_level like '%AD%';
+select patch_level from apps.fnd_product_installations where patch_level like '%FND%';
+
+=== other ===
+
+What is the patchset level
+Applications Manager / Applications Dashboard / Other Links - Products Installed
+
+i expense , Short code is IBY
+{{{
+> select patch_level from apps.fnd_product_installations where patch_level like '%IBY%';
+}}}
+
+{{{
+> select patch_level from apps.fnd_product_installations where patch_level like '%AP%';
+PATCH_LEVEL
+------------------------------
+R12.AP.C.3
+}}}
+
+
+
+== JSP compile ==
+
+{{{
+$ cd $FND_TOP/patch/115/bin
+$ ojspCompile.pl --compile --flush
+}}}
+
+
