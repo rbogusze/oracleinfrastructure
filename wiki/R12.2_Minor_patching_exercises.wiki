@@ -1,0 +1,378 @@
+= Minor patching exercises =
+
+== Apply patch 18668337:R12.FUN.C ==
+
+=== Start a new patching cycle ===
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+}}}
+
+So, the RUN edition is now (fs2), the patch edition is now (fs1).
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+ebs2		master		PREPARE     COMPLETED	    05-MAY-14 14:19:07 +02:00	   05-MAY-14 15:21:17 +02:00  1:02:10
+APPLY	    COMPLETED	    07-MAY-14 10:41:43 +02:00	   08-MAY-14 00:50:56 +02:00  14:09:13
+FINALIZE    COMPLETED	    08-MAY-14 05:40:10 +02:00	   08-MAY-14 05:42:20 +02:00  0:02:10
+CUTOVER     COMPLETED	    08-MAY-14 05:44:25 +02:00	   08-MAY-14 06:32:12 +02:00  0:47:47
+CLEANUP     COMPLETED	    08-MAY-14 06:37:26 +02:00	   08-MAY-14 15:48:29 +02:00  9:11:03
+}}}
+
+
+{{{
+$ adop phase=prepare
+}}}
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    22-AUG-14 16:23:06 +02:00	   22-AUG-14 16:43:37 +02:00  0:20:31
+APPLY	    NOT STARTED
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+}}}
+
+
+=== Apply patch 18668337 ===
+
+ERROR WHEN SETUP INVOICE OPTIONS AT AGIS SETUPS (Patch)
+p18668337_R12.FUN.C_R12_GENERIC.zip	13.0 KB	(13288 bytes) MD5	8986420DA6325D77C0516480877CBA84
+
+Check if the patch has not been already applied
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18668337';
+no rows selected
+}}}
+
+{{{
+$ cd $PATCH_TOP
+$ md5sum p18668337_R12.FUN.C_R12_GENERIC.zip
+8986420da6325d77c0516480877cba84  p18668337_R12.FUN.C_R12_GENERIC.zip
+$ unzip p18668337_R12.FUN.C_R12_GENERIC.zip
+}}}
+
+{{{
+$ adop phase=apply patches=18668337
+}}}
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    22-AUG-14 16:23:06 +02:00	   22-AUG-14 16:43:37 +02:00  0:20:31
+APPLY	    COMPLETED	    22-AUG-14 16:46:19 +02:00	   22-AUG-14 17:53:04 +02:00  1:06:45
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+}}}
+
+
+The patch has been applied to the PATCH edition, it is not yet "seeable".
+
+
+=== Perform cutover to switch patch file system to run file system ===
+
+This cutover phase will stop services on the current RUN (fs2) edition, replace the (fs1) as the RUN edition and start services from that.
+
+{{{
+$ adop phase=cutover
+}}}
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+}}}
+
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18668337';
+}}}
+
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+*--------- ------------------------------ ------------------
+935966 18668337			  22-AUG-14
+
+
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+*-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    22-AUG-14 16:23:06 +02:00	   22-AUG-14 16:43:37 +02:00  0:20:31
+APPLY	    COMPLETED	    22-AUG-14 16:46:19 +02:00	   22-AUG-14 17:53:04 +02:00  1:06:45
+CUTOVER     COMPLETED	    22-AUG-14 19:41:42 +02:00	   22-AUG-14 19:54:38 +02:00  0:12:56
+FINALIZE    COMPLETED	    22-AUG-14 19:42:00 +02:00	   22-AUG-14 19:42:37 +02:00  0:00:37
+CLEANUP     NOT STARTED
+
+This is it, patch has been applied, services are running.
+
+Last phase, the cleanup. Can be done on a running system.
+
+{{{
+$ adop phase=cleanup
+}}}
+
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+*-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    22-AUG-14 16:23:06 +02:00	   22-AUG-14 16:43:37 +02:00  0:20:31
+APPLY	    COMPLETED	    22-AUG-14 16:46:19 +02:00	   22-AUG-14 17:53:04 +02:00  1:06:45
+CUTOVER     COMPLETED	    22-AUG-14 19:41:42 +02:00	   22-AUG-14 19:54:38 +02:00  0:12:56
+FINALIZE    COMPLETED	    22-AUG-14 19:42:00 +02:00	   22-AUG-14 19:42:37 +02:00  0:00:37
+CLEANUP     COMPLETED	    22-AUG-14 21:22:12 +02:00	   22-AUG-14 22:06:29 +02:00  0:44:17
+
+
+
+
+
+
+
+== Apply both patch 18376908 and 18668337 ==
+
+=== Start a new patching cycle ===
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+}}}
+
+So, the RUN edition is now (fs2), the patch edition is now (fs1).
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+ebs2		master		PREPARE     COMPLETED	    05-MAY-14 14:19:07 +02:00	   05-MAY-14 15:21:17 +02:00  1:02:10
+APPLY	    COMPLETED	    07-MAY-14 10:41:43 +02:00	   08-MAY-14 00:50:56 +02:00  14:09:13
+FINALIZE    COMPLETED	    08-MAY-14 05:40:10 +02:00	   08-MAY-14 05:42:20 +02:00  0:02:10
+CUTOVER     COMPLETED	    08-MAY-14 05:44:25 +02:00	   08-MAY-14 06:32:12 +02:00  0:47:47
+CLEANUP     COMPLETED	    08-MAY-14 06:37:26 +02:00	   08-MAY-14 15:48:29 +02:00  9:11:03
+}}}
+
+
+{{{
+$ adop phase=prepare
+}}}
+
+{{{
+$ adop -status
+}}}
+
+sun4		master		PREPARE     COMPLETED	    28-AUG-14 14:19:58 +02:00	   28-AUG-14 14:41:00 +02:00  0:21:02
+APPLY	    NOT STARTED
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+
+=== Apply patch 18376908 and 18668337 ===
+==== prepare patch 18376908 ====
+#FF:17731609:TST1223: ENABLE NEGATIVE ACCRUAL TRANSACTION FLAG MISSING IN IMPLE (Patch)
+p18376908_R12.PJC.C_R12_GENERIC.zip	144.0 KB	(147415 bytes) MD5	CEADC6899CBABCC8A17D0B195F17FFE4
+
+Check if the patch has not been already applied
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18376908';
+no rows selected
+}}}
+
+{{{
+$ cd $PATCH_TOP
+$ md5sum p18376908_R12.PJC.C_R12_GENERIC.zip
+ceadc6899cbabcc8a17d0b195f17ffe4  p18376908_R12.PJC.C_R12_GENERIC.zip
+$ unzip p18376908_R12.PJC.C_R12_GENERIC.zip
+}}}
+
+
+==== prepare patch 18668337 ====
+ERROR WHEN SETUP INVOICE OPTIONS AT AGIS SETUPS (Patch)
+p18668337_R12.FUN.C_R12_GENERIC.zip	13.0 KB	(13288 bytes) MD5	8986420DA6325D77C0516480877CBA84
+
+Check if the patch has not been already applied
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18668337';
+no rows selected
+}}}
+
+{{{
+$ cd $PATCH_TOP
+$ md5sum p18668337_R12.FUN.C_R12_GENERIC.zip
+8986420da6325d77c0516480877cba84  p18668337_R12.FUN.C_R12_GENERIC.zip
+$ unzip p18668337_R12.FUN.C_R12_GENERIC.zip
+}}}
+
+==== do the combined apply ====
+{{{
+$ adop phase=apply patches=18376908,18668337
+}}}
+
+{{{
+$ adop -status
+}}}
+
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+*-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    28-AUG-14 14:19:58 +02:00	   28-AUG-14 14:41:00 +02:00  0:21:02
+APPLY	    ACTIVE	    28-AUG-14 15:39:11 +02:00	   28-AUG-14 16:38:39 +02:00  0:59:28
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+
+
+The patch is already visible:
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18668337';
+}}}
+
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+*--------- ------------------------------ ------------------
+935967 18668337			  28-AUG-14
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18376908';
+}}}
+
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+*--------- ------------------------------ ------------------
+935966 18376908			  28-AUG-14
+
+=== Apply patch 18376908 and 18668337 the wrong approach (just for curiosity) ===
+{{{
+$ adop phase=apply patches=18376908
+adop exiting with status = 0 (Success)
+}}}
+
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+*-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    29-AUG-14 21:07:38 +02:00	   29-AUG-14 21:28:50 +02:00	  0:21:12
+APPLY	    ACTIVE	    29-AUG-14 21:35:20 +02:00	   29-AUG-14 21:36:40 +02:00	  0:01:20
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+
+
+*> This works fine.
+
+{{{
+$ adop phase=apply patches=18668337
+adop exiting with status = 0 (Success)
+}}}
+
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+*-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    29-AUG-14 21:07:38 +02:00	   29-AUG-14 21:28:50 +02:00	  0:21:12
+APPLY	    ACTIVE	    29-AUG-14 21:35:20 +02:00	   29-AUG-14 22:44:05 +02:00	  1:08:45
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+
+*> this to my surprise worked as well
+
+
+
+
+
+=== Perform cutover to switch patch file system to run file system ===
+
+This cutover phase will stop services on the current RUN (fs2) edition, replace the (fs1) as the RUN edition and start services from that.
+
+{{{
+$ adop phase=cutover
+}}}
+
+{{{
+$ adop -status
+}}}
+
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+*-------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    28-AUG-14 14:19:58 +02:00	   28-AUG-14 14:41:00 +02:00  0:21:02
+APPLY	    COMPLETED	    28-AUG-14 15:39:11 +02:00	   28-AUG-14 16:38:39 +02:00  0:59:28
+CUTOVER     COMPLETED	    28-AUG-14 16:46:05 +02:00	   28-AUG-14 17:05:22 +02:00  0:19:17
+FINALIZE    COMPLETED	    28-AUG-14 16:46:23 +02:00	   28-AUG-14 16:46:42 +02:00  0:00:19
+CLEANUP     NOT STARTED
+
+This is it, patch has been applied, services are running.
+
+Last phase, the cleanup. Can be done on a running system.
+
+{{{
+$ adop phase=cleanup
+}}}
+
+== applying the same patch again ==
+
+If a patch has to be reapplied, then specify parameters "abandon=no" and "restart=yes".
+If a patch has to be reapplied and any of the parameters modified, then specify parameters "abandon=yes" and "restart=no".
+
+
+== Check if applying CPU patch from 12.2.4 on 12.2.3 can break the system ==
+Applying on ebs3, ebsdb3, snapshot taken before "invalids_test"
+
+{{{
+$ adop phase=apply patches=19371817,20083253 workers=32 merge=yes – only for R 12.2.4
+}}}
+
+http://ebs2.remik.org:8000
+*> Unable to authenticate session. -> this is browser issue, on onother one it works fine
+*> I can login fine, presented with menu
+
+{{{
+> select release_name from apps.fnd_product_groups;
+RELEASE_NAME
+--------------------------------------------------
+12.2.3
+}}}
+
+E-Business Suite Environment Information
+*---------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+Non-Editioned File System : /u01/oracle/VIS/fs_ne
+
+
+DB Host: ebsdb2.remik.org  Service/SID: VIS
+
+{{{
+$ adop phase=prepare
+$ adop phase=apply patches=19371817,20083253 workers=32 merge=yes patchtop=/STAGING/ebs12patches
+$ adop phase=cutover
+}}}
+
+Now again check the system
+http://ebs2.remik.org:8000
+
+Login page presented (but looks a little differently, dark blue background on top header)
+
+After login only the error message is displayed:
+You have encountered an unexpected error. Please contact the System Administr
+
+There is not much in logs that could guide you to good conclusions:
+
+<May 8, 2015 1:02:10 AM BST> <Debug> <oracle.jbo.common.ADFLoggerDiagnosticImpl> <BEA-000000
+{{{
+> <[280] Binding param 1: ACCESSIBILITY>
+java.lang.NoSuchMethodError: oracle/apps/fnd/framework/webui/OAPopupHelper.handlePopupPPRClickEvent(Loracle/apps/fnd/framework/webui/OAPageContext;)V at oracle.apps.fnd.framework.webui.OAPageBean.handlePopupPPRClickEvent(OAPageBean.ja
+va:9017)
+}}}
+
+Trying to do the usual actions:
+* recompiling JSP
+* running autoconfig on MT and DB
+
+Does not solve the issue. It is because the patches for EBS 12.2.4 were applied on 12.2.3. Actually adop should not allow that to happen.
+
+
+
+
+
