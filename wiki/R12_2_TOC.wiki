@@ -1,11 +1,20 @@
 Test setup:
 [[R12_2_Nice_links]]
+
 [[R12_2_Installing_Oracle_E-Business_Suite_Release_12_2_under_OEL_5.10_x86-64]]
+
 [[R12_2_Maintenance]]
+
 [[R12_2_Interesting_tasks]]
+
 [[R12_2_Minor_patching_exercises]]
+
 [[R12_2_Troubleschooting]]
+
 [[R12_2_Upgrading_DB_to_11_2_0_4]]
+
 [[R12_2_Upgrading_EBS_to_12_2_4_patch]]
+
 [[R12_2_Installing_R12_12_2_4_on_multinode_MT_and_2_node_RAC]]
+
 [[R12_2_Upgrading_to_AD_6]]
