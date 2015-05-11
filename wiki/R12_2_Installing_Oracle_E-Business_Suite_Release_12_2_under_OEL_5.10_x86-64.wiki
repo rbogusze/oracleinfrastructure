@@ -4180,3 +4180,2096 @@ $ grep EDITION /d01/oracle/VIS/fs*/EBSapps/appl/*env
 So /d01/oracle/VIS/fs1/EBSapps/appl/VIS_jazz.env is the current, active edition. And fs2 the patch one.
 
 
+Table of contents
+<wiki:toc max_depth=8 />
+= Installing Oracle E-Business Suite Release 12_2 under OEL 5.10 x86-64 =
+Installing Oracle E-Business Suite Release 12.2 under OEL 5.10 x86-64
+== Install Oracle Enterprise Linux 5.10 ==
+Oracle Linux Release 5 Update 10 for x86_64 (64 Bit)	V40139-01	4.0G
+V40139-01.iso	MD5		1AA0A1246B1A55108ABF20AA2BCAC00E
+
+I used two hosts. One for APP tier and one for DB tier. This is the configuration that you will find in most production environments.
+
+Resources:
+|| Tier || u01 size  || RAM minimal || CPU minimal      ||
+|| APP  || 200G disk || 7G RAM      || 1 socket 6 cores ||
+|| DB   || 250G disk || 5G RAM      || 1 socket 4 cores ||
+
+Notes:
+* additionally 20G for OS isntallation, including 4G swap
+
+Install OEL 5.10 with the most basic options. I first devote 20G for OS as /dev/sda and let the OEL installer do the default partitioning.
+* firewall disabled
+* SE linux disabled
+* do not create any users, just the root account is what we need
+
+Disable yum-updatesd
+{{{
+# service yum-updatesd stop
+# chkconfig --levels 2345 yum-updatesd off
+}}}
+
+Disable X Windows at System Boot
+{{{
+# vi /etc/inittab
+change from
+id:5:initdefault:
+to
+id:3:initdefault:
+# reboot
+}}}
+
+Enable some other repositories
+{{{
+# vim /etc/yum.repos.d/public-yum-el5.repo
+[el5_latest]
+[el5_addons]
+[el5_oracle_addons]
+[ol5_UEK_latest]
+[ol5_UEK_base]
+gpgcheck=1
+enabled=1
+}}}
+
+Install basic dependencies for EBS R12
+{{{
+# yum install oracle-ebs-server-R12-preinstall
+}}}
+
+To avoid problems with /usr/lib64/libpthread_nonshared.a
+{{{
+# yum install oracle-validated
+}}}
+
+Now I can install SVN to download some automation scripts I have prepared
+{{{
+# yum install subversion
+}}}
+
+
+
+Now this is my unusual linux configuration script. You probably do not want to do it, because it sets a certain DNS, domain name, public key, vmware tools, etc. but this is what I do, that is why I put it here.
+
+{{{
+# cd
+# svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto
+}}}
+
+Review the script and see what makes sense in your environment.
+{{{
+# cd ~/scripto/linux/
+# ./linux_setup.sh ALL
+(repeated few times untill no reboots are required)
+}}}
+
+To save on IO disable atime
+* http://wlangiewicz.com/2013/02/18/what-is-kjournald-and-why-its-using-99-of-io-what-about-noatime/
+change the mount parameter to include noatime.
+{{{
+# vim /etc/fstab
+/dev/VolGroup00/LogVol00 /                       ext3    defaults,noatime        1 1
+}}}
+
+If X forwarding does not work:
+{{{
+# vi /etc/ssh/sshd_config
+X11UseLocalhost no
+# /etc/init.d/sshd restart
+}}}
+
+
+== Create user and group ==
+No need to create them manually, they sould be present after oracle-ebs-server-R12-preinstall installation.
+
+{{{
+# cat /etc/passwd
+oracle:x:54321:54321::/home/oracle:/bin/bash
+applmgr:x:54322:54321::/home/applmgr:/bin/bash
+}}}
+
+{{{
+# cat /etc/group
+oinstall:x:54321:applmgr
+dba:x:54322:oracle
+}}}
+
+Set passwords
+{{{
+# passwd oracle
+# passwd applmgr
+}}}
+
+
+== Create the /u01 mount point ==
+Create the /u01 mount point that will store app or db tier data on respective nodes.
+
+I use LVM to facilitate future expansion. My /dev/sdb is additional drive that will be used for that.
+{{{
+# pvcreate /dev/sdb
+# vgcreate vg_u01 /dev/sdb
+# lvcreate --name u01 --extents 100%FREE vg_u01
+# mkfs.ext4 /dev/vg_u01/u01
+}}}
+
+{{{
+# vim /etc/fstab
+/dev/vg_u01/u01	/u01		ext4	defaults,noatime	0 0
+}}}
+
+{{{
+# mkdir /u01
+# mount /u01
+}}}
+
+oraInv.loc should be created
+{{{
+# echo "inventory_loc=/u01/oraInventory" > /etc/oraInst.loc
+# echo "inst_group=oinstall" >> /etc/oraInst.loc
+$ mkdir /u01/oraInventory
+}}}
+
+== Contents of /etc/hosts ==
+Make sure that both app and DB tiers can see each other by the hostname. Pay attention to the 'IP name.domain name' convention. Do not use tabs, just single space between values.
+
+{{{
+# vi /etc/hosts
+127.0.0.1 localhost
+192.168.1.160 ebs3.remik.org ebs3
+192.168.1.161 ebsdb3.remik.org ebsdb3
+}}}
+
+
+
+== IO sanity checks ==
+EBS and especially ADOP cycle is pretty IO intensive. On low end storage the patching can take many days to complete. To have some idea how much time we can expect I have made the following observations:
+
+=== Poorly configured system (something is way too slow) ===
+MT on NFS
+{{{
+$ time dd if=/dev/zero of=./testfile bs=16k count=56384
+923795456 bytes (924 MB) copied, 28.7702 seconds, 32.1 MB/s
+real	0m28.845s
+}}}
+
+{{{
+$ time dd if=./testfile of=/dev/null bs=16k
+}}}
+
+
+
+== Create staging area ==
+=== Download the EBS 12.2 binaries and check the md5 sum ===
+DO NOT unpack the downloaded files.
+
+MOS:
+* MD5 Checksums for R12.2 Rapid Install Media (Doc ID 1505510.1)
+
+Download the md5_linux.txt file.
+
+{{{
+$ md5sum --check md5_linux.txt > md5sum_result.txt
+md5sum: WARNING: 1 of 12822 computed checksums did NOT match
+}}}
+
+The only failed czecksum is in my installation:
+{{{
+$ cat md5sum_result.txt | grep -v OK
+TechInstallMedia/ohs11116/Disk1/stage/prereq/linux64/refhost.xml: FAILED
+}}}
+
+The staging area is created on Samba share and mounted on app and DB tiers.
+
+On the client:
+{{{
+# vim /etc/fstab
+//192.168.1.10/STAGING	/STAGING	cifs credentials=/etc/samba/cred-file 0 0
+# cat /etc/samba/cred-file
+username=remik
+password=
+}}}
+
+{{{
+# mkdir /STAGING
+# mount /STAGING
+}}}
+
+=== apply recent startcd patch ===
+Patch 17873425: RI STARTCD 12.2.0.47_5
+MD5	9EFFF779D2870CD83451A13E830951EF
+
+Download the patch zip file to the place where you have all (around 80G) EBS 12.2 installation media. Do not unzip any other file, except those mentioned.
+
+{{{
+# unzip p17873425_R12_GENERIC.zip
+}}}
+
+Run as root
+{{{
+# cd startCD/Disk1/rapidwiz
+# ./RapidWizVersion
+Oracle E-Business Suite Rapid Install Wizard
+Version 12.2.0.47
+# cd bin
+# ./buildStage.sh
+1.     Create new stage area
+2.    Linux x86 (64-bit)
+}}}
+
+The above command actually unzipped the installation media files. Now we are ready to start the installation.
+
+
+== Installation on two hosts ==
+(now it is a good time to take a before_installation snapchot)
+
+=== DB tier ===
+This will take a while, run in under vncserver session
+{{{
+# vncserver
+}}}
+
+Connect to the VNC session
+{{{
+$ vncviewer ebsdb3.remik.org:1
+}}}
+
+Run as root
+{{{
+# chown oracle:oinstall /u01
+# cd /STAGING/startCD/Disk1/rapidwiz
+# ./rapidwiz
+}}}
+
+When app and DB hosts are different the instalator will install DB tier and end. The configuration file will be saved that needs to be copied to app tier.
+
+=== APP tier ===
+We need to copy the configuration file from DB tier to APP tier.
+
+On DB tier
+{{{
+$ scp /u01/oracle/VIS/11.2.0/appsutil/conf_VIS.txt root@ebs3:/tmp
+}}}
+
+Now we start the same installation on APP tier and provide the configuration file when possible.
+
+This will take a while, run in under vncserver session
+{{{
+# vncserver
+}}}
+
+Connect to the VNC session
+{{{
+$ vncviewer ebsdb3.remik.org:1
+}}}
+
+Run as root
+{{{
+# chown applmgr:oinstall /u01
+# cd startCD/Disk1/rapidwiz
+# ./rapidwiz
+}}}
+
+
+== Validate completed installation ==
+My installation fails on the following checks. After leaving is for a while and rechecking the only still failing is SSH, which runs fine when executed manually.
+
+=== Virtual Directory ===
+The error log:
+*--
+Virtual Directory
+checking URL = http://ebs1.remik.org:8000/OA_MEDIA/FNDLOGOL.gif
+RW-50016: Error: - {0} was not created:
+File = {1}   checking URL = http://ebs1.remik.org:8000/OA_JAVA/oracle/apps/fnd/admin/server/server.xml
+RW-50016: Error: - {0} was not created:
+File = {1}   checking URL = http://ebs1.remik.org:8000/OA_CGI/FNDWRR.exe
+RW-50016: Error: - {0} was not created:
+File = {1}
+*--
+
+MOS:
+* Troubleshooting Rapid Install for E-Business Suite Release 12.2 (Doc ID 1378579.1)
+
+
+
+=== Login Page ===
+Login Page
+checking URL = http://ebs3.remik.org:8000/OA_HTML/AppsLogin
+RW-50016: Error: - {0} was not created:
+File = {1}
+
+=== SSH verification check ===
+*-- Error
+Unable to execute command:
+perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+*--
+
+Trying from hand:
+{{{
+$ perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+ERROR DESCRIPTION:
+(
+failed to create node-cmd.txt file Permission denied
+)
+}}}
+
+{{{
+$ ls -l /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/node-cmd.txt
+-rw-r--r-- 1 root root 27 May 12 23:56 /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/node-cmd.txt
+}}}
+
+{{{
+# chown applmgr:oinstall /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/node-cmd.txt
+# chown applmgr:oinstall /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/verifyssh.log
+}}}
+
+{{{
+$ perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+Logfile location /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/verifyssh.log
+xml output = /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/out.xml
+}}}
+
+And he said that user equivalency is established. ???
+
+Again running all the post install checks. This time only SSH connecion is failed :)
+{{{
+$ cat verifyssh.log
+Failed to execute Remote API
+Check the log file /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK for details
+}}}
+
+[applmgr@ebs3 TXK]$ ssh -l applmgr ebs3
+works without password
+
+Trying from root
+{{{
+# perl /u01/oracle/VIS/fs1/EBSapps/appl/ad/12.0.0/patch/115/bin/txkRunSSHSetup.pl verifyssh -contextfile=/u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/appl/admin/VIS_ebs3.xml -hosts=ebs3 -invalidnodefile=verifyssh.log
+# cat verifyssh.log
+Reading /u01/oracle/VIS/fs1/inst/apps/VIS_ebs3/logs/appl/rgf/TXK/out.xml file
+SSH equivalence setup verification completed successfully
+}}}
+
+
+
+
+=== JSP ===
+*-- Error
+JSP
+checking URL = http://ebs3.remik.org:8000/OA_HTML/jtfTestCookie.jsp
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding, waiting 15 seconds and retesting.
+JSP is not responding
+*--
+
+
+
+== 12.2.3 patch ==
+Basically what we need to do to have 12.2.3 running is:
+
+# Clean 12.2 install downloaded from edelivery with 12.2.0.47 rapid install
+This is what we have already done.
+
+2. Following Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
+2a. Seed Table Upgrade Patch 17204589
+2b. Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body Patch 17268684
+
+3. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+3a. RDBMS oneoff patches on top of 11.2.0.3 (17600719, 17693770, 17875948, 18116376, 18259911)
+3b. RDBMS passes the EBS Database Codelevel Checker
+
+4. Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+4a. apply the main R12.AD.C.Delta.4 Patch 17766337 merged with suggested 18628932,18470942,18274429
+4b. apply the main R12.TXK.C.Delta.4 Patch 17893964 merged with suggested 18332816
+
+5. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+5a. Apply the latest Application tier technology patches
+
+6. Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
+6a. Patch to the 12.2.3
+
+
+=== 2. Following Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1) ===
+==== 2a. Seed Table Upgrade Patch 17204589 ====
+Apply Consolidated Seed Table Upgrade Patch 17204589 (17204589:12.2.0)
+
+This is a superseed of the earlier Patch 16605855.
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '16605855';
+no rows selected
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17204589';
+no rows selected
+}}}
+
+
+R12.2.0: CONSOLIDATED SEED TABLE UPGRADE PATCH (Patch)
+p17204589_12.2.0_R12_GENERIC.zip	MD5	D15F4472BDCA99D911502CC4D2F2776D
+
+{{{
+$ cd /u01/oracle/VIS/fs_ne/EBSapps/patch
+
+I just copy the patches from previously prepared location
+$ rsync -a --progress /STAGING/ebs12patches/ /u01/oracle/VIS/fs_ne/EBSapps/patch/
+$ md5sum p17204589_12.2.0_R12_GENERIC.zip
+d15f4472bdca99d911502cc4d2f2776d  p17204589_12.2.0_R12_GENERIC.zip
+$ unzip p17204589_12.2.0_R12_GENERIC.zip
+}}}
+
+Source the run app environment
+{{{
+Now, this handy escript is not yet here
+/u01/oracle/VIS/EBSapps.env run
+
+That is why we assume now that the run edition is on fs1 and source
+$ . /u01/oracle/VIS/fs1/EBSapps/appl/VIS_`uname -n | awk -F"." '{print $1}'`.env
+
+}}}
+
+Stop all Application tier services on the Run File System.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adstpall.sh
+}}}
+
+Start up only the Weblogic AdminServer service on the Run File System.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adadminsrvctl.sh start
+}}}
+
+I found out that increasing the size of redologs speeds up the process.
+{{{
+> alter database add logfile group 4 ('/u01/oracle/VIS/data/log4.dbf') size 1000M;
+> alter database add logfile group 5 ('/u01/oracle/VIS/data/log5.dbf') size 1000M;
+> alter database add logfile group 6 ('/u01/oracle/VIS/data/log6.dbf') size 1000M;
+> alter system switch logfile;
+> alter system checkpoint;
+> alter database drop logfile group 1;
+> alter database drop logfile group 2;
+> alter database drop logfile group 3;
+}}}
+
+
+Apply Consolidated Seed Table Upgrade Patch 17204589 (17204589:12.2.0) on Run File system using adop hotpatch mode.
+{{{
+$ cd 17204589
+$ adop phase=apply patches=17204589 hotpatch=yes
+}}}
+
+Patchin completed in:
+#:09:14 - 15:38:26
+03:35:05 - 04:24:07
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '16605855';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913941 16605855			  28-APR-14
+}}}
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17204589'
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913913 17204589			  28-APR-14
+}}}
+
+And, what I find strange the 17064510 has been also applied:
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17064510';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913954 17064510			  28-APR-14
+}}}
+
+==== 2b. Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body Patch 17268684 ====
+To avoid Dictionary Corrupted HAB_RT_EXEC_PROC_RUN_METRICS TS mismatch
+
+MOS:
+* R12.2 Dictionary Corrupted While Running adop - "TS Mismatch" Error (Doc ID 1576086.1)
+
+Follow:
+* Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
+
+Section: Fix Timestamp Mismatch Issues for Synonym, View, Package and Package Body
+
+Download Patch 17268684 (17268684:R12.AD.C).
+
+R12.2: Timestamp Mismatch Fixer for View, Synonym, Package and Package Body (Patch)
+p17268684_R12.AD.C_R12_GENERIC.zip	MD5	5F108A4F0CB51559C2643FB32D475513
+
+Do not apply the Patch 17268684 (17268684:R12.AD.C). You should instead execute instructions in the patch readme to fix timestamp mismatches for Synonym, View, Package and Package Body.
+
+
+On the DB tier
+
+{{{
+$ md5sum p17268684_R12.AD.C_R12_GENERIC.zip
+5f108a4f0cb51559c2643fb32d475513  p17268684_R12.AD.C_R12_GENERIC.zip
+$ unzip p17268684_R12.AD.C_R12_GENERIC.zip
+$ cd 17268684
+$ mkdir -p $ORACLE_HOME/appsutil/admin
+$ cp admin/ADZDDTFIX.sql $ORACLE_HOME/appsutil/admin
+$ cd /tmp
+> connect system/manager
+> @$ORACLE_HOME/appsutil/admin/ADZDDTFIX.sql
+$ sqlplus / as sysdba
+> @adzddtfix.out
+> connect system/manager
+> @$ORACLE_HOME/appsutil/admin/ADZDDTFIX.sql
+$ cat adzddtfix.out
+-> should be empty this time
+}}}
+
+
+=== 3. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1) ===
+==== 3a. RDBMS oneoff patches on top of 11.2.0.3 (17600719, 17693770, 17875948, 18116376, 18259911) ====
+MOS:
+* Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+
+I used startCD Version 12.2.0.47
+
+"If you used startCD 12.2.0.47 for a new Release 12.2 installation that included Oracle Database 11.2.0.3, you will not need to re-apply the patches listed in either the '12.2.0.47' or '12.2.0.46' rows of Table 1. This is because startCDs are cumulative, with successive ones including all the content of their predecessors. You will, however, need to apply the patches listed under 'Not included in any startCD' rows in the tables for the different technology components."
+
+Check current DB patches
+{{{
+$ export PATH=$PATH:$ORACLE_HOME/OPatch
+$ opatch lsinventory
+}}}
+
+Patching with those mentioned under 'Not included in any startCD' section
+
+Shutdown APP and DB tiers
+{{{
+$ do it
+}}}
+
+===== OPatch =====
+OPatch patch of version 11.2.0.3.6 for Oracle software releases 11.2.0.x (DEC 2013) (Patch)
+p6880880_112000_Linux-x86-64.zip	MD5	2AB78CB17174C3A49DF560F05E3352C6
+
+{{{
+$ opatch version
+OPatch Version: 11.2.0.3.0
+$ mv $ORACLE_HOME/OPatch $ORACLE_HOME/OPatch_`/bin/date +%Y%m%d`
+$ unzip -d $ORACLE_HOME p6880880_112000_Linux-x86-64.zip
+$ opatch version
+OPatch Version: 11.2.0.3.6
+}}}
+
+===== 17600719 =====
+
+DBMS_UTILITY.INVALIDATE ORA-3113 ORA-7445 CORE DUMP [OPIGLN] (Patch)
+p17600719_112030_Linux-x86-64.zip	MD5	39D742550866A206A444DA8E01320D7E
+
+{{{
+$ md5sum p17600719_112030_Linux-x86-64.zip
+39d742550866a206a444da8e01320d7e  p17600719_112030_Linux-x86-64.zip
+$ unzip p17600719_112030_Linux-x86-64.zip
+$ cd 17600719
+$ opatch prereq CheckConflictAgainstOHWithDetail -ph ./
+$ opatch apply
+$ opatch lsinventory | grep 17600719
+Patch  17600719     : applied on Mon Apr 28 20:28:48 CEST 2014
+}}}
+
+No Postinstallation
+
+===== 17693770 =====
+MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 17502060 17487358 (Patch)
+p17693770_112030_Linux-x86-64.zip	MD5	2AB47B81CD24E5EDEC557E8332D6FFC8
+
+{{{
+$ md5sum p17693770_112030_Linux-x86-64.zip
+2ab47b81cd24e5edec557e8332d6ffc8  p17693770_112030_Linux-x86-64.zip
+$ unzip p17693770_112030_Linux-x86-64.zip
+$ cd 17693770
+$ opatch apply
+$ opatch lsinventory | grep 17693770
+Patch  17693770     : applied on Mon Apr 28 20:36:32 CEST 2014
+}}}
+
+Postinstallation
+{{{
+> startup
+> @?/sqlpatch/17693770/postinstall.sql
+> shutdown immediate
+}}}
+
+
+===== 17875948 =====
+
+MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 16587934 17654622 (Patch)
+p17875948_112030_Linux-x86-64.zip	MD5	F7FD987FC9BA4BADACD0E2BB3EC592A9
+
+{{{
+$ md5sum p17875948_112030_Linux-x86-64.zip
+f7fd987fc9ba4badacd0e2bb3ec592a9  p17875948_112030_Linux-x86-64.zip
+$ unzip p17875948_112030_Linux-x86-64.zip
+$ cd 17875948
+$ opatch prereq CheckConflictAgainstOHWithDetail -ph ./
+$ opatch apply
+}}}
+
+Postinstallation
+{{{
+> startup
+> @?/sqlpatch/17875948/postinstall.sql
+}}}
+
+Note: If XDB is installed it is required to run "catmetx.sql" script also.
+{{{
+> @valid
+Oracle XML Database		    VALID	    11.2.0.3.0
+> @?/rdbms/admin/catmetx.sql
+> shutdown immediate
+}}}
+
+===== 18116376 =====
+MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 17047617 12811829 (Patch)
+p18116376_112030_Linux-x86-64.zip	MD5	E10F7E87397573624A948CA6FA5C05E7
+
+{{{
+# md5sum p18116376_112030_Linux-x86-64.zip
+e10f7e87397573624a948ca6fa5c05e7  p18116376_112030_Linux-x86-64.zip
+# unzip p18116376_112030_Linux-x86-64.zip
+$ cd 18116376
+$ opatch apply
+}}}
+
+No Postinstallation steps.
+
+===== 18259911 =====
+MERGE REQUEST ON TOP OF 11.2.0.3.0 FOR BUGS 16163946 16833977 4189542 11896575 (Patch)
+p18259911_112030_Linux-x86-64.zip	MD5	8D5701B5CDBD649E5D67A6B10AE0F27D
+
+{{{
+# md5sum p18259911_112030_Linux-x86-64.zip
+8d5701b5cdbd649e5d67a6b10ae0f27d  p18259911_112030_Linux-x86-64.zip
+# unzip p18259911_112030_Linux-x86-64.zip
+$ cd 18259911
+$ opatch prereq CheckConflictAgainstOHWithDetail -ph ./
+}}}
+
+Please contact Oracle Support and get the merged patch of the patches :
+#461865, 18259911
+
+{{{
+$ opatch apply
+If you continue, patch(es) [  17461865 ] will be rolled back and the new Patch  [ 18259911 ] will be installed.
+}}}
+
+MOS:
+* Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+
+Footnote 7 - Database bug fix 16187992 has been replaced with database bug fix 18241194, this is included in Patch 18259911 and should be installed instead of Patch 17461865.
+
+Continuing with the patching.
+
+
+==== 3b. RDBMS passes the EBS Database Codelevel Checker ====
+EBS Database Codelevel Checker (Patch)
+p17537119_R12_GENERIC.zip	MD5	095E006B61296033ABD67A58FCAB838B
+
+{{{
+$ cp p17537119_R12_GENERIC.zip /tmp
+$ cd /tmp
+$ md5sum p17537119_R12_GENERIC.zip
+095e006b61296033abd67a58fcab838b  p17537119_R12_GENERIC.zip
+$ unzip p17537119_R12_GENERIC.zip
+}}}
+
+Source DB env
+{{{
+$ ./checkDBpatch.sh
+All the required one-offs are present in Oracle Database Home
+}}}
+
+
+=== 4. Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1) ===
+==== 4a. apply the main R12.AD.C.Delta.4 Patch 17766337 merged with suggested 18628932,18470942,18274429 ====
+Customers are required to apply the latest available AD and TXK Release Update Pack (RUP) for Oracle E-Business Suite Release 12.2 by referring to My Oracle Support Knowledge Document 1583092.1, E-Business Suite-wide RUP, AD and TXK RUP Information, Release 12.2.
+
+MOS:
+* Oracle E-Business Suite Release 12.2: Suite-Wide Rollup and AD/TXK Delta Information (Doc ID 1583092.1)
+
+
+p17766337_R12.AD.C_R12_LINUX.zip        MD5	1DC21E3C8D3302C3063C5DAB320778B0
+
+
+On DB tier
+{{{
+$ md5sum p17766337_R12.AD.C_R12_LINUX.zip
+1dc21e3c8d3302c3063c5dab320778b0  p17766337_R12.AD.C_R12_LINUX.zip
+$ unzip p17766337_R12.AD.C_R12_LINUX.zip
+}}}
+
+Source DB env
+{{{
+$ mkdir -p $ORACLE_HOME/appsutil/admin
+$ cd 17766337
+$ cp admin/adgrants.sql $ORACLE_HOME/appsutil/admin
+}}}
+
+{{{
+> startup
+$ sqlplus /nolog
+> @$ORACLE_HOME/appsutil/admin/adgrants.sql apps
+> shutdown immediate
+}}}
+
+MOS:
+* Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+
+Before proceeding with next step, ensure to review My Oracle Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes and apply all patches for Database 11.2.0.3.
+
+*> already done.
+
+
+Still following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+MOS:
+* Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+* Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
+
+
+New Installation Customers, Path A
+
+# Source the run edition environment file.
+{{{
+$ . $HOME/scripto/ebs/app_env
+}}}
+
+2. Apply the latest embedded Application Tier Technology patches on Run File System.
+DB patches applied.
+
+App patches:
+
+Do I need to apply them if I am going to install 12.2.3 shortly? Yes, but they will be applied to the patch edition shortly before online adop 12.2.3 patching session.
+
+3. Run adgrants.
+*> already done
+
+4. Apply R12.AD.C.Delta.4 Patch 17766337 by merging with the following AD one-off patches in hotpatch mode. The patch should be applied on the Run Edition Application File System:
+
+Start DB tier
+{{{
+$ $HOME/scripto/ebs/start_DB.sh
+}}}
+
+On APP tier start up only the Weblogic AdminServer service on the Run File System.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adadminsrvctl.sh start
+}}}
+
+Preparing other patches to be merged with main 17766337
+{{{
+$ cd /u01/oracle/VIS/fs_ne/EBSapps/patch
+}}}
+
+#Off R12.AD.C.Delta.4: ADOP PREPARE FAILS ON A MULTI-TIER ENVIRONMENT DURING FSCLONE STAGE (Patch)
+p18628932_R12.AD.C_R12_GENERIC.zip	MD5	9B5E8DE3274A873F4B2C1E3268F57A3E
+
+#1Off R12.AD.C.Delta.4: FIX FOR HYBRRID CONFIGURATION, CCD AND EXEMPT POLICY (Patch)
+p18470942_R12.AD.C_R12_GENERIC.zip	MD5	23FD88FB1533A4D63FD609CCDD3F93B3
+
+#Off R12.AD.C.Delta.4: script to fix ldt invalidation issue during main divisional upgrade (Patch)
+p18274429_R12.AD.C_R12_GENERIC.zip	MD5	9E3DBA06786604F1347887DCB403C692
+
+{{{
+$ unzip p18628932_R12.AD.C_R12_GENERIC.zip
+$ unzip p18470942_R12.AD.C_R12_GENERIC.zip
+$ unzip p18274429_R12.AD.C_R12_GENERIC.zip
+$ unzip p17766337_R12.AD.C_R12_LINUX.zip
+}}}
+
+On apps tier
+{{{
+$ adop phase=apply patches=17766337,18628932,18470942,18274429 hotpatch=yes merge=yes
+}}}
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17766337'
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913966 17766337			  05-MAY-14
+}}}
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18628932'
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913969 18628932			  05-MAY-14
+}}}
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18470942'
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913968 18470942			  05-MAY-14
+}}}
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '18274429'
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913967 18274429			  05-MAY-14
+}}}
+
+==== 4b. apply the main R12.TXK.C.Delta.4 Patch 17893964 merged with suggested 18332816 ====
+Still following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+MOS:
+* Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+* Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
+
+5. Apply R12.TXK.C.Delta.4 Patch 17893964 by merging it with 18332816:R12.TXK.C in hotpatch mode on the run edition application tier file system:
+
+R12.TXK.C.DELTA.4 (Patchset)
+p17893964_R12.TXK.C_R12_GENERIC.zip	MD5	148815EDD925F1F327AB9714BD8127DE
+
+
+QREP1224.2:AD/TXK RUP4 D6:AC-50606: EXCEPTION OCCURRED WHILE RELEASING LOCK (Patch)
+p18332816_R12.TXK.C_R12_GENERIC.zip	MD5	67367EF4F004D01B3FEA0F99889A2B7C
+
+{{{
+$ unzip p17893964_R12.TXK.C_R12_GENERIC.zip
+$ unzip p18332816_R12.TXK.C_R12_GENERIC.zip
+}}}
+
+{{{
+$ adop phase=apply patches=17893964,18332816 merge=yes hotpatch=yes
+}}}
+
+6. On Windows, not applicable
+
+7. Instantiate the Oracle HTTP Server configuration files admin.conf, ssl.conf, mod_wl_ohs.conf on the run edition application tier file system.
+
+Perform the instantiation with the following commands.When prompted for the APPS password, press <Return>.
+
+{{{
+$ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -d $FND_TOP/admin/driver/ohstmpl.drv -tmpl $FND_TOP/admin/template/ssl_conf_FMW.tmp
+}}}
+
+Prepare the next command to run:
+{{{
+$ cat $CONTEXT_FILE | grep -e s_ohs_instance_loc -e s_ohs_component
+<ohs_instance_loc oa_var="s_ohs_instance_loc">/u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1</ohs_instance_loc>
+<ohs_component oa_var="s_ohs_component">EBS_web_VIS</ohs_component>
+}}}
+
+{{{
+$ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -tmpl $FND_TOP/admin/template/mod_wl_ohs_conf_FMW.tmp -out <s_ohs_instance_loc>/config/OHS/<s_ohs_component>/mod_wl_ohs.conf
+}}}
+
+Which will be on this system:
+{{{
+$ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -tmpl $FND_TOP/admin/template/mod_wl_ohs_conf_FMW.tmp -out /u01/oracle/VIS/fs1/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/mod_wl_ohs.conf
+And other two:
+$ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -d $FND_TOP/admin/driver/ohstmpl.drv -tmpl $FND_TOP/admin/template/admin_conf_FMW.tmp
+}}}
+
+{{{
+$ perl $FND_TOP/patch/115/bin/txkSetAppsConf.pl -contextfile=$CONTEXT_FILE -outfile=$INST_TOP/logs/appl/rgf/TXK/test.log
+}}}
+
+8. Synchronize the file systems
+
+We have done some changes to the run filesystem because the patches were applied in hotpatch=yes mode. Now it is time to sychronise those changes to the patch filesystem. This why we use fs_clone phase. As help is suggesting
+
+{{{
+$ adop -help
+(...)
+fs_clone      - Copy the run file system to the patch file system.
+}}}
+
+
+That is why we are advised to to that.
+{{{
+$ adop phase=fs_clone
+}}}
+
+Done with Following Applying R12.AD.C.Delta.4 and R12.TXK.C.Delta.4 Release Update Packs (Doc ID 1617461.1)
+
+Applyed:
+
+R12.AD.C.Delta.4 Patch 17766337
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17766337'
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913966 17766337			  05-MAY-14
+}}}
+
+R12.TXK.C.Delta.4 Patch 17893964
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17893964'
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+914514 17893964			  05-MAY-14
+}}}
+
+With those patches came an easy way of setting the environment, the EBSapps.env file. We can set run, patch edition or be asked which one we want to set.
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+$ . /u01/oracle/VIS/EBSapps.env patch
+$ . /u01/oracle/VIS/EBSapps.env
+}}}
+
+
+
+
+=== 5. Following Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1) ===
+==== 5a. Apply the latest Application tier technology patches ====
+
+We have here actually 3 possible scenarius. We have some Forms and FMW patches to apply. These are not like standard EBS patches now applied with adop, previously with adpatch. These are also not database patches applied to database home with opatch. These are patches to binaries of Forms and Fusion Middleware FMW patches, applied to selected homes with opatch or with Weblogic own mechanism.
+
+Those binaries that we need to patch lie on both run and patch filesystems so we somehow have to take care of that. With extra functionality comes some complications.
+
+The options how to handle this:
+
+I. We can approach in a way similar to how we installed R12.AD.C.Delta.4 Patch 17766337.
+a. Shutdown the APP tier
+b. Apply the Forms and FMW patches to RUN filesystem
+c. Run adop phase=fs_clone to copy the run file system to the patch file system.
+
+II. We can treat it like almost usual adop patching session
+a. adop phase=prepare
+b. Apply the Forms and FMW patches to PATCH filesystem (just like adop phase=apply would do with standard patch)
+c. adop phase=finalize,cutover,cleanup after witch we run the system with patched Forms and FMW
+d. adop phase=fs_clone that will copy the run file system to the patch file system
+
+III. We can combine the Forms and FMW patching with comming 12.2.3 patch, which can save us some time
+a. adop phase=prepare
+b. Apply the Forms and FMW patches to PATCH filesystem
+c. adop phase=apply that will apply 12.2.3 patch to the PATCH filesystem
+d. adop phase=finalize,cutover,cleanup after witch we run the system with patched Forms and FMW
+e. adop phase=fs_clone that will copy the run file system to the patch file system
+
+Here we go with option III. Just wait, go forward.
+
+
+
+=== 6. Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1) 6a. Patch to the 12.2.3 ===
+
+==== Prerequisite Patches ====
+ORACLE APPLICATIONS DBA 12.2.3 PRODUCT RELEASE UPDATE PACK (Patchset)
+p17023760_R12.AD.C_R12_LINUX.zip	MD5	34153EF8134BC3C2560950682A1A6B02
+
+R12.AD.C.Delta.4 Patch 17766337 already applied, which includes 17023760
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17023760';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+914327 17023760			  05-MAY-14
+}}}
+
+
+==== 1. Preparation ====
+{{{
+$ cd $APPL_TOP_NE/../patch
+}}}
+
+MOS:
+* 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
+
+{{{
+ORACLE E-BUSINESS SUITE 12.2.3 RELEASE UPDATE PACK (Patchset)
+p17020683_R12_LINUX_1of6.zip	MD5	B8A3AE465DD1C9A8FF6E1056A56FB0DE
+p17020683_R12_LINUX_2of6.zip	MD5	30F643C1E899F23EAE135A85AC8DF924
+p17020683_R12_LINUX_3of6.zip	MD5	2293DDFBB5805B91C799C736D34903ED
+p17020683_R12_LINUX_4of6.zip	MD5	3AC8B195D0BAD8AA3B3226BE9F9B0906
+p17020683_R12_LINUX_5of6.zip	MD5	C55FFE5AE4EE4D975E99595C7AA7B4D8
+p17020683_R12_LINUX_6of6.zip	MD5	C7576B678DD595C684C8FFC2220974B9
+}}}
+
+{{{
+$ md5sum p17020683_R12_LINUX_1of6.zip
+b8a3ae465dd1c9a8ff6e1056a56fb0de  p17020683_R12_LINUX_1of6.zip
+$ md5sum p17020683_R12_LINUX_2of6.zip
+30f643c1e899f23eae135a85ac8df924  p17020683_R12_LINUX_2of6.zip
+$ md5sum p17020683_R12_LINUX_3of6.zip
+2293ddfbb5805b91c799c736d34903ed  p17020683_R12_LINUX_3of6.zip
+$ md5sum p17020683_R12_LINUX_4of6.zip
+3ac8b195d0bad8aa3b3226be9f9b0906  p17020683_R12_LINUX_4of6.zip
+$ md5sum p17020683_R12_LINUX_5of6.zip
+c55ffe5ae4ee4d975e99595c7aa7b4d8  p17020683_R12_LINUX_5of6.zip
+$ md5sum p17020683_R12_LINUX_6of6.zip
+c7576b678dd595c684c8ffc2220974b9  p17020683_R12_LINUX_6of6.zip
+}}}
+
+
+{{{
+$ unzip p17020683_R12_LINUX_1of6.zip
+$ unzip p17020683_R12_LINUX_2of6.zip
+$ unzip p17020683_R12_LINUX_3of6.zip
+$ unzip p17020683_R12_LINUX_4of6.zip
+$ unzip p17020683_R12_LINUX_5of6.zip
+$ unzip p17020683_R12_LINUX_6of6.zip
+}}}
+
+==== 2. Required Database Patches ====
+All database patches from  Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes and apply all patches for Database 11.2.0.3.
+
+Already applied.
+
+==== 3. Apply Consolidated Seed Table Upgrade Patch (Required) ====
+
+Consolidated Seed Table Upgrade Patch 17204589 (17204589:12.2.0) already applied
+
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17204589';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913913 17204589			  05-MAY-14
+}}}
+
+# Stop all Application tier services on the run file system.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adstpall.sh
+}}}
+
+2. Start up only the Weblogic AdminServer service on the run file system.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adadminsrvctl.sh start
+}}}
+
+3. Apply the consolidated seed table upgrade Patch 17204589 (17204589:12.2.0) on the run file system using adop hotpatch mode.
+*> already done
+
+4. Start up all Application tier services.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adstrtal.sh
+}}}
+
+==== 4. Apply the Latest AD and TXK Delta Release Update Packs ====
+Already applied.
+
+R12.AD.C.Delta.4 Patch 17766337
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17766337';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913966 17766337			  05-MAY-14
+}}}
+
+R12.TXK.C.Delta.4 Patch 17893964
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17893964';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+914514 17893964			  05-MAY-14
+}}}
+
+==== 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack ====
+
+====== 1. Source the run edition applications environment. ======
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+}}}
+
+
+===== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack =====
+====== 2. Start an online patching cycle. ======
+{{{
+$ adop phase=prepare
+}}}
+
+====== 3. Application Tier Technology Patches ======
+
+Apply the latest Application tier technology patches documented in 'Section 3: Application Tier Technology Patches and Bug Numbers' of My Oracle Support Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes.
+
+MOS:
+* Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+
+I used the startCD 12.2.0.47 for the installation, but I still need to apply the patches listed under 'Not included in any startCD' for each of the technology components.
+
+When obtaining patches listed in these tables select release 10.1.0.5.0 for patch download and install into the 10.1.2 ORACLE_HOME.
+
+{{{
+#
+# Apply the FMW and Forms patches to the PATCH filesystem
+#
+}}}
+
+How to source patch filesystem?
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+}}}
+
+====== Which homes are for what? ======
+How to determine which home is which technology?
+MOS:
+* Oracle E-Business Suite 12.2 Patching Technology Components Guide (Doc ID 1355068.1)
+
+======= /u01/oracle/VIS/fs1/FMW_Home/webtier/OPatch/opatch =======
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/webtier
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+}}}
+
+Oracle WebTier and Utilities CD                                      11.1.1.6.0
+Interim patches (7) : 16199894 14616819 10638758 17325559 13643211 12949905 7695070
+
+Indicate, that this is:
+
+Web Tier and Utilities (OHS) 11.1.1.6
+
+
+======= /u01/oracle/VIS/fs1/FMW_Home/Oracle_EBS-app1/OPatch/opatch =======
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/Oracle_EBS-app1
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+}}}
+
+Oracle E-Business Suite Component                                    11.1.1.6.0
+There are no Interim patches installed in this Oracle Home.
+
+??
+
+
+
+======= /u01/oracle/VIS/fs1/FMW_Home/oracle_common/OPatch/opatch =======
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/oracle_common
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+}}}
+
+Oracle AS Common Toplevel Component                                  11.1.1.2.0
+Interim patches (5) :Patch  12714567 16199894 ...
+
+Which indicates, that this is:
+Oracle Fusion Middleware Common 11.1.1.6, but this 11.1.1.2.0? 11.1.1.6? Anyway, this is the best match.
+
+
+======= /u01/oracle/VIS/fs1/EBSapps/10.1.2/OPatch/opatch =======
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+}}}
+
+40) Patches applied, including Patch  7016961 which indicates, that this is:
+
+'Forms and Reports 10.1.2.3'
+
+
+====== Section 3.1: Forms and Reports 10.1.2.3 Patches and Bug Numbers ======
+Here we have patches for versions 10.1.2.3.0 or 10.1.0.5.0. Which is the one I need?
+
+We have 10.1.2.3
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+}}}
+
+{{{
+$ export PATH=$PATH:$ORACLE_HOME/OPatch
+$ opatch lsinventory
+}}}
+
+Apply those Not included in any startCD
+
+======= 5659594 =======
+{{{
+$ opatch lsinventory | grep 5659594
+}}}
+
+R11:REG:RWBUILDER/RWRUN RAISING EXCEPTION WHILE RUNNING REPORT IN VIEW (Patch)
+p5659594_10123_GENERIC.zip	MD5	39972CD7B1D6AA71B80B61A459151E89
+
+{{{
+$ cd 5659594
+$ opatch apply
+}}}
+
+{{{
+$ opatch lsinventory | grep 5659594
+1) Patch  5659594 applied on Tue May 06 06:03:27 EDT 2014
+}}}
+
+======= 8943095 =======
+APPS1012: ALIGNMENT INCORRECT WHEN USING VIETNAMESE COMBINING CHARACTERS (Patch)
+p8943095_10123_LINUX.zip	MD5	19CD850DD59E9F7CE995C17BC6E03F3B
+
+{{{
+$ cd 8943095
+$ opatch apply
+}}}
+
+{{{
+$ opatch lsinventory | grep 8943095
+1) Patch  8943095 applied on Tue May 06 06:06:15 EDT 2014
+}}}
+
+
+======= 15900214 =======
+APPS6: RUNNING RWCONVERTER SHOWS PARAMETERS PASSED IN PS -EF (Patch)
+p15900214_10123_LINUX.zip	MD5	6B82F41683BA0CA83DED03CCAA95FCCB
+
+cd 15900214
+opatch apply
+
+{{{
+$ opatch lsinventory | grep 15900214
+1) Patch  15900214 applied on Tue May 06 06:07:10 EDT 2014
+}}}
+
+
+
+======= 17645157 =======
+APPS6:GETTING JAVA SERVER VM WARNING WITH 10.1.2 ORACLE_HOME EXE , JDK 1.7.0_40 (Patch)
+p17645157_10123_LINUX.zip	MD5	697A9EC1567213779C400BBAD2B8F322
+
+{{{
+$ cd 17645157
+}}}
+
+Allow opatch to roll 16207165 back when applying <Patch 17645157>
+{{{
+$ opatch apply
+}}}
+
+{{{
+$ opatch lsinventory | grep 17645157
+1) Patch  17645157 applied on Tue May 06 06:10:02 EDT 2014
+}}}
+
+
+Relink the reports
+{{{
+$ cd $ORACLE_HOME/reports/lib
+$ make -f ins_reports.mk install
+}}}
+
+
+======= 17907988 =======
+MERGE REQUEST ON TOP OF 10.1.2.3.0 FOR BUGS 7121788 17594101 (Patch)
+p17907988_10123_LINUX.zip	MD5	D100E84C1980079E1AC458955FCFD5DD
+
+cd 17907988
+opatch apply
+chmod +x $ORACLE_HOME/bin/genshlib
+
+{{{
+$ opatch lsinventory | grep 17907988
+1) Patch  17907988 applied on Tue May 06 06:11:53 EDT 2014
+}}}
+
+
+Relink the forms.
+{{{
+$ cd $ORACLE_HOME/forms/lib
+$ make -f ins_forms.mk sharedlib install
+}}}
+
+{{{
+$ opatch lsinventory
+43 patches installed (5 installed 2 rollback)
+}}}
+
+====== Section 3.2: Web Tier & Utilities (OHS) 11.1.1.6 Patches and Bug Numbers ======
+Web Tier and Utilities (OHS) 11.1.1.6 Patches
+IAS_ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/webtier
+{{{
+$ cd /u01/oracle/VIS/fs1/FMW_Home/webtier/OPatch
+$ ./opatch lsinventory
+Oracle WebTier and Utilities CD                                      11.1.1.6.0
+Interim patches (7) :Patch  16199894 14616819 10638758 17325559 13643211 12949905 7695070
+}}}
+
+No patches to apply.
+
+====== Section 3.3: Oracle Fusion Middleware Common 11.1.1.6 Patches and Bug Numbers ======
+{{{
+$ relogin to clear env
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/FMW_Home/oracle_common
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/FMW_Home/oracle_common
+}}}
+
+{{{
+$ export PATH=$PATH:$ORACLE_HOME/OPatch
+$ opatch lsinventory
+}}}
+
+Apply those Not included in any startCD
+
+======= 9905685 =======
+MISSING COMMONS-CLI-1.1.JAR IN WEBTIER ORACLE_COMMON/SOA/MODULES (Patch)
+p9905685_111160_Generic.zip	78.8 KB	(80669 bytes)
+SHA-1	B0BD74EB7EFD0AB8BEFA8DD33618AA6A8E0CCA85
+MD5	8C3F033B5B508CF7E366B3399D417676
+
+{{{
+$ cd 9905685/opatch/9905685
+$ opatch apply
+}}}
+
+{{{
+$ opatch lsinventory | grep 9905685
+Patch  9905685      : applied on Tue May 06 08:39:12 EDT 2014
+}}}
+
+======= 13947608 =======
+RUP4: JPS-02592 FAILED TO PUSH LDAP CONFIG DATA TO LIBOVD IN HCM DTE ENV (Patch)
+p13947608_111160_Generic.zip	MD5	3138AE776F8F1F3435117C5A52478D3F
+
+{{{
+$ cd 13947608
+$ opatch apply
+}}}
+
+{{{
+$ opatch lsinventory | grep 13947608
+Patch  13947608     : applied on Tue May 06 10:12:33 EDT 2014
+}}}
+
+======= 17394319 =======
+
+PASTBINARY NOT RETURNING CORRECT STATUS IN CASE OF CTRL+C (Patch)
+p17394319_111160_Generic.zip	MD5	8A34BC75E733059BF9CD2FAEDD5D080D
+
+{{{
+$ cd 17394319
+$ opatch apply
+}}}
+
+{{{
+$ opatch lsinventory | grep 17394319
+Patch  17394319     : applied on Tue May 06 10:13:12 EDT 2014
+}}}
+
+
+====== Section 3.4: Oracle Weblogic Server 10.3.6.0 Patches and Bug Numbers ======
+{{{
+$ cd $FMW_HOME/utils/bsu
+$ bsu.sh -report -bea_home=$FMW_HOME -output_format=text
+Product Version........... 10.3.6.0
+}}}
+
+Patches Not included in any startCD	17495356
+
+======= 17495356 =======
+
+SU Patch [CIH8]: TRACKING BUG FOR SMARTUPDATE PATCH OF MLR BUG 17431995 (Patch)
+p17495356_1036_Generic.zip	MD5	6D7C562BE2D908321CFD033099F482B2
+
+MOS:
+* How to Apply WebLogic Server (WLS) Patches Using Smart Update [Video] (Doc ID 876004.1)
+
+{{{
+# md5sum p17495356_1036_Generic.zip
+6d7c562be2d908321cfd033099f482b2  p17495356_1036_Generic.zip
+$ cp p17495356_1036_Generic.zip $FMW_HOME/utils/bsu/cache_dir/
+$ cd $FMW_HOME/utils/bsu/cache_dir
+$ unzip p17495356_1036_Generic.zip
+inflating: CIH8.jar
+inflating: patch-catalog_20352.xml
+$ rm p17495356_1036_Generic.zip README.txt
+}}}
+
+{{{
+$ cd $FMW_HOME/utils/bsu
+$ ./bsu.sh -prod_dir=$FMW_HOME/wlserver_10.3 -patchlist=CIH8 -verbose -install
+}}}
+
+
+===== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack =====
+Still Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
+MOS:
+* 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
+
+====== 4. Apply Oracle E-Business Suite Release 12.2.3. ======
+
+Start up only the Weblogic AdminServer service on the Run File System.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adadminsrvctl.sh start
+}}}
+
+??? Actually the whole APP stack can be up, as this is online patching :)
+{{{
+$ start_APP
+}}}
+
+START 2014/05/06 15:33:57
+
+The adop will apply the patches to the PATCH edition filesystem. That is why were also applying the Forms and FMW patches to the patch edition, which is now fs2.
+
+Just a check.
+
+The fs2 should have applied new patches, but the running not. It is supposed to be so.
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+43) Patch
+}}}
+
+There is no need to run any resync. It will be all done after the patch
+
+
+Perform the actual online patching exercise
+{{{
+$ adop phase=apply patches=17020683
+}}}
+
+START 2014/05/07 10:40:43
+END   2014/05/08 00:51:05
+
+Just a check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+43) Patch
+}}}
+
+So still the run edition has no changed. The patch edition has the Forms patched and the whole patch app has 17020683, which is 12.2.3 applied.
+
+===== back to 5. Apply Oracle E-Business Suite 12.2.3 Release Update Pack =====
+Still Following Oracle E-Business Suite Release 12.2.3 Readme (Doc ID 1586214.1)
+MOS:
+* 1586214.1 - 'Oracle E-Business Suite Release 12.2.3 Readme'.
+
+====== 5. Instantiate the Oracle HTTP Server configuration files admin.conf, ssl.conf, and mod_wl_ohs.conf. ======
+
+Source the patch edition environment file:
+{{{
+$ . $PATCH_BASE/EBSapps/appl/APPS$CONTEXT_NAME.env
+}}}
+
+When prompted for the APPS password, press <Return>.
+{{{
+$ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -d $FND_TOP/admin/driver/ohstmpl.drv -tmpl $FND_TOP/admin/template/ssl_conf_FMW.tmp
+}}}
+
+{{{
+$ cat $CONTEXT_FILE | grep -e s_ohs_instance_loc -e s_ohs_component
+<ohs_instance_loc oa_var="s_ohs_instance_loc">/u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1</ohs_instance_loc>
+<ohs_component oa_var="s_ohs_component">EBS_web_VIS</ohs_component>
+}}}
+
+{{{
+$ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -tmpl $FND_TOP/admin/template/mod_wl_ohs_conf_FMW.tmp -out /u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/config/OHS/EBS_web_VIS/mod_wl_ohs.conf
+$ $ADJVAPRG oracle.apps.ad.autoconfig.InstantiateFile -e $CONTEXT_FILE -d $FND_TOP/admin/driver/ohstmpl.drv -tmpl $FND_TOP/admin/template/admin_conf_FMW.tmp
+}}}
+
+{{{
+$ perl $FND_TOP/patch/115/bin/txkSetAppsConf.pl -contextfile=$CONTEXT_FILE -outfile=$INST_TOP/logs/appl/rgf/TXK/test.log
+}}}
+
+====== 6. Complete the online patching cycle by running the following commands in the order shown. ======
+
+Source the run edition environment file:
+{{{
+$ . $RUN_BASE/EBSapps/appl/APPS$CONTEXT_NAME.env
+}}}
+
+{{{
+$ adop phase=finalize
+$ adop phase=cutover
+}}}
+
+Now the situation is still the same:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+43) Patch
+}}}
+
+But, the run edition is now set to fs2
+{{{
+$ source /u01/oracle/VIS/EBSapps.env run
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+}}}
+
+That is the whole beauty if online patching. The cutover phase has shutdown the services from fs1, and started from fs2, which the current run edition.
+
+{{{
+$ adop phase=cleanup
+START 2014/05/08 06:35:45
+END   2014/05/08 15:48:49
+}}}
+
+Just a check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+43) Patch
+}}}
+
+====== 7. Synchronize file systems ======
+This action will copy the new run edition code and configuration to the other file system, to help the next online patching cycle complete faster.
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished	  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+ebs2		master		PREPARE     COMPLETED	    05-MAY-14 14:19:07 -04:00	   05-MAY-14 15:21:17 -04:00	  1:02:10
+APPLY	    COMPLETED	    07-MAY-14 10:41:43 -04:00	   08-MAY-14 00:50:56 -04:00	  14:09:13
+FINALIZE    COMPLETED	    08-MAY-14 05:40:10 -04:00	   08-MAY-14 05:42:20 -04:00	  0:02:10
+CUTOVER     COMPLETED	    08-MAY-14 05:44:25 -04:00	   08-MAY-14 06:32:12 -04:00	  0:47:47
+CLEANUP     COMPLETED	    08-MAY-14 06:37:26 -04:00	   08-MAY-14 15:48:29 -04:00	  9:11:03
+}}}
+
+
+{{{
+$ adop phase=fs_clone
+START 2014/05/08 16:03:31
+END   2014/05/08 19:06:28
+}}}
+
+Just a check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+43) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+43) Patch
+}}}
+
+
+===== 6. Post-Update Steps =====
+Nice:
+source /u01/oracle/VIS/EBSapps.env run|patch
+
+If you are upgrading from Release 11i, 12.0.x or 12.1.x to Release 12.2.3, then you must continue with 12.2.0 post upgrade steps.
+
+I have done the upgrade from 12.2 to 12.2.3, so those post install steps do not apply.
+
+===== Done =====
+
+We have 12.2.3 installed.
+
+
+
+== troubleschooting ==
+=== Database Availability check riwTDBup.sh ===
+Database Availability
+command: su applmgr -c "/STAGING/oracle_EBS_R12.2_linux_x86-64/startCD/Disk1/rapidwiz/bin/riwTDBup.sh /u01/oracle/VIS/fs1/inst/apps/VIS_ebs1/ora/10.1.2/VIS_ebs1.env APPS/*****"
+
+/STAGING/oracle_EBS_R12.2_linux_x86-64/startCD/Disk1/rapidwiz/bin/riwTDBup.sh /u01/oracle/VIS/fs1/inst/apps/VIS_ebs1/ora/10.1.2/VIS_ebs1.env APPS/APPS
+
+to mi dziala jak odpaloone z reki.
+
+MOS:
+* "No such file or directory: FastCGI: read() from pipe failed (0)" When Starting Oracle HTTP Server (Doc ID 1115253.1)
+
+Edit the file /etc/hosts to use the following format:
+
+ip_address fully_qualified_hostname short_hostname
+
+First line of the etc/hosts file should be:
+
+
+#7.0.0.1 localhost
+
+
+
+rw-50011
+MOS:
+* R12i: Pre-Install Check Fails RW-50011 (Doc ID 951783.1)
+
+Installation
+http://docs.oracle.com/cd/B53825_03/current/acrobat/121oaig.pdf
+
+=== Installation Freezes constantly during ===
+
+Freezes constantly during
+MOS:
+* Oracle E-Business Suite Release Notes, Release 12.2 (Doc ID 1320300.1)
+* Troubleshooting Rapid Install for E-Business Suite Release 12.2 (Doc ID 1378579.1)
+* Oracle E-Business Suite Release 12.2 Information Center - Announcements (Doc ID 1583109.1)
+
+apply the patch to startCD
+
+
+=== /etc/hosts ===
+{{{
+# cat /etc/hosts
+# Do not remove the following line, or various programs
+# that require network functionality will fail.
+127.0.0.1 localhost
+::1		localhost6.localdomain6 localhost6
+192.168.1.158 ebs2.remik.org ebs2
+192.168.1.159 ebsdb2.remik.org ebsdb2
+}}}
+
+=== RW-50004 An error has occured ===
+Looking at log file:
+
+Fatal Error: TXK Install Service
+
+oracle.apps.fnd.txk.config.ProcessStateException: OPatch process failed : Exit=1 See log for details. CMD= /u0
+#oracle/VIS/11.2.0/OPatch/opatch napply -skip_subset -skip_duplicate -verbose -silent   -ocmrf /u01/oracle/VI
+S/11.2.0/temp/VIS_ebsdb3/DBInstallHome/fnd/admin/template/txkForms_ocm.rsp  /u01/oracle/VIS/11.2.0/temp/VIS_eb
+sdb3/patches/16342486/16342486/
+
+at oracle.apps.fnd.txk.config.OPatchActionNode.processState(OPatchActionNode.java:296)
+
+at oracle.apps.fnd.txk.config.PatchActionNode.processState(PatchActionNode.java:187)
+
+at oracle.apps.fnd.txk.config.PatchNode.processState(PatchNode.java:338)
+
+running from vnc
+and it works!
+
+Probably the problem was with:
+
+{{{
+# ./rapidwiz
+Rapid Install Wizard is validating your file system......
+CMDDIR=/STAGING/oracle_EBS_R12.2_linux_x86-64/startCD/Disk1/rapidwiz
+Rapid Install Wizard will now launch the Java Interface.....
+}}}
+
+[root@ebsdb3 rapidwiz]# X11 connection rejected because of wrong authentication.
+Configuration file written to: /u01/oracle/VIS/11.2.0/appsutil/conf_VIS.txt
+Database logfile - /u01/oracle/VIS/11.2.0/appsutil/log/VIS_ebsdb3/05121655.log
+X11 connection rejected because of wrong authentication.
+X11 connection rejected because of wrong authentication.
+
+MOS:
+* Silent Installation Fails When Using Ssh With X Forwarding (Doc ID 1607080.1)
+
+This probably has to do something with the IP6 disabled, that caused the ssh X forwarding to fail, what was workarounded by setting 'X11UseLocalhost no'.
+
+Workaround: use vncserver.
+
+
+
+
+
+=== DB Connection as APPS was not successful. Please verify the connection details and apps user password. ===
+
+Apps user DB Connection
+DB Connection as APPS was not successful. Please verify the connection details and apps user password.
+
+Database Connection String - jdbc:oracle:thin:@ebsdb1.remik.org:1521:VIS
+
+MOS:
+* Troubleshooting Rapid Install for E-Business Suite Release 12.2 (Doc ID 1378579.1)
+
+looking at:
+/tmp/05041500/05041500.log
+
+Apps user DB Connection
+*----------------------
+
+
+getConnection() -->
+sDbHost    : ebsdb2
+sDbDomain  : remik.org
+sDbPort    : 1521
+sDbSid     : VIS
+sDbUser    : APPS
+Trying to connect using SID...
+getConnectionUsingSID() -->
+JDBC URL: jdbc:oracle:thin:@ebsdb2.remik.org:1521:VIS
+Exception occurred: java.sql.SQLException: ORA-01017: invalid username/passw
+ord; logon denied
+
+provided wrong password before.
+
+Solved.
+
+Pay attention to what passwords are asked for.
+
+Apps OS User Password: this the Linux password for user applmgr.
+
+Apps DB User Password: this the database password for user APPS, which is by default apps.
+
+=== Trying (wrongly) to manualy synchronise fs2 ===
+
+After the fs1 patching
+
+Should I synchronise the fs2? NO! Just apply the patch.
+
+{{{
+$ adop phase=fs_clone
+Using ADOP Session ID from currently incomplete patching cycle
+[UNEXPECTED]FS clone cannot be called while a patching cycle is active
+}}}
+
+adop exiting with status = 2 (Fail)
+
+MOS:
+* 12.2 E-Business Suite - Collecting Online Patching and fs_clone Log Files (Doc ID 1542162.1)
+* Oracle E-Business Suite Release 12.2: Backup and Recovery Guidelines For Online Patching Cutover (Doc ID 1584097.1)
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished			  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+ebs2		master		PREPARE     COMPLETED	    05-MAY-14 14:19:07 -04:00	   05-MAY-14 15:21:17 -04:00	  1:02:10
+APPLY	    NOT STARTED
+CUTOVER     NOT STARTED
+CLEANUP     NOT STARTED
+FINALIZE    NOT STARTED
+}}}
+
+{{{
+$ adop phase=apply
+He continues with standard adpatch :) Ho to abort it?
+}}}
+
+{{{
+$ adop phase=abort
+adop exiting with status = 0 (Success)
+}}}
+
+{{{
+$ adop -status
+ebs2		master		PREPARE     SESSION ABORTED 05-MAY-14 14:19:07 -04:00	   05-MAY-14 15:21:17 -04:00	  1:02:10
+APPLY	    SESSION ABORTED 07-MAY-14 06:56:26 -04:00	   07-MAY-14 07:19:56 -04:00	  0:23:30
+CUTOVER     SESSION ABORTED
+CLEANUP     SESSION ABORTED
+FINALIZE    SESSION ABORTED
+}}}
+
+OK, I should be able to do the fs_clone now.
+{{{
+$ adop phase=fs_clone
+adop exiting with status = 2 (Fail)
+[STATEMENT] There is a pending clone session for /u01/oracle/VIS/fs2.
+}}}
+
+to sie wywalalo: txkADOPPreparePhaseSynchronize.pl
+Puscilem z reki cale polecenie i wywalilo sie na:
+
+The Node Manager for machine ebs2 failed to start.
+Try to start it manually
+
+I start the whole app stack.
+
+How does one handle eg Forms update when we have fs1 and fs2?
+MOS:
+* Upgrading Oracle Fusion Middleware Technology Stack of Oracle E-Business Suite Release 12.2 to 11.1.1.7(11gR1 PS6) (Doc ID 1590356.1)
+
+
+To jest wszystko zle!!!
+
+Ja mialem caly system w statusie PREPARE, zgodnie z dokumentacja podczas aplikowania 12.2.3
+
+Potem aplikowalem Application Tier Technology Patches, gdzie jest napisane:
+
+Application tier technology patches must be applied to the PATCH file system.
+
+Czyli odkrecam do snapschota (dobrze, ze go zrobilem), sprawdzam w jakim statusie jest adop, aplikuje patche Formsow, FMW na !!!PATCH!!! file system i dopiero potem jade z patchem 12.2.3.
+
+
+
+
+
+
+== ADOP patching scenarios (some crash) ==
+=== apply Forms/FMW patch to patch edition with the whole adop phases ===
+OK, all is clean. DB up, APP up.
+
+This time I will apply the Forms binaries patch to the filesystem patch edition. Together with the whole adop rutine, and when the APP is up.
+
+
+{{{
+$ adop -status
+ebs3		master		APPLY	    COMPLETED	    14-MAY-14 10:43:41 +02:00	   14-MAY-14 11:13:07 +02:00	  0:29:26
+CLEANUP     COMPLETED	    14-MAY-14 11:14:03 +02:00	   14-MAY-14 11:14:45 +02:00	  0:00:42
+PREPARE     NOT APPLICABLE
+CUTOVER     NOT APPLICABLE
+FINALIZE    NOT STARTED
+}}}
+
+Pre check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+RUN File System           : /u01/oracle/VIS/fs1/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs2/EBSapps/appl
+
+Source the run filesystem and initiate adpatch
+{{{
+$ adop phase=prepare
+}}}
+
+Now source the patch filesystem and apply the patch.
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+}}}
+
+{{{
+$ export PATH=$PATH:$ORACLE_HOME/OPatch
+$ opatch lsinventory | grep 5659594
+(nothing)
+$ cd 5659594
+$ opatch apply
+$ opatch lsinventory | grep 5659594
+1) Patch  5659594 applied on Wed May 14 13:41:35 CEST 2014
+}}}
+
+Post patch check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+41) Patch
+}}}
+
+
+Source the run filesystem and complete the adpatch cycle
+{{{
+$ adop phase=finalize
+$ adop phase=cutover
+$ adop phase=cleanup
+}}}
+
+Post adop cleanup check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+41) Patch
+}}}
+
+So nothing has changed in terms of what fs is patched, but now the run edition and patch edition is reversed. Now run is fs2 and patch is fs1.
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+E-Business Suite Environment Information
+----------------------------------------
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+}}}
+
+So, finally it is time to run fs_clone that will copy the run file system to the patch file system.
+
+{{{
+$ adop phase=fs_clone
+And we are done. This all took a while:
+Node Name	Node Type	Phase	    Status	    Started			   Finished		  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------
+ebs3		master	PREPARE     COMPLETED	    14-MAY-14 16:37:04 14-MAY-14 16:58:01 +02:00	  0:20:57
+FINALIZE    COMPLETED	    14-MAY-14 18:06:20 14-MAY-14 18:06:36 +02:00	  0:00:16
+CUTOVER     COMPLETED	    14-MAY-14 18:08:10 14-MAY-14 18:31:50 +02:00	  0:23:40
+CLEANUP     COMPLETED	    14-MAY-14 19:18:38 14-MAY-14 19:19:22 +02:00	  0:00:44
+APPLY	    COMPLETED
+}}}
+
+
+But at the end both fs has the patches applied.
+
+Post adop fs_clone check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+41) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+41) Patch
+}}}
+
+
+
+=== apply Forms/FMW patch to patch edition without prepare phase ===
+
+
+
+=== apply Forms/FMW patch to run edition and trying to resync ===
+OK, all is clean. DB up (irrelevant), APP down.
+
+{{{
+$ adop -status
+ebs3		master		APPLY	    COMPLETED	    14-MAY-14 10:43:41 +02:00	   14-MAY-14 11:13:07 +02:00	  0:29:26
+CLEANUP     COMPLETED	    14-MAY-14 11:14:03 +02:00	   14-MAY-14 11:14:45 +02:00	  0:00:42
+PREPARE     NOT APPLICABLE
+CUTOVER     NOT APPLICABLE
+FINALIZE    NOT STARTED
+}}}
+
+
+Pre check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+Now, with apps shut down I apply the Forms patch, like it would be a hotpatch to the run filesystem edition.
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+}}}
+
+{{{
+$ export PATH=$PATH:$ORACLE_HOME/OPatch
+$ opatch lsinventory | grep 5659594
+(nothing)
+$ cd 5659594
+$ opatch apply
+$ opatch lsinventory | grep 5659594
+1) Patch  5659594 applied on Wed May 14 13:41:35 CEST 2014
+}}}
+
+
+Post patch check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+41) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+40) Patch
+}}}
+
+OK, so far, as expected we have the run edition patched. The patch edition is old.
+
+Now I will run fs_clone phase. As help is suggesting
+fs_clone      - Copy the run file system to the patch file system.
+
+Source run edition
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+}}}
+
+On APP tier start up only the Weblogic AdminServer service on the Run File System.
+{{{
+$ sh $ADMIN_SCRIPTS_HOME/adadminsrvctl.sh start
+}}}
+
+{{{
+$ adop phase=fs_clone
+START 2014/05/14 13:48:34
+END   2014/05/14 15:54:56
+}}}
+
+Post fs_clone check:
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs1/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+41) Patch
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ cd $ORACLE_HOME/OPatch
+$ ./opatch lsinventory
+41) Patch
+}}}
+
+OK, so this approach works. The fs_clone procedure could probably be run when the system is running.
+
+Is this way of applying patches to binaries supported?
+
+
+
+=== to do ===
+* popieprzylem patchowanie, a caly czas dzialam na starym. Chce odkrecic, czy moge bez wracania do backupu?
+
+
+== maintenance ==
+=== concurrent managers logs ===
+{{{
+$APPLCSF/$APPLLOG
+}}}
+
+=== where am I? ===
+Now, with APP environment it gets a litlle bit tricky. We have
+/d01/oracle/VIS/fs1/EBSapps/appl/APPSVIS_jazz.env
+/d01/oracle/VIS/fs2/EBSapps/appl/APPSVIS_jazz.env
+
+Why? Because of ADOP - AD Online Patching, new way in which EBS is patched now.
+Which is correct? It depends. Let's find out
+
+{{{
+$ grep EDITION /d01/oracle/VIS/fs*/EBSapps/appl/*env
+/d01/oracle/VIS/fs1/EBSapps/appl/VIS_jazz.env:FILE_EDITION="run"
+(...)
+/d01/oracle/VIS/fs2/EBSapps/appl/VIS_jazz.env:FILE_EDITION="patch"
+(...)
+}}}
+
+So /d01/oracle/VIS/fs1/EBSapps/appl/VIS_jazz.env is the current, active edition. And fs2 the patch one.
+
+

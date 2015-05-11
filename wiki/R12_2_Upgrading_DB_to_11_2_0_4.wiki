@@ -3030,3 +3030,1521 @@ Check:
 
 
 
+Table of contents
+<wiki:toc max_depth=8 />
+= Upgrading DB to 11_2_0_4 =
+
+MOS:
+* Interoperability Notes E-Business Suite Release 12.2 with Database 11g Release 2 (Doc ID 1623879.1)
+* E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+* Database Patch Conflict Resolution (Doc ID 1321267.1)
+* How to Relink Oracle Database Software on UNIX (Doc ID 131321.1)
+
+Following: Interoperability Notes E-Business Suite Release 12.2 with Database 11g Release 2 (Doc ID 1623879.1)
+
+Section 1: Upgrading an R12 Database to Oracle Database 11g Release 2 (11.2.0)
+
+== 1. Verify software versions ==
+
+=== Read the "Determine the Upgrade Path" subsection in Chapter 2 of the Oracle Database Upgrade Guide 11g Release 2 (11.2). Make sure that direct upgrade is supported from your current release. ===
+
+Yes, it is supported to upgrade from 11.2.0.3 to 11.2.0.4 :)
+
+=== Apply EBS patches: (if not already there) ===
+
+Patch 16207672 - 12.2.2
+Patch 17999920
+Patch 18054175 - Already included in AD.C.delta.4 (17766337)
+
+{{{
+> select bug_number,creation_date from apps.ad_bugs where bug_number in ('16207672','17999920','18054175') order by bug_number;
+}}}
+
+BUG_NUMBER		       CREATION_DATE
+*----------------------------- ------------------
+#207672		       08-MAY-14
+
+So we need Patch 17999920 and Patch 18054175 to be applied first, before we will do anything with the DB.
+
+p17999920_R12.ONT.C_R12_GENERIC.zip	22.3 KB	MD5	390B01042318B364CFEC28027E4FBE85
+(no special pre or post instructions)
+
+#FF:ONLINE ENABLEMENT FAILS ON 11.2.0.4 DB,DBMS_OBJECTS_UTILS AUTHID CHANGE (Patch)
+p18054175_R12.AD.C_R12_GENERIC.zip	66.8 KB	MD5	9DC17CB1EC9F0E32D313895A29B6A1D7
+(run recent adgrants)
+
+Readme:
+
+Run the adgrants.sql script as a user that can connect as SYSDBA to grant privileges to selected SYS objects and create PL/SQL profiler objects.
+
+Login to App tier
+
+{{{
+$ cd /STAGING/ebs12patches
+$ md5sum p17999920_R12.ONT.C_R12_GENERIC.zip
+390b01042318b364cfec28027e4fbe85  p17999920_R12.ONT.C_R12_GENERIC.zip
+$ md5sum p18054175_R12.AD.C_R12_GENERIC.zip
+9dc17cb1ec9f0e32d313895a29b6a1d7  p18054175_R12.AD.C_R12_GENERIC.zip
+}}}
+
+{{{
+$ unzip p17999920_R12.ONT.C_R12_GENERIC.zip
+$ unzip p18054175_R12.AD.C_R12_GENERIC.zip
+}}}
+
+Checking which adgrants is more recent
+{{{
+$ head 18054175/admin/adgrants.sql | grep Header
+}}}
+
+{{{
+$ head $APPL_TOP/admin/adgrants.sql | grep Header
+}}}
+
+The same, no need to run adgrants.
+
+OK, proceeding with the patching.
+
+{{{
+$ adop phase=prepare
+$ adop phase=apply patches=17999920,18054175 patchtop=/STAGING/ebs12patches
+$ adop phase=cutover,cleanup
+}}}
+
+{{{
+> select bug_number,creation_date from apps.ad_bugs where bug_number in ('16207672','17999920','18054175') order by bug_number;
+}}}
+
+BUG_NUMBER		       CREATION_DATE
+*----------------------------- ------------------
+#207672		       08-MAY-14
+#999920		       20-OCT-14
+#054175		       20-OCT-14
+
+=== Implement AutoConfig or upgrade to the latest version. ===
+See the Patching AutoConfig subsection of the Technical Configuration section of the Oracle E-Business Suite Setup Guide Release 12.2 for instructions.
+
+Autoconfig implemented.
+
+=== Daylight Saving changes, Minimum version 17 ===
+MOS:
+* Complying with Daylight Saving Time (DST) and Time Zone Rule Changes in E-Business Suite 12 (Doc ID 563019.1)
+
+
+{{{
+> select value$ from sys.props$ where name='DST_PRIMARY_TT_VERSION';
+VALUE$
+--------------------------------------------------------------------------------
+17
+}}}
+
+*> Doing nothing now.
+
+=== DirectX ===
+Windows customers ONLY
+
+*> Skipping
+
+== 2. Update application tier context file with new database listener port number (conditional) ==
+
+None of the mentioned parameters will change. Doing nothing.
+
+
+== 3. Prepare to create the 11.2.0 Oracle home ==
+Now the DB binaries are installed under:
+
+ORACLE_HOME=/u01/oracle/VIS/11.2.0
+
+we will install under new home, lets assume it is
+
+ORACLE_HOME=/u01/oracle/VIS/11204
+
+== 4. Install the 11.2.0.4 software ==
+
+{{{
+$ cd /STAGING/oracle11.2.0.4_x86-64
+$ md5sum p13390677_112040_Linux-x86-64_1of7.zip
+1616f61789891a56eafd40de79f58f28  p13390677_112040_Linux-x86-64_1of7.zip
+$ md5sum p13390677_112040_Linux-x86-64_2of7.zip
+67ba1e68a4f581b305885114768443d3  p13390677_112040_Linux-x86-64_2of7.zip
+}}}
+
+{{{
+$ unzip p13390677_112040_Linux-x86-64_1of7.zip
+$ unzip p13390677_112040_Linux-x86-64_2of7.zip
+}}}
+
+{{{
+$ export ORACLE_HOME=/u01/oracle/VIS/11204
+$ cd database
+$ ./runInstaller
+Configure Security Updates -> No
+Download Software Updates -> Skip
+Installation Option -> Install Database software only
+Grid Installation Options -> Single Instance
+Product Languages -> Select all used in EBS
+Database Edition -> Enterprise Edition
+Installation Location -> Oracle Base: /u01, Software Location: /u01/oracle/VIS/11204
+Operating System Groups -> dba, oinstall
+}}}
+
+You will be asked to run as root:
+{{{
+# /u01/oracle/VIS/11204/root.sh
+}}}
+
+Done.
+
+== 5. Install Oracle Database 11g Products from the 11g Examples CD (mandatory) ==
+
+{{{
+$ cd /STAGING/oracle11.2.0.4_x86-64
+$ md5sum p13390677_112040_Linux-x86-64_6of7.zip
+2db69cd15db335758228d91182263c5e  p13390677_112040_Linux-x86-64_6of7.zip
+$ unzip p13390677_112040_Linux-x86-64_6of7.zip
+$ cd examples
+$ ./runInstaller
+Download Software Updates -> Skip
+Specify Installation Location -> Software Location: /u01/oracle/VIS/11204
+}}}
+
+We are supposed to have all the env variables set to look like we are running form /u01/oracle/VIS/11204
+
+This can be easily set bu using this trick:
+{{{
+$ echo "DUMMY:/u01/oracle/VIS/11204:N" >> /etc/oratab
+$ . oraenv
+-> DUMMY
+}}}
+
+And we have
+ORACLE_BASE=/u01
+ORACLE_HOME=/u01/oracle/VIS/11204
+PATH=/usr/kerberos/bin:/usr/local/bin:/bin:/usr/bin:/home/oracle/bin:/u01/oracle/VIS/11204/bin
+LD_LIBRARY_PATH=/u01/oracle/VIS/11204/lib
+
+The only thing missing is PERL5LIB
+{{{
+$ export PERL5LIB=/u01/oracle/VIS/11204/perl/lib/5.10.0:/u01/oracle/VIS/11204/perl/lib/site_perl/5.10.0
+}}}
+
+The one that needs some fixing is PATH
+{{{
+$ which perl
+/usr/bin/perl
+}}}
+
+And we want to use the one delivered with Oracle binaries
+
+{{{
+$ export PATH=$ORACLE_HOME/perl/bin:$PATH
+$ which perl
+/u01/oracle/VIS/11204/perl/bin/perl
+}}}
+
+== 6a. Apply additional 11.2.0.4 RDBMS patches ==
+MOS:
+* Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+* Database Patch Set Update Overlay Patches Required for Use with PSUs and Oracle E-Business Suite (Doc ID 1147107.1)
+
+So, we have an option here:
+# Go with Doc ID 1594274.1 and install only the mention interoperability patches
+2. Go with Doc ID 1147107.1 and Apply latest PSU + required interoperability patches
+
+I chose 2.
+
+=== First I will apply 11.2.0.4.3 PSU 18522509 (latest certified with EBS) ===
+
+DATABASE PATCH SET UPDATE 11.2.0.4.3 (INCLUDES CPUJUL2014) (Patch)
+p18522509_112040_Linux-x86-64.zip	24.3 MB	MD5	6AE77509E30D8B30A78CE0F837AA3258
+
+Following Patch 18522509 - 11.2.0.4.3 Patch Set Update Readme
+
+{{{
+$ cd /STAGING/DB_11.2_patches
+$ md5sum p18522509_112040_Linux-x86-64.zip
+6ae77509e30d8b30a78ce0f837aa3258  p18522509_112040_Linux-x86-64.zip
+}}}
+
+{{{
+$ export PATH=$PATH:$ORACLE_HOME/OPatch
+$ opatch lsinventory
+Oracle Interim Patch Installer version 11.2.0.3.4
+}}}
+
+Oracle Database 11g                                                  11.2.0.4.0
+Oracle Database 11g Examples                                         11.2.0.4.0
+There are 2 products installed in this Oracle Home.
+There are no Interim patches installed in this Oracle Home.
+
+First we need to patche the opatch :) to version 11.2.0.3.6 or later
+p6880880_112000_Linux-x86-64.zip MD5	2AB78CB17174C3A49DF560F05E3352C6
+{{{
+$ md5sum p6880880_112000_Linux-x86-64.zip
+2ab78cb17174c3a49df560f05e3352c6  p6880880_112000_Linux-x86-64.zip
+$ mv $ORACLE_HOME/OPatch $ORACLE_HOME/OPatch_`/bin/date +%Y%m%d`
+$ unzip -d $ORACLE_HOME p6880880_112000_Linux-x86-64.zip
+$ opatch version
+OPatch Version: 11.2.0.3.6
+}}}
+
+
+
+No we can proceed to apply 11.2.0.4.3
+{{{
+$ cd /STAGING/DB_11.2_patches
+$ unzip p18522509_112040_Linux-x86-64.zip
+$ cd 18522509
+$ opatch prereq CheckConflictAgainstOHWithDetail -ph ./
+Prereq "checkConflictAgainstOHWithDetail" passed.
+}}}
+
+{{{
+$ opatch apply
+Oracle Home       : /u01/oracle/VIS/11204
+Composite patch 18522509 successfully applied.
+OPatch Session completed with warnings.
+}}}
+
+We can ignore the following warnings
+ins_emagent.mk:113: warning: overriding commands for target `nmosudo'
+ins_emagent.mk:52: warning: ignoring old commands for target `nmosudo'
+
+
+=== Then I will apply the overlay patches mentioned in Doc ID 1147107.1 ===
+To make it faster lets create a response file for this monit about receiving the security mail, so we do not have to answer it every time we run opatch.
+{{{
+$ cd $ORACLE_HOME/OPatch/ocm/bin
+$ pwd
+/u01/oracle/VIS/11204/OPatch/ocm/bin
+$ ./emocmrsp
+}}}
+
+Now the ocm.rsp file should be created in current directory.
+
+
+{{{
+$ ls -1 | grep -v 18522509 | awk '{print "unzip -n "$0 }'
+unzip -n p12949905_112040_Linux-x86-64.zip
+unzip -n p16989137_112040_Generic.zip
+unzip -n p17402822_112040_Linux-x86-64.zip
+unzip -n p17429475_112040_Generic.zip
+unzip -n p17501296_112040_Generic.zip
+unzip -n p17629476_112040_Generic.zip
+unzip -n p17944018_112040_Generic.zip
+unzip -n p18118982_112041_Linux-x86-64.zip
+unzip -n p18419770_112040_Linux-x86-64.zip
+unzip -n p18614015_112040_Generic.zip
+unzip -n p18665660_112040_Linux-x86-64.zip
+unzip -n p18685209_112040_Linux-x86-64.zip
+unzip -n p19233888_112043_Linux-x86-64.zip
+unzip -n p4189542_112040_Linux-x86-64.zip
+unzip -n p4247037_112040_Generic.zip
+unzip -n p17912217_112043_Linux-x86-64.zip
+}}}
+
+{{{
+$ ls -1 | grep -v 18522509 | awk '{print "md5sum "$0 }'
+md5sum p12949905_112040_Linux-x86-64.zip
+md5sum p16989137_112040_Generic.zip
+md5sum p17402822_112040_Linux-x86-64.zip
+md5sum p17429475_112040_Generic.zip
+md5sum p17501296_112040_Generic.zip
+md5sum p17629476_112040_Generic.zip
+md5sum p17944018_112040_Generic.zip
+md5sum p18118982_112041_Linux-x86-64.zip
+md5sum p18419770_112040_Linux-x86-64.zip
+md5sum p18614015_112040_Generic.zip
+md5sum p18665660_112040_Linux-x86-64.zip
+md5sum p18685209_112040_Linux-x86-64.zip
+md5sum p19233888_112043_Linux-x86-64.zip
+md5sum p4189542_112040_Linux-x86-64.zip
+md5sum p4247037_112040_Generic.zip
+md5sum p17912217_112043_Linux-x86-64.zip
+}}}
+
+{{{
+$ md5sum p12949905_112040_Linux-x86-64.zip
+f02149beef366559b7c69ebda7a22175  p12949905_112040_Linux-x86-64.zip
+$ md5sum p16989137_112040_Generic.zip
+0ad30310d8f272ac9abdb90b6e41508c  p16989137_112040_Generic.zip
+$ md5sum p17402822_112040_Linux-x86-64.zip
+a403e4e4d467a2b45ce9156d820fe3da  p17402822_112040_Linux-x86-64.zip
+$ md5sum p17429475_112040_Generic.zip
+2c659bf0c1c99ac4458e08018a50dc95  p17429475_112040_Generic.zip
+$ md5sum p17501296_112040_Generic.zip
+d3eb7063bb456a6bae17b1d458445a12  p17501296_112040_Generic.zip
+$ md5sum p17629476_112040_Generic.zip
+51108971cdb9b2cb99b664585ee196b6  p17629476_112040_Generic.zip
+$ md5sum p17912217_112043_SOLARIS64.zip
+d168c8eb891ba0ad8993d7658f954245  p17912217_112043_SOLARIS64.zip
+$ md5sum p17944018_112040_Generic.zip
+7cc42707f10a1f53e8ee9151c96e1bf3  p17944018_112040_Generic.zip
+$ md5sum p18118982_112041_Linux-x86-64.zip
+5f978d91237597824db30a5c85e3d97a  p18118982_112041_Linux-x86-64.zip
+$ md5sum p18419770_112040_Linux-x86-64.zip
+e2f0e86685ec667fe91701ba4ff1f805  p18419770_112040_Linux-x86-64.zip
+$ md5sum p18614015_112040_Generic.zip
+e3157e2289bef31bda59d91d7e69a384  p18614015_112040_Generic.zip
+$ md5sum p18665660_112040_Linux-x86-64.zip
+8fc29f69732a60426621f6eb372a2c91  p18665660_112040_Linux-x86-64.zip
+$ md5sum p18685209_112040_Linux-x86-64.zip
+df97e08ef1085359083aaf27acc23732  p18685209_112040_Linux-x86-64.zip
+$ md5sum p19233888_112043_Linux-x86-64.zip
+972e419d75321493daf57a37ef52efcb  p19233888_112043_Linux-x86-64.zip
+$ md5sum p4189542_112040_Linux-x86-64.zip
+06eb1b0039245b92a29fa366188c9a7c  p4189542_112040_Linux-x86-64.zip
+$ md5sum p4247037_112040_Generic.zip
+e3e864ff687934898600e5d2b67bf93e  p4247037_112040_Generic.zip
+$ md5sum p17912217_112043_Linux-x86-64.zip
+b99dc0f478991d4d02375c821e7f63a3  p17912217_112043_Linux-x86-64.zip
+}}}
+
+
+==== 4189542 ====
+ONLY SYS CAN "ALTER SYNONYM... COMPILE" FOR ANOTHER USERS'S SYNONYM (Patch)
+p4189542_112040_Linux-x86-64.zip	MD5	06EB1B0039245B92A29FA366188C9A7C
+
+{{{
+$ cd 4189542
+$ opatch apply -silent -ocmrf /u01/oracle/VIS/11204/OPatch/ocm/bin/ocm.rsp
+}}}
+
+This opatch apply repeat on every following patch.
+
+==== 4247037 ====
+RFID-EPC GENERATION FEATURE FROM DATABASE SERVER. TO BE USED WITH APPS WMS R12 (Patch)
+p4247037_112040_Generic.zip	MD5	E3E864FF687934898600E5D2B67BF93E
+
+{{{
+$ cd 4247037
+}}}
+
+==== 12949905 ====
+DST-17: DST UPDATE OCTOBER 2011 - TZDATA2011J (Patch)
+p12949905_112040_Linux-x86-64.zip	MD5	F02149BEEF366559B7C69EBDA7A22175
+
+{{{
+$ cd 12949905
+}}}
+
+==== 16989137 ====
+DRG-10761 ON SETTING PROCEDURE ATTRIBUTE OF PROCEDURE_FILTER PREFERENCE (Patch)
+p16989137_112040_Generic.zip	MD5	0AD30310D8F272AC9ABDB90B6E41508C
+
+{{{
+$ cd 16989137
+}}}
+
+==== 17402822 ====
+ENABLE 3RD PARTY INXIGHT LINGUISTX TECHNOLOGY IN 11.2.0.4 (Patch)
+p17402822_112040_Linux-x86-64.zip	MD5	A403E4E4D467A2B45CE9156D820FE3DA
+
+{{{
+$ cd 17402822
+}}}
+
+==== 18118982 version 11.2.0.4.1 ====
+MERGE REQUEST ON TOP OF DATABASE PSU 11.2.0.4.1 FOR BUGS 10019002 10427365 (Patch)
+p18118982_112041_Linux-x86-64.zip	MD5	5F978D91237597824DB30A5C85E3D97A
+
+{{{
+$ cd 18118982
+}}}
+
+==== 17429475 ====
+RCONFIG DROPPING TEMPORARY DATA FILES NOT CREATING THEM (Patch)
+p17429475_112040_Generic.zip	MD5	2C659BF0C1C99AC4458E08018A50DC95
+
+{{{
+$ cd 17429475
+}}}
+
+==== 17501296 ====
+UNABLE TO DELETE ROWS FROM TABLE WITH TEXT INDEX AFTER UPGRADE TO 11.2.0.4 (Patch)
+p17501296_112040_Generic.zip	MD5	D3EB7063BB456A6BAE17B1D458445A12
+
+{{{
+$ cd 17501296
+}}}
+
+==== 17629476 version 11.2.0.4.0 (no conflict) (NOTE: This Database Patch has an AD code dependency.  See 1594274.1 for detail) ====
+MERGE REQUEST ON TOP OF 11.2.0.4.0 FOR BUGS 17421340 17487358 (Patch)
+p17629476_112040_Generic.zip	MD5	51108971CDB9B2CB99B664585EE196B6
+
+{{{
+$ cd 17629476
+}}}
+
+==== 17912217 version 11.2.0.4.3 ====
+TRACKING BUG FOR LRG 9760292 (Patch)
+p17912217_112043_Linux-x86-64.zip	MD5	B99DC0F478991D4D02375C821E7F63A3
+
+{{{
+$ cd 17912217
+}}}
+
+==== 17944018 ====
+MERGE REQUEST ON TOP OF 11.2.0.4.0 FOR BUGS 17654622 17801303 (Patch)
+p17944018_112040_Generic.zip	MD5	7CC42707F10A1F53E8EE9151C96E1BF3
+
+{{{
+$ cd 17944018
+}}}
+
+
+==== 18419770 ====
+KEY-PRESERVED TABLE IN JOIN VIEW NOT RECOGNIZED WHEN JOINED TABLES HAVE UNQ INDX (Patch)
+p18419770_112040_Linux-x86-64.zip	MD5	E2F0E86685EC667FE91701BA4FF1F805
+
+{{{
+$ cd 18419770
+}}}
+
+
+==== 18614015 ====
+UTL_RECOMP DOES NOT COMPILE INVALID OBJECTS MV WITH STATUS 3 (Patch)
+p18614015_112040_Generic.zip	MD5	E3157E2289BEF31BDA59D91D7E69A384
+
+{{{
+$ cd 18614015
+}}}
+
+
+==== 18665660 ====
+HIGH CHILD CURSOR COUNTS DUE TO OPTIMIZER_MISMATCH WITH OFE=920 HINT (Patch)
+p18665660_112040_Linux-x86-64.zip	MD5	8FC29F69732A60426621F6EB372A2C91
+
+{{{
+$ cd 18665660
+}}}
+
+
+==== 18685209 ====
+ORA-600 [KKOGBRO: NO KKOAPTYP] (Patch)
+p18685209_112040_Linux-x86-64.zip	MD5	DF97E08EF1085359083AAF27ACC23732
+
+{{{
+$ cd 18685209
+}}}
+
+
+==== 19233888 version 11.2.0.4.3 ====
+MERGE REQUEST ON TOP OF DATABASE PSU 11.2.0.4.3 FOR BUGS 17608907 17781991 (Patch)
+p19233888_112043_Linux-x86-64.zip	MD5	972E419D75321493DAF57A37EF52EFCB
+
+{{{
+$ cd 19233888
+}}}
+
+== 6b. Apply additional 11.2.0.4 RDBMS patches (review 2015.02.11 to include JAN2015 PSU) ==
+Going with the latest 11.2.0.4.5 - JAN2015 PSU Patch 19769489
+
+DATABASE PATCH SET UPDATE 11.2.0.4.5 (INCLUDES CPUJAN2015) (Patch)
+p19769489_112040_Linux-x86-64.zip	53.6 MB	MD5	3736762BE873522E0C92E1FFDDD4C857
+
+{{{
+$ md5sum p19769489_112040_Linux-x86-64.zip
+3736762be873522e0c92e1ffddd4c857  p19769489_112040_Linux-x86-64.zip
+$ unzip p19769489_112040_Linux-x86-64.zip
+}}}
+
+{{{
+$ which opatch
+/u01/oracle/VIS/11204/OPatch/opatch
+$ opatch lspatches
+19233888;
+18685209;
+18665660;
+18614015;
+18419770;
+17944018;
+17912217;
+17629476;
+17501296;
+17429475;
+18118982;
+17402822;
+16989137;
+12949905;
+4247037;
+4189542;
+18522509;Database Patch Set Update : 11.2.0.4.3 (18522509)
+}}}
+
+{{{
+$ cd 19769489
+$ opatch apply -silent -ocmrf /u01/oracle/VIS/11204/OPatch/ocm/bin/ocm.rsp
+Composite Patch 19769489 conflicts with installed patch(es)  19233888
+$ opatch rollback -id 19233888
+$ opatch apply -silent -ocmrf /u01/oracle/VIS/11204/OPatch/ocm/bin/ocm.rsp
+Composite patch 19769489 successfully applied.
+OPatch Session completed with warnings.
+$ cd $ORACLE_HOME/rdbms/admin
+> @catbundle.sql psu apply
+}}}
+
+{{{
+$ opatch lspatches
+19769489;Database Patch Set Update : 11.2.0.4.5 (19769489)
+18685209;
+18665660;
+18419770;
+17944018;
+17629476;
+17501296;
+17429475;
+18118982;
+17402822;
+16989137;
+12949905;
+4247037;
+4189542;
+}}}
+
+
+EBS Technology Codelevel Checker (Patch) 28-Jan-2015 17:53
+p17537119_R12_GENERIC.zip	15.1 KB	MD5	ACBAF219DB11CE3DB2512451DCAC88EC
+{{{
+$ md5sum p17537119_R12_GENERIC.zip
+acbaf219db11ce3db2512451dcac88ec  p17537119_R12_GENERIC.zip
+}}}
+
+{{{
+$ unzip p17537119_R12_GENERIC.zip
+$ ./checkDBpatch.sh
+List of missing bug fixes:
+17608907
+17781991
+19393542
+}}}
+
+==== 17608907 17781991 ====
+#910653 version 11.2.0.4.4
+#608907 version 11.2.0.4.4
+
+(NOTE: If Patch 18241194, 18515145, 18061712 or 19233888 were installed, you should roll them back before installing this patch.)
+*> none of the mentioned patches installed.
+
+===== Found Patch 17781991 for 11.2.0.4.5 =====
+
+DROPPED OBJECTS ARE BEING REFERRED IN DEPENDENCY WHEN CREATE A NEW TABLE (Patch)
+p17781991_112045_Linux-x86-64.zip	238.8 KB MD5	B320BA6BF12C3BBBE84B46B74873D723
+
+{{{
+$ md5sum p17781991_112045_Linux-x86-64.zip
+b320ba6bf12c3bbbe84b46b74873d723  p17781991_112045_Linux-x86-64.zip
+$ unzip p17781991_112045_Linux-x86-64.zip
+$ cd 17781991
+$ opatch prereq CheckConflictAgainstOHWithDetail -ph ./
+$ opatch apply
+}}}
+
+===== Found Patch 17608907 for 11.2.0.4.5 =====
+
+TMDBWWD.DIF IN SDO MAIN (Patch)
+p17608907_112045_Linux-x86-64.zip	788.9 KB MD5	047CF97023A68660D2C0108C22A6AF6E
+{{{
+$ md5sum p17608907_112045_Linux-x86-64.zip
+047cf97023a68660d2c0108c22a6af6e  p17608907_112045_Linux-x86-64.zip
+$ unzip p17608907_112045_Linux-x86-64.zip
+$ cd 17608907
+$ opatch prereq CheckConflictAgainstOHWithDetail -ph ./
+$ opatch apply
+}}}
+
+==== Patch 19393542 ====
+Patch not visible in note: Database Patch Set Update Overlay Patches Required for Use with PSUs and Oracle E-Business Suite (Doc ID 1147107.1)
+as required on top of 11.2.0.4, but reported by Code Checker
+
+TIMESTAMP MISMATCHES ON RULE SET & EVALUATION CONTEXT (Patch)
+p19393542_112040_Linux-x86-64.zip	129.2 KB MD5	248284C28C07C6825D1473661BEB3547
+
+{{{
+$ md5sum p19393542_112040_Linux-x86-64.zip
+248284c28c07c6825d1473661beb3547  p19393542_112040_Linux-x86-64.zip
+$ unzip p19393542_112040_Linux-x86-64.zip
+$ cd 19393542
+$ opatch prereq CheckConflictAgainstOHWithDetail -ph ./
+$ opatch apply
+Applying interim patch '19393542' to OH '/u01/oracle/VIS/11204'
+Verifying environment and performing prerequisite checks...
+OPatch system modification phase did not start:
+Patch "19393542" is not needed since it has no fixes for this Oracle Home. Please see log file for details.
+Log file location: /u01/oracle/VIS/11204/cfgtoollogs/opatch/19393542_Feb_11_2015_11_33_54/apply2015-02-11_11-33-54AM_1.log
+}}}
+
+
+
+
+
+
+== 7. Create nls/data/9idata directory ==
+
+With env set to new binaries
+{{{
+$ env | grep ORACLE_HOME
+ORACLE_HOME=/u01/oracle/VIS/11204
+$ which perl
+/u01/oracle/VIS/11204/perl/bin/perl
+}}}
+
+{{{
+$ perl $ORACLE_HOME/nls/data/old/cr9idata.pl
+Please reset environment variable ORA_NLS10 to /u01/oracle/VIS/11204/nls/data/9idata!
+}}}
+
+== 8. Install JRE 6 ==
+Install JRE 6 on the $ORACLE_HOME/appsutil/jre directory.
+
+MOS:
+* Using JDK 6.0 Latest Update with Oracle E-Business Suite Release 12.2 (Doc ID 1459546.1)
+
+Section 8: Upgrading to Latest JRE 6.0 on Database Tier Node
+=== Step 8.1: Download Latest JRE 6.0 Update ===
+Linux	JRE 6.0 Update 17 or higher	Java SE Downloads on My Oracle Support Knowledge Document 1439822.1
+
+A patch that has "JDK" in the description contains both the JDK and the JRE deliverables.
+
+#138237	Oracle JDK 6 Update 85
+
+Oracle JDK 6 Update 85 (Patch)
+p19138237_16085_Linux-x86-64.zip	173.0 MB MD5	E7D195C945158E3C47F7AB38570A2E28
+
+{{{
+$ md5sum p19138237_16085_Linux-x86-64.zip
+e7d195c945158e3c47f7ab38570a2e28  p19138237_16085_Linux-x86-64.zip
+}}}
+
+=== Step 8.2: Replace JRE Home Used With Oracle E-Business Suite Release 12.2 ===
+
+{{{
+$ mkdir $ORACLE_HOME/appsutil
+$ cp jre-6u85-linux-x64.bin $ORACLE_HOME/appsutil
+$ cd $ORACLE_HOME/appsutil
+$ pwd
+/u01/oracle/VIS/11204/appsutil
+$ ./jre-6u85-linux-x64.bin
+$ mv jre1.6.0_85 jre
+}}}
+
+== 9. Ensure Applications patching cycle is complete ==
+
+Now on app tier.
+
+{{{
+$ adop -status
+Node Name	Node Type	Phase	    Status	    Started			   Finished		  Elapsed
+--------------- --------------- ----------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE     COMPLETED	    20-OCT-14 16:39:29 +02:00	   20-OCT-14 16:57:48 +02:00	  0:18:19
+APPLY	    COMPLETED	    20-OCT-14 17:06:56 +02:00	   20-OCT-14 17:09:28 +02:00	  0:02:32
+CUTOVER     COMPLETED	    20-OCT-14 17:14:50 +02:00	   20-OCT-14 17:32:45 +02:00	  0:17:55
+FINALIZE    COMPLETED	    20-OCT-14 17:15:09 +02:00	   20-OCT-14 17:15:29 +02:00	  0:00:20
+CLEANUP     COMPLETED	    20-OCT-14 17:32:56 +02:00	   20-OCT-14 17:33:52 +02:00	  0:00:56
+}}}
+
+The Status should all have COMPLETED value.
+
+== 10. Shut down Applications server processes and database listener ==
+
+On app tier:
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ ./adstpall.sh apps/apps
+}}}
+
+On DB tier:
+{{{
+$ cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+$ ./addlnctl.sh stop $ORACLE_SID
+}}}
+
+Make sure that you do not have the LOCAL_LISTENER initialization parameter set.
+
+We do not use spfile
+{{{
+> show parameter spfi
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+spfile				     string
+}}}
+
+And we have
+{{{
+> show parameter local_listener
+NAME				     TYPE	 VALUE
+------------------------------------ ----------- ------------------------------
+local_listener			     string	 VIS_LOCAL
+}}}
+
+So I just edit the init file and bounce the DB
+{{{
+$ cd $ORACLE_HOME/dbs
+$ vim initVIS.ora
+local_listener  = VIS_LOCAL
+to
+# local_listener  = VIS_LOCAL
+$ sqlplus / as sysdba
+> shutdown immediate
+> startup
+}}}
+
+{{{
+> show parameter local_listener
+local_listener			     string
+}}}
+
+Ok.
+
+== 11. Drop SYS.ENABLED$INDEXES (conditional) ==
+
+{{{
+> drop table sys.enabled$indexes;
+ORA-00942: table or view does not exist
+}}}
+
+== 12. Prepare to upgrade ==
+Ensure that the oratab file contains an entry for the database to be upgraded.
+
+{{{
+$ cat /etc/oratab
+VIS:/u01/oracle/VIS/11204:N
+}}}
+
+And this is kind of misleading, because it should be also the DB we want to upgrade, let's change it to:
+{{{
+$ cat /etc/oratab
+VIS:/u01/oracle/VIS/11.2.0:N
+DUMMY:/u01/oracle/VIS/11204:N
+}}}
+
+== 13. Upgrade the database instance ==
+The instructions for the database upgrade are outlined in Oracle Database Upgrade Guide 11g Release 2 (11.2) Chapters 3 and 4.
+
+http://docs.oracle.com/cd/E18283_01/server.112/e17222/upgrade.htm
+
+
+Perform the steps from the "Run the Pre-Upgrade Information Tool" section to the "Upgrade the Database Using the Database Upgrade Assistant" section of chapter 3 and any step in chapter 4 that is relevant to your environment.
+
+=== Run the Pre-Upgrade Information Tool ===
+Login to DB tier and source the current environment.
+{{{
+$ . /u01/oracle/VIS/11.2.0/VIS_`uname -n | awk -F"." '{print $1}'`.env
+$ env | grep ORACLE_HOME
+ORACLE_HOME=/u01/oracle/VIS/11.2.0
+}}}
+
+{{{
+$ sqlplus / as sysdba
+> SPOOL upgrade_info.log
+> @/u01/oracle/VIS/11204/rdbms/admin/utlu112i.sql
+> SPOOL OFF
+}}}
+
+Reviewing the results:
+*-> Real Application Clusters	 [upgrade]  INVALID
+*> Ignoring, not using RAC anyway
+
+WARNING: --> Database is using a timezone file greater than version 14.
+*> ok, EBS is using v17
+
+WARNING: --> Database contains INVALID objects prior to upgrade.
+*> ok, some apps packages
+
+WARNING: --> Database contains schemas with objects dependent on DBMS_LDAP package.
+*> ok "Disregard warnings related to Network ACLs. AutoConfig manages all the E-Business Suite Network ACLs."
+
+WARNING: --> JOB_QUEUE_PROCESS value must be updated
+*> this I will change
+
+{{{
+> show parameter job_queue_processes
+job_queue_processes		     integer	 2
+}}}
+
+{{{
+$ cd $ORACLE_HOME/dbs
+$ vim initVIS.ora
+job_queue_processes             = 2
+to
+job_queue_processes             = 12
+> startup force
+> show parameter job_queue_processes
+job_queue_processes		     integer	 12
+}}}
+
+
+Oracle recommends gathering dictionary statistics prior to upgrading the database.
+{{{
+> EXECUTE dbms_stats.gather_dictionary_stats;
+}}}
+
+Just to summarise
+{{{
+> @valid
+}}}
+
+BANNER
+*-------------------------------------------------------------------------------
+Oracle Database 11g Enterprise Edition Release 11.2.0.3.0 - 64bit Production
+PL/SQL Release 11.2.0.3.0 - Production
+CORE	11.2.0.3.0	Production
+TNS for Linux: Version 11.2.0.3.0 - Production
+NLSRTL Version 11.2.0.3.0 - Production
+
+
+NAME
+*--------
+VIS
+
+
+COMP_NAME			    STATUS	    VERSION
+*---------------------------------- --------------- ---------------
+Oracle Database Catalog Views	    VALID	    11.2.0.3.0
+JServer JAVA Virtual Machine	    VALID	    11.2.0.3.0
+Oracle Real Application Clusters    INVALID	    11.2.0.3.0
+Oracle Database Packages and Types  VALID	    11.2.0.3.0
+Oracle XML Database		    VALID	    11.2.0.3.0
+Oracle Expression Filter	    VALID	    11.2.0.3.0
+Oracle Database Java Packages	    VALID	    11.2.0.3.0
+Oracle XDK			    VALID	    11.2.0.3.0
+OLAP Analytic Workspace 	    VALID	    11.2.0.3.0
+Oracle Multimedia		    VALID	    11.2.0.3.0
+Spatial 			    VALID	    11.2.0.3.0
+Oracle OLAP API 		    VALID	    11.2.0.3.0
+OLAP Catalog			    VALID	    11.2.0.3.0
+Oracle Text			    VALID	    11.2.0.3.0
+
+# rows selected.
+
+
+OBJECT_NAME		       OWNER		    OBJECT_TYPE
+*----------------------------- -------------------- -------------------
+FFP55429_01011900	       APPS		    PACKAGE BODY
+FFP60280_01010001	       APPS		    PACKAGE BODY
+FFP61161_01010001	       APPS		    PACKAGE BODY
+FFP60342_01010001	       APPS		    PACKAGE BODY
+OZF_EARNING_SUMMARY_MV	       APPS		    MATERIALIZED VIEW
+FFP60342_01012008	       APPS		    PACKAGE BODY
+FFP60342_01012009	       APPS		    PACKAGE BODY
+FFP55409_01012007	       APPS		    PACKAGE BODY
+FFP55409_01012011	       APPS		    PACKAGE BODY
+FFP60342_01012006	       APPS		    PACKAGE BODY
+
+# rows selected.
+
+=== Upgrade the Database Using the Database Upgrade Assistant ===
+
+Source the new installed binaries
+{{{
+$ . oraenv
+-> DUMMY
+$ export PERL5LIB=/u01/oracle/VIS/11204/perl/lib/5.10.0:/u01/oracle/VIS/11204/perl/lib/site_perl/5.10.0
+$ export PATH=$ORACLE_HOME/perl/bin:$PATH
+$ export ORA_NLS10=/u01/oracle/VIS/11204/nls/data/9idata
+$ which dbua
+/u01/oracle/VIS/11204/bin/dbua
+}}}
+
+*> Make sure it is from the new binaries directory
+
+{{{
+$ dbua
+Select Database: -> VIS, Oracle Home /u01/oracle/VIS/11.2.0
+Do not configure DB with Enterprise Manager
+}}}
+
+We can see that the dbua has changed the oratab
+{{{
+$ cat /etc/oratab
+DUMMY:/u01/oracle/VIS/11204:N
+VIS:/u01/oracle/VIS/11204:N
+}}}
+
+
+=== After Upgrading to the New Release ===
+Upgrade Statistics Tables Created by the DBMS_STATS Package
+{{{
+> EXECUTE DBMS_STATS.UPGRADE_STAT_TABLE('APPLSYS','FND_STATTAB');
+}}}
+
+== 14. Modify initialization parameters ==
+MOS:
+* Database Initialization Parameters for Oracle E-Business Suite Release 12 (Doc ID 396009.1)
+
+I am kind of fedup with this Doc. I have been reviewing it several times during 9i->10g ora 10g->11g upgrades, but reviewing it during 11.2.0.3 -> 11.2.0.4 seems too much. It should be done as a script to run anyway.
+
+Skiping this.
+
+|| Real Application Clusters || Oracle_Server.log || Failed ||
+|| Oracle Text               || Oracle_Server.log || Failed ||
+
+==== Fixing Oracle Text ====
+MOS:
+* The STATUS Of Oracle Text In DBA_REGISTRY=INVALID; CTXSYS.DRIOPT Package Body Is INVALID - Compilation Errors = ORA-942 PLS-364: loop index variable 'COL' use is invalid (Doc ID 1499153.1)
+*  Oracle TEXT Installation is INVALID (Doc ID 1469094.1)
+
+SELECT Comp_ID, Status, Version,Comp_Name FROM DBA_Registry ORDER by 1,2;
+
+select object_name, object_type, status from dba_objects where owner='CTXSYS' and status != 'VALID' order by object_name;
+
+OBJECT_NAME		       OBJECT_TYPE	   STATUS
+*----------------------------- ------------------- ---------------
+DRIACC			       PACKAGE BODY	   INVALID
+
+select owner,table_name,grantee,privilege from dba_tab_privs where table_name in ('UTL_FILE','DBMS_LOB','UTL_HTTP', 'DBMS_JOB', 'DBMS_SCHEDULER') order by 2,3;
+
+
+alter package ctxsys.DRIACC compile body;
+LINE/COL ERROR
+*------- -----------------------------------------------------------------
+352/7	 PL/SQL: SQL Statement ignored
+352/27	 PL/SQL: ORA-00942: table or view does not exist
+
+MOS:
+* Can Not Validate CTXSYS.DRIACC Package (Doc ID 1906873.1)
+
+To resolve this issue, please do the following:
+
+connect /as sysdba
+
+ALTER SESSION SET CURRENT_SCHEMA=SYS;
+grant select on SYS.DBA_PROCEDURES to ctxsys;
+
+ALTER SESSION SET CURRENT_SCHEMA=CTXSYS;
+SET PAGESIZE 0
+SELECT 'Calling ctx/admin/driacc.plb on ' || SYSTIMESTAMP FROM dual;
+SET PAGESIZE 10
+
+@@?/ctx/admin/driacc.plb;
+
+@$ORACLE_HOME/rdbms/admin/utlrp.sql
+
+set serveroutput on
+execute sys.validate_context;
+
+select comp_name, status, substr(version,1,10) as version from dba_registry where comp_id = 'CONTEXT';
+
+*--
+
+OK, the last one helped.
+
+{{{
+> @valid
+COMP_NAME			    STATUS	    VERSION
+----------------------------------- --------------- ---------------
+Oracle Text			    VALID	    11.2.0.4.0
+}}}
+
+== 15. Perform patch post-install instructions ==
+Now, this is fun. We need to review the readme files of all the additional patches installed on top of 11.2.0.4 and see if there are some scripts that need to be run as post instalation step.
+
+=== 11.2.0.4.3 PSU 18522509 ===
+{{{
+$ lynx 18522509/README.html
+$ cd $ORACLE_HOME/rdbms/admin
+$ pwd
+/u01/oracle/VIS/11204/rdbms/admin
+> @catbundle.sql psu apply
+}}}
+
+=== Oneoff patches ===
+
+less 12949905/README.txt
+none
+
+less 16989137/README.txt
+@?/sqlpatch/16989137/postinstall.sql
+
+less 17402822/README.txt
+none
+
+less 17429475/README.txt
+none
+
+less 17501296/README.txt
+{{{
+> @?/sqlpatch/17501296/postinstall.sql
+}}}
+
+less 17629476/README.txt
+{{{
+> @?/sqlpatch/17629476/postinstall.sql
+}}}
+
+less 17944018/README.txt
+{{{
+> @?/sqlpatch/17944018/postinstall.sql
+}}}
+
+less 18118982/README.txt
+none
+
+less 18419770/README.txt
+none
+
+less 18614015/README.txt
+{{{
+> @?/sqlpatch/18614015/postinstall.sql
+}}}
+
+less 18665660/README.txt
+none
+
+less 18685209/README.txt
+none
+
+less 19233888/README.txt
+none
+
+less 4189542/README.txt
+none
+
+less 4247037/README.txt
+{{{
+> @?/md/admin/catmgdidcode
+> @?/rdbms/admin/utlrp.sql
+}}}
+
+less 17912217/README.txt
+none
+
+{{{
+> @valid
+OBJECT_NAME		       OWNER		    OBJECT_TYPE
+------------------------------ -------------------- -------------------
+AD_ZD_PREP		       APPS		    PACKAGE BODY
+FFP55429_01011900	       APPS		    PACKAGE BODY
+FFP60280_01010001	       APPS		    PACKAGE BODY
+FFP61161_01010001	       APPS		    PACKAGE BODY
+FFP55409_01012011	       APPS		    PACKAGE BODY
+FFP60342_01012006	       APPS		    PACKAGE BODY
+FFP60342_01012008	       APPS		    PACKAGE BODY
+FFP60342_01012009	       APPS		    PACKAGE BODY
+FFP55409_01012007	       APPS		    PACKAGE BODY
+FFP60342_01010001	       APPS		    PACKAGE BODY
+}}}
+
+# rows selected.
+
+What I do not like is the invalid AD_ZD_PREP
+
+{{{
+> alter package APPS.AD_ZD_PREP compile body;
+Warning: Package Body altered with compilation errors.
+}}}
+
+SQL> show err
+Errors for PACKAGE BODY APPS.AD_ZD_PREP:
+
+LINE/COL ERROR
+*------- -----------------------------------------------------------------
+419/3	 PL/SQL: SQL Statement ignored
+419/19	 PL/SQL: ORA-00942: table or view does not exist
+423/5	 PL/SQL: SQL Statement ignored
+423/21	 PL/SQL: ORA-00942: table or view does not exist
+457/5	 PL/SQL: SQL Statement ignored
+457/21	 PL/SQL: ORA-00942: table or view does not exist
+
+Looks like some grants are missing.
+
+Copy adgrants.sql from old ORACLE_HOME to new.
+OLD - /u01/oracle/VIS/11.2.0/appsutil/admin
+NEW - /u01/oracle/VIS/11204/appsutil/admin
+
+{{{
+$ mkdir /u01/oracle/VIS/11204/appsutil/admin
+$ cp /u01/oracle/VIS/11.2.0/appsutil/admin/adgrants.sql /u01/oracle/VIS/11204/appsutil/admin
+> @?/appsutil/admin/adgrants.sql apps
+}}}
+
+{{{
+> alter package APPS.AD_ZD_PREP compile body;
+Package body altered.
+}}}
+
+{{{
+> @?/rdbms/admin/utlrp.sql
+> @valid
+}}}
+
+OBJECT_NAME		       OWNER		    OBJECT_TYPE
+*----------------------------- -------------------- -------------------
+FFP55429_01011900	       APPS		    PACKAGE BODY
+FFP60280_01010001	       APPS		    PACKAGE BODY
+FFP61161_01010001	       APPS		    PACKAGE BODY
+FFP60342_01010001	       APPS		    PACKAGE BODY
+FFP55409_01012011	       APPS		    PACKAGE BODY
+FFP60342_01012008	       APPS		    PACKAGE BODY
+FFP60342_01012009	       APPS		    PACKAGE BODY
+FFP55409_01012007	       APPS		    PACKAGE BODY
+FFP60342_01012006	       APPS		    PACKAGE BODY
+
+9 rows selected.
+
+OK, those invalids were from the beginning.
+
+== 16. Revoke ORA$BASE grant ==
+
+{{{
+> revoke use on edition ora$base from public;
+}}}
+
+== 17. Natively compile PL/SQL code (optional) ==
+Not changing anything.
+
+== 18. Start the new database listener (conditional) ==
+Make sure that the listener binaries come from the new ORACLE_HOME
+
+{{{
+$ which lsnrctl
+/u01/oracle/VIS/11204/bin/lsnrctl
+}}}
+
+{{{
+$ lsnrctl start
+> alter system register;
+$ lsnrctl status
+Service "VIS" has 1 instance(s).
+Instance "VIS", status READY, has 1 handler(s) for this service...
+}}}
+
+I do not have any listener.ora configured.
+
+== 19. Run adgrants.sql ==
+Done already during invalid package troubleschooting.
+
+== 20. Grant create procedure privilege on CTXSYS ==
+Copy $AD_TOP/patch/115/sql/adctxprv.sql from the administration server node to the database server node.
+
+From app tier:
+{{{
+$ scp $AD_TOP/patch/115/sql/adctxprv.sql oracle@ebsdb4:/u01/oracle/VIS/11204/appsutil/admin
+}}}
+
+On DB tier
+{{{
+$ cd /u01/oracle/VIS/11204/appsutil/admin
+$ sqlplus apps/apps
+> @adctxprv.sql [SYSTEM password] CTXSYS
+so in my case
+> @adctxprv.sql manager CTXSYS
+}}}
+
+== 21. Compile invalid objects ==
+
+{{{
+> @?/rdbms/admin/utlrp.sql
+}}}
+
+== 22. Set CTXSYS parameter ==
+
+{{{
+> exec ctxsys.ctx_adm.set_parameter('file_access_role', 'public');
+}}}
+
+== 23. Validate Workflow ruleset ==
+
+I should be possible now to connect from app tier to DB.
+
+On app tier:
+{{{
+$ sqlplus apps/apps
+SQL*Plus: Release 10.1.0.5.0 - Production on Wed Oct 22 12:28:18 2014
+Connected to: Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+}}}
+
+Nice, it works.
+
+{{{
+$ cd $FND_TOP/patch/115/sql/
+$ sqlplus [APPS user]/[APPS password] @wfaqupfix.sql [APPLSYS user] [APPS user]
+so in my case
+$ sqlplus apps/apps @wfaqupfix.sql APPLSYS APPS
+}}}
+
+== 24. Deregister the current database server (conditional) ==
+Not changing port, host, SID, or database name. Doing nothing.
+
+== 25. Implement and run AutoConfig ==
+
+=== Implement and run AutoConfig in the new Oracle home on the database server node. ===
+
+Login to DB tier.
+
+http://docs.oracle.com/cd/V39571_01/current/acrobat/122ebssu.pdf
+
+Section: "Enabling AutoConfig on a New Oracle Home"
+
+==== 1. Copy AutoConfig to the RDBMS ORACLE_HOME ====
+
+On the application tier
+{{{
+$ perl $AD_TOP/bin/admkappsutil.pl
+$ scp /u01/oracle/VIS/fs2/inst/apps/VIS_sun4/admin/out/appsutil.zip oracle@ebsdb4:/u01/oracle/VIS/11204
+}}}
+
+On the DB tier
+{{{
+$ cd /u01/oracle/VIS/11204
+$ unzip -o appsutil.zip
+}}}
+
+==== 2. Install Java Runtime Environment (JRE) on the Database tier ====
+Done already
+
+{{{
+$ /u01/oracle/VIS/11204/appsutil/jre/bin/java -version
+java version "1.6.0_85"
+}}}
+
+==== 3. Generate the Database Context File ====
+
+{{{
+$ perl /u01/oracle/VIS/11204/appsutil/bin/adbldxml.pl
+Enter Hostname of Database server: ebsdb4
+Enter Port of Database server: 1521
+Enter SID of Database server: VIS
+Enter Database Service Name: VIS
+/u01/oracle/VIS/11204/appsutil/VIS_ebsdb4.xml
+}}}
+
+==== 4. Run AutoConfig on the Database tier ====
+
+{{{
+$ <RDBMS_ORACLE_HOME>/appsutil/bin/adconfig.sh contextfile=<context_file>
+}}}
+
+so in my case
+
+{{{
+$ /u01/oracle/VIS/11204/appsutil/bin/adconfig.sh contextfile=/u01/oracle/VIS/11204/appsutil/VIS_ebsdb4.xml
+}}}
+
+Now what has been created is the env file:
+{{{
+$ ls /u01/oracle/VIS/11204/VIS_ebsdb4.env
+}}}
+
+This can be included i .bash_profile to load the env every time you log in.
+
+And network configuration
+{{{
+$ cd /u01/oracle/VIS/11204/network/admin/VIS_ebsdb4
+}}}
+
+Nice.
+
+Shut down all processes, including the database and the listener, and restart them to load the new environment settings.
+
+Shutting down the usual way.
+
+{{{
+$ lsnrctl stop
+> shutdown immediate
+}}}
+
+Starting up the EBS way.
+cd $ORACLE_HOME/appsutil/scripts/$CONTEXT_NAME
+{{{
+$ pwd
+/u01/oracle/VIS/11204/appsutil/scripts/VIS_ebsdb4
+}}}
+
+./addbctl.sh start
+./addlnctl.sh start $ORACLE_SID
+
+If the database tier node is different from the Applications tier node, after running AutoConfig on the database tier, modify tcp.invited_nodes of the generated [TNS_ADMIN]/sqlnet.ora to include the Applications tier so that the Applications tier can connect to the database.
+
+This
+tcp.validnode_checking = yes
+tcp.invited_nodes=(EBS2.remik.org, EBSDB2.remik.org)
+
+Is somehow not created any more. And good. It was pissing everybody off.
+
+
+=== Run AutoConfig on each application tier server node on both the Patch and Run APPL_TOP to update the system with the listener. ===
+
+What has changed with the listener to run that? Anyway, I will do it.
+
+When running AutoConfig on the Patch APPL_TOP, ignore all errors.
+
+Login to app tier.
+
+Run AutoConfig on run fs
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+RUN File System           : /u01/oracle/VIS/fs2/EBSapps/appl
+PATCH File System         : /u01/oracle/VIS/fs1/EBSapps/appl
+Sourcing the RUN File System ...
+}}}
+
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ pwd
+/u01/oracle/VIS/fs2/inst/apps/VIS_sun4/admin/scripts
+$ ./adautocfg.sh
+}}}
+
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+Sourcing the PATCH File System ...
+}}}
+
+{{{
+$ cd $ADMIN_SCRIPTS_HOME
+$ pwd
+/u01/oracle/VIS/fs1/inst/apps/VIS_sun4/admin/scripts
+$ ./adautocfg.sh
+Ignoring errors.
+}}}
+
+
+
+
+== 26. Gather statistics for SYS schema ==
+
+On app tier
+{{{
+$ scp $APPL_TOP/admin/adstats.sql oracle@ebsdb4:/u01/oracle/VIS/11204/appsutil/admin
+}}}
+
+On DB tier
+{{{
+$ cd /u01/oracle/VIS/11204/appsutil/admin
+> alter system enable restricted session;
+> @adstats.sql
+> alter system disable restricted session;
+}}}
+
+== 27. Create Demantra privileges (conditional) ==
+Not using Demantra, doing nothing.
+
+== 28. Re-create custom database links (conditional) ==
+If the Oracle Net listener in the 11.2.0 Oracle home is defined differently than the one used by the old Oracle home, you must re-create any custom self-referential database links that exist in the Applications database instance.
+*> it was not created differently, links should work fine.
+
+Checking the links.
+{{{
+> column DB_LINK format a30
+> select OWNER, db_link from dba_db_links;
+OWNER			       DB_LINK
+------------------------------ ------------------------------
+CN			       ORACLE_APPS
+APPS			       APPS_TO_APPS
+APPS			       APPS_TO_APPS.REMIK.ORG
+APPS			       APPS_TO_APPS.US.ORACLE.COM
+APPS			       EDW_APPS_TO_WH
+APPS			       EDW_APPS_TO_WH.REMIK.ORG
+APPS			       EDW_APPS_TO_WH.US.ORACLE.COM
+APPS			       SA0252
+}}}
+
+8 rows selected.
+
+{{{
+> connect apps
+> select 'select * from global_name@'||DB_LINK||';' from user_db_links;
+}}}
+
+{{{
+> select * from global_name@EDW_APPS_TO_WH;
+}}}
+
+GLOBAL_NAME
+*-------------------------------------------------------------------------------
+VIS.REMIK.ORG
+
+{{{
+> select * from global_name@APPS_TO_APPS;
+}}}
+
+GLOBAL_NAME
+*-------------------------------------------------------------------------------
+VIS.REMIK.ORG
+
+Links work fine. No need to recreate them.
+
+== WIP 29. Re-create grants and synonyms ==
+On app tier.
+{{{
+$ adadmin
+Error: Unable to execute statement <
+Begin
+ad_jar.get_jripasswords(:l_storepass, :l_keypass);
+End;
+> len = 63
+}}}
+
+AD Administration error:
+ORA-01031: insufficient privileges
+ORA-06512: at "SYS.DBMS_SESSION", line 114
+ORA-06512: at "APPS.AD_JAR", line 17
+
+What is that?
+
+== 30. Restart Applications server processes ==
+Login to app tier
+
+cd $ADMIN_SCRIPTS_HOME
+./adstrtal.sh apps/apps
+
+== 31. Synchronize Workflow views ==
+
+Log on to Oracle E-Business Suite with the "System Administrator" responsibility. Click Requests > Run > Single Request and the OK button. Enter the following parameters:
+
+Request Name = Workflow Directory Services User/Role Validation
+Batch Size = 10000
+Fix dangling users = Yes
+Add missing user/role assignments = Yes
+Update WHO columns in WF tables = No
+Click "OK" and "Submit".
+
+http://sun4.remik.org:8000
+
+
+
+== 6c. JAN2015 PSU requires some changes on app tier too ==
+MOS:
+* Oracle E-Business Suite Releases 11i and 12 Critical Patch Update Knowledge Document (January 2015) (Doc ID 1954250.1)
+
+Section 3: CPU Patches for Oracle E-Business Suite
+
+=== Minimum Required Code Level to Apply CPU Patch ===
+
+#.2.3 Release Update Patch along with the R12.AD.C.DELTA.5 & R12.TXK.C.DELTA.5 roll-up patches.
+
+=== CPU Patch ===
+Before applying the CPU patch you must apply Oracle Database Patch 19393542.
+
+We should have this patch already installed.
+
+Check on DB node
+{{{
+$ $ORACLE_HOME/OPatch/opatch lsinventory | grep 19393542
+Patch  19393542     : applied on Thu Feb 05 17:42:36 GMT 2015
+}}}
+
+
+
+==== Apply EBS Patch 19873050 ====
+ORACLE APPLICATIONS RELEASE 12.2: CPU PATCH FOR JAN 2015 (Patch)
+p19873050_12.2.0_R12_LINUX.zip	10.4 MB	MD5	9D9B07AB1F5357F13FA501F4FA8DD534
+
+
+
+
+
+
+==== Run AutoConfig after applying the CPU patch. ====
+
+
+
+=== ??? ===
+Check:
+* Oracle Recommended Patches -- "Oracle JavaVM Component Database PSU" (OJVM PSU) Patches (Doc ID 1929745.1)
+
+
+
+

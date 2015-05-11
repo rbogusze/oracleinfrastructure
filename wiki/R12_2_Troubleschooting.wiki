@@ -892,3 +892,303 @@ eg
 }}}
 
 
+Table of contents
+<wiki:toc max_depth=8 />
+= Troubleschooting =
+== LsInventorySession failed: OracleHomeInventory gets null oracleHomeInfo ==
+{{{
+$ opatch lsinventory
+Oracle Interim Patch Installer version 11.2.0.3.6
+Copyright (c) 2013, Oracle Corporation.  All rights reserved.
+}}}
+
+
+Oracle Home       : /u01/oracle/VIS/11.2.0
+Central Inventory : /u01/oraInventory
+from           : /u01/oracle/VIS/11.2.0/oraInst.loc
+OPatch version    : 11.2.0.3.6
+OUI version       : 11.2.0.3.0
+Log file location : /u01/oracle/VIS/11.2.0/cfgtoollogs/opatch/opatch2014-09-16_14-37-24PM_1.log
+
+List of Homes on this system:
+
+Inventory load failed... OPatch cannot load inventory for the given Oracle Home.
+Possible causes are:
+Oracle Home dir. path does not exist in Central Inventory
+Oracle Home is a symbolic link
+Oracle Home inventory is corrupted
+LsInventorySession failed: OracleHomeInventory gets null oracleHomeInfo
+
+OPatch failed with error code 73
+
+{{{
+$ ls /u01/oraInventory
+logs
+}}}
+
+Looks like there is nothing installed here.
+
+MOS:
+* FAQs on Central Inventory and Oracle Home Inventory (Local Inventory) in Oracle RDBMS (Doc ID 564192.1)
+* Steps To Recreate Central Inventory(oraInventory) In RDBMS Homes (Doc ID 556834.1)
+
+{{{
+$ cd $ORACLE_HOME/oui/bin
+$ ./runInstaller -silent -ignoreSysPrereqs -attachHome ORACLE_HOME="$ORACLE_HOME" ORACLE_HOME_NAME=EBS_DB
+}}}
+
+{{{
+$ ls /u01/oraInventory
+ContentsXML  logs
+}}}
+
+{{{
+$ opatch lsinventory
+-> looks good.
+}}}
+
+
+== How to access Oracle Applications Manager ==
+Login as sysadmin,
+System Administration -> Oracle Applications Manager -> Dashboard
+
+
+== Adop logs ==
+Filesystem logs:
+{{{
+$APPL_TOP_NE/../log/adop
+}}}
+
+DB logs:
+AD_ZD_LOGS Table
+The contents of the table can be obtained by running the following command:
+{{{
+$ sqlplus apps/apps @$AD_TOP/sql/ADZDSHOWLOG.sql
+}}}
+
+Get the contents of ad_adop_session_patches table using the following command
+select * from ad_adop_session_patches order by end_date;
+
+=== Troubleshooting Scripts ===
+
+==== System Status ====
+ADZDSHOWED.sql
+Edition List in historical order, it highlights Run edition and Patch edition (if exists)
+ADZDSHOWOBJS.sql
+Summary of Editioned Objects per database Edition
+ADZDSHOWTS.sql
+Summary of Important Tablespaces status
+ADZDSHOWLOG.sql
+Dump of Statement level Database LOG
+ADZDSHOWLOGEVT.sql
+Statement level log for a specific event
+
+==== During Patching ====
+ADZDSHOWSTATUS.sql
+Detailed Summary Status of the Current Patching Cycle, Patches Applied, object difference between last two editions, cross edition triggers, seed data tables prepared
+ADZDSHOWTM.sql
+Table manager, patching detail like patched indexes, CFET etc
+ADZDSHOWSM.sql
+Seed Data Tables that were prepared in the current edition and Seed Data synchronization Triggers
+ADZDSHOWDDLS.sql
+Count of Current DDL Jobs per Phase and Status (Enablement and Cutover)
+ADZDSHOWPATCH.sql
+Patched/Actual Objects, Patched Columns and Patched Seed Data Tables
+ADZDSHOWMV.sql
+Shows Materialized Views details for the current patching cycle
+
+==== General Purpose ====
+ADZDSHOWAOBJS.sql
+Actual Objects for Current Edition
+ADZDSHOWCOBJS.sql
+Covered Objects per Edition
+ADZDSHOWEV.sql
+Shows the column mappings of a specific Editioning View
+ADZDSHOWTAB.sql
+Displays a table's metadata information, which can be used to check the status after enablement
+ADZDSHOWINDEX.sql
+Index details for a specified table
+
+
+
+== Apps 11i Keys shortcut ==
+
+below are 11i keys quick shortcut it will help to save time
+{{{
+F4 Exit
+F5 Clear Field
+F6 Clear Record
+F7 Clear Block
+F8 Clear Form
+F11 Query Enter - wyszukiwanie, then Ctrl + F11 to execute the query
+F12 Count Query
+Ctrl + S Save
+Ctrl + L List of Values
+Ctrl + F11 Query Run
+Ctrl + E Edit
+Ctrl + Up Delete Record
+Ctrl + Down Insert Record
+Ctrl + P Print
+Ctrl + U Update Record
+Ctrl + B Block Menu
+Ctrl + K Display list of Keys
+Shift + F5 Duplicate Field
+Shift + F6 Duplicate Record
+Shift + F8 Next Set of Records (Same as Page Down)
+Shift + Page Down Next Block
+Shift + Tab Previous Field
+Shift + Page Up Previous Block
+Shift + Ctrl + E Display Error
+Page Down Scroll Down (Same as Shift + F8)
+Page Up Scroll Up
+Tab Next Field
+Down Arrow Next Record
+Up Arrow Previous Record
+Return Return
+}}}
+
+
+
+== Apache ==
+=== restart ===
+cd $SCRIPT_TOP
+or
+cd $ADMIN_SCRIPTS_HOME
+./adapcctl.sh stop
+./adapcctl.sh start
+
+=== logs ===
+{{{
+$ cd $FMW_HOME/webtier/instances/EBS_web_${TWO_TASK}_OHS1/diagnostics/logs/OHS/EBS_web_${TWO_TASK}
+}}}
+
+eg
+/u01/oracle/VIS/fs2/FMW_Home/webtier/instances/EBS_web_VIS_OHS1/diagnostics/logs/OHS/EBS_web_VIS
+
+=== httpd.conf ===
+Apache conf:
+{{{
+$ cd $FMW_HOME/webtier/instances/EBS_web_${TWO_TASK}_OHS1/config/OHS/EBS_web_${TWO_TASK}
+}}}
+
+
+
+== oacore_server1 ==
+=== restart ===
+{{{
+$ cd $SCRIPT_TOP
+$ admanagedsrvctl.sh status oacore_server1
+$ admanagedsrvctl.sh start oacore_server1
+}}}
+
+=== logs ===
+{{{
+$ cd $EBS_DOMAIN_HOME/servers/oacore_server1/logs
+$ less oacore_server1.out00517
+}}}
+
+
+=== Datasource password ===
+Could not connect to 'oracle.jdbc.OracleDriver'.
+The returned message is: ORA-01017: invalid username/password; logon denied
+
+Domain Structure / Services / Data Sources / OAEADatasource / Connection Pool - and proper password
+
+
+
+
+
+
+== Where is the request output and logfile ==
+output is directly appended in output file in $APPLCSF/$APPLOUT/o<req_id>.out
+
+{{{
+> select LOGFILE_NAME, OUTFILE_NAME from apps.fnd_concurrent_requests where request_id = 7455807;
+/u01/oracle/VIS/fs_ne/inst/VIS_sun4/logs/appl/conc/log/l7455807.req
+/u01/oracle/VIS/fs_ne/inst/VIS_sun4/logs/appl/conc/out/o7455807.out
+}}}
+
+
+
+
+
+
+
+
+== how to check what all localizations / product is installed ==
+System Administrator -> Oracle Applications Manager, License Manager
+
+
+
+
+== change Profile option ==
+
+System Administrator > Profile > System
+
+
+== How to restart only selected services, not the whole MT ==
+http://onlineappsdba.com/index.php/2007/06/10/start-up-shutdown-scripts-in-oracle-apps-r12/
+
+Concurent manager
+{{{
+$ ./adcmctl.sh stop
+$ ./adcmctl.sh start
+}}}
+
+
+== Concurent managers logs ==
+
+Internal manager
+cd $APPLCSF/$APPLLOG
+ls -lrt *$TWO_TASK*
+
+
+== Who is logged to the system ==
+
+SELECT DISTINCT icx.session_id,
+icx.user_id,
+fu.user_name,
+fu.description
+FROM icx_sessions icx, fnd_user fu
+WHERE     disabled_flag != 'Y'
+AND icx.pseudo_flag = 'N'
+AND (last_connect +
+DECODE (fnd_profile.VALUE ('ICX_SESSION_TIMEOUT'),
+NULL, limit_time,
+0   , limit_time,
+fnd_profile.VALUE ('ICX_SESSION_TIMEOUT')/60) / 24) > SYSDATE
+AND icx.counter < limit_connects
+AND icx.user_id = fu.user_id;
+
+
+
+== Putting requests on hold ==
+Meaning of status_code and phase_code in FND_CONCURRENT_REQUESTS table
+http://arunrathod.blogspot.com/2008/12/meaning-of-statuscode-and-phasecode-in.html
+
+
+create table holded_req tablespace APPS_TS_TX_DATA
+as select * from fnd_concurrent_requests
+where phase_code = 'P'
+and status_code in ('Q','I')
+and requested_by <> 0
+and hold_flag <> 'Y';
+
+
+== How to start Workflow Notification Mailer ==
+
+Login as sysadmin
+System Administrator -> Oracle Applications Manager -> Workflow
+Service Components -> Workflow Mailer Service (Container column)
+Start what is not started.
+
+
+== start / stop logs ==
+
+{{{
+$ cd $LOG_HOME/appl/admin/log/
+eg
+/RYBAK/oracle/VIS/fs2/inst/apps/VIS_okon3/logs/appl/admin/log/adstpall.log
+}}}
+
+

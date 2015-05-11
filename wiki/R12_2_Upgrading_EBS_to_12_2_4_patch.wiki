@@ -2178,3 +2178,1095 @@ Done with the upgrade based on main Oracle E-Business Suite Release 12.2.4 Readm
 
 
 
+Table of contents
+<wiki:toc max_depth=8 />
+= Upgrading EBS to 12_2_4 patch =
+MOS
+* Oracle E-Business Suite Release 12.2.4 Readme (Doc ID 1617458.1)
+* Applying the Latest AD and TXK Release Update Packs to Oracle E-Business Suite Release 12.2 (Doc ID 1617461.1)
+* Oracle E-Business Suite Release 12.2: Online Patching FAQ (Doc ID 1583902.1)
+* http://balaoracledba.com/
+
+Following Oracle E-Business Suite Release 12.2.4 Readme (Doc ID 1617458.1)
+
+== Section 1: Preparation ==
+OK.
+
+== Section 2: Apply Required Database Patches ==
+We just applied the 11.2.0.4 + PSU 11.2.0.4.3 + EBS required oneoff patches, but we can run the codechecker too.
+
+EBS Database Codelevel Checker (Patch)
+EBS Technology Codelevel Checker (Patch) Oct 17, 2014 7:39 PM
+p17537119_R12_GENERIC.zip	MD5	37B83C8D0670FC419A232B38386636CA
+
+{{{
+$ cp p17537119_R12_GENERIC.zip /tmp
+$ cd /tmp
+$ md5sum p17537119_R12_GENERIC.zip
+37b83c8d0670fc419a232b38386636ca  p17537119_R12_GENERIC.zip
+
+$ unzip p17537119_R12_GENERIC.zip
+}}}
+
+Source DB env
+{{{
+$ ./checkDBpatch.sh
+Enter ORACLE_HOME value : /u01/oracle/VIS/11204
+Enter ORACLE_SID value : VIS
+
+All the required one-offs are present in Oracle Database Home
+}}}
+
+OK, then it is fine.
+
+== Section 3: Apply Consolidated Seed Table Upgrade Patch (Required) ==
+Note: This step is applicable only for new installation customers and customers upgrading from Oracle E-Business Suite Release 12.2.2 to Release 12.2.4.
+
+As this is an upgrade from 12.2.3 to 12.2.4 this should already been done.
+
+Consolidated Seed Table Upgrade Patch 17204589:12.2.0 already applied
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17204589'
+}}}
+
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+*--------- ------------------------------ ------------------
+913913 17204589			  05-MAY-14
+
+Doing nothing.
+
+== Section 4: Apply the Latest AD and TXK Delta Release Update Packs ==
+MOS:
+* Applying the Latest AD and TXK Release Update Packs to Oracle E-Business Suite Release 12.2 (Doc ID 1617461.1)
+
+Following Applying the Latest AD and TXK Release Update Packs to Oracle E-Business Suite Release 12.2 (Doc ID 1617461.1)
+
+=== Section 1: Preparation ===
+OK, just bla bla.
+
+=== Section 2: Apply Required Technology Patches ===
+MOS:
+* Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes (Doc ID 1594274.1)
+
+==== Section 1: Introduction ====
+OK, usual introduction.
+
+==== Section 2: Database Patches and Bug Numbers ====
+
+I have already applied the PSU 11.2.0.4.3 and required overlay EBS patches by following: Database Patch Set Update Overlay Patches Required for Use with PSUs and Oracle E-Business Suite (Doc ID 1147107.1)
+
+==== Section 3: Application Tier Technology Patches and Bug Numbers ====
+Following: Applying the Latest AD and TXK Release Update Packs to Oracle E-Business Suite Release 12.2 (Doc ID 1617461.1)
+
+We used startCD RapidWizVersion Version 12.2.0.47
+
+We already have:
+R12.AD.C.Delta.4 Patch 17766337
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17766337';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+913966 17766337			  05-MAY-14
+}}}
+
+R12.TXK.C.Delta.4 Patch 17893964
+{{{
+> select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '17893964';
+BUG_ID BUG_NUMBER			  LAST_UPDATE_DATE
+---------- ------------------------------ ------------------
+914514 17893964			  05-MAY-14
+}}}
+
+Installed, so we go with Path B (Already using Oracle E-Business Suite Release 12.2 (below AD-TXK Delta 5 codelevel))
+
+=== Section 3.2 Path B - Existing Release 12.2 Customers (Below AD-TXK Delta 5 Codelevel) ===
+
+==== 1. Source the run edition environment file. ====
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+}}}
+
+==== 2. Start new online patching cycle. ====
+{{{
+$ adop phase=prepare
+}}}
+
+==== 3. Apply the latest embedded application tier technology patches on the patch file system. ====
+
+===== a. From a separate session, source the patch edition environment file. =====
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+}}}
+
+===== b. On the patch file system, apply the latest application tier technology patches =====
+documented in 'Section 3: Application Tier Technology Patches and Bug Numbers' of My Oracle Support Knowledge Document 1594274.1, Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes.
+
+Following: Oracle E-Business Suite Release 12.2: Consolidated List of Patches and Technology Bug Fixes. 1594274.1
+
+====== Section 3.1: Forms and Reports 10.1.2.3 Patches and Bug Numbers ======
+
+Login to app tier
+{{{
+Variable ORACLE_HOME should already be set to Forms and Reports 10.1.2.3 Home
+$ echo $ORACLE_HOME
+ORACLE_HOME=/u01/oracle/VIS/fs2/EBSapps/10.1.2
+$ export PATH=$PATH:$ORACLE_HOME/OPatch
+$ opatch lsinventory
+}}}
+
+======= <begin> opatch lsinventory =======
+Oracle Interim Patch Installer version 1.0.0.0.64
+Copyright (c) 2011 Oracle Corporation. All Rights Reserved..
+
+
+Oracle recommends you to use the latest OPatch version
+and read the OPatch documentation available in the OPatch/docs
+directory for usage. For information about the latest OPatch and
+other support-related issues, refer to document ID 293369.1
+available on My Oracle Support (https://myoraclesupport.oracle.com)
+
+Oracle Home           : /u01/oracle/VIS/fs2/EBSapps/10.1.2
+Oracle Home Inventory : /u01/oracle/VIS/fs2/EBSapps/10.1.2/inventory
+Central Inventory     : /u01/oraInventory
+from               : /etc/oraInst.loc
+OUI location          : /u01/oracle/VIS/fs2/EBSapps/10.1.2/oui
+OUI shared library    : /u01/oracle/VIS/fs2/EBSapps/10.1.2/oui/lib/linux/liboraInstaller.so
+Java location         : /u01/oracle/VIS/fs2/EBSapps/10.1.2/jdk/jre/bin/java
+Log file location     : /u01/oracle/VIS/fs2/EBSapps/10.1.2/.patch_storage/<patch ID>/*.log
+
+Creating log file "/u01/oracle/VIS/fs2/EBSapps/10.1.2/.patch_storage/LsInventory__10-22-2014_19-54-36.log"
+
+Result:
+
+
+Installed Patch List:
+=====================
+# Patch  17907988 applied on Wed May 07 16:14:21 CEST 2014
+Unique Patch ID:  17187922
+[ Bug fixes: 17594101 7121788  ]
+2) Patch  17645157 applied on Wed May 07 16:13:23 CEST 2014
+Unique Patch ID:  16946372
+[ Bug fixes: 17645157  ]
+3) Patch  15900214 applied on Wed May 07 16:12:23 CEST 2014
+Unique Patch ID:  16188428
+[ Bug fixes: 15900214  ]
+4) Patch  8943095 applied on Wed May 07 16:11:35 CEST 2014
+Unique Patch ID:  12585530
+[ Bug fixes: 8943095  ]
+5) Patch  5659594 applied on Wed May 07 16:10:57 CEST 2014
+Unique Patch ID:  16884798
+[ Bug fixes: 5659594  ]
+6) Patch  5604120 applied on Mon May 05 00:25:05 CEST 2014
+Unique Patch ID:  16679014
+[ Bug fixes: 5604120  ]
+7) Patch  16778382 applied on Mon May 05 00:24:48 CEST 2014
+Unique Patch ID:  16617640
+[ Bug fixes: 16778382  ]
+8) Patch  8300196 applied on Mon May 05 00:24:32 CEST 2014
+[ Bug fixes: 8300196  ]
+9) Patch  4047619 applied on Mon May 05 00:23:58 CEST 2014
+Unique Patch ID:  16332416
+[ Bug fixes: 4047619  ]
+#) Patch  17303472 applied on Mon May 05 00:23:42 CEST 2014
+Unique Patch ID:  16746710
+[ Bug fixes: 13913713 16181611 17234934 9876954 6166808 14321171 15976866 16052292 16399579 15828839 17065474 14260745 16832700 13864790 16598714 16537869 17064478 14170800 16778210 16300855 9818155  ]
+[ This patch overlays patches " 14825718 " ]
+[ This patch needs patches " 14825718 "  as prerequisites ]
+#) Patch  16275529 applied on Mon May 05 00:23:21 CEST 2014
+Unique Patch ID:  15927809
+[ Bug fixes: 10019002 5010130 12574386 12332340 10427365 8604052  ]
+#) Patch  16209520 applied on Mon May 05 00:22:13 CEST 2014
+Unique Patch ID:  15910982
+[ Bug fixes: 16209520  ]
+#) Patch  14825718 applied on Mon May 05 00:21:57 CEST 2014
+Unique Patch ID:  15687652
+[ Bug fixes: 9293220 6132689 7231982 12383263 8442155 12433970 7304653 7286928 7573720 8940272 7001328 8808264 5624555 13450923 12842412 9358044 7512736 8359788 7175618 5571663 9499728 6857221 6894576 5375851 14255151 7350891 8339004 7359193 8348570 7319888 5969391 7000696 13613107 7651246 10008235 8319129 11075260 8393944 8342525 7833659 1947595 11668256 9902558 7529909 7126045 7142365 10630609 9913966 6790720 9362676 6078303 6999812 8287889 9436383 12329307 7621923 6683962 9148117 9852403 8781507 10411388 10164084 9084276 9653703 8947375 13652243 8221857 9320023 10381273 5116235 14277452 6251633 7358376 11782681 3213707 8552429 9390538 11673568 6933210 8316127 9200985 8428638 7021759 6502349 8928753 11778609 8486421 12862243 10041239 13438826 5733397 10388906 5950737 9148124 13469105 7442879 6724714 7552880 7369690 8623626 8637879 7215354 9124173 8974551 8272078 14525012 7567072 12533753 8928735 6510297 6722224 13635555 9644309 7170999 12953856 9971961 12627468 13033652 11713521 6821297 6395358 7240862 6025516 7029083 9773298 13712140 6823259 7261996 8988492 8847739 9202767 5155021 14609039 6747939 7114153 4407272 6446152 7595761 14577216 6169108 7171994 9803561 6704955 7526041 8582519 5563375 8866722 11775668 7329300 8755926 8485711 10081297 8242418 11879934 12976004 7497460 6460568 7164050 9254095 8859958 12832774 12898344 13869488 10049103 6770810 14247708 7242694 14559906 7392832 13725522 7123031 6998181 5465339 9463433 6652955 7657973 6391947 8278813 4526825 9368437 6128859  ]
+#) Patch  14353879 applied on Mon May 05 00:20:17 CEST 2014
+Unique Patch ID:  15321004
+[ Bug fixes: 14353879  ]
+#) Patch  14374587 applied on Mon May 05 00:20:01 CEST 2014
+Unique Patch ID:  15378031
+[ Bug fixes: 14374587  ]
+#) Patch  10152652 applied on Mon May 05 00:19:17 CEST 2014
+Unique Patch ID:  13212735
+[ Bug fixes: 6497684 9726201 10152652  ]
+#) Patch  16241466 applied on Mon May 05 00:18:13 CEST 2014
+Unique Patch ID:  15939719
+[ Bug fixes: 8551790 16234436  ]
+#) Patch  14703419 applied on Mon May 05 00:17:40 CEST 2014
+Unique Patch ID:  15916997
+[ Bug fixes: 14703419  ]
+#) Patch  16271876 applied on Mon May 05 00:17:06 CEST 2014
+Unique Patch ID:  15957907
+[ Bug fixes: 16271876  ]
+20) Patch  12848228 applied on Fri Nov 16 08:59:32 CET 2012
+Unique Patch ID:  14066256
+[ Bug fixes: 12848228  ]
+21) Patch  12898423 applied on Fri Nov 16 08:52:39 CET 2012
+Unique Patch ID:  14066493
+[ Bug fixes: 12898423  ]
+22) Patch  12887068 applied on Fri Nov 16 08:52:13 CET 2012
+Unique Patch ID:  14066157
+[ Bug fixes: 12887068  ]
+23) Patch  12949905 applied on Fri Nov 16 08:51:30 CET 2012
+Unique Patch ID:  14148564
+[ Bug fixes: 12949905  ]
+24) Patch  7695070 applied on Fri Nov 16 08:50:49 CET 2012
+Unique Patch ID:  11489308
+[ Bug fixes: 7695070  ]
+25) Patch  12379038 applied on Fri Nov 16 08:49:45 CET 2012
+Unique Patch ID:  13813443
+[ Bug fixes: 12379038  ]
+26) Patch  11780669 applied on Fri Nov 16 08:49:04 CET 2012
+Unique Patch ID:  13706844
+[ Bug fixes: 11780669  ]
+27) Patch  9974899 applied on Fri Nov 16 08:46:06 CET 2012
+Unique Patch ID:  14106915
+[ Bug fixes: 7552946 4692585 6790178 7529830 6526074 9974899 8416899 6018059 6024000 6772953 7514592 7529859 5596834 6844221 9892569 5724681 7430171 6471931 5979883 5155185 6060499 5740055 6134487 6912781 6681624 5985742 4473073 7021360 4685283 4635520 6433471 5902630 9288120 7519011 6237650 7195030 5763122 5999450 6917549 6150541 5562810 6647933 9204863 5453754 6153975 5697416 5932346 5573438 7146872 7574599 6682888 7229577 9195865 6655345 6713795 5025985 9213612 7113141  ]
+28) Patch  9273888 applied on Fri Nov 16 08:45:40 CET 2012
+Unique Patch ID:  14106915
+[ Bug fixes: 9273888  ]
+29) Patch  8447875 applied on Fri Nov 16 08:45:14 CET 2012
+Unique Patch ID:  14106915
+[ Bug fixes: 6490362 8447875 8351021  ]
+30) Patch  12828135 applied on Fri Nov 16 08:44:19 CET 2012
+Unique Patch ID:  14106915
+[ Bug fixes: 5220448 6350565 6079585 5458753 9655023 4175906 5901912 6864078 4486132 5896963 11725035 6647005 5095815 4519477 5347751 4691191 4754900 5861360 8290534 5382595 5071931 6370967 5458543 6607951 5179574 4329444 5029950 5464895 5029952 5029954 5738539 5648727 5352587 5631915 4402808 4871035 6455161 5114396 5091108 5584790 4605877 4751932 5751672 5490845 10080564 6753516 8534394 3345756 5933477 7592360 5094098 10183338 5015557 4679094 5675556 5154689 12828135 5222931 5910829 5754150 5227879 4152843 4661844 6079603 5637094 7044603 6016022 4905112 8290629 4581220 4166537 7120513 5276400 7154097 7154098 5408664 5563256 6395024 4146291 6397568 6854919 12419228 9108675 5901877 4768040 5049074 7022400 5960451 5490935 5049077 4542188 4680009 4593539 4555795 12565867 5406923 4359124 5689908 5258410 4969005 3962946 3743912 5648102 9352208 5057964 8836540 3935623 5014128 4873311 4439469 4331689 6705965 4597251 4903532 6055387 9764906 7576788 5650178 5225797 4047969 4554284 5376215 4874628 5401921 5151518 4458415 4700543 7375686 5226235 4900129 5122955 5095648 4561867 5239126 5869471 4712638 5354517 4925103 4745776 5998987 4939157 6404864 4627335 7300525 5501362 4587572 4969029 9119261 6270140 5055442 7334756 6639839 4492467 5222032 5151675 5242647 6999528 6737308 7137797 6864202 4587431 5605370 6647068 9952279 6826532 4335559 5417371 4671216 5065930 9362645 4575854 6130365 5355257 7173149 5243019 6639553 4966417 5884075 4899479 4610820 3837600 5092688 4528572 4449900 4601861 6009358 4226736 6404447 4348230 8785236 5233111 5644862 4197970  ]
+31) Patch  12434128 applied on Fri Nov 16 08:42:23 CET 2012
+Unique Patch ID:  14106915
+[ Bug fixes: 9357234 7379127 9173023 8265594 7135493 12434128 7135488 8298232 9772332 9765884 7156655 7608327 7156648 8537027 9679852 7379122  ]
+32) Patch  8528194 applied on Fri Nov 16 08:40:05 CET 2012
+Unique Patch ID:  12333868
+[ Bug fixes: 8528194  ]
+33) Patch  8557019 applied on Fri Nov 16 08:37:31 CET 2012
+Unique Patch ID:  11823436
+[ Bug fixes: 8557019  ]
+34) Patch  5261796 applied on Fri Nov 16 08:30:46 CET 2012
+[ Bug fixes: 5261796 5056864 4598613 3662022  ]
+35) Patch  8339196 applied on Fri Nov 16 08:29:45 CET 2012
+Unique Patch ID:  11970373
+[ Bug fixes: 8339196  ]
+36) Patch  6400501 applied on Mon Dec 13 07:26:47 CET 2010
+[ Bug fixes: 6400501  ]
+37) Patch  5651245 applied on Fri Dec 10 00:03:33 CET 2010
+[ Bug fixes: 5651245  ]
+38) Patch  5394728 applied on Thu Mar 26 16:42:47 CET 2009
+[ Bug fixes: 5394728  ]
+39) Patch  3559326 applied on Thu Mar 26 16:42:23 CET 2009
+[ Bug fixes: 3559326  ]
+40) Patch  7140405 applied on Thu Mar 26 16:42:04 CET 2009
+[ Bug fixes: 6116405 6764875  ]
+41) Patch  6371228 applied on Thu Mar 26 16:41:41 CET 2009
+[ Bug fixes: 6371228  ]
+42) Patch  5917053 applied on Thu Mar 26 16:41:08 CET 2009
+[ Bug fixes: 5917053  ]
+43) Patch  7016961 applied on Thu Mar 26 16:40:17 CET 2009
+[ Bug fixes: 7016961  ]
+
+
+
+
+OPatch succeeded.
+
+======= <end> opatch lsinventory =======
+
+So it looks like I have applied some of the patches that are included in more recent RapidWiz 12.2.0.48 than was used during installation - because I did the upgrade to 12.2.3 before.
+
+Just to check:
+{{{
+$ opatch lsinventory | grep -e 5659594 -e 8528194 -e 8943095 -e 15900214 -e 17645157 -e 17653437 -e 17907988 | grep Patch
+1) Patch  17907988 applied on Wed May 07 16:14:21 CEST 2014
+2) Patch  17645157 applied on Wed May 07 16:13:23 CEST 2014
+3) Patch  15900214 applied on Wed May 07 16:12:23 CEST 2014
+4) Patch  8943095 applied on Wed May 07 16:11:35 CEST 2014
+5) Patch  5659594 applied on Wed May 07 16:10:57 CEST 2014
+32) Patch  8528194 applied on Fri Nov 16 08:40:05 CET 2012
+}}}
+
+Missing:
+#653437
+
+And including those currently not included in any startCD
+#186693
+#620223
+#434967
+
+So we have 4 patches to install - we do the installation to patch edition.
+
+======= + 17653437 =======
+GETTING JAVA SERVER VM WARNING WITH 10.1.2 ORACLE_HOME EXE AND JDK 1.7.0_40 (Patch)
+p17653437_10123_LINUX.zip	61.3 KB	MD5	579D823F4BBD08C09D0B41EC5C51F9D0
+
+{{{
+$ md5sum p17653437_10123_LINUX.zip
+579d823f4bbd08c09d0b41ec5c51f9d0  p17653437_10123_LINUX.zip
+$ unzip p17653437_10123_LINUX.zip
+$ cd 17653437
+$ opatch apply
+Patch(es) 14703419,  conflict with the patch currently being installed (17653437).
+}}}
+
+#653437 (see Footnote 6 & Footnote 8)
+Footnote 8 - If a conflict is reported with 14703419, either roll back 14703419 first (opatch rollback, then apply 17653437), or allow opatch to roll it back when applying Patch 17653437.
+
+OK, proceeding.
+
+
+
+Relink the forms.
+{{{
+$ cd $ORACLE_HOME/forms/lib
+$ make -f ins_forms.mk sharedlib install
+}}}
+
+======= + 18186693 =======
+MERGE REQUEST ON TOP OF 10.1.2.3.2PSU FOR BUGS 17303472 7711752 16806432 (Patch)
+p18186693_101232_LINUX.zip	4.7 MB	MD5	124414E306680C379F1E826C77101756
+
+#186693 (see Footnote 12)
+Footnote 12 - This is the Forms Overlay Patch on 10.1.2.3.2. For a more recent Forms Overlay Patch 19434967 should be applied instead.
+
+{{{
+$ cd 18186693
+$ opatch apply
+}}}
+
+SPECIAL INSTRUCTION FOR formsapp.ear
+*--------------------------------------------------------
+To complete the application of Patch, please follow these instructions
+for Application Server middle tier (including Forms/Reports Services):
+
+# cd $ORACLE_HOME/j2ee/OC4J_BI_Forms/applications/formsapp/formsweb/WEB-INF
+2. cp orion-web.xml
+(there is no such file, skipping that section.)
+
+{{{
+$ORACLE_HOME/j2ee/OC4J_BI_Forms/applications/orion-web.xml_pre9282569
+3. cp web.xml $ORACLE_HOME/j2ee/OC4J_BI_Forms/applications/web.xml_pre9282569
+4. Redeploy formsapp by executing the following command:
+dcmctl redeployApplication -f $ORACLE_HOME/forms/j2ee/formsapp.ear -a formsapp
+-co OC4J _BI_Forms
+5. Restart OC4J _BI_Forms
+}}}
+
+======= + 18620223 =======
+APPS6: RECORD LOCKING SUSPENDING FIRING OF FORMULA-CALCULATION (Patch)
+p18620223_101232_LINUX.zip	13.4 KB	MD5	7C937F34A4DE519F1650985E3EF6A960
+
+{{{
+$ cd 18620223
+$ opatch apply
+}}}
+
+? Please make sure you have the latest OPATCH 10.1 via bug number 6880880
+
+======= + 19434967 =======
+MERGE REQUEST ON TOP OF 10.1.2.3.2PSU FOR BUGS 19059675 6161079 10226288 (Patch)
+p19434967_101232_LINUX.zip	4.8 MB	MD5	1265E88888764BF284592833570414FF
+
+{{{
+$ cd 19434967
+$ opatch apply
+}}}
+
+
+
+
+
+====== Section 3.2: Patches and bug numbers for Oracle Fusion Middleware (FMW) webtier 11.1.1.6 ======
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+$ export ORACLE_HOME=$IAS_ORACLE_HOME
+$ export PATH=$ORACLE_HOME/OPatch:$PATH
+$ which opatch
+/RYBAK/oracle/VIS/fs2/FMW_Home/webtier/OPatch/opatch
+/u01/oracle/VIS/fs2/FMW_Home/webtier/OPatch/opatch
+}}}
+
+{{{
+$ opatch lsinventory
+Oracle Home       : /RYBAK/oracle/VIS/fs2/FMW_Home/webtier
+Oracle WebTier and Utilities CD                                      11.1.1.6.0
+Interim patches (7)
+}}}
+
+We already have those from rapid install 46 and 47: 10638758, 13643211, 14616819, 16199894, 17325559
+
+Installing those Not included in any startCD
+
+{{{
+$ env | grep FILE_EDITION
+FILE_EDITION=patch
+}}}
+
+
+======= + 13055259 =======
+REL6: BIFNDNEPM RUNTIME CUMULATIVE 11.1.1.6.31 PATCH 4 (Patch)
+p13055259_111160_Linux-x86-64.zip	968.8 KB MD5	6D1BE19DE35D4575BBCE1355BAC9B41C
+
+{{{
+$ md5sum p13055259_111160_Linux-x86-64.zip
+6d1be19de35d4575bbce1355bac9b41c  p13055259_111160_Linux-x86-64.zip
+$ unzip p13055259_111160_Linux-x86-64.zip
+$ cd 13055259
+$ opatch apply
+}}}
+
+======= + 17555224 =======
+OHSTLS 1.2 WITH CLIENT CERTIFICATE AUTHENTICATION (Patch)
+p17555224_111160_Linux-x86-64.zip	1.6 MB	MD5	01191D25D7EEA2D31E6CB42AF34C02FA
+
+{{{
+$ md5sum p17555224_111160_Linux-x86-64.zip
+01191d25d7eea2d31e6cb42af34c02fa  p17555224_111160_Linux-x86-64.zip
+$ unzip p17555224_111160_Linux-x86-64.zip
+$ cd 17555224
+$ opatch apply
+}}}
+
+======= + 17639414 =======
+PASTECONFIG FAILS IF SSL.CONF ENTRY IS COMMENTED IN HTTPD.CONF (Patch)
+p17639414_111160_Generic.zip	11.2 KB	MD5	E904927678DB8980FFA2874235D53D52
+
+{{{
+$ md5sum p17639414_111160_Generic.zip
+e904927678db8980ffa2874235d53d52  p17639414_111160_Generic.zip
+$ unzip p17639414_111160_Generic.zip
+$ cd 17639414
+$ opatch apply -jre $ORACLE_HOME/jdk/jre
+}}}
+
+======= + 19945419 =======
+MERGE REQUEST ON TOP OF 11.1.1.6.0 FOR BUGS 13055259 19848621 (Patch)
+p19945419_111160_Linux-x86-64.zip	1.1 MB	MD5	49EE4BF830C51032E98D6362EAE12AD6
+
+{{{
+$ md5sum p19945419_111160_Linux-x86-64.zip
+49ee4bf830c51032e98d6362eae12ad6  p19945419_111160_Linux-x86-64.zip
+$ unzip p19945419_111160_Linux-x86-64.zip
+}}}
+
+{{{
+$ cd 19945419
+$ opatch apply -jre $ORACLE_HOME/jdk/jre
+}}}
+
+
+====== Section 3.2: Patches and bug numbers for Oracle Fusion Middleware (FMW) oracle_common 11.1.1.6 ======
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+$ export ORACLE_HOME=`echo ${IAS_ORACLE_HOME} | sed 's/webtier/oracle_common/'`
+$ export PATH=$ORACLE_HOME/OPatch:$PATH
+$ which opatch
+/u01/oracle/VIS/fs2/FMW_Home/oracle_common/OPatch/opatch
+$ opatch lsinventory
+Oracle Home       : /u01/oracle/VIS/fs2/FMW_Home/oracle_common
+Oracle AS Common Toplevel Component                                  11.1.1.2.0
+}}}
+
+Those present in 12.2.0.48 already included (installed during 12.2.3 patching)
+{{{
+$ opatch lsinventory | grep -e 9905685 -e 13947608 -e 17394319 | grep Patch
+Patch  17394319     : applied on Wed May 07 16:19:59 CEST 2014
+Patch  13947608     : applied on Wed May 07 16:19:32 CEST 2014
+Patch  9905685      : applied on Wed May 07 16:19:05 CEST 2014
+}}}
+
+Not included (those from 12.2.0.49 and currently Not included in any startCD) 17284368, 19462638, 13490778, 18989444
+======= + 17284368 =======
+ORA-12516, TNS:LISTENER COULD NOT FIND AVAILABLE HANDLER WITH MATCHING PROTOCOL (Patch)
+p17284368_111160_Generic.zip	180.1 KB	MD5	F08481C52A5DD9E5294BE81D4D3E02D4
+
+{{{
+$ md5sum p17284368_111160_Generic.zip
+f08481c52a5dd9e5294be81d4d3e02d4  p17284368_111160_Generic.zip
+$ cd 17284368
+}}}
+
+{{{
+$ opatch apply -jre ${IAS_ORACLE_HOME}/jdk/jre
+}}}
+
+
+
+======= + 19462638 =======
+MERGE REQUEST ON TOP OF 11.1.1.6.0 FOR BUGS 14588599 15998207 18515906 (Patch)
+p19462638_111160_Generic.zip	167.6 KB	MD5	DF191C241BD1BE3C43582C00EEF17BD1
+
+{{{
+$ md5sum p19462638_111160_Generic.zip
+df191c241bd1be3c43582c00eef17bd1  p19462638_111160_Generic.zip
+$ cd 19462638
+$ opatch apply -jre ${IAS_ORACLE_HOME}/jdk/jre
+}}}
+
+
+======= + 13490778 =======
+PS5:REF2: INSTANCE STATUS SHOWN INCORRECTLY IN EM WITH RC4-REFRESH-2 (Patch)
+p13490778_111160_Generic.zip	50.8 KB	MD5	EEF8916EEACFB5EC69C08B63B28087ED
+
+{{{
+$ md5sum p13490778_111160_Generic.zip
+eef8916eeacfb5ec69c08b63b28087ed  p13490778_111160_Generic.zip
+$ cd 13490778
+$ opatch apply -jre ${IAS_ORACLE_HOME}/jdk/jre
+}}}
+
+
+======= + 18989444 =======
+
+MERGE REQUEST ON TOP OF 11.1.1.6.0 FOR BUGS 13947608 14192016 (Patch)
+p18989444_111160_Generic.zip	17.7 KB	MD5	7523E5664ED4908F22F266391464CF23
+
+{{{
+$ md5sum p18989444_111160_Generic.zip
+7523e5664ed4908f22f266391464cf23  p18989444_111160_Generic.zip
+$ cd 18989444
+$ opatch apply -jre ${IAS_ORACLE_HOME}/jdk/jre
+}}}
+
+
+====== Section 3.4: Oracle Weblogic Server 10.3.6.0 Patch and Bug Numbers ======
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+}}}
+
+{{{
+$ cd $FMW_HOME/utils/bsu
+$ bsu.sh -report -bea_home=$FMW_HOME -output_format=text
+Product Version........... 10.3.6.0
+}}}
+
+#.2.0.48	17495356 CIH8 - already installed
+{{{
+$ bsu.sh -report -bea_home=$FMW_HOME -output_format=text | grep "Patch ID"
+Patch ID.................. 32I2
+Patch ID.................. YHJK
+Patch ID.................. S9MN
+Patch ID.................. LL4G
+Patch ID.................. TTEM
+Patch ID.................. VFS8
+Patch ID.................. D33T
+Patch ID.................. YIJF
+Patch ID.................. CIH8
+}}}
+
+Installing those currently Not included in any startCD
+{{{
+$ env | grep FILE_EDITION
+FILE_EDITION=patch
+}}}
+
+======= + 17893334 7FC9 =======
+SU Patch [7FC9]: THE <TARGET> PATH IN PATCH-BACKUP.XML FILE DOES NOT CHANGE (Patch)
+p17893334_1036_Generic.zip	1.5 MB	MD5	CDEA6178F75BE443C4D8F984D9D8EC78
+
+{{{
+$ md5sum p17893334_1036_Generic.zip
+cdea6178f75be443c4d8f984d9d8ec78  p17893334_1036_Generic.zip
+$ cp p17893334_1036_Generic.zip $FMW_HOME/utils/bsu/cache_dir/
+$ cd $FMW_HOME/utils/bsu/cache_dir
+$ unzip p17893334_1036_Generic.zip
+$ rm p17893334_1036_Generic.zip README.txt
+$ cd $FMW_HOME/utils/bsu
+$ ./bsu.sh -prod_dir=$FMW_HOME/wlserver_10.3 -patchlist=7FC9 -verbose -install
+}}}
+
+
+======= + 19600486 Y5AP =======
+SU Patch [Y5AP]: PASTECONFIG.SH FAILED AFTER ADDING SETMAXREQUESTPARAMTERCOUNT() ATTRIBUTE (Patch)
+p19600486_1036_Generic.zip	7.3 MB	MD5	421FB4FCA21A30209897B8889BCDABEC
+
+{{{
+$ md5sum p19600486_1036_Generic.zip
+421fb4fca21a30209897b8889bcdabec  p19600486_1036_Generic.zip
+$ cp p19600486_1036_Generic.zip $FMW_HOME/utils/bsu/cache_dir/
+$ cd $FMW_HOME/utils/bsu/cache_dir
+$ unzip p19600486_1036_Generic.zip
+$ rm p19600486_1036_Generic.zip README.txt
+$ cd $FMW_HOME/utils/bsu
+$ ./bsu.sh -prod_dir=$FMW_HOME/wlserver_10.3 -patchlist=Y5AP -verbose -install
+}}}
+
+
+
+===== c. Source the run edition environment file. =====
+
+"The latest AD-TXK codelevel has a dependency on Oracle Fusion Middleware Patch 19462638."
+
+Let's check it again.
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+$ export ORACLE_HOME=`echo ${IAS_ORACLE_HOME} | sed 's/webtier/oracle_common/'`
+$ export PATH=$ORACLE_HOME/OPatch:$PATH
+$ which opatch
+/u01/oracle/VIS/fs2/FMW_Home/oracle_common/OPatch/opatch
+$ opatch lsinventory | grep 19462638
+Patch  19462638     : applied on Sun Jan 11 22:14:20 CET 2015
+}}}
+
+Logout.
+
+Source the run edition environment file.
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+}}}
+
+==== 4. Unzip patches and run adgrants. ====
+===== a. Download and unzip the following patches: =====
+
+{{{
+$ cp p18283295_R12.AD.C_R12_LINUX.zip p20034256_R12.AD.C_R12_LINUX.zip p20075842_R12.AD.C_R12_GENERIC.zip p18288881_R12.TXK.C_R12_GENERIC.zip p20043910_R12.TXK.C_R12_GENERIC.zip p19803392_R12.TXK.C_R12_GENERIC.zip p20158287_R12.TXK.C_R12_GENERIC.zip p19259764_R12.FND.C_R12_GENERIC.zip $PATCH_TOP
+}}}
+
+{{{
+$ cd $PATCH_TOP
+$ md5sum *
+cbb8d2c0bec8fbe9c577efd1814a14ec  p18283295_R12.AD.C_R12_LINUX.zip
+b2ab4f599a070b730d4048bb7038003f  p18288881_R12.TXK.C_R12_GENERIC.zip
+9b504769ba39378fa47dfa6b95899e04  p19259764_R12.FND.C_R12_GENERIC.zip
+c4a6a85cffe9e0c7818b99e9a34f0b88  p19803392_R12.TXK.C_R12_GENERIC.zip
+f3187d71bb4255d4854fc4af8f18ffed  p20034256_R12.AD.C_R12_LINUX.zip
+8ca68b0148976e9df144aa4100318c96  p20043910_R12.TXK.C_R12_GENERIC.zip
+db1f4ce092ebb158ea3ed707620d89ca  p20075842_R12.AD.C_R12_GENERIC.zip
+ab01dcc314cb6219e9624228e0b7e119  p20158287_R12.TXK.C_R12_GENERIC.zip
+}}}
+
+unzip p18283295_R12.AD.C_R12_LINUX.zip
+unzip p18288881_R12.TXK.C_R12_GENERIC.zip
+unzip p19259764_R12.FND.C_R12_GENERIC.zip
+unzip p19803392_R12.TXK.C_R12_GENERIC.zip
+unzip p20034256_R12.AD.C_R12_LINUX.zip
+unzip p20043910_R12.TXK.C_R12_GENERIC.zip
+unzip p20075842_R12.AD.C_R12_GENERIC.zip
+unzip p20158287_R12.TXK.C_R12_GENERIC.zip
+
+===== b. Execute adgrants by following the instructions in the readme of Patch 20034256:R12.AD.C. =====
+{{{
+$ cd 20034256/admin
+$ scp adgrants.sql oracle@usera1:/u01/oracle/VIS/11.2.0/appsutil/admin
+$ scp adgrants.sql oracle@ebsdb4:/u01/oracle/VIS/11204/appsutil/admin
+}}}
+
+On DB node run adgrants
+{{{
+> @?/appsutil/admin/adgrants.sql apps
+}}}
+
+==== 5. Apply Patch 18283295:R12.AD.C.Delta.5 merged with Patch 20034256:R12.AD.C and Patch 20075842:R12.AD.C ====
+
+{{{
+$ env | grep EDITION
+FILE_EDITION=run
+}}}
+
+{{{
+$ adop phase=apply patches=18283295,20034256,20075842 merge=yes
+}}}
+
+Failed to generate product JAR files in JAVA_TOP
+
+JarSigner standard output:
+jarsigner: Certificate chain not found for: VIS_sun4.  VIS_sun4 must reference a valid KeyStore key entry containing a private key and corresponding public key certificate chain.
+
+MOS:
+* Patch Application Fails With Error: Jarsigner: Certificate Chain Not Found (Doc ID 555636.1)
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env patch
+$ mv $APPL_TOP/admin/adkeystore.dat $APPL_TOP/admin/adkeystore.dat.org
+$ adjkey -initialize
+}}}
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+$ adop phase=apply patches=18283295,20034256,20075842 merge=yes
+ERRORMSG: Since earlier patching session failed and you are invoking apply again, please specify 'abandon' or 'restart' parameter.
+}}}
+
+{{{
+$ adop phase=apply patches=18283295,20034256,20075842 merge=yes restart=yes
+}}}
+
+AutoPatch error:
+Current 'patchtop' command-line argument not same as original value.
+Original: "/u01/oracle/VIS/fs1/EBSapps/appl/admin/VIS/log/ADOP_MRG_20150111_1421012325"
+Current : "/u01/oracle/VIS/fs1/EBSapps/appl/admin/VIS/log/ADOP_MRG_20150111_1421013171"
+
+{{{
+$ adop phase=apply patches=18283295,20034256,20075842 merge=yes abandon=no restart=yes
+AutoPatch error:
+Current 'patchtop' command-line argument not same as original value.
+Original: "/u01/oracle/VIS/fs1/EBSapps/appl/admin/VIS/log/ADOP_MRG_20150111_1421012325"
+Current : "/u01/oracle/VIS/fs1/EBSapps/appl/admin/VIS/log/ADOP_MRG_20150111_1421013171"
+}}}
+
+{{{
+$ adop phase=apply patches=18283295,20034256,20075842 merge=yes abandon=yes restart=no
+adop exiting with status = 0 (Success)
+}}}
+
+{{{
+$ adop phase=apply patches=18283295,20034256,20075842 merge=yes
+This Patch seems to have been applied already.
+Would you like to continue anyway  [N] ? N *
+}}}
+
+MOS:
+* How to bypass the error "This Patch seems to have been applied already. Would you like to continue anyway" when applying a patch via ADOP ? (Doc ID 1920187.1)
+
+http://docs.oracle.com/cd/E26401_01/doc.122/e22954/T202991T531062.htm#5281339
+
+The only way to bypass that is using the forceapply option.
+
+{{{
+$ adop phase=apply patches=18283295,20034256,20075842 merge=yes options=forceapply
+adop exiting with status = 0 (Success)
+}}}
+
+==== 6. Apply Patch 18288881:R12.TXK.C.Delta.5 merged with Patch 20043910:R12.TXK.C, Patch 19803392:R12.TXK.C, and Patch 20158287:R12.TXK.C ====
+
+{{{
+$ adop phase=apply patches=18288881,20043910,19803392,20158287 merge=yes
+adop exiting with status = 0 (Success)
+}}}
+
+==== 7. Apply Patch 19259764:R12.FND.C. ====
+
+{{{
+$ adop phase=apply patches=19259764
+adop exiting with status = 0 (Success)
+}}}
+
+==== 8. Complete the online patching cycle by running the following commands in the order shown. ====
+
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+$ adop phase=finalize
+$ adop phase=cutover
+Relogin
+$ . /u01/oracle/VIS/EBSapps.env run
+$ adop phase=cleanup
+}}}
+
+[ERROR]     The EBS Technology Codelevel Checker (available as Patch 17537119) needs to be run on the following nodes: <ebsdb4>.
+
+I believe I did it already, but I will repeat that with the recent version. On DB tier.
+{{{
+$ md5sum p17537119_R12_GENERIC.zip
+f5603e3d73efa99f54a347e2aca294eb  p17537119_R12_GENERIC.zip
+$ unzip p17537119_R12_GENERIC.zip
+$ ./checkDBpatch.sh
+Enter ORACLE_HOME value : /u01/oracle/VIS/11204
+Is this a RAC environment [y/n] : n
+Enter ORACLE_SID value : VIS
+}}}
+
+List of missing bug fixes:
+#393542
+
+Looks like one additional DB bug has appeard.
+
+Back to app tier.
+{{{
+$ adop phase=cleanup
+~ 6h
+}}}
+
+==== 9. Synchronize file systems ====
+
+{{{
+$ adop phase=fs_clone
+~ 2h
+}}}
+
+Done with: Applying the Latest AD and TXK Release Update Packs to Oracle E-Business Suite Release 12.2 (Doc ID 1617461.1)
+
+
+
+
+
+== Section 5: Perform Pre-Update Steps (Conditional) ==
+Following: Oracle E-Business Suite Release 12.2.4 Readme (Doc ID 1617458.1)
+
+Tasks only for: Supply Chain Management
+*> Skipping
+
+== Section 6: Apply Oracle E-Business Suite 12.2.4 Release Update Pack ==
+
+Chosing: Already using Oracle E-Business Suite Release 12.2.2 or 12.2.3	Path B
+
+== 6.2 Path B - Existing Customers (Release 12.2.2 or Release 12.2.3) upgrading to Oracle E-Business Suite 12.2.4 Release Update Pack ==
+
+=== 1. Source the run edition applications environment ===
+{{{
+$ . /u01/oracle/VIS/EBSapps.env run
+}}}
+
+=== 2. Start an online patching cycle. ===
+{{{
+$ adop phase=prepare
+}}}
+
+ORACLE E-BUSINESS SUITE 12.2.4 RELEASE UPDATE PACK (Patchset)
+p17919161_R12_LINUX_1of9.zip	402.6 MB	(422148953 bytes)
+SHA-1	C4956E8251924BFF40B3ADFAF2A53BBA9F94A62A
+MD5	5EDDFA3BCB47652FF236784CBF4A1A8B
+p17919161_R12_LINUX_2of9.zip	498.8 MB	(523046115 bytes)
+SHA-1	9B4021E26A8FE5D3D0887F9F8616985EEC79C66B
+MD5	4AC9F85D6BEC42655F2C40730E5E72A3
+p17919161_R12_LINUX_3of9.zip	485.9 MB	(509451855 bytes)
+SHA-1	FB7CCC53AC58C882E720A15D596C0496FD856D4A
+MD5	007626C25733A998DA413DF93DD4528D
+p17919161_R12_LINUX_4of9.zip	520.2 MB	(545468978 bytes)
+SHA-1	670D411CDDC359C56B95CA530C9256FE45E25753
+MD5	2531E4A825699B992BB895AAAE440D13
+p17919161_R12_LINUX_5of9.zip	573.2 MB	(601073495 bytes)
+SHA-1	899137AC01C2BAC95F1254722EBC19F91E814DCC
+MD5	F482834FA441A62CA771223C09B99981
+p17919161_R12_LINUX_6of9.zip	564.2 MB	(591609251 bytes)
+SHA-1	0684FD9DC29C4CF222389E04BA8CD6BF3E033ABA
+MD5	2D4C5D9D7AC2FEA58CB8680899EF036D
+p17919161_R12_LINUX_7of9.zip	498.5 MB	(522726073 bytes)
+SHA-1	204CD9F3145C7A45B38296D99F2FEDAC9BFC4C64
+MD5	FC8C751E8F2694E8FC4787FBCF711C53
+p17919161_R12_LINUX_8of9.zip	544.0 MB	(570439034 bytes)
+SHA-1	202160E9922296C0F8523B6C608B5325C55EA2CB
+MD5	38C92E3DA5EE47A2B684A3FBC5120BC8
+p17919161_R12_LINUX_9of9.zip	97.9 MB	(102613913 bytes)
+SHA-1	8140D89B421344D82D83C4848FE90269AD8A9E9C
+MD5	9450F037BCEAE901CBAACE3110D28E69
+
+{{{
+$ md5sum p17919161_R12_LINUX_*
+5eddfa3bcb47652ff236784cbf4a1a8b  p17919161_R12_LINUX_1of9.zip
+4ac9f85d6bec42655f2c40730e5e72a3  p17919161_R12_LINUX_2of9.zip
+007626c25733a998da413df93dd4528d  p17919161_R12_LINUX_3of9.zip
+2531e4a825699b992bb895aaae440d13  p17919161_R12_LINUX_4of9.zip
+f482834fa441a62ca771223c09b99981  p17919161_R12_LINUX_5of9.zip
+2d4c5d9d7ac2fea58cb8680899ef036d  p17919161_R12_LINUX_6of9.zip
+fc8c751e8f2694e8fc4787fbcf711c53  p17919161_R12_LINUX_7of9.zip
+38c92e3da5ee47a2b684a3fbc5120bc8  p17919161_R12_LINUX_8of9.zip
+9450f037bceae901cbaace3110d28e69  p17919161_R12_LINUX_9of9.zip
+}}}
+
+unzip p17919161_R12_LINUX_1of9.zip
+unzip p17919161_R12_LINUX_2of9.zip
+unzip p17919161_R12_LINUX_3of9.zip
+unzip p17919161_R12_LINUX_4of9.zip
+unzip p17919161_R12_LINUX_5of9.zip
+unzip p17919161_R12_LINUX_6of9.zip
+unzip p17919161_R12_LINUX_7of9.zip
+unzip p17919161_R12_LINUX_8of9.zip
+unzip p17919161_R12_LINUX_9of9.zip
+
+=== 3. Apply Oracle E-Business Suite Release 12.2.4 Patch 17919161. ===
+{{{
+$ adop phase=apply patches=17919161 patchtop=/STAGING/ebs12patches
+~ 28h on both app and db tier on one disk
+}}}
+
+=== 4. Complete the online patching cycle by running the following commands in the order shown. ===
+Weird thing happening on DB:
+
+
+SID SQL_HASH_VALUE USERNAME	 OS PID
+
+260	714380553		 6005
+insert into obj$(owner#,name,namespace,obj#,type#,ctime,mtime,stime,status,remoteowner,linkname,subname,dataobj#,flags,oid$,spare1,spare2,spare3) values(:1,:2,:3,:4,:5,:6,:7,:8,:9,:10,:11,:12,:13,:14,
+
+EVENT				WAIT_TIME USERNAME		SID    SERIAL# SQL_HASH_VALUE
+
+latch free				0			 64	     5	    714380553
+
+*> Restarting DB after the patch is applied.
+That helped :)
+
+
+{{{
+$ adop phase=finalize
+$ adop phase=cutover
+~ 1h on both app and db tier on one disk
+$ . <INSTALL_BASE>/EBSapps.env run
+$ adop phase=cleanup
+~ 12h on both app and db tier on one disk
+}}}
+
+=== 5. Synchronize file systems ===
+{{{
+$ adop -status
+Node Name	Node Type	Phase		Status		Started 		       Finished 		      Elapsed
+--------------- --------------- --------------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE 	COMPLETED	14-JAN-15 21:26:21 +01:00      14-JAN-15 21:35:26 +01:00      0:09:05
+APPLY		COMPLETED	14-JAN-15 22:02:23 +01:00      16-JAN-15 02:17:47 +01:00      28:15:24
+FINALIZE	COMPLETED	16-JAN-15 10:06:28 +01:00      16-JAN-15 10:09:47 +01:00      0:03:19
+CUTOVER 	COMPLETED	16-JAN-15 10:14:57 +01:00      16-JAN-15 11:13:19 +01:00      0:58:22
+CLEANUP 	COMPLETED	16-JAN-15 11:30:43 +01:00      16-JAN-15 23:56:49 +01:00      12:26:06
+}}}
+
+{{{
+$ adop phase=fs_clone
+~ 2h
+}}}
+
+It is a good time to do the backp.
+
+== Section 7: Post-Update Steps ==
+=== 1. Apply Oracle E-Business Suite Release 12.2.4 Online Help ===
+
+Oracle E-Business Suite Online Help for 12.2.4 Release Update Pack (Patch)
+p17919162_R12_GENERIC.zip	31.8 MB	MD5	6E18D17EBF49496BD79BC324C8931496
+
+HELP PATCH FOR ORACLE GRANTS ACCOUNTING USER GUIDE, RELEASE 12.2.4 (Patch)
+p19290141_R12_GENERIC.zip	12.0 KB	MD5	337263CECA3D65898471EE6FBDE2B642
+
+{{{
+$ cd /STAGING/ebs12patches
+$ md5sum p17919162_R12_GENERIC.zip p19290141_R12_GENERIC.zip
+6e18d17ebf49496bd79bc324c8931496  p17919162_R12_GENERIC.zip
+337263ceca3d65898471ee6fbde2b642  p19290141_R12_GENERIC.zip
+}}}
+
+{{{
+$ unzip -o p17919162_R12_GENERIC.zip
+$ unzip -o p19290141_R12_GENERIC.zip
+}}}
+
+{{{
+$ adop phase=apply patches=17919162,19290141 hotpatch=yes merge=yes patchtop=/STAGING/ebs12patches
+}}}
+
+=== 2. Grant flexfield value set access to specific users (required) ===
+*> leaving that for dev team to decide how to use flexfileds security.
+
+=== 3. Register new products (conditional) ===
+New products available:
+yms	Oracle Yard Management
+cmi	Oracle In-memory Cost Management
+
+If required that can be register them using License Manager.
+*> skipping for now
+
+=== 4. Perform Product-Specific Steps (conditional) ===
+Application Technology tasks:
+Oracle Application Framework: -> for developers
+Oracle E-Business Suite Integrated SOA Gateway -> not using SOA, skipping
+Customer Relationship Management tasks: -> not using, skipping
+Financials tasks: -> for developers
+Human Resources tasks: -> for developers
+
+=== 5. Perform NLS-related Step (conditional) ===
+*> using just default US. Doing nothing.
+
+=== 6. Run the Patch Wizard for current recommended and high priority product patches. ===
+MOS:
+* R11i / R12 : Patch Wizard Utility [Video] (Doc ID 976188.1)
+* Document 1400757.1, How to Find Oracle E-Business Suite Recommended Patches.
+
+http://sun4.remik.org:8000
+
+Receiving errors: FDPSTP failed due to ORA-20100
+
+Skipping for now, thich can be checked later.
+
+== Section 8: Apply Additional Critical Patches ==
+
+8.1 Patches to Improve Connection Handling
+
+All Customers
+
+The following critical performance fixes resolve issues with connections not being released for return to the data source connection pool:
+
+Patch 19494816 - Oracle Application Object Library
+
+Patch 19807163 - Oracle Applications Manager
+
+Patch 19858552 - Oracle Application Framework
+
+8.2 Patch to Improve Results Caching
+
+All Customers
+
+Applying the following critical fix resolves an issue with efficiency of the database results cache, and may significantly improve response times.
+
+Patch 19891697
+
+8.3 Patch to Reduce Logging in Oracle Framework
+
+All Customers
+
+Applying the following fix to reduce log generation may improve overall performance:
+
+Patch 18345006 - Oracle Application Framework
+
+Installing in one adop session.
+
+JDBC CONNECTION LEAK IN ORACLE.APPS.FND.COMMON.ERRORSTACK (Patch)
+p19494816_R12.FND.C_R12_GENERIC.zip	320.5 KB MD5	4FC1F7ADC1029DAAE644EB977253790D
+
+#FF:12.2.4:TRANSACTIONSCOPE - CONNECTION LEAK IN 12.2.4 (Patch)
+p19807163_R12.OAM.C_R12_GENERIC.zip	50.1 KB	MD5	3C95121B483D78B3A7B1208BDFC9FC14
+
+WEB APPS CONTEXT NOT RELEASED IN OAERRORPAGE.JSP AND OAERRORDETAILPAGE.JSP (Patch)
+p19858552_R12.FWK.C_R12_GENERIC.zip	318.5 KB MD5	4B0194FDE602D07808068F51A263DADD
+
+#FF:12.2:PERFORMANCE PROBLEMS RESULTS SET CACHE (Patch)
+p19891697_R12.FND.C_R12_GENERIC.zip	25.3 KB	MD5	BE986CC5FB823F59E07CD6E099008E1A
+
+JBO DEBUG LOGGING ON WITHOUT -D FLAG, NOTICE LEVEL AND PROD MODE=TRUE (Patch)
+p18345006_R12.FWK.C_R12_GENERIC.zip	17.7 MB	MD5	A55406A21399C052DADE5A478B64EF1D
+
+{{{
+$ md5sum p19494816_R12.FND.C_R12_GENERIC.zip p19858552_R12.FWK.C_R12_GENERIC.zip p19807163_R12.OAM.C_R12_GENERIC.zip p19891697_R12.FND.C_R12_GENERIC.zip p18345006_R12.FWK.C_R12_GENERIC.zip
+4fc1f7adc1029daae644eb977253790d  p19494816_R12.FND.C_R12_GENERIC.zip
+4b0194fde602d07808068f51a263dadd  p19858552_R12.FWK.C_R12_GENERIC.zip
+3c95121b483d78b3a7b1208bdfc9fc14  p19807163_R12.OAM.C_R12_GENERIC.zip
+be986cc5fb823f59e07cd6e099008e1a  p19891697_R12.FND.C_R12_GENERIC.zip
+a55406a21399c052dade5a478b64ef1d  p18345006_R12.FWK.C_R12_GENERIC.zip
+}}}
+
+{{{
+$ unzip -o p19494816_R12.FND.C_R12_GENERIC.zip
+$ unzip -o p19858552_R12.FWK.C_R12_GENERIC.zip
+$ unzip -o p19807163_R12.OAM.C_R12_GENERIC.zip
+$ unzip -o p19891697_R12.FND.C_R12_GENERIC.zip
+$ unzip -o p18345006_R12.FWK.C_R12_GENERIC.zip
+}}}
+
+{{{
+$ adop -status
+sun4		master		PREPARE 	NOT APPLICABLE
+APPLY		ACTIVE		24-MAR-15 13:26:16 +01:00      24-MAR-15 14:37:25 +01:00      1:11:09
+FINALIZE	NOT APPLICABLE
+CUTOVER 	NOT APPLICABLE
+CLEANUP 	NOT STARTED
+}}}
+
+*> that is weird, maybe this is ok if the patch was applied in hotpatch mode? The last one did.
+
+{{{
+$ adop phase=prepare
+adop phase=prepare - Completed Successfully
+$ adop -status
+Node Name	Node Type	Phase		Status		Started 		       Finished 		      Elapsed
+--------------- --------------- --------------- --------------- ------------------------------ ------------------------------ ------------
+sun4		master		PREPARE 	COMPLETED	25-MAR-15 15:48:50 +01:00      25-MAR-15 17:02:04 +01:00      1:13:14
+APPLY		NOT STARTED
+FINALIZE	NOT STARTED
+CUTOVER 	NOT STARTED
+CLEANUP 	NOT STARTED
+}}}
+
+*> looks fine now. Proceeding with patching.
+
+{{{
+$ adop phase=apply patches=19494816,19858552,19807163,19891697,18345006 patchtop=/STAGING/ebs12patches
+$ adop phase=cutover
+}}}
+
+Done with the upgrade based on main Oracle E-Business Suite Release 12.2.4 Readme (Doc ID 1617458.1)
+
+
+
