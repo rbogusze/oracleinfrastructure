@@ -4,6 +4,7 @@ Table of contents
 http://okon1.remik.org:8005
 
 == Download binaries ==
+{{{
 "File Name"
 + "V46139-01.zip"
 + "V46140-01.zip"
@@ -124,6 +125,7 @@ http://okon1.remik.org:8005
 "V46200-01.zip"
 "V46214-01.zip"
 "V46191-01.zip"
+}}}
 
 == Setup hosts ==
 === Setup MT ===

@@ -2,7 +2,7 @@ Test setup:
 
 [R12_2_Nice_links]
 
-[R12_2_Installing_Oracle_E-Business_Suite_Release_12_2_under_OEL_5.10_x86-64]
+[R12_2_Installing_EBS_Release_12_2_under_OEL_5.10_x86-64]
 
 [R12_2_Maintenance]
 
