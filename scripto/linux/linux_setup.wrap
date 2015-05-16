@@ -26,6 +26,10 @@ b_setup_yum_repository()
     run_command "cp ./sup_files/yum.conf.CentOS_4.7_i686 /etc/yum.conf"
     run_command "yum clean all"
     ;;
+  "Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    msgi "Doing nothing"
+    ;;
   "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64")
     msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
 
@@ -152,13 +156,14 @@ b_install_usefull_rpm()
   TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" -e "^subversion" -e "^nmon" -e "^iftop" | wc -l`
   if [ "$TMP_CHK" -lt 8 ]; then
     msga "Installing mutt rsync lynx dialog ..."
-    run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced nmon iftop screen meld fio"
+    #run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced nmon iftop screen meld fio"
+    run_command "yum -y install mutt rsync lynx dialog ntp subversion vim-enhanced nmon iftop screen meld fio"
   else
     msgi "mutt rsync lynx dialog ... already installed. Doing nothing."
   fi 
 
   case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
-  "CentOS release 4.7 (Final)_i686")
+  "CentOS release 4.7 (Final)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
     if [ "$TMP_CHK" -lt 1 ]; then
@@ -308,7 +313,7 @@ b_time_synchro()
 {
   msgb "${FUNCNAME[0]} Beginning."
   case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
-  "CentOS release 4.7 (Final)_i686")
+  "CentOS release 4.7 (Final)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
     msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
     run_command "chkconfig ntpd on"
     run_command "ntpdate pool.ntp.org"
@@ -344,7 +349,7 @@ b_install_vmware_tools()
     run_command "rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub"
 
     case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
-    "CentOS release 4.7 (Final)_i686")
+    "CentOS release 4.7 (Final)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
       msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
       check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4"
       run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4 /etc/yum.repos.d/vmware-tools.repo"
@@ -636,7 +641,7 @@ b_disable_IP6()
     msgi "IPv6 seems to work fine. Disabling it."
 
     case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
-    "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686")
+    "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
       msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
       run_command "cp /etc/sysconfig/network /etc/sysconfig/network.$V_UNIQ"
       run_command "cat /etc/sysconfig/network | grep -v NETWORKING_IPV6 > /tmp/network.tmp"
@@ -646,25 +651,11 @@ b_disable_IP6()
       run_command "service ip6tables save"
       run_command "service ip6tables stop"
       run_command "chkconfig ip6tables off"
-      msga "It is required to reboot the host now to make the setting work."
-      USER_ANSWER=''
-      EXIT_WHILE=''
-      while [ ! "$EXIT_WHILE" ]
-      do
-        read -p "[wait] Do you want to reboot now? (yes/no)" USER_ANSWER
-        if [ "$USER_ANSWER" = "yes" ]; then
-          msgi "Rebooting NOW."
-          run_command "reboot"
-          run_command "exit 0"
-          EXIT_WHILE=1
-        fi
-        if [ "$USER_ANSWER" = "no" ]; then
-          msgi "Doing nothing."
-          EXIT_WHILE=1
-        fi
-      done
 
-
+      ;;
+    "Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+      run_command "echo 'alias net-pf-10 off' >> /etc/modprobe.conf"   
+   
 
       ;;
     *)
@@ -672,6 +663,26 @@ b_disable_IP6()
       exit 1
       ;;
     esac
+
+    msga "It is required to reboot the host now to make the setting work."
+    USER_ANSWER=''
+    EXIT_WHILE=''
+    while [ ! "$EXIT_WHILE" ]
+    do
+      read -p "[wait] Do you want to reboot now? (yes/no)" USER_ANSWER
+      if [ "$USER_ANSWER" = "yes" ]; then
+        msgi "Rebooting NOW."
+        run_command "reboot"
+        run_command "exit 0"
+        EXIT_WHILE=1
+      fi
+      if [ "$USER_ANSWER" = "no" ]; then
+        msgi "Doing nothing."
+        EXIT_WHILE=1
+      fi
+    done
+
+
   fi #eval ping6 -c 4 ::1
 
 
