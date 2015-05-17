@@ -72,9 +72,11 @@ EOF
   run_command_d "cat /tmp/backup_loop.tmp.output"
   VM_TO_BACKUP_VMID=`cat /tmp/backup_loop.tmp.output | grep "$VM_TO_BACKUP" | awk '{print $1}' `
   msgd "VM_TO_BACKUP_VMID: $VM_TO_BACKUP_VMID"
-  VM_TO_BACKUP_PATH=`cat /tmp/backup_loop.tmp.output | grep "$VM_TO_BACKUP" | awk '{print $3"/" $4 }' | tr -d "[]" | awk '{print "/vmfs/volumes/" $0}'`
+  VM_TO_BACKUP_PATH=`cat /tmp/backup_loop.tmp.output | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}' | grep "^${VM_TO_BACKUP}" | awk '{print $2"/" $3 }' | tr -d "[]" | awk '{print "/vmfs/volumes/" $0}'`
   VM_TO_BACKUP_PATH=`dirname $VM_TO_BACKUP_PATH`
   msgd "VM_TO_BACKUP_PATH: $VM_TO_BACKUP_PATH"
+  check_parameter $VM_TO_BACKUP_PATH
+
 
   msgi "Get the current status of the vm"
   cat > $F_SH_CMND << EOF
