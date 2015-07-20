@@ -21,6 +21,11 @@ ServerAliveInterval 300
 ServerAliveCountMax 2
 }}}
 
+Install some additional packages
+{{{
+# yum install perl-LDAP
+}}}
+
 On the DB host that will be monitored create an unpriviledged user, for example named logwatch on each database host. We will connect as that user to tail the alert log from logwatch host.
 {{{
 # adduser logwatch
