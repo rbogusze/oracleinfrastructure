@@ -95,7 +95,7 @@ To make life more colorful I use the package logmon
 Install logmon
 {{{
 # cd /opt
-# yum install ncurses-devel
+# yum install ncurses-devel gcc-c++
 # wget http://www.edespot.com/code/LogMon/LogMon-0.4.3.src.tgz
 # tar xvzf LogMon-0.4.3.src.tgz
 # cd LogMon-0.4.3
