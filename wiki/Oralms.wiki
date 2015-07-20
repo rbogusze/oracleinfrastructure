@@ -16,9 +16,11 @@ We need to create an unpriviledged user that will be able to connect to database
 
 On the logwatch host prevent SSH session from beeing time-out by some firewall or other network equipment add the following parameters to the Host * section :
 {{{
+
+!!! check again, are those parameters valid? !!!
 # vim /etc/ssh/sshd_config
-ServerAliveInterval 300
-ServerAliveCountMax 2
+#ServerAliveInterval 300
+#ServerAliveCountMax 2
 }}}
 
 Install some additional packages
