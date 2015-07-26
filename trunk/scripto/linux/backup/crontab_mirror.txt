@@ -1,0 +1,1 @@
+45 22 * * * /home/remik/scripto/linux/backup/rsync_from_kasztelan_to_synology.sh
