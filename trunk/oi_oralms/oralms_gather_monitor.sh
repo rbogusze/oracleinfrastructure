@@ -9,6 +9,7 @@ GLOBAL_ALERT_RAW=/tmp/global_alert_raw.log
 TMP_LOG_DIR=/tmp/oralms
 CONFIG_FILE=/tmp/oralms_ldap_list.txt
 AWK_FILE=/tmp/ldap_list.awk
+PWD_FILE=/home/orainf/.passwords
 
 INFO_MODE=DEBUG
 
@@ -89,7 +90,7 @@ do {
     msgd "CN: $CN"
    
     # Check the autorisation, if nothing is specified then we assume 'key'
-    USER_AUTH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfOsLogwatchUserAuth']" 2>/dev/null | grep -v '^ *$' `
+    USER_AUTH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfOsLogwatchUserAuth']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
     msgd "USER_AUTH: $USER_AUTH"
 
     if [ -z "$USER_AUTH" ]; then
@@ -100,7 +101,6 @@ do {
     fi
     msgd "USER_AUTH: $USER_AUTH"
 
-#exit 0
 
     msgd "Check for active ssh connection"
     ps -ef | grep -v grep | grep "${USERNAME}@${HOST} tail -f ${LOGFILE_PATH}" > /dev/null
@@ -112,9 +112,37 @@ do {
       if [ ! -f "${TMP_LOG_DIR}/${LOG_ID}" ] ; then
          touch "${TMP_LOG_DIR}/${LOG_ID}"
       fi
-      ssh -o BatchMode=yes ${USERNAME}@${HOST} "tail -f ${LOGFILE_PATH}"  > ${TMP_LOG_DIR}/${LOG_ID} &
-      PID=$!
-      touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
+
+      case $USER_AUTH in
+        "key")
+          msgd "$USER_AUTH authentication method"
+          ssh -o BatchMode=yes ${USERNAME}@${HOST} "tail -f ${LOGFILE_PATH}"  > ${TMP_LOG_DIR}/${LOG_ID} &
+          PID=$!
+          touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
+          ;;
+        "password")
+          msgd "$USER_AUTH authentication method"
+          INDEX_HASH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfOsLogwatchIndexHash']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
+          msgd "INDEX_HASH: $INDEX_HASH"
+          HASH=`echo "$INDEX_HASH" | base64 --decode`
+          msgd "HASH: $HASH"
+          if [ -f "$PWD_FILE" ]; then
+            V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode`
+            msgd "V_PASS: $V_PASS"
+          else
+            msge "Unable to find the password file. Continuing"
+            continue
+          fi
+
+exit 0
+          ;;
+        *)
+          msge "Unknown Authentication method. Continue. _${USER_AUTH}_"
+          continue
+          ;;
+      esac
+
+
       msgd "Sleep 8"
       sleep 8
 
