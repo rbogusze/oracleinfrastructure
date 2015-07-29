@@ -74,24 +74,33 @@ do {
     # set variables
 
     USERNAME=`echo ${LINE} | gawk '{ print $1 }'`
+    msgd "USERNAME: $USERNAME"
     HOST=`echo ${LINE} | gawk '{ print $2 }'`
+    msgd "HOST: $HOST"
     LOGFILE_PATH=`echo ${LINE} | gawk '{ print $3 }'`
+    msgd "LOGFILE_PATH: $LOGFILE_PATH"
     ## when last in LINE and host contains 't' >= 't' !!! ( bash or gawk bug ?? )
     LOG_ID=`echo "${LINE}" | gawk '{ print $4 }'`
-    USER_AUTH=`echo "${LINE}" | gawk '{ print $5 }'`
+    msgd "LOG_ID: $LOG_ID"
 
+
+    # Very not elegant way of obtaining 'cn' because of the whole mess to have the prefix at the same length
+    CN=`echo $LOG_ID | sed 's/\_.*//' | sed 's/^\[//'`
+    msgd "CN: $CN"
+   
     # Check the autorisation, if nothing is specified then we assume 'key'
-    #$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
+    USER_AUTH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfOsLogwatchUserAuth']" 2>/dev/null | grep -v '^ *$' `
     msgd "USER_AUTH: $USER_AUTH"
+
     if [ -z "$USER_AUTH" ]; then
       msgd "USER_AUTH was not set by the LDAP parameter orainfOsLogwatchUserAuth, defaulting to key"
       USER_AUTH=key
     else
-      msgd "It was set by the user: USER_AUTH: $USER_AUTH"
+      msgd "It was set by the user: $USER_AUTH"
     fi
     msgd "USER_AUTH: $USER_AUTH"
 
-exit 0
+#exit 0
 
     msgd "Check for active ssh connection"
     ps -ef | grep -v grep | grep "${USERNAME}@${HOST} tail -f ${LOGFILE_PATH}" > /dev/null
