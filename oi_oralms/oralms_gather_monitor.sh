@@ -78,6 +78,20 @@ do {
     LOGFILE_PATH=`echo ${LINE} | gawk '{ print $3 }'`
     ## when last in LINE and host contains 't' >= 't' !!! ( bash or gawk bug ?? )
     LOG_ID=`echo "${LINE}" | gawk '{ print $4 }'`
+    USER_AUTH=`echo "${LINE}" | gawk '{ print $5 }'`
+
+    # Check the autorisation, if nothing is specified then we assume 'key'
+    #$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
+    msgd "USER_AUTH: $USER_AUTH"
+    if [ -z "$USER_AUTH" ]; then
+      msgd "USER_AUTH was not set by the LDAP parameter orainfOsLogwatchUserAuth, defaulting to key"
+      USER_AUTH=key
+    else
+      msgd "It was set by the user: USER_AUTH: $USER_AUTH"
+    fi
+    msgd "USER_AUTH: $USER_AUTH"
+
+exit 0
 
     msgd "Check for active ssh connection"
     ps -ef | grep -v grep | grep "${USERNAME}@${HOST} tail -f ${LOGFILE_PATH}" > /dev/null
