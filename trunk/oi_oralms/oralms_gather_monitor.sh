@@ -10,7 +10,7 @@ TMP_LOG_DIR=/tmp/oralms
 CONFIG_FILE=/tmp/oralms_ldap_list.txt
 AWK_FILE=/tmp/ldap_list.awk
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -61,7 +61,7 @@ touch $LOCKFILE
 #. /home/orainf/.ssh-agent
 
 # Direct all messages to a file
-exec >> $GLOBAL_ALERT 2>&1
+#exec >> $GLOBAL_ALERT 2>&1
 
 msgd "Cycle through CONFIG_FILE: $CONFIG_FILE and start the data gathering"
 exec 3<> $CONFIG_FILE
@@ -79,7 +79,7 @@ do {
     ## when last in LINE and host contains 't' >= 't' !!! ( bash or gawk bug ?? )
     LOG_ID=`echo "${LINE}" | gawk '{ print $4 }'`
 
-    # Check for active ssh connection
+    msgd "Check for active ssh connection"
     ps -ef | grep -v grep | grep "${USERNAME}@${HOST} tail -f ${LOGFILE_PATH}" > /dev/null
 
     # If ssh connection is not found establish one
@@ -109,6 +109,8 @@ do {
       else
         echo "${LOG_ID} [gather_monitor] tail for ${LOG_ID} already exists"
       fi
+    else
+      msgd "${LOG_ID} ssh connection already exists, doing nothing."
     fi
 
   fi
