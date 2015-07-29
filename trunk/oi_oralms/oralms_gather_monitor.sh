@@ -129,12 +129,15 @@ do {
           if [ -f "$PWD_FILE" ]; then
             V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode`
             msgd "V_PASS: $V_PASS"
+
+            /home/orainf/oi_oralms/ssh_passwd.exp ${USERNAME} ${HOST} ${V_PASS} ${LOGFILE_PATH} > ${TMP_LOG_DIR}/${LOG_ID} &
+            PID=$!
+            touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
           else
             msge "Unable to find the password file. Continuing"
             continue
           fi
 
-exit 0
           ;;
         *)
           msge "Unknown Authentication method. Continue. _${USER_AUTH}_"
