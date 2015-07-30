@@ -124,10 +124,10 @@ do {
           msgd "$USER_AUTH authentication method"
           INDEX_HASH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfOsLogwatchIndexHash']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
           msgd "INDEX_HASH: $INDEX_HASH"
-          HASH=`echo "$INDEX_HASH" | base64 --decode`
+          HASH=`echo "$INDEX_HASH" | base64 --decode -i`
           msgd "HASH: $HASH"
           if [ -f "$PWD_FILE" ]; then
-            V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode`
+            V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}'`
             msgd "V_PASS: $V_PASS"
 
             /home/orainf/oi_oralms/ssh_passwd.exp ${USERNAME} ${HOST} ${V_PASS} ${LOGFILE_PATH} > ${TMP_LOG_DIR}/${LOG_ID} &
