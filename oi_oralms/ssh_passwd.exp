@@ -6,10 +6,16 @@ set hostname [lindex $argv 1]
 set password [lindex $argv 2]
 set commands1 [lindex $argv 3]
 
-spawn ssh -t -l $username $hostname tail -f $commands1
+#spawn ssh -t -l $username $hostname "tail -f $commands1"
+spawn ssh -t -l $username $hostname
 sleep 1
 expect "password:"
 send "$password\r"
 sleep 1
 
-interact
+expect ""
+send "tail -f $commands1\r \&"
+sleep 1
+
+#interact;
+expect eof
