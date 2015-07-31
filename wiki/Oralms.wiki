@@ -25,7 +25,7 @@ On the logwatch host prevent SSH session from beeing time-out by some firewall o
 
 Install some additional packages
 {{{
-# yum install perl-LDAP gcc
+# yum install perl-LDAP gcc expect
 }}}
 
 On the DB host that will be monitored create an unpriviledged user, for example named logwatch on each database host. We will connect as that user to tail the alert log from logwatch host.
