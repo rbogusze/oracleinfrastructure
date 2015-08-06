@@ -44,7 +44,7 @@ run_command_e "mkdir -p $D_HASH_HISTORY"
 run_command_e "cd $D_HASH_HISTORY"
 
 msgd "V_USER: $V_USER"
-msgd "V_PASS: $V_PASS"
+#msgd "V_PASS: $V_PASS"
 
 
 # Extract the Service name from file name. Not elegent, not the first time...
