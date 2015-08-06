@@ -139,6 +139,16 @@ SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_HTML(:dbid,:instid,
 spool off
 EOF
 
+msgd "If dummy file is generated then something went wrong"
+if [ -f awr_____.html ] || [ -f awr_____.txt ]; then
+  msge "Something went wrong."
+  run_command_d "cat awr_____.txt"
+  msge "Something went wrong."
+  msgd "Removing those files, so that the next proper run is not stopped bu their existence"
+  rm -f awr_____.html awr_____.txt
+fi
+
+
 
 ####### Co tu Radzio chcial powiedziec? Robi od poczatku zeby okreslic nazwe plikow?
 
