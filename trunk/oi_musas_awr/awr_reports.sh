@@ -38,13 +38,40 @@ check_parameter $V_USER
 #LOG=/tmp/awr_reports.log
 #exec > $LOG 2>&1
 
-# Sourcing the password variables
 F_CRED_FILE=~/.credentials
-check_file $F_CRED_FILE
-. $F_CRED_FILE
+PWD_FILE=~/.passwords
+V_PASS_SOURCING=hash
+
+if [ ${V_PASS_SOURCING} = "source" ]; then
+  msgd "Getting password from sourcing file"
+  # Sourcing the password variables
+  check_file $F_CRED_FILE
+  . $F_CRED_FILE
+
+elif [ ${V_PASS_SOURCING} = "hash" ]; then
+  msgd "Getting password from hash"
+
+  INDEX_HASH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfDbRrdoraIndexHash']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
+  msgd "INDEX_HASH: $INDEX_HASH"
+  HASH=`echo "$INDEX_HASH" | base64 --decode -i`
+  msgd "HASH: $HASH"
+  if [ -f "$PWD_FILE" ]; then
+    V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
+    msgd "V_PASS: $V_PASS"
+  else
+    msge "Unable to find the password file. Exiting"
+    exit 0
+  fi
+
+else
+  msge "Unknown method to retrieve password. Exiting"
+  exit 0
+fi
 
 msgd "V_USER: $V_USER"
 msgd "V_PASS: $V_PASS"
+check_variable $V_USER
+check_variable $V_PASS
 
 S_SQL_ID_REPORTS=~/oi_musas_awr/sql_id_reports.sh
 check_file $S_SQL_ID_REPORTS
