@@ -57,7 +57,7 @@ elif [ ${V_PASS_SOURCING} = "hash" ]; then
   msgd "HASH: $HASH"
   if [ -f "$PWD_FILE" ]; then
     V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
-    msgd "V_PASS: $V_PASS"
+    #msgd "V_PASS: $V_PASS"
   else
     msge "Unable to find the password file. Exiting"
     exit 0
@@ -69,7 +69,7 @@ else
 fi
 
 msgd "V_USER: $V_USER"
-msgd "V_PASS: $V_PASS"
+#msgd "V_PASS: $V_PASS"
 check_variable $V_USER
 check_variable $V_PASS
 
