@@ -5,6 +5,7 @@
 #
 # Example
 # $ ./bulk_generate.sh 08:00 16:00 8
+# $ ./bulk_generate.sh EBSDB4 apps 08:00 16:00 8
 #
 #
 # Load usefull functions
@@ -21,10 +22,14 @@ INFO_MODE=DEBUG
 check_parameter $1
 check_parameter $2
 check_parameter $3
+check_parameter $4
+check_parameter $5
 
-TIME_START=$1
-TIME_END=$2
-NR_DAYS_BACK=$3
+DB_CN=$1
+USERNAME=$2
+TIME_START=$3
+TIME_END=$4
+NR_DAYS_BACK=$5
 
 myvar=0
 while [ $myvar -ne $NR_DAYS_BACK ]
@@ -39,7 +44,7 @@ do
   if [ "$DAY_OF_WEEK" == "7" ] || [ "$DAY_OF_WEEK" == "6" ]; then
     echo "This is Sunday or Saturday, skiping statspack report generation"
   else
-    run_command "./awr_reports.sh TEST ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
+    run_command "./awr_reports.sh ${DB_CN} ${USERNAME} ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
   fi #if [ "$DAY_OF_WEEK" == "0" ];
 
   myvar=$(( $myvar + 1 ))
