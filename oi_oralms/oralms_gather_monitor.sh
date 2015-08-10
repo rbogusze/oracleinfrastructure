@@ -10,8 +10,9 @@ TMP_LOG_DIR=/tmp/oralms
 CONFIG_FILE=/tmp/oralms_ldap_list.txt
 AWK_FILE=/tmp/ldap_list.awk
 PWD_FILE=/home/orainf/.passwords
+TAG_CREATION=easy
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -35,25 +36,36 @@ if [ ! -d $LOCKFILE_SPAN ] ; then
 fi
 
 msgd "Ask the ldap for all the alert logs to monitor"
-msgd " first pass, determine length of longest host, sid and tns name from ldap"
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $4}'         >  /tmp/conf4.list
 
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $2}'         >  /tmp/conf2.list
+if [ "$TAG_CREATION" = "easy" ]; then
+  msgd "easy tag creation"
 
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $5}'         >  /tmp/conf5.list
+  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'cn']" | awk '{print $1" "$2" "$3" ["$4"_"$2"]"}' > $CONFIG_FILE
+else
+  msgd "messy tag creation, but equally idented "
+  msgd "first pass, determine length of longest host, sid and tns name from ldap"
+  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $4}'         >  /tmp/conf4.list
 
-LEN_4=`cat /tmp/conf4.list | wc -L`
+  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $2}'         >  /tmp/conf2.list
 
-LEN_2=`cat /tmp/conf2.list | wc -L`
+  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $5}'         >  /tmp/conf5.list
 
-LEN_5=`cat /tmp/conf5.list | wc -L`
+  LEN_4=`cat /tmp/conf4.list | wc -L`
 
-msgd "AWK_FILE: $AWK_FILE"
-echo '{ printf $1 " " $2 " " $3 " [" substr($5 "_____________________________",1,' $LEN_5 ') "_" substr($4 "_____________________________",1,' $LEN_4 ') "_" substr($2 "____________________________",1,' $LEN_2 '); v_spnr=split ($3, a, "/"); if (substr(a[v_spnr], 1, 3) == "ale") printf "_A"; if (substr(a[v_spnr], 1, 3) == "drc") printf "_D"; print "] dummy_parm"}' > $AWK_FILE
+  LEN_2=`cat /tmp/conf2.list | wc -L`
 
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
+  LEN_5=`cat /tmp/conf5.list | wc -L`
+
+  msgd "AWK_FILE: $AWK_FILE"
+  echo '{ printf $1 " " $2 " " $3 " [" substr($5 "_____________________________",1,' $LEN_5 ') "_" substr($4 "_____________________________",1,' $LEN_4 ') "_" substr($2 "____________________________",1,' $LEN_2 '); v_spnr=split ($3, a, "/"); if (substr(a[v_spnr], 1, 3) == "ale") printf "_A"; if (substr(a[v_spnr], 1, 3) == "drc") printf "_D"; print "] dummy_parm"}' > $AWK_FILE
+
+  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
+fi 
+
 
 check_file $CONFIG_FILE
+
+run_command_d "cat $CONFIG_FILE"
 
 # Set lock file
 touch $LOCKFILE
@@ -62,7 +74,7 @@ touch $LOCKFILE
 #. /home/orainf/.ssh-agent
 
 # Direct all messages to a file
-#exec >> $GLOBAL_ALERT 2>&1
+exec >> $GLOBAL_ALERT 2>&1
 
 msgd "Cycle through CONFIG_FILE: $CONFIG_FILE and start the data gathering"
 exec 3<> $CONFIG_FILE

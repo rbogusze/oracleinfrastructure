@@ -3,9 +3,12 @@
 
 #set -x
 
-LOGMON_CONFIG=/home/orainf/oi_oralms/logmon_global_alert.conf
 
 # Make it more colorfull and add action to selected events
 cd /tmp
-logmon -f $LOGMON_CONFIG global_alert.log
+tail -f global_alert.log | ack --flush --passthru --color --color-match=red "ORA-.....|terminated|Corrupt" \
+| ack --flush --passthru --color --color-match=yellow "Completed: ALTER DATABASE OPEN|Completed: ALTER DATABASE CLOSE NORMAL|Completed: ALTER DATABASE DISMOUNT" \
+| ack --flush --passthru --color --color-match=magenta "cannot allocate new log|Checkpoint not complete" \
+| ack --flush --passthru --color --color-match=cyan "warning|free_space_tablespaces|gather_monitor|free_space_filesystems|tremor error" \
+| ack --flush --passthru --color --color-match=green "^... ... .. ..:..:.. .... ....|^... ... .. ..:..:.. ... ...."
 
