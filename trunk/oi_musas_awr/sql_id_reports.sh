@@ -12,17 +12,48 @@ fi
 
 # Sourcing the password variables
 F_CRED_FILE=~/.credentials
-check_file $F_CRED_FILE
-. $F_CRED_FILE
+PWD_FILE=~/.passwords
+V_PASS_SOURCING=hash
+
+F_RAPORT_FILE=$1
+check_file $F_RAPORT_FILE
+V_USER=$2
+check_parameter $V_USER
+
+msgd "F_RAPORT_FILE: $F_RAPORT_FILE"
+V_CN=`dirname $F_RAPORT_FILE | awk -F"/" '{print $6}'`
+msgd "V_CN: $V_CN"
+
+if [ ${V_PASS_SOURCING} = "source" ]; then
+  msgd "Getting password from sourcing file"
+  # Sourcing the password variables
+  check_file $F_CRED_FILE
+  . $F_CRED_FILE
+
+elif [ ${V_PASS_SOURCING} = "hash" ]; then
+  msgd "Getting password from hash"
+
+  INDEX_HASH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$V_CN)" "['orainfDbRrdoraIndexHash']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
+  msgd "INDEX_HASH: $INDEX_HASH"
+  HASH=`echo "$INDEX_HASH" | base64 --decode -i`
+  msgd "HASH: $HASH"
+  if [ -f "$PWD_FILE" ]; then
+    V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
+    #msgd "V_PASS: $V_PASS"
+  else
+    msge "Unable to find the password file. Exiting"
+    exit 0
+  fi
+else
+  msge "Unknown method to retrieve password. Exiting"
+  exit 0
+fi
+
+
 
 msgi "ala ma kota"
 INFO_MODE=DEBUG
 
-F_RAPORT_FILE=$1
-check_file $F_RAPORT_FILE
-
-V_USER=$2
-check_parameter $V_USER
 check_parameter $V_PASS
 
 F_HASH=/tmp/hash_reports.tmp
@@ -48,9 +79,6 @@ msgd "V_USER: $V_USER"
 
 
 # Extract the Service name from file name. Not elegent, not the first time...
-msgd "F_RAPORT_FILE: $F_RAPORT_FILE"
-V_CN=`dirname $F_RAPORT_FILE | awk -F"/" '{print $6}'`
-msgd "V_CN: $V_CN"
 HOUR_START=`basename $F_RAPORT_FILE | grep -o "....-..-.._..:.._....-..-.._..:.." | sed s/^....-..-.._// | sed s/_....-..-.._/\|/ | awk -F"|" '{print $1}'`
 msgd "HOUR_START: $HOUR_START"
 HOUR_STOP=`basename $F_RAPORT_FILE | grep -o "....-..-.._..:.._....-..-.._..:.." | sed s/^....-..-.._// | sed s/_....-..-.._/\|/ | awk -F"|" '{print $2}'`
