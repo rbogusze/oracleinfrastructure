@@ -10,7 +10,7 @@ $ svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scr
 $ cd 
 }}}
 
-If going through proxy provide the proxy address in svn configuration
+If going through proxy provide the proxy address in svn configuration for the whole system:
 {{{
 # vi /etc/subversion/servers
 [Global]
@@ -18,6 +18,12 @@ http-proxy-host=proxy.example.com
 http-proxy-port=3128
 }}}
 
+Or just locally for the current user
+{{{
+$ vi ~/.subversion/servers
+http-proxy-host=proxy.example.com
+http-proxy-port=3128
+}}}
 
 Following projects use extensively from this depot, but I also use it for frequently used SQL scripts.
 
