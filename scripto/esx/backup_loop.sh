@@ -6,7 +6,12 @@
 # # vim-cmd vmsvc/getallvms | awk '{print $2}' | sort | grep -v "^Name$"
 #
 #
+# Assumptions:
+# - ability to login passwordless to ESX host
+#
 # Sample usage: 
+# $ ./backup_loop.sh
+#
 # *** Start of Configuration section ***
 LOG_DIR=/var/tmp/backup_esx
 LOG_NAME=backup.log
