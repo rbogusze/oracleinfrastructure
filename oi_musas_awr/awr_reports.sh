@@ -169,12 +169,13 @@ spool off
 EOF
 
 msgd "If dummy file is generated then something went wrong"
-if [ -f awr_____.html ] || [ -f awr_____.txt ]; then
+if [ -f awr___.html ] || [ -f awr___.txt ]; then
   msge "Something went wrong."
-  run_command_d "cat awr_____.txt"
+  run_command_d "cat awr___.txt"
   msge "Something went wrong."
-  msgd "Removing those files, so that the next proper run is not stopped bu their existence"
-  rm -f awr_____.html awr_____.txt
+  msgd "Removing those files, so that the next proper run is not stopped by their existence"
+  rm -f awr___.html awr___.txt
+  exit 1
 fi
 
 msgi "Generating AWR report. Done."
