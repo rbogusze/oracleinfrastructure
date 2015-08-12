@@ -36,8 +36,9 @@ while [ $myvar -ne $NR_DAYS_BACK ]
 do
 
   CHECK_FOR_DATE=`date -I -d "$myvar day ago"`
-
-  msgd "Computing fo date: ${CHECK_FOR_DATE}"
+  msgi "#################################################################"
+  msgi "Computing fo date: ${CHECK_FOR_DATE}"
+  msgi "#################################################################"
 
   # If this is Sunday or Saturday skip that day
   DAY_OF_WEEK=`date --date=$CHECK_FOR_DATE '+%u'`

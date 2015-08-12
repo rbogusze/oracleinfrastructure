@@ -5,7 +5,8 @@
 #
 
 LOCKFILE=/tmp/awr_reports.lock
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
+
 
 # Load usefull functions
 D_SCRIPTO_DIR=~/scripto
@@ -26,8 +27,8 @@ CURRENT_DAY="$3"
 HOUR_START="$4"
 HOUR_STOP="$5"
 
-echo "HOUR_START: $HOUR_START"
-echo "HOUR_STOP : $HOUR_STOP"
+msgd "HOUR_START: $HOUR_START"
+msgd "HOUR_STOP : $HOUR_STOP"
 
 check_parameter $CURRENT_DAY
 check_parameter $HOUR_START
@@ -77,7 +78,7 @@ S_SQL_ID_REPORTS=~/oi_musas_awr/sql_id_reports.sh
 check_file $S_SQL_ID_REPORTS
 
 IFS="="
-echo "[msg] checking for $CN"
+msgi "checking for $CN"
 
 testavail=`sqlplus -S /nolog <<EOF
 set head off pagesize 0 echo off verify off feedback off heading off
@@ -87,14 +88,14 @@ exit;
 EOF`
 
 if [ "$testavail" != "1" ]; then
-  echo "DB $CN not available, exiting !!" 
+  msge "DB $CN not available, exiting !!" 
   rm -f $LOCKFILE
   exit 0
 else
-  echo "DB $CN available , generating AWR reports" 
+  msgi "DB $CN available , generating AWR reports" 
 
 run_command "mkdir -p /var/tmp/awr_reports"
-run_command "check_directory /var/tmp/awr_reports"
+check_directory /var/tmp/awr_reports
 run_command "cd /var/tmp/awr_reports"
 
 msgd "Checking if I am able to execute DBMS_WORKLOAD_REPOSITORY package"
@@ -116,9 +117,10 @@ else
   msgd "OK, I able to access dbms_workload_repository. Continuing."
 fi
 
+msgi "Generating AWR report. Please wait"
 
-#sqlplus /nolog << EOF > /dev/null
-sqlplus /nolog << EOF 
+#sqlplus /nolog << EOF 
+sqlplus /nolog << EOF > /dev/null
 set head off pagesize 0 echo off verify off feedback off heading off
 col fname_txt new_value file_name_txt
 col fname_html new_value file_name_html
@@ -246,7 +248,7 @@ check_directory $D_HTML_DAY
 run_command "mv $FHTML $D_HTML_DAY"
 
 # generate sql_id reports
-msga "Generating sql_id reports."
+msgi "Generating sql_id reports."
 check_file `which php`
 $S_SQL_ID_REPORTS $D_TXT_DAY/$FTXT $V_USER
 

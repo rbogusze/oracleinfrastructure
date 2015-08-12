@@ -50,9 +50,7 @@ else
 fi
 
 
-
-msgi "ala ma kota"
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 check_parameter $V_PASS
 
@@ -145,8 +143,8 @@ EOF
 
 done < $F_HASH
 
-msgi "Because of Oracle bug in 10.2.0.4 that causes in txt reports many '##########'"
-msgi "I am turning the html files into txt ones."
+msgd "Because of Oracle bug in 10.2.0.4 that causes in txt reports many '##########'"
+msgd "I am turning the html files into txt ones."
 mkdir -p /tmp/org_hash
 for i in `ls *.html`
 do
@@ -158,7 +156,7 @@ do
 done
 
 
-msgi "Move all the .html files to AWR_html dir"
+msgd "Move all the .html files to AWR_html dir"
 msgd "D_HASH_HISTORY: $D_HASH_HISTORY"
 D_HASH_HISTORY_HTML=`echo $D_HASH_HISTORY | sed s/AWR_txt/AWR_html/`
 msgd "D_HASH_HISTORY_HTML: $D_HASH_HISTORY_HTML"
