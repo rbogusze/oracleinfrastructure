@@ -156,8 +156,8 @@ select snap_id into :end_snap from dba_hist_snapshot where DBID=:dbid and INSTAN
 end;
 /
 
-select 'awr_' || :instname || '_' || :begin_snap || '_' || :end_snap || '_' || :begin_date_fname || '_' || :end_date_fname || '.txt' "fname_txt" from dual;
-select 'awr_' || :instname || '_' || :begin_snap || '_' || :end_snap || '_' || :begin_date_fname || '_' || :end_date_fname || '.html' "fname_html" from dual;
+select 'awr_' || :instname || '_' || :begin_date_fname || '_' || :end_date_fname || '.txt' "fname_txt" from dual;
+select 'awr_' || :instname || '_' || :begin_date_fname || '_' || :end_date_fname || '.html' "fname_html" from dual;
 
 spool &file_name_txt
 SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_TEXT(:dbid,:instid,:begin_snap,:end_snap));
@@ -177,7 +177,8 @@ if [ -f awr_____.html ] || [ -f awr_____.txt ]; then
   rm -f awr_____.html awr_____.txt
 fi
 
-
+msgi "Generating AWR report. Done."
+msgd "Generating file names"
 
 ####### Co tu Radzio chcial powiedziec? Robi od poczatku zeby okreslic nazwe plikow?
 
@@ -210,12 +211,14 @@ select snap_id into :end_snap from dba_hist_snapshot where DBID=:dbid and INSTAN
 (to_date(:end_date,'YYYY-MM-DD HH24:MI') between begin_interval_time and end_interval_time);
 end;
 /
-select  'awr_' || :instname || '_' || :begin_snap || '_' || :end_snap || '_' || :begin_date_fname || '_' || :end_date_fname || '.txt', 1 from dual
+select  'awr_' || :instname || '_' || :begin_date_fname || '_' || :end_date_fname || '.txt', 1 from dual
 union
-select  'awr_' || :instname || '_' || :begin_snap || '_' || :end_snap || '_' || :begin_date_fname || '_' || :end_date_fname || '.html', 2 from dual order by 2;
+select  'awr_' || :instname || '_' || :begin_date_fname || '_' || :end_date_fname || '.html', 2 from dual order by 2;
 EOF
 
 . ./FNAMES.TXT
+
+msgd "Generating file names. Done."
 
 numlines=$(wc -l $FTXT)
 numlines=$(echo $numlines | awk '{ print $1 }')
