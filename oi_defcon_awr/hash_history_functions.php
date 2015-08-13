@@ -44,6 +44,7 @@ function draw_chart($data_values, $data_values_label, $chart_data_label, $sectio
     $filtered_data_values = rem_array_filter($data_values);
     $filtered_data_values_label = rem_array_filter($data_values_label);
     //show_array($filtered_data_values);
+    //echo "<BR> ala ma kota wielkiego";
     //show_array($filtered_data_values_label);
     draw_chart($filtered_data_values, $filtered_data_values_label, $chart_data_label, $section_name, $draw_sql_explain, $dir);
   } else {
@@ -52,9 +53,12 @@ function draw_chart($data_values, $data_values_label, $chart_data_label, $sectio
     // chart_data - values like 2500 PIO
     // chart_leg - legent to values like timestamp
     // chart_data_label - Subtitle
+    //echo "<BR> ala ma kota wielkiego";
+    //show_array($data_values);
+    //show_array($data_values_label);
     echo "<img src=\"draw_chart.php?chart_data=$tmp1&chart_leg=$tmp2&chart_data_label=$chart_data_label&chart_title=$section_name\" border=0 align=center width= height=>";
     // For troubleschooting
-    //echo "<a href=\"draw_chart.php?data_values=$tmp1&chart_leg=$tmp2&data_values_label=$data_values_label&chart_title=$section_name\" >aaa </a>";
+    // echo "<a href=\"draw_chart.php?data_values=$tmp1&chart_leg=$tmp2&data_values_label=$data_values_label&chart_title=$section_name\" >aaa </a>";
 
     // Create a table with SQL explain plan for every day.
     // I will not create a separate function because all the same parameters should be passed to decide
