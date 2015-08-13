@@ -9,7 +9,8 @@ $chart_leg=unserialize(base64_decode($_GET['chart_leg']));
 $chart_title=$_GET['chart_title'];
 $chart_data_label=$_GET['chart_data_label'];
 
-//echo "<BR> ala ma kota draw chart <BR>";
+//$str1 = "ala ma kota draw chart";
+//printf("[%s]<br>",$str1);
 //print_r($chart_data);
 //print_r($chart_leg);
 
