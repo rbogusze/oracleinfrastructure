@@ -144,17 +144,17 @@ EOF
 
 done < $F_HASH
 
-msgd "Because of Oracle bug in 10.2.0.4 that causes in txt reports many '##########'"
-msgd "I am turning the html files into txt ones."
-mkdir -p /tmp/org_hash
-for i in `ls *.html`
-do
-  #echo $i
-  F_TMP_NAME=`echo $i | sed s/html$/txt/`
-  #echo "new filename: $F_TMP_NAME"
-  mv $F_TMP_NAME /tmp/org_hash
-  lynx -dump http://logwatch/awr_reports/$V_CN/AWR_txt_day/hash_history/$i > $F_TMP_NAME
-done
+#msgd "Because of Oracle bug in 10.2.0.4 that causes in txt reports many '##########'"
+#msgd "I am turning the html files into txt ones."
+#mkdir -p /tmp/org_hash
+#for i in `ls *.html`
+#do
+#  #echo $i
+#  F_TMP_NAME=`echo $i | sed s/html$/txt/`
+#  #echo "new filename: $F_TMP_NAME"
+#  mv $F_TMP_NAME /tmp/org_hash
+#  lynx -dump http://logwatch/awr_reports/$V_CN/AWR_txt_day/hash_history/$i > $F_TMP_NAME
+#done
 
 
 msgd "Move all the .html files to AWR_html dir"
