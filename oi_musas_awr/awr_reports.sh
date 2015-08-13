@@ -244,6 +244,8 @@ fi; #Baza $CN dostepna , generuje raporty
 # destination dir with time, so that only reports from the same time range are in one dir
 D_TXT_DAY=/var/www/html/awr_reports/${CN}_${HOUR_START}_${HOUR_STOP}/AWR_txt_day
 D_HTML_DAY=/var/www/html/awr_reports/${CN}_${HOUR_START}_${HOUR_STOP}/AWR_html_day
+msgd "D_TXT_DAY: $D_TXT_DAY"
+msgd "D_HTML_DAY: $D_HTML_DAY"
 
 msgd "FTXT: $FTXT"
 msgd "FHTML: $FHTML"
@@ -258,7 +260,7 @@ run_command "mv $FHTML $D_HTML_DAY"
 # generate sql_id reports
 msgi "Generating sql_id reports."
 check_file `which php`
-$S_SQL_ID_REPORTS $D_TXT_DAY/$FTXT $V_USER
+run_command "$S_SQL_ID_REPORTS $D_TXT_DAY/$FTXT $V_USER"
 
 msgi "Done awr_reports.sh"
 
