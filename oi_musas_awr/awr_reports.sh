@@ -237,9 +237,13 @@ mv ${FHTML}.tmp $FHTML
 
 fi; #Baza $CN dostepna , generuje raporty
 
-# moving the awr reports between the directories
-D_TXT_DAY=/var/www/html/awr_reports/$CN/AWR_txt_day
-D_HTML_DAY=/var/www/html/awr_reports/$CN/AWR_html_day
+# moving the awr reports between the directories, all in one place
+#D_TXT_DAY=/var/www/html/awr_reports/$CN/AWR_txt_day
+#D_HTML_DAY=/var/www/html/awr_reports/$CN/AWR_html_day
+
+# destination dir with time, so that only reports from the same time range are in one dir
+D_TXT_DAY=/var/www/html/awr_reports/${CN}_${HOUR_START}_${HOUR_STOP}/AWR_txt_day
+D_HTML_DAY=/var/www/html/awr_reports/${CN}_${HOUR_START}_${HOUR_STOP}/AWR_html_day
 
 msgd "FTXT: $FTXT"
 msgd "FHTML: $FHTML"
