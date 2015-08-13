@@ -10,7 +10,7 @@ else
   . ${D_SCRIPTO_DIR}/bash/bash_library.sh
 fi
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Sourcing the password variables
 F_CRED_FILE=~/.credentials
@@ -52,8 +52,6 @@ else
   exit 0
 fi
 
-
-#INFO_MODE=DEBUG
 
 check_parameter $V_PASS
 
@@ -130,8 +128,8 @@ select snap_id into :end_snap from dba_hist_snapshot where DBID=:dbid and INSTAN
 end;
 /
 
-select 'awr_' || :instname || '_' || :sqlid || '_' || :begin_snap || '_' || :end_snap || '_' || :begin_date_fname || '_' || :end_date_fname || '.txt' "fname_txt" from dual;
-select 'awr_' || :instname || '_' || :sqlid || '_' || :begin_snap || '_' || :end_snap || '_' || :begin_date_fname || '_' || :end_date_fname || '.html' "fname_html" from dual;
+select 'awr_' || :instname || '_' || :sqlid || '_' || :begin_date_fname || '_' || :end_date_fname || '.txt' "fname_txt" from dual;
+select 'awr_' || :instname || '_' || :sqlid || '_' || :begin_date_fname || '_' || :end_date_fname || '.html' "fname_html" from dual;
 
 spool &file_name_txt
 SELECT output FROM TABLE(dbms_workload_repository.AWR_SQL_REPORT_TEXT(:dbid,:instid,:begin_snap,:end_snap,:sqlid));
