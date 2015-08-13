@@ -94,7 +94,9 @@ require("calendar/month.php");
 
 //Include waits from rrdora
 echo "</td><td valign=top>";
-echo "<img src=\"http://logwatch/rrdora_history/$getFilenameDate/$sid/12hour_waits.gif\" border=0 align=center width= height=>";
+if (is_file("/var/www/rrdora_history/$getFilenameDate/$sid/12hour_waits.gif")) {
+  echo "<img src=\"http://logwatch/rrdora_history/$getFilenameDate/$sid/12hour_waits.gif\" border=0 align=center width= height=>";
+}
 echo "</td></table>";
 
 //Include statspack charts and tables 
