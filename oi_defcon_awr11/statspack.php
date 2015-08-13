@@ -98,13 +98,19 @@ while (!feof($fh))
 
   // Spot sections
   if (strstr ( $data, "SQL ordered by Gets  ")) { echo "<font color='green'>"; $section_name = "Buffer_Gets"; }
-  if (strstr ( $data, "SQL ordered by Reads  ")) { echo "<font color='green'>"; $section_name = "Physical_Reads"; }
+  if (strstr ( $data, "SQL ordered by Physical Reads ")) { echo "<font color='green'>"; $section_name = "Physical_Reads"; }
   if (strstr ( $data, "SQL ordered by CPU ")) { echo "<font color='green'>"; $section_name = "CPU_Usage"; }
   if (strstr ( $data, "SQL ordered by Elapsed ")) { $section_name = "Elapsed_Time"; }
   if (strstr ( $data, "SQL ordered by Executions ")) { echo "<font color='green'>"; $section_name = "Executions_Rows"; }
   if (strstr ( $data, "SQL ordered by Parse Calls ")) { echo "<font color='green'>"; $section_name = "Parse_Calls"; }
   if (strstr ( $data, "SQL ordered by Sharable Memory ")) { echo "<font color='green'>"; $section_name = "Sharable_Mem"; }
   if (strstr ( $data, "SQL ordered by User I/O Wait Time ")) { echo "<font color='green'>"; $section_name = "User_IO_wait"; }
+  if (strstr ( $data, "SQL ordered by Version Count ")) { echo "<font color='green'>"; $section_name = "Version_Count"; }
+  if (strstr ( $data, "SQL ordered by Cluster Wait Time ")) { echo "<font color='green'>"; $section_name = "Version_Count"; }
+  if (strstr ( $data, "Total - Physical Reads as a percentage of Total Disk ")) { echo "<font color='green'>"; $section_name = "Version_Count"; }
+  if (strstr ( $data, "Key Instance Activity Stats ")) { continue;  }
+
+
 
   if ( $section ) {
     // I need to stripe multiple spaces
@@ -125,7 +131,8 @@ while (!feof($fh))
     $trash4 = str_replace(",", "", $trash4);  // | %Total	|
     $trash5 = str_replace(",", "", $trash5);  // | CPU Time (s)	|
     $trash6 = str_replace(",", "", $trash6);  // | Elapsd Time (|
-    if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash4) ) { 
+//    echo "<BR>RAW section_name: $section_name , trash1: $trash1 , trash2: $trash2 , trash3: $trash3 , trash4: $trash4 , trash5: $trash5 , trash6: $trash6 , trash7: $trash7 , trash8: $trash8 <BR>";
+    if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash5) ) { 
       echo "<BR> section_name: $section_name , trash1: $trash1 , trash2: $trash2 , trash3: $trash3 , trash4: $trash4 , trash5: $trash5 , trash6: $trash6 , trash7: $trash7 , trash8: $trash8 <BR>";
       //If this is a numeric value, then the next is module name, we need it so I take it
       $module_name = fgets($fh);
@@ -142,7 +149,7 @@ while (!feof($fh))
       // Bulding arrays with hash and values
       if ($section_name == "Buffer_Gets") {
         $data_values1[$data_values1_counter] = $trash1;			//Buffer Gets
-        $data_values1_label[$data_values1_counter] = $trash7;	//SQL Id
+        $data_values1_label[$data_values1_counter] = $trash8;	//SQL Id
         $data_values1_module[$data_values1_counter] = $module_name;
         $data_values1_sql[$data_values1_counter] = $sql_text;
         $data_values1_executions[$data_values1_counter] = $trash2;	//Executions
@@ -154,7 +161,7 @@ while (!feof($fh))
         $data_values2_label[$data_values2_counter] = $trash7; //SQL Id
         $data_values2_module[$data_values2_counter] = $module_name;
         $data_values2_sql[$data_values2_counter] = $sql_text;
-        $data_values2_executions[$data_values2_counter] = $trash2; //Executions
+        $data_values2_executions[$data_values2_counter] = $trash3; //Executions
         $data_values2_elapsedtime[$data_values2_counter] = $trash6;	//Elapsed Time (s)
         $data_values2_counter++;
       }
@@ -175,10 +182,10 @@ while (!feof($fh))
       }
       if ($section_name == "Elapsed_Time") {
         $data_values5[$data_values5_counter] = $trash1; //Elapsed Time (s)
-        $data_values5_label[$data_values5_counter] = $trash6; //sql_id
+        $data_values5_label[$data_values5_counter] = $trash7; //sql_id
         $data_values5_module[$data_values5_counter] = $module_name;
         $data_values5_sql[$data_values5_counter] = $sql_text;
-        $data_values5_executions[$data_values5_counter] = $trash3;
+        $data_values5_executions[$data_values5_counter] = $trash2;
         $data_values5_counter++;
       } 
     } // if ( is_numeric($trash1)
