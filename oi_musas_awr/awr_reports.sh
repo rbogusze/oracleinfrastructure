@@ -179,6 +179,8 @@ if [ -f awr___.html ] || [ -f awr___.txt ]; then
 fi
 
 msgi "Generating AWR report. Done."
+
+
 msgd "Generating file names"
 
 ####### Co tu Radzio chcial powiedziec? Robi od poczatku zeby okreslic nazwe plikow?
@@ -220,6 +222,17 @@ EOF
 . ./FNAMES.TXT
 
 msgd "Generating file names. Done."
+run_command_d "cat FNAMES.TXT"
+
+msgd "We should have the awr and txt reports now in tmp dir"
+msgd "Checking if there are no fatal ORA- in files that will make them unusable"
+
+TMP_CHK=`cat $FTXT $FHTML | grep "ORA-20019" | wc -l`
+msgd "TMP_CHK: $TMP_CHK"
+if [ $TMP_CHK -gt 1 ]; then
+  msge "Fatal error found in AWR reports. Exiting"
+  exit 1 
+fi
 
 numlines=$(wc -l $FTXT)
 numlines=$(echo $numlines | awk '{ print $1 }')
