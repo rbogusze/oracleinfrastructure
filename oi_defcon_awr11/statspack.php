@@ -56,7 +56,7 @@ if (is_file($dir . $filename) ) {
 
 // open file
 $fh = fopen ($dir . $filename, "r") or die("Could not open file");
-//echo "<BR> file: $filename in dir: $dir <BR>";
+echo "<BR> file: $filename in dir: $dir <BR>";
 
 
 //some variables
@@ -104,6 +104,7 @@ while (!feof($fh))
   if (strstr ( $data, "SQL ordered by Executions ")) { echo "<font color='green'>"; $section_name = "Executions_Rows"; }
   if (strstr ( $data, "SQL ordered by Parse Calls ")) { echo "<font color='green'>"; $section_name = "Parse_Calls"; }
   if (strstr ( $data, "SQL ordered by Sharable Memory ")) { echo "<font color='green'>"; $section_name = "Sharable_Mem"; }
+  if (strstr ( $data, "SQL ordered by User I/O Wait Time ")) { echo "<font color='green'>"; $section_name = "User_IO_wait"; }
 
   if ( $section ) {
     // I need to stripe multiple spaces
@@ -113,23 +114,24 @@ while (!feof($fh))
     $data = trim($data);
 
     // Separate the string into pieces
-    list($trash1, $trash2, $trash3, $trash4, $trash5, $trash6, $trash7) = split(' ',$data);
+    list($trash1, $trash2, $trash3, $trash4, $trash5, $trash6, $trash7, $trash8) = split(' ',$data);
 
     // If the all the tokens are number I assume we are in the first line describing
     // SQL with values. This is a bit naive, but I see no other way
+    // because of the trash3, which can be N/A if number of executions is 0, I check for trash4 instead
     $trash1 = str_replace(",", "", $trash1);  // | Buffer Gets	|
     $trash2 = str_replace(",", "", $trash2);  // | Executions	|
     $trash3 = str_replace(",", "", $trash3);  // | Gets per Exec|
     $trash4 = str_replace(",", "", $trash4);  // | %Total	|
     $trash5 = str_replace(",", "", $trash5);  // | CPU Time (s)	|
     $trash6 = str_replace(",", "", $trash6);  // | Elapsd Time (|
-    if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash3) ) { 
-      //echo "<BR> section_name: $section_name , trash1: $trash1 , trash2: $trash2 , trash3: $trash3 , trash4: $trash4 , trash5: $trash5 , trash6: $trash6 , trash7: $trash7 <BR>";
+    if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash4) ) { 
+      echo "<BR> section_name: $section_name , trash1: $trash1 , trash2: $trash2 , trash3: $trash3 , trash4: $trash4 , trash5: $trash5 , trash6: $trash6 , trash7: $trash7 , trash8: $trash8 <BR>";
       //If this is a numeric value, then the next is module name, we need it so I take it
       $module_name = fgets($fh);
       if (strstr ($module_name, "Module: ")) { 
         $module_name = str_replace("Module: ", "", $module_name);
-        $module_name = substr($module_name, 0, 13);  //Trimint to first 13 char
+        $module_name = substr($module_name, 0, 25);  //Trimint to first 25 char
       } else {
         $module_name = "NA";
       }
@@ -158,10 +160,10 @@ while (!feof($fh))
       }
       if ($section_name == "CPU_Usage") {
         $data_values3[$data_values3_counter] = $trash1;		// CPU Time (s)
-        $data_values3_label[$data_values3_counter] = $trash6;    //sql_id
+        $data_values3_label[$data_values3_counter] = $trash8;    //sql_id
         $data_values3_module[$data_values3_counter] = $module_name;  //module name
         $data_values3_sql[$data_values3_counter] = $sql_text;
-        $data_values3_executions[$data_values3_counter] = $trash3;
+        $data_values3_executions[$data_values3_counter] = $trash2;
         $data_values3_counter++;
       }
       if ($section_name == "Parse_Calls") {
