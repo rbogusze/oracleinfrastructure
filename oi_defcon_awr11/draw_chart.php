@@ -1,8 +1,8 @@
 <?php
 /* $Id: draw_chart.php,v 1.1 2012-05-17 10:25:16 orainf Exp $ */
 
-include ("/var/www/html/oi_defcon_awr/jpgraph-1.20.5/src/jpgraph.php");
-include ("/var/www/html/oi_defcon_awr/jpgraph-1.20.5/src/jpgraph_bar.php");
+include ("/var/www/html/oi_defcon_awr11/jpgraph-1.20.5/src/jpgraph.php");
+include ("/var/www/html/oi_defcon_awr11/jpgraph-1.20.5/src/jpgraph_bar.php");
 
 $chart_data=unserialize(base64_decode($_GET['chart_data']));
 $chart_leg=unserialize(base64_decode($_GET['chart_leg']));
