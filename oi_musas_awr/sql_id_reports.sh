@@ -10,18 +10,21 @@ else
   . ${D_SCRIPTO_DIR}/bash/bash_library.sh
 fi
 
+INFO_MODE=DEBUG
+
 # Sourcing the password variables
 F_CRED_FILE=~/.credentials
 PWD_FILE=~/.passwords
 V_PASS_SOURCING=hash
 
 F_RAPORT_FILE=$1
+msgd "F_RAPORT_FILE: $F_RAPORT_FILE"
 check_file $F_RAPORT_FILE
 V_USER=$2
 check_parameter $V_USER
 
 msgd "F_RAPORT_FILE: $F_RAPORT_FILE"
-V_CN=`dirname $F_RAPORT_FILE | awk -F"/" '{print $6}'`
+V_CN=`dirname $F_RAPORT_FILE | awk -F"/" '{print $6}' | awk -F"_" '{print $1}'`
 msgd "V_CN: $V_CN"
 
 if [ ${V_PASS_SOURCING} = "source" ]; then
