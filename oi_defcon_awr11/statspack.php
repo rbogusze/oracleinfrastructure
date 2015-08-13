@@ -133,7 +133,7 @@ while (!feof($fh))
     $trash6 = str_replace(",", "", $trash6);  // | Elapsd Time (|
 //    echo "<BR>RAW section_name: $section_name , trash1: $trash1 , trash2: $trash2 , trash3: $trash3 , trash4: $trash4 , trash5: $trash5 , trash6: $trash6 , trash7: $trash7 , trash8: $trash8 <BR>";
     if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash5) ) { 
-      echo "<BR> section_name: $section_name , trash1: $trash1 , trash2: $trash2 , trash3: $trash3 , trash4: $trash4 , trash5: $trash5 , trash6: $trash6 , trash7: $trash7 , trash8: $trash8 <BR>";
+//      echo "<BR> section_name: $section_name , trash1: $trash1 , trash2: $trash2 , trash3: $trash3 , trash4: $trash4 , trash5: $trash5 , trash6: $trash6 , trash7: $trash7 , trash8: $trash8 <BR>";
       //If this is a numeric value, then the next is module name, we need it so I take it
       $module_name = fgets($fh);
       if (strstr ($module_name, "Module: ")) { 
