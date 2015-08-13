@@ -4,8 +4,9 @@
 # Generate the statspack and hash reports for the long range of days
 #
 # Example
-# $ ./bulk_generate.sh 08:00 16:00 8
 # $ ./bulk_generate.sh EBSDB4 apps 08:00 16:00 8
+# Optionaly add at the end date from which to start
+# $ ./bulk_generate.sh EBSDB4 apps 08:00 16:00 8 2015-08-12
 #
 #
 # Load usefull functions
@@ -30,12 +31,13 @@ USERNAME=$2
 TIME_START=$3
 TIME_END=$4
 NR_DAYS_BACK=$5
+DATE_START=$6
 
 myvar=0
 while [ $myvar -ne $NR_DAYS_BACK ]
 do
 
-  CHECK_FOR_DATE=`date -I -d "$myvar day ago"`
+  CHECK_FOR_DATE=`date -I -d "$DATE_START $myvar day ago"`
   msgi "#################################################################"
   msgi "Computing fo date: ${CHECK_FOR_DATE}"
   msgi "#################################################################"
