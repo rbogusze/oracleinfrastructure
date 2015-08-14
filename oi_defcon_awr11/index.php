@@ -32,6 +32,7 @@ if (is_dir($dir)) {
 echo "<tt>DEFCON - Visualising the AWR / Statspack report<BR></tt>";
 echo "<tt>Please select the database you are interested in</tt>";
 echo "<BR><table>";
+sort($filenames_array);
 for($j=0;$j<count($filenames_array);$j++) 
 {
    $row = each($filenames_array);
