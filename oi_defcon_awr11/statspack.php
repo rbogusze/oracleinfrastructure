@@ -10,14 +10,16 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
   $tmp1 = base64_encode(serialize($chart_data));
   $tmp2 = base64_encode(serialize($chart_leg));
 
+  //echo "<BR> dir: " . $dir;
+  //echo "<BR> filename: " . $filename;
   //Digesting SID from dir path, again not elegant and errorprone but...
-  list($trash, $trash, $trash, $trash, $trash, $db_sid)=split('/', $dir);
+  list($trash, $db_sid)=split('_', $filename);
   //echo "<BR> db_sid: $db_sid ";
 
   //echo "<BR> filename: $filename";
   // Digest constant file part from awr filename that is present in hash file too
-  $file_part= str_replace("awr_$db_sid" , '', $filename ); 
-  //echo "<BR> file_part: $file_part";
+  $filename2= str_replace("awr_$db_sid" , '', $filename ); 
+  //echo "<BR> filename2: $filename2";
 
   echo "<table><tr><td> Module-exp </td><td> FullHistor </td><td> Exec</td></tr>";
   echo "<tr><td></td><td></td><td></td><td rowspan=50><img src=\"draw_chart_section.php?chart_data=$tmp1&chart_leg=$tmp2&chart_title=$section_name&chart_width=$width&chart_height=$height\" border=0 align=center width= height=></td></tr>";
@@ -30,8 +32,11 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
     $each_data_module = each($data_module);
     $each_data_executions = each($data_values_executions);
     print "<tr><td>";
-    //print "<a href=\"show_file.php?filename=". $dir . "hash_history/hash_" . $each_chart_leg["value"] . "_" . $timestamp . ".lst" .  "\" > " . $each_data_module["value"] . "</a>";
-    print "<a href=\"show_file.php?filename=". $dir . "hash_history/awr_" . $db_sid . "_" . $each_chart_leg["value"] . $file_part .  "\" > " . $each_data_module["value"] . "</a>";
+    //print "<a href=\"show_file.php?filename=". $dir . "hash_history/awr_" . $db_sid . "_" . $each_chart_leg["value"] . $filename2 .  "\" > " . $each_data_module["value"] . "</a>";
+    //echo "<BR>each_chart_leg[value]: " . $each_chart_leg["value"];
+    //echo "<BR>filename2: " . $filename2;
+    //echo "";
+    print "<a href=\"show_file.php?filename=". $dir . "hash_history/awr_" . $db_sid . "_" . $each_chart_leg["value"] . $filename2 .  "\" > " . $each_data_module["value"] . "</a>";
     print "</td><td>";
     print "<a href=\"hash_history.php?dir=" . $dir . "hash_history/" . "&hash_value=" . $each_chart_leg["value"] . "\" >" . $each_chart_leg["value"] . "</a>"; 
     print "</td><td>";
@@ -56,7 +61,7 @@ if (is_file($dir . $filename) ) {
 
 // open file
 $fh = fopen ($dir . $filename, "r") or die("Could not open file");
-echo "<BR> file: $filename in dir: $dir <BR>";
+//echo "<BR> file: $filename in dir: $dir <BR>";
 
 
 //some variables
