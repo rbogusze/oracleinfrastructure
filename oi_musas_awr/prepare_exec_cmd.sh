@@ -23,6 +23,9 @@ msgd "List the CN that are candidates"
 $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbMusasMonitoring=TRUE)(orainfDbMusasMonitoringMode=awr))" "['cn']" > /tmp/prepare_exec_cmd_cn.txt
 run_command_d "cat /tmp/prepare_exec_cmd_cn.txt"
 
+msgd "Cleaning log dir"
+rm -f /tmp/awr_reports*.log
+
 msgd "Loop through the CNs"
 while read CN
 do
@@ -46,7 +49,7 @@ do
       run_command_d "cat /tmp/prepare_exec_cmd_cn_multi.txt"
       V_MULTI_RUN=`cat /tmp/prepare_exec_cmd_cn_multi.txt`
       msgd "V_MULTI_RUN: $V_MULTI_RUN"
-      echo "$V_MULTI_RUN $line $line2 > /tmp/awr_reports.log"
+      echo "$V_MULTI_RUN $line $line2 > /tmp/awr_reports_${CN}_`date -I`_${RANDOM}.log"
 
 
     done < /tmp/prepare_exec_cmd_cn_start.txt 3< /tmp/prepare_exec_cmd_cn_end.txt
