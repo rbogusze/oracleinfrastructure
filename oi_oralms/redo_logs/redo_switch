@@ -1,0 +1,3 @@
+#!/bin/sh
+#echo $1 | sed -e s/redo_logs// | sed -e s/.// | sed -e s/'\/'// >> redo_logs/redo_logs.txt2
+echo $1 >> redo_logs/redo_logs.txt
