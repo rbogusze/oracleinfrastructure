@@ -10,6 +10,8 @@ echo "<tt>Database Statistics <BR></tt>";
 $dir=$_GET['dir'];
 $filename=$_GET['filename'];
 
+echo "<a href=\"index.php\" >Back to DB list</a> <BR></tt>";
+
 echo "<BR> dir: $dir";
 echo "<BR> filename: $filename";
 

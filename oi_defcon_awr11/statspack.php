@@ -109,10 +109,10 @@ while (!feof($fh))
   if (strstr ( $data, "SQL ordered by Executions ")) { echo "<font color='green'>"; $section_name = "Executions_Rows"; }
   if (strstr ( $data, "SQL ordered by Parse Calls ")) { echo "<font color='green'>"; $section_name = "Parse_Calls"; }
   if (strstr ( $data, "SQL ordered by Sharable Memory ")) { echo "<font color='green'>"; $section_name = "Sharable_Mem"; }
-  if (strstr ( $data, "SQL ordered by User I/O Wait Time ")) { echo "<font color='green'>"; $section_name = "User_IO_wait"; }
+  if (strstr ( $data, "SQL ordered by User I/O Wait Time ")) { echo "<font color='green'>"; $section_name = "User_IO_Wait"; }
   if (strstr ( $data, "SQL ordered by Version Count ")) { echo "<font color='green'>"; $section_name = "Version_Count"; }
-  if (strstr ( $data, "SQL ordered by Cluster Wait Time ")) { echo "<font color='green'>"; $section_name = "Version_Count"; }
-  if (strstr ( $data, "Total - Physical Reads as a percentage of Total Disk ")) { echo "<font color='green'>"; $section_name = "Version_Count"; }
+  if (strstr ( $data, "SQL ordered by Cluster Wait Time ")) { echo "<font color='green'>"; $section_name = "Cluster_Wait"; }
+  if (strstr ( $data, "Total - Physical Reads as a percentage of Total Disk ")) { echo "<font color='green'>"; $section_name = "TotalPhysical"; }
   if (strstr ( $data, "Key Instance Activity Stats ")) { continue;  }
 
 
