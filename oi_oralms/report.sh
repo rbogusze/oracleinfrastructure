@@ -18,7 +18,10 @@ f_report_stats_from_dir()
   V_DATE=`date -I`
   V_HOUR=`date '+%Y-%m-%d--%H'`
   
-  check_directory $TMP_LOG_DIR
+  if [ ! -d $TMP_LOG_DIR ]; then
+    msgd "No dir. Continue"
+    return 0
+  fi
 
   for FILE in `ls $TMP_LOG_DIR | grep $V_DATE`
   do
