@@ -1,4 +1,6 @@
--- File containing all database to measured by RRDORA
--- each line should contain : <dbname>|<dbuser>|<dbpassword>
--- Like sample below
-TEST|perfstat|perfstat
+TEST|perfstat|apps
+DB10203|perfstat|apps
+EBSDB4|apps|apps
+RAC2|perfstat|apps
+RAC3|perfstat|apps
+RAC4|perfstat|apps
