@@ -1,7 +1,17 @@
 #!/bin/bash
 # $Header: /home/remik/cvs_root_kgp/oralms/oralms_view.sh,v 1.2 2012-05-25 11:52:39 orainf Exp $
 
-#set -x
+#INFO_MODE=DEBUG
+
+# Load usefull functions
+if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
+  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
+  exit 1
+else
+  . $HOME/scripto/bash/bash_library.sh
+fi
+
+check_file `which ack`
 
 
 # Make it more colorfull and add action to selected events
