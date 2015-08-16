@@ -4,7 +4,7 @@
 
 TAG=`echo $1 | tr -d "[]"`
 
-TMP_LOG_DIR=/tmp/oralms_redo
+TMP_LOG_DIR=/tmp/oralms_sess_killed
 mkdir -p $TMP_LOG_DIR
 
 echo "$TAG `date '+%Y-%m-%d--%H:%M:%S'`" >> $TMP_LOG_DIR/${TAG}_`date -I`.txt
