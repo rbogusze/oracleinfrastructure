@@ -1,0 +1,10 @@
+#
+# ORALMS
+#
+*/42 * * * * /home/orainf/oi_oralms/oralms_gather_monitor.sh
+*/32 * * * * /home/orainf/oi_oralms/delete_stale_tail.sh 2>&1 >> /tmp/oralms_delete_stale_tail.log
+
+#
+# MUSAS_AWR - Generate AWR reports
+#
+09 23 * * 1-5 . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_awr; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh; touch /tmp/ala_ma_kota
