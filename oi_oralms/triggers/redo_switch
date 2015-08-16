@@ -1,0 +1,7 @@
+#!/bin/sh
+#echo $1 | sed -e s/redo_logs// | sed -e s/.// | sed -e s/'\/'// >> redo_logs/redo_logs.txt2
+
+TMP_LOG_DIR=/tmp/oralms_redo
+mkdir -p $TMP_LOG_DIR
+
+echo "$1 `date '+%Y-%m-%d--%H:%M:%S'`" >> $TMP_LOG_DIR/$1.txt
