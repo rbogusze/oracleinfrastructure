@@ -44,4 +44,8 @@ f_report_stats_from_dir()
 echo "Hourly redo switches"
 f_report_stats_from_dir "/tmp/oralms_redo"
 
+echo ""
+
+echo "Hourly killed sessions"
+f_report_stats_from_dir "/tmp/oralms_sess_killed"
 
