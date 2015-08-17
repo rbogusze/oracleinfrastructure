@@ -5,7 +5,7 @@
 #
 
 LOCKFILE=/tmp/awr_reports.lock
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 
 # Load usefull functions
