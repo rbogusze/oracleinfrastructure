@@ -44,18 +44,15 @@ f_report_stats_from_dir()
 
 
 # Actual run
-echo "--------------------------------------------"
-echo "Hourly redo switches"
-#f_report_stats_from_dir "/tmp/oralms_redo" > /tmp/oralms_redo.txt
+msgd "Compute Hourly redo switches"
+f_report_stats_from_dir "/tmp/oralms_redo" > /tmp/oralms_redo.txt
 run_command_d "cat /tmp/oralms_redo.txt"
 
-echo ""
 
-echo "Hourly killed sessions"
-#f_report_stats_from_dir "/tmp/oralms_sess_killed" > /tmp/oralms_sess_killed.txt
+msgd "Compute Hourly killed sessions"
+f_report_stats_from_dir "/tmp/oralms_sess_killed" > /tmp/oralms_sess_killed.txt
 run_command_d "cat /tmp/oralms_sess_killed.txt"
 
-echo "--------------------------------------------"
 
 
 # Get the list of CN that monitor alert log
@@ -63,8 +60,8 @@ $HOME/scripto/perl/ask_ldap.pl "(orainfDbAlertLogMonitoring=TRUE)" "['cn']" > /t
 run_command_d "cat /tmp/oralms_report.txt"
 
 # Get the stats for every report I want to include
-
-echo "           | Redo switches | Ses. Killed |"
+echo "--------------------------------------------"
+echo "        /h | Redo switches | Ses. Killed |"
 while read LINE
 do
   #echo $LINE
@@ -83,6 +80,7 @@ do
   echo ""
 done < /tmp/oralms_report.txt
 
+echo "--------------------------------------------"
 
 
 
