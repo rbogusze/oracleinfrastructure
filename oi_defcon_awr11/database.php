@@ -64,8 +64,20 @@ if (is_dir($dir)) {
 }
 
 //Include link to raw statspack file
-echo "<BR>Raw statspack file : ";
+echo "<BR>Raw AWR in txt: ";
 echo "<a href=\"show_file.php?filename=$dir$filename\" >$filename </a>";
+echo "<BR>Raw AWR in html: ";
+# WIP
+$html_filename="$dir$filename";
+//echo "<BR> Ala: $html_filename";
+$html_filename=str_replace("/var/www/html",'',$html_filename);
+//echo "<BR> Ala: $html_filename";
+$html_filename=str_replace("AWR_txt_day","AWR_html_day",$html_filename);
+//echo "<BR> Ala: $html_filename";
+$html_filename=str_replace(".txt",".html",$html_filename);
+//echo "<BR> Ala: $html_filename";
+
+echo "<a href=\"$html_filename\" >" . str_replace(".txt",".html",$filename) . "</a>";
 echo "<BR><BR>";
 echo "<a href=\"db_statistics.php?dir=$dir&filename=$filename\" >Database Statistics</a>";
 
