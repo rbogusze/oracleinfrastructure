@@ -24,10 +24,10 @@ for F_TAIL in `ls ${D_ORALMS}`
 do
   msgd "################## $F_TAIL #################"
   if [ ${F_LIMIT} -nt ${D_ORALMS}/${F_TAIL} ]; then
-    msgd "tail file has not been touched in the last 3h"
+    msgi "[gather_monitor] File ${F_TAIL} has not been touched in the last 3h. Killing the tail. Please wait for connection refresh."
     # checking if ssh session exists
     # get the hostname from the F_TAIL
-    V_HOSTNAME=`echo ${F_TAIL} | awk -F"_" '{print $2}'`
+    V_HOSTNAME=`echo ${F_TAIL} | awk -F"_" '{print $2}' | tr -d "]"`
     msgd "V_HOSTNAME: $V_HOSTNAME"
 
     if [ -z "$V_HOSTNAME" ]; then
@@ -35,12 +35,13 @@ do
       continue
     fi
 
-    V_KILL_PID=`ps -ef | grep ssh | grep "$V_HOSTNAME" | head -n 1 | awk '{print $2}'`
-    msgd "V_KILL_PID: $V_KILL_PID"
+    V_KILL_PID=`ps -ef | grep ssh | grep "$V_HOSTNAME" | head -n 1 | awk '{print $2}' | grep -v '^ *$' | tr -d "\n" | tr -cd '[:alnum:] [:space:]'`
+    msgd "V_KILL_PID:_${V_KILL_PID}_"
     if [ -z "$V_KILL_PID" ]; then
-      run_command "kill -9 $V_KILL_PID"
+      msgi "There is nothing to kill"
     else
-      msgd "There is nothing to kill"
+      msgd "I am about to run: kill -9 $V_KILL_PID"
+      run_command "kill -9 $V_KILL_PID"
     fi    
 
   else
