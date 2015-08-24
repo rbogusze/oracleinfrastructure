@@ -46,11 +46,46 @@ f_report_stats_from_dir()
 # Actual run
 echo "--------------------------------------------"
 echo "Hourly redo switches"
-f_report_stats_from_dir "/tmp/oralms_redo"
+#f_report_stats_from_dir "/tmp/oralms_redo" > /tmp/oralms_redo.txt
+run_command_d "cat /tmp/oralms_redo.txt"
 
 echo ""
 
 echo "Hourly killed sessions"
-f_report_stats_from_dir "/tmp/oralms_sess_killed"
+#f_report_stats_from_dir "/tmp/oralms_sess_killed" > /tmp/oralms_sess_killed.txt
+run_command_d "cat /tmp/oralms_sess_killed.txt"
 
 echo "--------------------------------------------"
+
+
+# Get the list of CN that monitor alert log
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbAlertLogMonitoring=TRUE)" "['cn']" > /tmp/oralms_report.txt
+run_command_d "cat /tmp/oralms_report.txt"
+
+# Get the stats for every report I want to include
+
+echo "           | Redo switches | Ses. Killed |"
+while read LINE
+do
+  #echo $LINE
+  V_REDO=`cat /tmp/oralms_redo.txt | grep "$LINE " | awk '{print $2}'`
+  msgd "V_REDO: $V_REDO"
+
+  V_KILL=`cat /tmp/oralms_sess_killed.txt | grep "$LINE " | awk '{print $2}'`
+  msgd "V_KILL: $V_KILL"
+
+
+  #echo "$LINE $V_REDO $V_KILL"
+  #printf "%-10s" "$LINE"
+  #echo "$V_REDO $V_KILL"
+  #echo "---------"
+  printf "%-10s | %-13s | %-10s" "$LINE" "$V_REDO" "$V_KILL"
+  echo ""
+done < /tmp/oralms_report.txt
+
+
+
+
+
+
+
