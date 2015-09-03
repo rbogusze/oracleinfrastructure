@@ -1,0 +1,1 @@
+@@sedn to_number(lower('&1'),'xxxx')

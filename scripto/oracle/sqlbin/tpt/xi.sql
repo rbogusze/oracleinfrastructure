@@ -1,0 +1,3 @@
+prompt eXplain the execution plan for sqlid &1 child &2....
+
+select * from table(dbms_xplan.display_cursor('&1',CASE WHEN '&2' = '%' THEN null ELSE '&2' END,'ALLSTATS LAST +PEEKED_BINDS +PARTITION'));

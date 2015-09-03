@@ -1,0 +1,3 @@
+prompt Taking a &1 second snapshot...
+
+@@snapper "stats,gather=s,sinclude=total IO requests|physical.*total bytes" &1 1 all

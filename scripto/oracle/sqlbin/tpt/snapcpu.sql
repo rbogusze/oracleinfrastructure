@@ -1,0 +1,3 @@
+prompt Taking a &1 second snapshot...
+
+@@snapper "out,gather=t,tinclude=DB CPU" &1 1 "select sid from v$session"

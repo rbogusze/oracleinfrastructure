@@ -1,0 +1,3 @@
+prompt Gather Schema Statistics for schema &1....
+exec dbms_stats.gather_schema_stats(upper('&1'), null, method_opt=>'FOR TABLE FOR ALL COLUMNS SIZE REPEAT', cascade=>true);
+

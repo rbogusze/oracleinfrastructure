@@ -1,0 +1,3 @@
+prompt Taking a &1 second snapshot...
+
+@@snapper4 "stats,gather=s,sinclude=redo size" &1 1 all

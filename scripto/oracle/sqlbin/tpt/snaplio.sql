@@ -1,0 +1,3 @@
+prompt Taking a &1 second snapshot...
+
+@@snapper "stats,gather=s,sinclude=gets" &1 1 "select sid from v$session"

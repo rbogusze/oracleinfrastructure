@@ -1,0 +1,2 @@
+set autotrace trace stat
+
