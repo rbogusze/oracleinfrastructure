@@ -101,31 +101,36 @@ EOF
 
   # Comparing the received values with expected
   msgd "Time elapsed"
-  V_TMP1=`echo $V_ELAPSED | sed -e 's/://g'`
-  msgd "V_TMP1: $V_TMP1"
-  V_TMP2=`echo $V_LT_RESULT_ELAPSED | awk -F"." '{print $1}' | sed -e 's/://g'`
-  msgd "V_TMP2: $V_TMP2"
+  if [ ! -z $V_ELAPSED ]; then
+    V_TMP1=`echo $V_ELAPSED | sed -e 's/://g'`
+    msgd "V_TMP1: $V_TMP1"
+    V_TMP2=`echo $V_LT_RESULT_ELAPSED | awk -F"." '{print $1}' | sed -e 's/://g'`
+    msgd "V_TMP2: $V_TMP2"
 
-  if [ $V_TMP2 -lt $V_TMP1 ]; then
-    msgd "OK, execution time less than expected"
-  else
-    msge "BAD, execution took longer than expected"
+    if [ $V_TMP2 -lt $V_TMP1 ]; then
+      msgd "OK, execution time less than expected"
+    else
+      msge "BAD, execution took longer than expected"
+    fi
   fi
 
   msgd "Gets"
-  if [ $V_LT_RESULT_GETS -lt $V_GETS ]; then
-    msgd "OK, nr of gets time less than expected"
-  else
-    msge "BAD, nr of gets larger than expected. Acutal: $V_LT_RESULT_GETS Expected: $V_GETS"
+  if [ ! -z $V_GETS ]; then
+    if [ $V_LT_RESULT_GETS -lt $V_GETS ]; then
+      msgd "OK, nr of gets time less than expected"
+    else
+      msge "BAD, nr of gets larger than expected. Acutal: $V_LT_RESULT_GETS Expected: $V_GETS"
+    fi
   fi
 
   msgd "Result"
-  if [ $V_LT_RESULT -lt $V_RESULT ]; then
-    msgd "OK, result less than expected"
-  else
-    msge "BAD, result larger than expected. Acutal: $V_LT_RESULT Expected: $V_RESULT"
+  if [ ! -z $V_RESULT ]; then
+    if [ $V_LT_RESULT -lt $V_RESULT ]; then
+      msgd "OK, result less than expected"
+    else
+      msge "BAD, result larger than expected. Acutal: $V_LT_RESULT Expected: $V_RESULT"
+    fi
   fi
-  
 
 
   msgd "${FUNCNAME[0]} End."
