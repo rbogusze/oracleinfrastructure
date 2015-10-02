@@ -16,6 +16,67 @@ fi
 f_LT_execute_sql()
 {
   msgd "${FUNCNAME[0]} Begin."
+  CN=`cat ~/.LT_SID`  
+  msgd "CN: $CN"
+
+  tnsping ${CN} > /tmp/run_initial_checks_tnsping.txt
+  if [ $? -eq 0 ]; then
+    msgd "OK, tnsping works"
+  else
+    msge "Error, tnsping $CN does not work. Exiting"
+    run_command_d "cat /tmp/run_initial_checks_tnsping.txt"
+    exit 1
+  fi
+
+  F_LT=$1
+  msgd "F_LT: $F_LT" 
+  run_command_d "cat $F_LT"
+  V_SQL=`cat $F_LT | grep ^SQL | sed -e 's/^SQL:\ //'`
+  msgd "V_SQL: $V_SQL"
+
+
+#exit 0
+
+  V_USER=apps
+  msgd "Getting password from hash"
+ 
+  PWD_FILE=~/.passwords
+  INDEX_HASH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfDbRrdoraIndexHash']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
+  msgd "INDEX_HASH: $INDEX_HASH"
+  HASH=`echo "$INDEX_HASH" | base64 --decode -i`
+  msgd "HASH: $HASH"
+  if [ -f "$PWD_FILE" ]; then
+    V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
+    #msgd "V_PASS: $V_PASS"
+  else
+    msge "Unable to find the password file. Exiting"
+    exit 0
+  fi
+
+  # OK, I have username, password and the database, it is time to connect
+  testavail=`sqlplus -S /nolog <<EOF
+set head off pagesize 0 echo off verify off feedback off heading off
+connect $V_USER/$V_PASS@$CN
+select trim(1) result from dual;
+exit;
+EOF`
+
+  if [ "$testavail" != "1" ]; then
+    msge "DB $CN not available, exiting !!"
+    exit 0
+  fi
+
+
+  F_TMP=/tmp/run_initial_checks_execute.txt
+  sqlplus /nolog << EOF > $F_TMP
+  connect $V_USER/$V_PASS@$CN
+  set timing on
+  set autotrace on
+  $V_SQL
+EOF
+  
+  run_command_d "cat $F_TMP"
+
 
   msgd "${FUNCNAME[0]} End."
 } #f_LT_execute_sql
