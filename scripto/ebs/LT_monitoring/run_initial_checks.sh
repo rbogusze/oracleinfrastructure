@@ -76,6 +76,10 @@ EOF`
 EOF
   
   run_command_d "cat $F_TMP"
+  V_LT_RESULT_ELAPSED=`cat $F_TMP | grep "^Elapsed:" | sed -e 's/Elapsed:\ //'`
+  msgd "V_LT_RESULT_ELAPSED: $V_LT_RESULT_ELAPSED"
+  V_LT_RESULT_GETS=`cat $F_TMP | grep "consistent gets" | awk '{print $1}' `
+  msgd "V_LT_RESULT_GETS: $V_LT_RESULT_GETS"
 
 
   msgd "${FUNCNAME[0]} End."
