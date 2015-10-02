@@ -39,12 +39,12 @@ f_LT_execute_sql()
 
   # Get the execution expected attributes
   # time elapsed
-  V_ELAPSED=`cat $F_LT | grep ^ELAPSED | sed -e 's/^ELAPSED:\ //'`
-  msgd "V_ELAPSED: $V_ELAPSED"
-  V_GETS=`cat $F_LT | grep ^GETS | sed -e 's/^GETS:\ //'`
-  msgd "V_GETS: $V_GETS"
-  V_RESULT=`cat $F_LT | grep ^RESULT | sed -e 's/^RESULT:\ //'`
-  msgd "V_RESULT: $V_RESULT"
+  V_ELAPSED_LT=`cat $F_LT | grep ^ELAPSED_LT: | sed -e 's/^ELAPSED_LT:\ //'`
+  msgd "V_ELAPSED_LT: $V_ELAPSED_LT"
+  V_GETS_LT=`cat $F_LT | grep ^GETS_LT: | sed -e 's/^GETS_LT:\ //'`
+  msgd "V_GETS_LT: $V_GETS_LT"
+  V_RESULT_LT=`cat $F_LT | grep ^RESULT_LT: | sed -e 's/^RESULT_LT:\ //'`
+  msgd "V_RESULT_LT: $V_RESULT_LT"
 
 #exit 0
 
@@ -100,9 +100,9 @@ EOF
 
 
   # Comparing the received values with expected
-  msgd "Time elapsed"
-  if [ ! -z $V_ELAPSED ]; then
-    V_TMP1=`echo $V_ELAPSED | sed -e 's/://g'`
+  msgd "Time elapsed less than"
+  if [ ! -z $V_ELAPSED_LT ]; then
+    V_TMP1=`echo $V_ELAPSED_LT | sed -e 's/://g'`
     msgd "V_TMP1: $V_TMP1"
     V_TMP2=`echo $V_LT_RESULT_ELAPSED | awk -F"." '{print $1}' | sed -e 's/://g'`
     msgd "V_TMP2: $V_TMP2"
@@ -112,24 +112,30 @@ EOF
     else
       msge "BAD, execution took longer than expected"
     fi
+  else
+    msgd "No check requested"
   fi
 
-  msgd "Gets"
-  if [ ! -z $V_GETS ]; then
-    if [ $V_LT_RESULT_GETS -lt $V_GETS ]; then
+  msgd "Gets less than"
+  if [ ! -z $V_GETS_LT ]; then
+    if [ $V_LT_RESULT_GETS -lt $V_GETS_LT ]; then
       msgd "OK, nr of gets time less than expected"
     else
-      msge "BAD, nr of gets larger than expected. Acutal: $V_LT_RESULT_GETS Expected: $V_GETS"
+      msge "BAD, nr of gets larger than expected. Acutal: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
     fi
+  else
+    msgd "No check requested"
   fi
 
-  msgd "Result"
-  if [ ! -z $V_RESULT ]; then
-    if [ $V_LT_RESULT -lt $V_RESULT ]; then
+  msgd "Result less than"
+  if [ ! -z $V_RESULT_LT ]; then
+    if [ $V_LT_RESULT -lt $V_RESULT_LT ]; then
       msgd "OK, result less than expected"
     else
-      msge "BAD, result larger than expected. Acutal: $V_LT_RESULT Expected: $V_RESULT"
+      msge "BAD, result larger than expected. Acutal: $V_LT_RESULT Expected: $V_RESULT_LT"
     fi
+  else
+    msgd "No check requested"
   fi
 
 
@@ -159,6 +165,8 @@ do
     exit 1
     ;;
   esac
+
+exit 0
   
 done
 
