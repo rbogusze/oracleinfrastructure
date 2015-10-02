@@ -45,6 +45,8 @@ f_LT_execute_sql()
   msgd "V_GETS_LT: $V_GETS_LT"
   V_RESULT_LT=`cat $F_LT | grep ^RESULT_LT: | sed -e 's/^RESULT_LT:\ //'`
   msgd "V_RESULT_LT: $V_RESULT_LT"
+  V_RESULT_EQ=`cat $F_LT | grep ^RESULT_EQ: | sed -e 's/^RESULT_EQ:\ //'`
+  msgd "V_RESULT_EQ: $V_RESULT_EQ"
 
 #exit 0
 
@@ -138,6 +140,19 @@ EOF
     msgd "No check requested"
   fi
 
+  msgd "Result equal to"
+  if [ ! -z $V_RESULT_EQ ]; then
+    if [ $V_LT_RESULT -eq $V_RESULT_EQ ]; then
+      msgd "OK, result equal"
+    else
+      msge "BAD, result not equal. Acutal: $V_LT_RESULT Expected: $V_RESULT_EQ"
+    fi
+  else
+    msgd "No check requested"
+  fi
+
+
+
 
   msgd "${FUNCNAME[0]} End."
 } #f_LT_execute_sql
@@ -153,6 +168,11 @@ check_directory $D_INITIAL_CHECKS
 for F_IC in `ls ${D_INITIAL_CHECKS}`
 do
   echo $F_IC
+
+F_IC=02_MV_refreshed_complete
+F_IC=05a_MTL_MATERIAL_TRANSACTIONS_TEMP
+
+
   IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}`
   msgd "IC_ACTION: $IC_ACTION"
   case $IC_ACTION in
