@@ -2,7 +2,7 @@
 # This script loops through the initial_checks dir, executes the tasks and compares it to expected results
 # The SID of the DB to connect to is stored in ~/.LT_SID
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -47,6 +47,8 @@ f_LT_execute_sql()
   msgd "V_RESULT_LT: $V_RESULT_LT"
   V_RESULT_EQ=`cat $F_LT | grep ^RESULT_EQ: | sed -e 's/^RESULT_EQ:\ //'`
   msgd "V_RESULT_EQ: $V_RESULT_EQ"
+  V_RESULT_STR=`cat $F_LT | grep ^RESULT_STR: | sed -e 's/^RESULT_STR:\ //'`
+  msgd "V_RESULT_STR: $V_RESULT_STR"
 
 #exit 0
 
@@ -151,6 +153,18 @@ EOF
     msgd "No check requested"
   fi
 
+  msgd "Result equal to string"
+  if [ ! -z $V_RESULT_STR ]; then
+    if [ "$V_LT_RESULT" = "$V_RESULT_STR" ]; then
+      msgd "OK, result equal"
+    else
+      msge "BAD, result not equal. Acutal: $V_LT_RESULT Expected: $V_RESULT_EQ"
+    fi
+  else
+    msgd "No check requested"
+  fi
+
+
 
 
 
@@ -171,6 +185,9 @@ do
 
 #F_IC=02_MV_refreshed_complete
 #F_IC=05b_MTL_MATERIAL_TRANSACTIONS_TEMP
+#F_IC=07c_result_cache
+#F_IC=08_FND_CONCURRENT_REQUESTS
+#F_IC=09_cache_size_2_processes
 
 
   IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}`
