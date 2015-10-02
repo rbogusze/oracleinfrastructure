@@ -1,0 +1,3 @@
+execute_sql
+SQL: SELECT /*+ FULL(a)*/ COUNT(*) FROM RCV_HEADERS_INTERFACE a;
+COND: time<1s gets<2200 result<5000
