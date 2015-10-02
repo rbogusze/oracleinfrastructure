@@ -169,8 +169,8 @@ for F_IC in `ls ${D_INITIAL_CHECKS}`
 do
   echo $F_IC
 
-F_IC=02_MV_refreshed_complete
-F_IC=05a_MTL_MATERIAL_TRANSACTIONS_TEMP
+#F_IC=02_MV_refreshed_complete
+#F_IC=05b_MTL_MATERIAL_TRANSACTIONS_TEMP
 
 
   IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}`
@@ -186,7 +186,7 @@ F_IC=05a_MTL_MATERIAL_TRANSACTIONS_TEMP
     ;;
   esac
 
-exit 0
+#exit 0
   
 done
 
