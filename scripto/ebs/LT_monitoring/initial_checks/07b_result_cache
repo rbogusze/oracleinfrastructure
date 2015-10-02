@@ -1,0 +1,3 @@
+execute_sql
+SQL: SELECT value from v$parameter where name='result_cache_max_size';
+RESULT_EQ: 1073741824

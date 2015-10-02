@@ -1,0 +1,3 @@
+execute_sql
+SQL: SELECT pct_free FROM dba_indexes WHERE index_name in ('MTL_MATERIAL_TRANS_TEMP_N1') AND owner       ='INV';
+RESULT_EQ: 70

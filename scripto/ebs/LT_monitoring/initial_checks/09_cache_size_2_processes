@@ -1,0 +1,3 @@
+execute_sql
+SQL: select count(*) from fnd_concurrent_queues_vl where cache_size < 2 * max_processes;
+RESULT_LT: 4

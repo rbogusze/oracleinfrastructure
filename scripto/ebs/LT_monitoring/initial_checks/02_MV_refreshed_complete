@@ -1,0 +1,3 @@
+execute_sql
+SQL: select count(*) from all_mviews WHERE mview_name LIKE 'GE_%_MV' AND last_refresh_type = 'COMPLETE';
+RESULT_EQ: 2
