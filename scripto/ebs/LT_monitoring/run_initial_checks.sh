@@ -37,6 +37,10 @@ f_LT_execute_sql()
   V_SQL=`cat $F_LT | grep ^SQL | sed -e 's/^SQL:\ //'`
   msgd "V_SQL: $V_SQL"
 
+  # Check if autotrace is expected
+  V_AUTOTRACE=`cat $F_LT | grep ^AUTOTRACE: | sed -e 's/^AUTOTRACE:\ //'`
+  msgd "V_AUTOTRACE: $V_AUTOTRACE"
+
   # Get the execution expected attributes
   # time elapsed
   V_ELAPSED_LT=`cat $F_LT | grep ^ELAPSED_LT: | sed -e 's/^ELAPSED_LT:\ //'`
@@ -87,13 +91,24 @@ EOF`
 
 
   F_TMP=/tmp/run_initial_checks_execute.txt
-  sqlplus -s /nolog << EOF > $F_TMP
-  set head off pagesize 0 echo off verify off feedback off heading off
-  connect $V_USER/$V_PASS@$CN
-  set timing on
-  set autotrace on
-  $V_SQL
+  if [ ! -z $V_AUTOTRACE ]; then
+    msgd "Run with autotrace on"
+    sqlplus -s /nolog << EOF > $F_TMP
+    set head off pagesize 0 echo off verify off feedback off heading off
+    connect $V_USER/$V_PASS@$CN
+    set timing on
+    set autotrace on
+    $V_SQL
 EOF
+  else
+    msgd "Run with autotrace off"
+    sqlplus -s /nolog << EOF > $F_TMP
+    set head off pagesize 0 echo off verify off feedback off heading off
+    connect $V_USER/$V_PASS@$CN
+    $V_SQL
+EOF
+  fi #if [ ! -z $V_AUTOTRACE
+  
  
   # Saving the received values 
   run_command_d "cat $F_TMP"
@@ -214,9 +229,9 @@ do
 #F_IC=02_MV_refreshed_complete
 #F_IC=05b_MTL_MATERIAL_TRANSACTIONS_TEMP
 #F_IC=07c_result_cache
-#F_IC=08_FND_CONCURRENT_REQUESTS
+F_IC=08_FND_CONCURRENT_REQUESTS
 #F_IC=09_cache_size_2_processes
-F_IC=10c_prevent_SGA_dynamic_resize
+#f_ic=10c_prevent_SGA_dynamic_resize
 
 
   IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}`
