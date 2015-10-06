@@ -2,7 +2,7 @@
 # This script loops through the initial_checks dir, executes the tasks and compares it to expected results
 # The SID of the DB to connect to is stored in ~/.LT_SID
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -47,6 +47,10 @@ f_LT_execute_sql()
   msgd "V_RESULT_LT: $V_RESULT_LT"
   V_RESULT_EQ=`cat $F_LT | grep ^RESULT_EQ: | sed -e 's/^RESULT_EQ:\ //'`
   msgd "V_RESULT_EQ: $V_RESULT_EQ"
+  V_RESULT_GE=`cat $F_LT | grep ^RESULT_GE: | sed -e 's/^RESULT_GE:\ //'`
+  msgd "V_RESULT_GE: $V_RESULT_GE"
+  V_RESULT_GT=`cat $F_LT | grep ^RESULT_GT: | sed -e 's/^RESULT_GT:\ //'`
+  msgd "V_RESULT_GT: $V_RESULT_GT"
   V_RESULT_STR=`cat $F_LT | grep ^RESULT_STR: | sed -e 's/^RESULT_STR:\ //'`
   msgd "V_RESULT_STR: $V_RESULT_STR"
 
@@ -153,6 +157,30 @@ EOF
     msgd "No check requested"
   fi
 
+  msgd "Result greater or equal to"
+  if [ ! -z $V_RESULT_GE ]; then
+    if [ $V_LT_RESULT -ge $V_RESULT_GE ]; then
+      msgd "OK, result greater or equal to"
+    else
+      msge "BAD, result not greater or equal. Acutal: $V_LT_RESULT Expected: $V_RESULT_GE"
+    fi
+  else
+    msgd "No check requested"
+  fi
+
+  msgd "Result greater"
+  if [ ! -z $V_RESULT_GT ]; then
+    if [ $V_LT_RESULT -gt $V_RESULT_GT ]; then
+      msgd "OK, result greater"
+    else
+      msge "BAD, result not greater. Acutal: $V_LT_RESULT Expected: $V_RESULT_GT"
+    fi
+  else
+    msgd "No check requested"
+  fi
+
+
+
   msgd "Result equal to string"
   if [ ! -z $V_RESULT_STR ]; then
     if [ "$V_LT_RESULT" = "$V_RESULT_STR" ]; then
@@ -188,6 +216,7 @@ do
 #F_IC=07c_result_cache
 #F_IC=08_FND_CONCURRENT_REQUESTS
 #F_IC=09_cache_size_2_processes
+F_IC=10c_prevent_SGA_dynamic_resize
 
 
   IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}`
@@ -203,7 +232,7 @@ do
     ;;
   esac
 
-#exit 0
+exit 0
   
 done
 

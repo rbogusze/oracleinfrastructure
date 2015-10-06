@@ -1,0 +1,3 @@
+execute_sql
+SQL: SELECT value from v$parameter where name='_memory_imm_mode_without_autosga';
+RESULT_STR: FALSE
