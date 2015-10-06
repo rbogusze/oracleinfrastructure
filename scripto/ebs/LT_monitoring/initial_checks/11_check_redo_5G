@@ -1,0 +1,3 @@
+execute_sql
+SQL: select distinct bytes from v$log;
+RESULT_GE: 5368709120

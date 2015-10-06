@@ -1,0 +1,3 @@
+execute_sql
+SQL: select distinct degree from all_tables where table_name in ('OE_ORDER_LINES_ALL', 'MTL_SYSTEM_ITEMS_B', 'MTL_ITEM_CATEGORIES');
+RESULT_EQ: 1

@@ -222,7 +222,7 @@ D_INITIAL_CHECKS=$D_BASE/initial_checks
 
 check_directory $D_INITIAL_CHECKS
 
-for F_IC in `ls ${D_INITIAL_CHECKS}`
+for F_IC in `ls -r ${D_INITIAL_CHECKS}`
 do
   echo $F_IC
 
