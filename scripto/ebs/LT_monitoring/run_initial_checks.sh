@@ -2,7 +2,7 @@
 # This script loops through the initial_checks dir, executes the tasks and compares it to expected results
 # The SID of the DB to connect to is stored in ~/.LT_SID
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -229,9 +229,9 @@ do
 #F_IC=02_MV_refreshed_complete
 #F_IC=05b_MTL_MATERIAL_TRANSACTIONS_TEMP
 #F_IC=07c_result_cache
-F_IC=08_FND_CONCURRENT_REQUESTS
+#F_IC=08_FND_CONCURRENT_REQUESTS
 #F_IC=09_cache_size_2_processes
-#f_ic=10c_prevent_SGA_dynamic_resize
+#F_IC=10d_prevent_SGA_dynamic_resize
 
 
   IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}`
@@ -247,7 +247,7 @@ F_IC=08_FND_CONCURRENT_REQUESTS
     ;;
   esac
 
-exit 0
+#exit 0
   
 done
 
