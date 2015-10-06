@@ -244,7 +244,8 @@ D_INITIAL_CHECKS=$D_BASE/initial_checks
 
 check_directory $D_INITIAL_CHECKS
 
-for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
+#for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
+for F_IC in `ls ${D_INITIAL_CHECKS}`
 do
   echo $F_IC
 
@@ -269,7 +270,7 @@ do
     ;;
   esac
 
-exit 0
+#exit 0
   
 done
 

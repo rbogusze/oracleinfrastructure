@@ -1,0 +1,3 @@
+execute_sql
+SQL: select count(1) from dba_objects where status != 'VALID' and object_type not in ('SYNONYM') and owner = 'APPS';
+RESULT_LE: 100
