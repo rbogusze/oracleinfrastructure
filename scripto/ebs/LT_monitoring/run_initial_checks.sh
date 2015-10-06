@@ -45,16 +45,25 @@ f_LT_execute_sql()
   # time elapsed
   V_ELAPSED_LT=`cat $F_LT | grep ^ELAPSED_LT: | sed -e 's/^ELAPSED_LT:\ //'`
   msgd "V_ELAPSED_LT: $V_ELAPSED_LT"
+
   V_GETS_LT=`cat $F_LT | grep ^GETS_LT: | sed -e 's/^GETS_LT:\ //'`
   msgd "V_GETS_LT: $V_GETS_LT"
+
   V_RESULT_LT=`cat $F_LT | grep ^RESULT_LT: | sed -e 's/^RESULT_LT:\ //'`
   msgd "V_RESULT_LT: $V_RESULT_LT"
+
+  V_RESULT_LE=`cat $F_LT | grep ^RESULT_LE: | sed -e 's/^RESULT_LE:\ //'`
+  msgd "V_RESULT_LE: $V_RESULT_LE"
+
   V_RESULT_EQ=`cat $F_LT | grep ^RESULT_EQ: | sed -e 's/^RESULT_EQ:\ //'`
   msgd "V_RESULT_EQ: $V_RESULT_EQ"
+
   V_RESULT_GE=`cat $F_LT | grep ^RESULT_GE: | sed -e 's/^RESULT_GE:\ //'`
   msgd "V_RESULT_GE: $V_RESULT_GE"
+
   V_RESULT_GT=`cat $F_LT | grep ^RESULT_GT: | sed -e 's/^RESULT_GT:\ //'`
   msgd "V_RESULT_GT: $V_RESULT_GT"
+
   V_RESULT_STR=`cat $F_LT | grep ^RESULT_STR: | sed -e 's/^RESULT_STR:\ //'`
   msgd "V_RESULT_STR: $V_RESULT_STR"
 
@@ -161,6 +170,19 @@ EOF
     msgd "No check requested"
   fi
 
+  msgd "Result less or equal than"
+  if [ ! -z $V_RESULT_LE ]; then
+    if [ $V_LT_RESULT -le $V_RESULT_LE ]; then
+      msgd "OK, result less or equal than expected"
+    else
+      msge "BAD, result larger than expected. Acutal: $V_LT_RESULT Expected: $V_RESULT_LE"
+    fi
+  else
+    msgd "No check requested"
+  fi
+
+
+
   msgd "Result equal to"
   if [ ! -z $V_RESULT_EQ ]; then
     if [ $V_LT_RESULT -eq $V_RESULT_EQ ]; then
@@ -222,7 +244,7 @@ D_INITIAL_CHECKS=$D_BASE/initial_checks
 
 check_directory $D_INITIAL_CHECKS
 
-for F_IC in `ls -r ${D_INITIAL_CHECKS}`
+for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
 do
   echo $F_IC
 
@@ -247,7 +269,7 @@ do
     ;;
   esac
 
-#exit 0
+exit 0
   
 done
 
