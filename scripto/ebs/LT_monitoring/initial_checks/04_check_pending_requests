@@ -1,0 +1,3 @@
+execute_sql
+SQL: SELECT COUNT(1) FROM fnd_concurrent_requests where phase_code  ='P';
+RESULT_LE: 1
