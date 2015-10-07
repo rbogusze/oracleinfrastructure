@@ -1,3 +1,3 @@
 execute_sql
-SQL: SELECT count(*) FROM V$SGA_RESIZE_OPS where oper_type in ('GROW','SHRINK');
-RESULT_LT: 1
+SQL: SELECT count(*) FROM V$SGA_RESIZE_OPS where oper_type in ('GROW','SHRINK') and component not in ('streams pool');
+RESULT_LE: 1
