@@ -153,7 +153,7 @@ EOF
     if [ $V_LT_RESULT_GETS -lt $V_GETS_LT ]; then
       msgd "OK, nr of gets time less than expected"
     else
-      msge "BAD, nr of gets larger than expected. Acutal: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
+      msge "BAD, nr of gets larger than expected. Actual: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
     fi
   else
     msgd "No check requested"
@@ -164,7 +164,7 @@ EOF
     if [ $V_LT_RESULT -lt $V_RESULT_LT ]; then
       msgd "OK, result less than expected"
     else
-      msge "BAD, result larger than expected. Acutal: $V_LT_RESULT Expected: $V_RESULT_LT"
+      msge "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
     fi
   else
     msgd "No check requested"
@@ -175,7 +175,7 @@ EOF
     if [ $V_LT_RESULT -le $V_RESULT_LE ]; then
       msgd "OK, result less or equal than expected"
     else
-      msge "BAD, result larger than expected. Acutal: $V_LT_RESULT Expected: $V_RESULT_LE"
+      msge "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
     fi
   else
     msgd "No check requested"
@@ -188,7 +188,7 @@ EOF
     if [ $V_LT_RESULT -eq $V_RESULT_EQ ]; then
       msgd "OK, result equal"
     else
-      msge "BAD, result not equal. Acutal: $V_LT_RESULT Expected: $V_RESULT_EQ"
+      msge "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     fi
   else
     msgd "No check requested"
@@ -199,7 +199,7 @@ EOF
     if [ $V_LT_RESULT -ge $V_RESULT_GE ]; then
       msgd "OK, result greater or equal to"
     else
-      msge "BAD, result not greater or equal. Acutal: $V_LT_RESULT Expected: $V_RESULT_GE"
+      msge "BAD, result not greater or equal. Actual: $V_LT_RESULT Expected: $V_RESULT_GE"
     fi
   else
     msgd "No check requested"
@@ -210,7 +210,7 @@ EOF
     if [ $V_LT_RESULT -gt $V_RESULT_GT ]; then
       msgd "OK, result greater"
     else
-      msge "BAD, result not greater. Acutal: $V_LT_RESULT Expected: $V_RESULT_GT"
+      msge "BAD, result not greater. Actual: $V_LT_RESULT Expected: $V_RESULT_GT"
     fi
   else
     msgd "No check requested"
@@ -223,7 +223,7 @@ EOF
     if [ "$V_LT_RESULT" = "$V_RESULT_STR" ]; then
       msgd "OK, result equal"
     else
-      msge "BAD, result not equal. Acutal: $V_LT_RESULT Expected: $V_RESULT_EQ"
+      msge "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     fi
   else
     msgd "No check requested"
