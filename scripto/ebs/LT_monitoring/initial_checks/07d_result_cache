@@ -1,0 +1,3 @@
+execute_sql
+SQL: SELECT value from v$parameter where name='optimizer_features_enable';
+RESULT_STR: 11.2.0.4
