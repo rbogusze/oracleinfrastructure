@@ -95,7 +95,7 @@ EOF
 
 # Actual run
 # Loop through the initial_checks dir, executes the tasks and compares it to expected results
-D_BASE=~/scripto/ebs/TestRuns
+D_BASE=~/scripto/ebs/test_runs
 D_INITIAL_CHECKS=$D_BASE/test_store
 
 check_directory $D_INITIAL_CHECKS
