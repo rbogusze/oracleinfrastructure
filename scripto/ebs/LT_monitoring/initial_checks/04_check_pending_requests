@@ -1,3 +1,4 @@
 execute_sql
+INFO: There should be no pending requests before the start of the LT
 SQL: SELECT COUNT(1) FROM fnd_concurrent_requests where phase_code  ='P';
 RESULT_LE: 1

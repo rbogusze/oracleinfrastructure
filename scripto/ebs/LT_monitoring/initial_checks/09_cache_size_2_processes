@@ -1,3 +1,4 @@
-execute_sql
+ignore
+INFO: That was the Oracle Support advisory to have cache set to 2 x number of processess for CM, but this has not make any improvemnt in the LT
 SQL: select count(*) from fnd_concurrent_queues_vl where cache_size < 2 * max_processes;
 RESULT_LT: 4

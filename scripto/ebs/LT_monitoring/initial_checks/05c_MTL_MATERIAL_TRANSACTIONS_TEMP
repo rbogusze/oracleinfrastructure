@@ -1,3 +1,4 @@
 execute_sql
+INFO: Check ini_trans value set for MTL_MATERIAL_TRANS_TEMP_N1 index
 SQL: SELECT ini_trans FROM dba_indexes WHERE index_name in ('MTL_MATERIAL_TRANS_TEMP_N1') AND owner       ='INV';
 RESULT_EQ: 255
