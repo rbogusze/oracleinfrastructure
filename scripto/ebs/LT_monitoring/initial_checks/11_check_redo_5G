@@ -1,3 +1,4 @@
 execute_sql
+INFO: Make sure we have redo size set to 5G
 SQL: select distinct bytes from v$log;
 RESULT_GE: 5368709120

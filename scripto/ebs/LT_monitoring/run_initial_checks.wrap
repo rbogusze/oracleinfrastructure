@@ -243,6 +243,8 @@ D_BASE=~/scripto/ebs/LT_monitoring
 D_INITIAL_CHECKS=$D_BASE/initial_checks
 
 check_directory $D_INITIAL_CHECKS
+CN=`cat ~/.LT_SID`
+msgi "Running tests on: $CN"
 
 #for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
 for F_IC in `ls ${D_INITIAL_CHECKS}`
@@ -263,6 +265,9 @@ do
   "execute_sql")
     msgd "execute_sql"
     f_LT_execute_sql ${D_INITIAL_CHECKS}/${F_IC}
+    ;;
+  "ignore")
+    msgd "ignore"
     ;;
   *)
     echo "Unknown action!!! Exiting."
