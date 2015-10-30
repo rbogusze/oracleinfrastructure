@@ -21,16 +21,20 @@ f_LT_execute_sql()
   F_LT=$1
 #  msgd "F_LT: $F_LT"
   run_command_d "cat $F_LT"
-  cat $F_LT | grep -v "execute_sql"
+#  cat $F_LT | grep -v "execute_sql"
 
   echo
 
+  V_INFO=`cat $F_LT | grep ^INFO | sed -e 's/^INFO:\ //'`
+  echo "$V_INFO"
 
   V_SQL=`cat $F_LT | grep ^SQL | sed -e 's/^SQL:\ //'`
-#  echo "SQL: $V_SQL"
+  echo "<code sql>"
+  echo "$V_SQL"
+  echo "</code>"
 
-  V_INFO=`cat $F_LT | grep ^INFO | sed -e 's/^INFO:\ //'`
-#  echo "$V_INFO"
+
+
 
   msgd "${FUNCNAME[0]} End."
 } #f_LT_execute_sql
@@ -46,7 +50,7 @@ check_directory $D_INITIAL_CHECKS
 #for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
 for F_IC in `ls ${D_INITIAL_CHECKS}`
 do
-  echo $F_IC
+  echo "==== $F_IC ===="
 
   IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}`
   msgd "IC_ACTION: $IC_ACTION"
