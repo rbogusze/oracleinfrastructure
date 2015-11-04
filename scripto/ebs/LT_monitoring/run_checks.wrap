@@ -143,9 +143,9 @@ EOF
     msgd "V_TMP2: $V_TMP2"
 
     if [ $V_TMP2 -lt $V_TMP1 ]; then
-      V_ELAPSED_LT_OK="OK, execution time less than expected"
+      V_ELAPSED_LT_OK="OK, execution time less than expected. Actual: $V_LT_RESULT_ELAPSED Expected: $V_ELAPSED_LT"
     else
-      V_ELAPSED_LT_BAD="BAD, execution took longer than expected"
+      V_ELAPSED_LT_BAD="BAD, execution took longer than expected. Actual: $V_LT_RESULT_ELAPSED Expected: $V_ELAPSED_LT"
     fi
   else
     msgd "No check requested"
@@ -167,7 +167,7 @@ EOF
     if [ $V_LT_RESULT -lt $V_RESULT_LT ]; then
       V_RESULT_LT_OK="OK, result less than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
     else
-      V_RESULT_LT_BAD= "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
+      V_RESULT_LT_BAD="BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
     fi
   else
     msgd "No check requested"
@@ -176,9 +176,9 @@ EOF
   msgd "Result less or equal than"
   if [ ! -z $V_RESULT_LE ]; then
     if [ $V_LT_RESULT -le $V_RESULT_LE ]; then
-      V_RESULT_LE_OK= "OK, result less or equal than expected"
+      V_RESULT_LE_OK="OK, result less or equal than expected"
     else
-      V_RESULT_LE_BAD= "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
+      V_RESULT_LE_BAD="BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
     fi
   else
     msgd "No check requested"
@@ -189,9 +189,9 @@ EOF
   msgd "Result equal to"
   if [ ! -z $V_RESULT_EQ ]; then
     if [ $V_LT_RESULT -eq $V_RESULT_EQ ]; then
-      V_RESULT_EQ_OK= "OK, result equal"
+      V_RESULT_EQ_OK="OK, result equal"
     else
-      V_RESULT_EQ_BAD= "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
+      V_RESULT_EQ_BAD="BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     fi
   else
     msgd "No check requested"
@@ -200,9 +200,9 @@ EOF
   msgd "Result greater or equal to"
   if [ ! -z $V_RESULT_GE ]; then
     if [ $V_LT_RESULT -ge $V_RESULT_GE ]; then
-      V_RESULT_GE_OK= "OK, result greater or equal to"
+      V_RESULT_GE_OK="OK, result greater or equal to"
     else
-      V_RESULT_GE_BAD= "BAD, result not greater or equal. Actual: $V_LT_RESULT Expected: $V_RESULT_GE"
+      V_RESULT_GE_BAD="BAD, result not greater or equal. Actual: $V_LT_RESULT Expected: $V_RESULT_GE"
     fi
   else
     msgd "No check requested"
@@ -211,9 +211,9 @@ EOF
   msgd "Result greater"
   if [ ! -z $V_RESULT_GT ]; then
     if [ $V_LT_RESULT -gt $V_RESULT_GT ]; then
-      V_RESULT_GT_OK= "OK, result greater"
+      V_RESULT_GT_OK="OK, result greater"
     else
-      V_RESULT_GT_BAD= "BAD, result not greater. Actual: $V_LT_RESULT Expected: $V_RESULT_GT"
+      V_RESULT_GT_BAD="BAD, result not greater. Actual: $V_LT_RESULT Expected: $V_RESULT_GT"
     fi
   else
     msgd "No check requested"
@@ -224,9 +224,9 @@ EOF
   msgd "Result equal to string"
   if [ ! -z $V_RESULT_STR ]; then
     if [ "$V_LT_RESULT" = "$V_RESULT_STR" ]; then
-      V_RESULT_STR_OK= "OK, result equal"
+      V_RESULT_STR_OK="OK, result equal"
     else
-      V_RESULT_STR_BAD= "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
+      V_RESULT_STR_BAD="BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     fi
   else
     msgd "No check requested"
@@ -235,30 +235,37 @@ EOF
 
   # OK, now I have all the required input, time to construct result info
 #WIP
-  echo "Test: `basename $F_LT`"
+  echo "==== Test: `basename $F_LT` ===="
   echo "$V_INFO"
+  echo "<code sql>"
   echo "$V_SQL"
+  echo "</code>"
 
-  if [ -n "$V_ELAPSED_LT_OK" ]; then echo "$V_ELAPSED_LT_OK"; fi
-  if [ -n "$V_ELAPSED_LT_BAD" ]; then echo "$V_ELAPSED_LT_BAD"; fi
+  V_OK_PREFIX=''
+  V_OK_SUFFIX='\\'
+  V_BAD_PREFIX=''
+  V_BAD_SUFFIX='\\'
 
-  if [ -n "$V_GETS_LT_OK" ]; then echo "$V_GETS_LT_OK"; fi
-  if [ -n "$V_GETS_LT_BAD" ]; then echo "$V_GETS_LT_BAD"; fi
+  if [ -n "$V_ELAPSED_LT_OK" ]; then echo "$V_OK_PREFIX $V_ELAPSED_LT_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_ELAPSED_LT_BAD" ]; then echo "$V_BAD_PREFIX $V_ELAPSED_LT_BAD $V_BAD_SUFFIX"; fi
 
-  if [ -n "$V_RESULT_LT_OK" ]; then echo "$V_RESULT_LT_OK"; fi
-  if [ -n "$V_RESULT_LT_BAD" ]; then echo "$V_RESULT_LT_BAD"; fi
+  if [ -n "$V_GETS_LT_OK" ]; then echo "$V_OK_PREFIX $V_GETS_LT_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_GETS_LT_BAD" ]; then echo "$V_BAD_PREFIX $V_GETS_LT_BAD $V_BAD_SUFFIX"; fi
 
-  if [ -n "$V_RESULT_LE_OK" ]; then echo "$V_RESULT_LE_OK"; fi
-  if [ -n "$V_RESULT_LE_BAD" ]; then echo "$V_RESULT_LE_BAD"; fi
+  if [ -n "$V_RESULT_LT_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_LT_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_RESULT_LT_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_LT_BAD $V_BAD_SUFFIX"; fi
 
-  if [ -n "$V_RESULT_GE_OK" ]; then echo "$V_RESULT_GE_OK"; fi
-  if [ -n "$V_RESULT_GE_BAD" ]; then echo "$V_RESULT_GE_BAD"; fi
+  if [ -n "$V_RESULT_LE_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_LE_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_RESULT_LE_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_LE_BAD $V_BAD_SUFFIX"; fi
 
-  if [ -n "$V_RESULT_GT_OK" ]; then echo "$V_RESULT_GT_OK"; fi
-  if [ -n "$V_RESULT_GT_BAD" ]; then echo "$V_RESULT_GT_BAD"; fi
+  if [ -n "$V_RESULT_GE_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_GE_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_RESULT_GE_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_GE_BAD $V_BAD_SUFFIX"; fi
 
-  if [ -n "$V_RESULT_STR_OK" ]; then echo "$V_RESULT_STR_OK"; fi
-  if [ -n "$V_RESULT_STR_BAD" ]; then echo "$V_RESULT_STR_BAD"; fi
+  if [ -n "$V_RESULT_GT_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_GT_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_RESULT_GT_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_GT_BAD $V_BAD_SUFFIX"; fi
+
+  if [ -n "$V_RESULT_STR_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_STR_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_RESULT_STR_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_STR_BAD $V_BAD_SUFFIX"; fi
 
   msgd "${FUNCNAME[0]} End."
 } #f_LT_execute_sql
