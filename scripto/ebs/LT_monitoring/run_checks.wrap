@@ -165,9 +165,9 @@ EOF
   msgd "Result less than"
   if [ ! -z $V_RESULT_LT ]; then
     if [ $V_LT_RESULT -lt $V_RESULT_LT ]; then
-      msgd "OK, result less than expected"
+      V_RESULT_LT_OK="OK, result less than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
     else
-      msge "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
+      V_RESULT_LT_BAD= "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
     fi
   else
     msgd "No check requested"
@@ -176,9 +176,9 @@ EOF
   msgd "Result less or equal than"
   if [ ! -z $V_RESULT_LE ]; then
     if [ $V_LT_RESULT -le $V_RESULT_LE ]; then
-      msgd "OK, result less or equal than expected"
+      V_RESULT_LE_OK= "OK, result less or equal than expected"
     else
-      msge "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
+      V_RESULT_LE_BAD= "BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
     fi
   else
     msgd "No check requested"
@@ -189,9 +189,9 @@ EOF
   msgd "Result equal to"
   if [ ! -z $V_RESULT_EQ ]; then
     if [ $V_LT_RESULT -eq $V_RESULT_EQ ]; then
-      msgd "OK, result equal"
+      V_RESULT_EQ_OK= "OK, result equal"
     else
-      msge "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
+      V_RESULT_EQ_BAD= "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     fi
   else
     msgd "No check requested"
@@ -200,9 +200,9 @@ EOF
   msgd "Result greater or equal to"
   if [ ! -z $V_RESULT_GE ]; then
     if [ $V_LT_RESULT -ge $V_RESULT_GE ]; then
-      msgd "OK, result greater or equal to"
+      V_RESULT_GE_OK= "OK, result greater or equal to"
     else
-      msge "BAD, result not greater or equal. Actual: $V_LT_RESULT Expected: $V_RESULT_GE"
+      V_RESULT_GE_BAD= "BAD, result not greater or equal. Actual: $V_LT_RESULT Expected: $V_RESULT_GE"
     fi
   else
     msgd "No check requested"
@@ -211,9 +211,9 @@ EOF
   msgd "Result greater"
   if [ ! -z $V_RESULT_GT ]; then
     if [ $V_LT_RESULT -gt $V_RESULT_GT ]; then
-      msgd "OK, result greater"
+      V_RESULT_GT_OK= "OK, result greater"
     else
-      msge "BAD, result not greater. Actual: $V_LT_RESULT Expected: $V_RESULT_GT"
+      V_RESULT_GT_BAD= "BAD, result not greater. Actual: $V_LT_RESULT Expected: $V_RESULT_GT"
     fi
   else
     msgd "No check requested"
@@ -224,9 +224,9 @@ EOF
   msgd "Result equal to string"
   if [ ! -z $V_RESULT_STR ]; then
     if [ "$V_LT_RESULT" = "$V_RESULT_STR" ]; then
-      msgd "OK, result equal"
+      V_RESULT_STR_OK= "OK, result equal"
     else
-      msge "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
+      V_RESULT_STR_BAD= "BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     fi
   else
     msgd "No check requested"
@@ -238,12 +238,27 @@ EOF
   echo "Test: `basename $F_LT`"
   echo "$V_INFO"
   echo "$V_SQL"
+
   if [ -n "$V_ELAPSED_LT_OK" ]; then echo "$V_ELAPSED_LT_OK"; fi
   if [ -n "$V_ELAPSED_LT_BAD" ]; then echo "$V_ELAPSED_LT_BAD"; fi
 
   if [ -n "$V_GETS_LT_OK" ]; then echo "$V_GETS_LT_OK"; fi
   if [ -n "$V_GETS_LT_BAD" ]; then echo "$V_GETS_LT_BAD"; fi
 
+  if [ -n "$V_RESULT_LT_OK" ]; then echo "$V_RESULT_LT_OK"; fi
+  if [ -n "$V_RESULT_LT_BAD" ]; then echo "$V_RESULT_LT_BAD"; fi
+
+  if [ -n "$V_RESULT_LE_OK" ]; then echo "$V_RESULT_LE_OK"; fi
+  if [ -n "$V_RESULT_LE_BAD" ]; then echo "$V_RESULT_LE_BAD"; fi
+
+  if [ -n "$V_RESULT_GE_OK" ]; then echo "$V_RESULT_GE_OK"; fi
+  if [ -n "$V_RESULT_GE_BAD" ]; then echo "$V_RESULT_GE_BAD"; fi
+
+  if [ -n "$V_RESULT_GT_OK" ]; then echo "$V_RESULT_GT_OK"; fi
+  if [ -n "$V_RESULT_GT_BAD" ]; then echo "$V_RESULT_GT_BAD"; fi
+
+  if [ -n "$V_RESULT_STR_OK" ]; then echo "$V_RESULT_STR_OK"; fi
+  if [ -n "$V_RESULT_STR_BAD" ]; then echo "$V_RESULT_STR_BAD"; fi
 
   msgd "${FUNCNAME[0]} End."
 } #f_LT_execute_sql
