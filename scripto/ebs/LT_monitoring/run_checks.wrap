@@ -33,6 +33,9 @@ f_LT_execute_sql()
   msgd "F_LT: $F_LT" 
   run_command_d "cat $F_LT"
 
+  V_INFO=`cat $F_LT | grep ^INFO | sed -e 's/^INFO:\ //'`
+  msgd "V_INFO: $V_INFO"
+
   # Get the SQL to be executed
   V_SQL=`cat $F_LT | grep ^SQL | sed -e 's/^SQL:\ //'`
   msgd "V_SQL: $V_SQL"
@@ -140,9 +143,9 @@ EOF
     msgd "V_TMP2: $V_TMP2"
 
     if [ $V_TMP2 -lt $V_TMP1 ]; then
-      msgd "OK, execution time less than expected"
+      V_ELAPSED_LT_OK="OK, execution time less than expected"
     else
-      msge "BAD, execution took longer than expected"
+      V_ELAPSED_LT_BAD="BAD, execution took longer than expected"
     fi
   else
     msgd "No check requested"
@@ -151,9 +154,9 @@ EOF
   msgd "Gets less than"
   if [ ! -z $V_GETS_LT ]; then
     if [ $V_LT_RESULT_GETS -lt $V_GETS_LT ]; then
-      msgd "OK, nr of gets time less than expected"
+      V_GETS_LT_OK="OK, nr of gets time less than expected. Actual: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
     else
-      msge "BAD, nr of gets larger than expected. Actual: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
+      V_GETS_LT_BAD="BAD, nr of gets larger than expected. Actual: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
     fi
   else
     msgd "No check requested"
@@ -230,7 +233,16 @@ EOF
   fi
 
 
+  # OK, now I have all the required input, time to construct result info
+#WIP
+  echo "Test: `basename $F_LT`"
+  echo "$V_INFO"
+  echo "$V_SQL"
+  if [ -n "$V_ELAPSED_LT_OK" ]; then echo "$V_ELAPSED_LT_OK"; fi
+  if [ -n "$V_ELAPSED_LT_BAD" ]; then echo "$V_ELAPSED_LT_BAD"; fi
 
+  if [ -n "$V_GETS_LT_OK" ]; then echo "$V_GETS_LT_OK"; fi
+  if [ -n "$V_GETS_LT_BAD" ]; then echo "$V_GETS_LT_BAD"; fi
 
 
   msgd "${FUNCNAME[0]} End."
@@ -259,7 +271,7 @@ do
 #F_IC=10d_prevent_SGA_dynamic_resize
   for F_ICF in `ls ${D_INITIAL_CHECKS}/${F_IC}`
   do
-    echo "Sub check: $F_ICF"
+    msgd "Sub check: $F_ICF"
 
     IC_ACTION=`head -1 ${D_INITIAL_CHECKS}/${F_IC}/${F_ICF}`
     msgd "IC_ACTION: $IC_ACTION"
