@@ -235,7 +235,12 @@ EOF
 
   # OK, now I have all the required input, time to construct result info
 #WIP
-  echo "==== Test: `basename $F_LT` ===="
+
+  # If any of the checks failed I mark it on header
+  V_HEAD_PREFIX=''
+  V_HEAD_SUFFIX=''
+
+  echo "==== Test: $V_HEAD_PREFIX `basename $F_LT` $V_HEAD_SUFFIX ===="
   echo "$V_INFO"
   echo "<code sql>"
   echo "$V_SQL"
@@ -243,7 +248,9 @@ EOF
 
   V_OK_PREFIX=''
   V_OK_SUFFIX='\\'
-  V_BAD_PREFIX=''
+  #V_BAD_PREFIX='<html><span style="color:red">'
+  #V_BAD_SUFFIX='</span></html>\\'
+  V_BAD_PREFIX=':!:'
   V_BAD_SUFFIX='\\'
 
   if [ -n "$V_ELAPSED_LT_OK" ]; then echo "$V_OK_PREFIX $V_ELAPSED_LT_OK $V_OK_SUFFIX"; fi
@@ -266,6 +273,8 @@ EOF
 
   if [ -n "$V_RESULT_STR_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_STR_OK $V_OK_SUFFIX"; fi
   if [ -n "$V_RESULT_STR_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_STR_BAD $V_BAD_SUFFIX"; fi
+
+  unset V_ELAPSED_LT_OK V_ELAPSED_LT_BAD V_GETS_LT_OK V_GETS_LT_BAD V_RESULT_LT_OK V_RESULT_LT_BAD V_RESULT_LE_OK V_RESULT_LE_BAD V_RESULT_GE_OK V_RESULT_GE_BAD V_RESULT_GT_OK V_RESULT_GT_BAD V_RESULT_STR_OK V_RESULT_STR_BAD 
 
   msgd "${FUNCNAME[0]} End."
 } #f_LT_execute_sql
@@ -312,7 +321,7 @@ do
     esac
   done
 
-exit 0
+#exit 0
   
 done
 
