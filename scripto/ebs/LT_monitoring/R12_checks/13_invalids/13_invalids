@@ -1,0 +1,4 @@
+execute_sql
+INFO: Make sure number of invalids in APPS schema is low
+SQL: select count(1) from dba_objects where status != 'VALID' and object_type not in ('SYNONYM') and owner = 'APPS';
+RESULT_LE: 100

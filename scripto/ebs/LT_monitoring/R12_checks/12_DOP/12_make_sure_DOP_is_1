@@ -1,0 +1,4 @@
+execute_sql
+INFO: Make sure we have DOP set to 1 on 'OE_ORDER_LINES_ALL', 'MTL_SYSTEM_ITEMS_B', 'MTL_ITEM_CATEGORIES' tables
+SQL: select distinct degree from all_tables where table_name in ('OE_ORDER_LINES_ALL', 'MTL_SYSTEM_ITEMS_B', 'MTL_ITEM_CATEGORIES');
+RESULT_EQ: 1

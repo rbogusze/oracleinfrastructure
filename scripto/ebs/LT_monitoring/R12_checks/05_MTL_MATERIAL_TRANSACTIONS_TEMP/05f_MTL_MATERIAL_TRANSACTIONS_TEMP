@@ -1,0 +1,4 @@
+execute_sql
+INFO: Check pct_free value set for MTL_MATERIAL_TRANS_TEMP_U1 index
+SQL: SELECT pct_free FROM dba_indexes WHERE index_name in ('MTL_MATERIAL_TRANS_TEMP_U1') AND owner       ='INV';
+RESULT_EQ: 70
