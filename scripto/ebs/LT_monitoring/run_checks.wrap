@@ -176,7 +176,7 @@ EOF
   msgd "Result less or equal than"
   if [ ! -z $V_RESULT_LE ]; then
     if [ $V_LT_RESULT -le $V_RESULT_LE ]; then
-      V_RESULT_LE_OK="OK, result less or equal than expected"
+      V_RESULT_LE_OK="OK, result less or equal than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
     else
       V_RESULT_LE_BAD="BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
     fi
@@ -189,7 +189,7 @@ EOF
   msgd "Result equal to"
   if [ ! -z $V_RESULT_EQ ]; then
     if [ $V_LT_RESULT -eq $V_RESULT_EQ ]; then
-      V_RESULT_EQ_OK="OK, result equal"
+      V_RESULT_EQ_OK="OK, result equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     else
       V_RESULT_EQ_BAD="BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
     fi
@@ -200,7 +200,7 @@ EOF
   msgd "Result greater or equal to"
   if [ ! -z $V_RESULT_GE ]; then
     if [ $V_LT_RESULT -ge $V_RESULT_GE ]; then
-      V_RESULT_GE_OK="OK, result greater or equal to"
+      V_RESULT_GE_OK="OK, result greater or equal to. Actual: $V_LT_RESULT Expected: $V_RESULT_GE"
     else
       V_RESULT_GE_BAD="BAD, result not greater or equal. Actual: $V_LT_RESULT Expected: $V_RESULT_GE"
     fi
@@ -211,7 +211,7 @@ EOF
   msgd "Result greater"
   if [ ! -z $V_RESULT_GT ]; then
     if [ $V_LT_RESULT -gt $V_RESULT_GT ]; then
-      V_RESULT_GT_OK="OK, result greater"
+      V_RESULT_GT_OK="OK, result greater. Actual: $V_LT_RESULT Expected: $V_RESULT_GT"
     else
       V_RESULT_GT_BAD="BAD, result not greater. Actual: $V_LT_RESULT Expected: $V_RESULT_GT"
     fi
@@ -224,9 +224,9 @@ EOF
   msgd "Result equal to string"
   if [ ! -z $V_RESULT_STR ]; then
     if [ "$V_LT_RESULT" = "$V_RESULT_STR" ]; then
-      V_RESULT_STR_OK="OK, result equal"
+      V_RESULT_STR_OK="OK, result equal. Actual: $V_LT_RESULT Expected: $V_RESULT_STR"
     else
-      V_RESULT_STR_BAD="BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_EQ"
+      V_RESULT_STR_BAD="BAD, result not equal. Actual: $V_LT_RESULT Expected: $V_RESULT_STR"
     fi
   else
     msgd "No check requested"
@@ -240,7 +240,7 @@ EOF
   V_HEAD_PREFIX=''
   V_HEAD_SUFFIX=''
 
-  echo "==== Test: $V_HEAD_PREFIX `basename $F_LT` $V_HEAD_SUFFIX ===="
+  echo "==== $V_HEAD_PREFIX `basename $F_LT` $V_HEAD_SUFFIX ===="
   echo "$V_INFO"
   echo "<code sql>"
   echo "$V_SQL"
@@ -265,6 +265,9 @@ EOF
   if [ -n "$V_RESULT_LE_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_LE_OK $V_OK_SUFFIX"; fi
   if [ -n "$V_RESULT_LE_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_LE_BAD $V_BAD_SUFFIX"; fi
 
+  if [ -n "$V_RESULT_EQ_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_EQ_OK $V_OK_SUFFIX"; fi
+  if [ -n "$V_RESULT_EQ_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_EQ_BAD $V_BAD_SUFFIX"; fi
+
   if [ -n "$V_RESULT_GE_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_GE_OK $V_OK_SUFFIX"; fi
   if [ -n "$V_RESULT_GE_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_GE_BAD $V_BAD_SUFFIX"; fi
 
@@ -274,7 +277,7 @@ EOF
   if [ -n "$V_RESULT_STR_OK" ]; then echo "$V_OK_PREFIX $V_RESULT_STR_OK $V_OK_SUFFIX"; fi
   if [ -n "$V_RESULT_STR_BAD" ]; then echo "$V_BAD_PREFIX $V_RESULT_STR_BAD $V_BAD_SUFFIX"; fi
 
-  unset V_ELAPSED_LT_OK V_ELAPSED_LT_BAD V_GETS_LT_OK V_GETS_LT_BAD V_RESULT_LT_OK V_RESULT_LT_BAD V_RESULT_LE_OK V_RESULT_LE_BAD V_RESULT_GE_OK V_RESULT_GE_BAD V_RESULT_GT_OK V_RESULT_GT_BAD V_RESULT_STR_OK V_RESULT_STR_BAD 
+  unset V_ELAPSED_LT_OK V_ELAPSED_LT_BAD V_GETS_LT_OK V_GETS_LT_BAD V_RESULT_LT_OK V_RESULT_LT_BAD V_RESULT_LE_OK V_RESULT_LE_BAD V_RESULT_GE_OK V_RESULT_GE_BAD V_RESULT_GT_OK V_RESULT_GT_BAD V_RESULT_STR_OK V_RESULT_STR_BAD V_RESULT_EQ_OK V_RESULT_EQ_BAD
 
   msgd "${FUNCNAME[0]} End."
 } #f_LT_execute_sql
@@ -287,14 +290,17 @@ D_INITIAL_CHECKS=$D_BASE/R12_checks
 
 check_directory $D_INITIAL_CHECKS
 CN=`cat ~/.LT_SID`
-msgi "Running tests on: $CN"
+#msgi "Running tests on: $CN"
+
+echo "====== Checking: $CN on: `date`======"
+echo '~~NOTOC~~'
 
 #for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
 for F_IC in `ls ${D_INITIAL_CHECKS}`
 do
-  echo "Main dir: $F_IC"
+  echo "===== Section: $F_IC ====="
 
-#F_IC=02_MV_refreshed_complete
+#F_IC=02_MV_refreshed_fast
 #F_IC=05b_MTL_MATERIAL_TRANSACTIONS_TEMP
 #F_IC=07c_result_cache
 #F_IC=08_FND_CONCURRENT_REQUESTS

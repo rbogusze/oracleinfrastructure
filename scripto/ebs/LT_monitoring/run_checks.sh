@@ -4,4 +4,4 @@
 LOG_DIR=/var/tmp/LT_monitoring
 mkdir -p $LOG_DIR
 
-(. ./run_checks.wrap 2>&1) | tee $LOG_DIR/run_checks_log_$1.`date '+%Y-%m-%d--%H:%M:%S'` /var/www/html/dokuwiki/data/pages/run_checks_log.txt
+(. ./run_checks.wrap 2>&1) | tee $LOG_DIR/run_checks_log_$1.`date '+%Y-%m-%d--%H:%M:%S'` /var/www/html/dokuwiki/data/pages/run_checks_log_`date '+%Y%m%d_%H%M%S'`.txt
