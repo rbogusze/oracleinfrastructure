@@ -128,7 +128,10 @@ EOF
   msgd "V_LT_RESULT_ELAPSED: $V_LT_RESULT_ELAPSED"
   V_LT_RESULT_GETS=`cat $F_TMP | grep "consistent gets" | awk '{print $1}' `
   msgd "V_LT_RESULT_GETS: $V_LT_RESULT_GETS"
-  V_LT_RESULT=`cat $F_TMP | head -1 | awk '{print $1}' `
+  #why so complicated? V_LT_RESULT=`cat $F_TMP | head -1 | awk '{print $1}' `
+  # just remove multiple spaces between the columns
+  # | head -1 - because with autotrace on we have explain plan and stats, that is why only first line
+  V_LT_RESULT=`cat $F_TMP | tr "\t" " " | tr -s '[:blank:]' | head -1`
   msgd "V_LT_RESULT: $V_LT_RESULT"
 
 
@@ -222,7 +225,7 @@ EOF
 
 
   msgd "Result equal to string"
-  if [ ! -z $V_RESULT_STR ]; then
+  if [ ! -z "$V_RESULT_STR" ]; then
     if [ "$V_LT_RESULT" = "$V_RESULT_STR" ]; then
       V_RESULT_STR_OK="OK, result equal. Actual: $V_LT_RESULT Expected: $V_RESULT_STR"
     else
@@ -301,8 +304,8 @@ do
   echo "===== Section: $F_IC ====="
 
 #F_IC=02_MV_refreshed_fast
-#F_IC=05b_MTL_MATERIAL_TRANSACTIONS_TEMP
-#F_IC=07c_result_cache
+#F_IC=06_init_settings
+#F_IC=09_profile_options
 #F_IC=08_FND_CONCURRENT_REQUESTS
 #F_IC=09_cache_size_2_processes
 #F_IC=10d_prevent_SGA_dynamic_resize

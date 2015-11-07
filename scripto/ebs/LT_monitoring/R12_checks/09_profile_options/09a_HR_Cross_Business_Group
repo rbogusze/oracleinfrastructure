@@ -1,0 +1,4 @@
+execute_sql
+INFO: Make sure we have HR:Cross Business Group set to N
+SQL: select v.profile_option_value VALUE from   fnd_profile_options p, fnd_profile_option_values v, fnd_profile_options_tl n, fnd_user usr, fnd_application app, fnd_responsibility rsp, fnd_nodes svr, hr_operating_units org where  p.profile_option_id = v.profile_option_id (+) and    p.profile_option_name = n.profile_option_name and    usr.user_id (+) = v.level_value and    rsp.application_id (+) = v.level_value_application_id and    rsp.responsibility_id (+) = v.level_value and    app.application_id (+) = v.level_value and    svr.node_id (+) = v.level_value and    org.organization_id (+) = v.level_value and    n.user_profile_option_name = 'HR:Cross Business Group' and    n.language = 'US' ;
+RESULT_STR: N
