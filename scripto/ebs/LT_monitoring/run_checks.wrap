@@ -2,7 +2,7 @@
 # This script loops through the initial_checks dir, executes the tasks and compares it to expected results
 # The SID of the DB to connect to is stored in ~/.LT_SID
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -237,7 +237,6 @@ EOF
 
 
   # OK, now I have all the required input, time to construct result info
-#WIP
 
   # If any of the checks failed I mark it on header
   if [ -n "$V_ELAPSED_LT_BAD" ] || [ -n "$V_RESULT_EQ_BAD" ] || [ -n "$V_RESULT_STR_BAD" ] || [ -n "$V_GETS_LT_BAD" ] || [ -n "$V_RESULT_LT_BAD" ] || [ -n "$V_RESULT_LE_BAD" ] || [ -n "$V_RESULT_EQ_BAD" ] || [ -n "$V_RESULT_GE_BAD" ] || [ -n "$V_RESULT_GT_BAD" ] ; then
@@ -302,13 +301,18 @@ f_section_progress()
 {
   msgd "${FUNCNAME[0]} Begin."
   V_SECTION_NAME=$1
-  V_TASK_PROGRESS=$2  
-
-  msgd "V_SECTION_NAME: $V_SECTION_NAME"
-  msgd "V_TASK_PROGRESS: $V_TASK_PROGRESS"
+  V_CHECKS=$2
+  V_TASK_PROGRESS=$3  
 
   exec 1>&3 2>&4
-  echo "$V_SECTION_NAME $V_TASK_PROGRESS"
+  msgd "V_SECTION_NAME: $V_SECTION_NAME"
+  msgd "V_CHECKS: $V_CHECKS"
+  msgd "V_TASK_PROGRESS: $V_TASK_PROGRESS"
+
+#WIP
+
+
+  echo "$V_SECTION_NAME $V_CHECKS $V_TASK_PROGRESS"
   exec 3>&1 4>&2 1>$LOG 2>&1
 
 
@@ -331,21 +335,25 @@ echo '~~NOTOC~~'
 #for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
 for F_IC in `ls ${D_INITIAL_CHECKS}`
 do
+
+  #F_IC=02_MV_refreshed_fast
+  #F_IC=06_init_settings
+  F_IC=07_result_cache
+  #F_IC=09_profile_options
+  #F_IC=08_FND_CONCURRENT_REQUESTS
+  #F_IC=09_cache_size_2_processes
+  #F_IC=10d_prevent_SGA_dynamic_resize
+
   #echo "Section: $F_IC"
   LOG=/tmp/ala.$F_IC
   exec 3>&1 4>&2 1>$LOG 2>&1
   echo "===== Section: $F_IC ====="
 
-  V_NR_CHECKS_IN_SECTION=``
+  V_NR_CHECKS_IN_SECTION=`find ${D_INITIAL_CHECKS}/${F_IC} -type f | grep -v '.svn' | wc -l`
+  echo ${D_INITIAL_CHECKS}/${F_IC}
 
-  f_section_progress "$F_IC"
+  f_section_progress "$F_IC" "$V_NR_CHECKS_IN_SECTION"
 
-  #F_IC=02_MV_refreshed_fast
-  #F_IC=06_init_settings
-  #F_IC=09_profile_options
-  #F_IC=08_FND_CONCURRENT_REQUESTS
-  #F_IC=09_cache_size_2_processes
-  #F_IC=10d_prevent_SGA_dynamic_resize
 
   for F_ICF in `ls ${D_INITIAL_CHECKS}/${F_IC}`
   do
@@ -360,7 +368,7 @@ do
       f_LT_execute_sql ${D_INITIAL_CHECKS}/${F_IC}/${F_ICF}
 
       # report current progress  
-      f_section_progress "$F_IC $?"
+      f_section_progress "$F_IC" "$V_NR_CHECKS_IN_SECTION" "$?"
       ;;
     "ignore")
       msgd "ignore"
@@ -372,7 +380,7 @@ do
     esac
   done
 
-#exit 0
+exit 0
   # Done with one section
   exec 1>&3 2>&4
   echo >&2 "Done"
