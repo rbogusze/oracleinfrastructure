@@ -2,7 +2,7 @@
 # This script loops through the initial_checks dir, executes the tasks and compares it to expected results
 # The SID of the DB to connect to is stored in ~/.LT_SID
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -301,18 +301,30 @@ f_section_progress()
 {
   msgd "${FUNCNAME[0]} Begin."
   V_SECTION_NAME=$1
-  V_CHECKS=$2
-  V_TASK_PROGRESS=$3  
+  V_TASKS_IN_SECTION=$2
+  V_TASK_RESULT=$3  
 
   exec 1>&3 2>&4
   msgd "V_SECTION_NAME: $V_SECTION_NAME"
-  msgd "V_CHECKS: $V_CHECKS"
-  msgd "V_TASK_PROGRESS: $V_TASK_PROGRESS"
+  msgd "V_TASKS_IN_SECTION: $V_TASKS_IN_SECTION"
+  msgd "V_TASK_RESULT: $V_TASK_RESULT"
 
 #WIP
+  if [ ! -n "$V_TASK_RESULT" ]; then
+    msgd "OK, empty V_TASK_RESULT so this is the beginning of the section. Reseting the counter." 
+    V_TASK_COUNT=0
+    V_TASK_FAILED=0
+    V_TASK_FAILED_MSG=''
+  else
+    V_TASK_COUNT=$[V_TASK_COUNT + 1]
+    # check the task result, if it failed increase the result counter
+    if [ "$V_TASK_RESULT" -eq 1 ]; then
+      V_TASK_FAILED=$[V_TASK_FAILED + 1]
+      V_TASK_FAILED_MSG="Failed: $V_TASK_FAILED"
+    fi
+  fi
 
-
-  echo "$V_SECTION_NAME $V_CHECKS $V_TASK_PROGRESS"
+  echo "$V_SECTION_NAME $V_TASK_COUNT / $V_TASKS_IN_SECTION $V_TASK_FAILED_MSG"
   exec 3>&1 4>&2 1>$LOG 2>&1
 
 
@@ -338,7 +350,7 @@ do
 
   #F_IC=02_MV_refreshed_fast
   #F_IC=06_init_settings
-  F_IC=07_result_cache
+  #F_IC=07_result_cache
   #F_IC=09_profile_options
   #F_IC=08_FND_CONCURRENT_REQUESTS
   #F_IC=09_cache_size_2_processes
