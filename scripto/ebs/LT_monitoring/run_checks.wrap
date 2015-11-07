@@ -240,7 +240,7 @@ EOF
 #WIP
 
   # If any of the checks failed I mark it on header
-  if [ -n "$V_ELAPSED_LT_BAD" ] || [ -n "$V_RESULT_EQ_BAD" ] || [ -n "$V_RESULT_STR_BAD" ] ; then
+  if [ -n "$V_ELAPSED_LT_BAD" ] || [ -n "$V_RESULT_EQ_BAD" ] || [ -n "$V_RESULT_STR_BAD" ] || [ -n "$V_GETS_LT_BAD" ] || [ -n "$V_RESULT_LT_BAD" ] || [ -n "$V_RESULT_LE_BAD" ] || [ -n "$V_RESULT_EQ_BAD" ] || [ -n "$V_RESULT_GE_BAD" ] || [ -n "$V_RESULT_GT_BAD" ] ; then
     msgd "All checks are fine"
     V_HEAD_PREFIX='BLE'
     V_HEAD_SUFFIX=''
@@ -297,6 +297,25 @@ EOF
 } #f_LT_execute_sql
 
 
+# Report on section progress
+f_section_progress()
+{
+  msgd "${FUNCNAME[0]} Begin."
+  V_SECTION_NAME=$1
+  V_TASK_PROGRESS=$2  
+
+  msgd "V_SECTION_NAME: $V_SECTION_NAME"
+  msgd "V_TASK_PROGRESS: $V_TASK_PROGRESS"
+
+  exec 1>&3 2>&4
+  echo "$V_SECTION_NAME $V_TASK_PROGRESS"
+  exec 3>&1 4>&2 1>$LOG 2>&1
+
+
+  msgd "${FUNCNAME[0]} End."
+} #f_LT_execute_sql
+
+
 # Actual run
 # Loop through the initial_checks dir, executes the tasks and compares it to expected results
 D_BASE=~/scripto/ebs/LT_monitoring
@@ -312,13 +331,17 @@ echo '~~NOTOC~~'
 #for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
 for F_IC in `ls ${D_INITIAL_CHECKS}`
 do
-  echo "Section: $F_IC"
+  #echo "Section: $F_IC"
   LOG=/tmp/ala.$F_IC
-#  exec 3>&1 4>&2 1>$LOG 2>&1
+  exec 3>&1 4>&2 1>$LOG 2>&1
   echo "===== Section: $F_IC ====="
 
+  V_NR_CHECKS_IN_SECTION=``
+
+  f_section_progress "$F_IC"
+
   #F_IC=02_MV_refreshed_fast
-  F_IC=06_init_settings
+  #F_IC=06_init_settings
   #F_IC=09_profile_options
   #F_IC=08_FND_CONCURRENT_REQUESTS
   #F_IC=09_cache_size_2_processes
@@ -335,7 +358,9 @@ do
     "execute_sql")
       msgd "execute_sql"
       f_LT_execute_sql ${D_INITIAL_CHECKS}/${F_IC}/${F_ICF}
-      echo "function returned $?"
+
+      # report current progress  
+      f_section_progress "$F_IC $?"
       ;;
     "ignore")
       msgd "ignore"
@@ -347,7 +372,7 @@ do
     esac
   done
 
-exit 0
+#exit 0
   # Done with one section
   exec 1>&3 2>&4
   echo >&2 "Done"
