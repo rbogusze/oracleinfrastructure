@@ -16,6 +16,7 @@ fi
 V_DATE=`date '+%Y%m%d_%H%M%S'`
 LOG_DIR=/var/tmp/LT_monitoring/$V_DATE
 mkdir -p $LOG_DIR
+F_WIKI_SUMMARY=$LOG_DIR/00_wiki_summary.txt
 
 # Assuming connections as apps to DB stored in ~/.LT_SID
 f_LT_execute_sql()
@@ -335,9 +336,12 @@ f_section_progress()
   exec 3>&1 4>&2 1>>$LOG 2>&1
 
   # Prepare summary for wiki
-  F_WIKI_SUMMARY=$LOG_DIR/00_wiki_summary.txt
   if [ "$V_TASK_COUNT" -eq "$V_TASKS_IN_SECTION" ]; then
-    echo "| $V_SECTION_NAME | $V_TASK_COUNT / $V_TASKS_IN_SECTION | $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
+    if [ "$V_TASK_FAILED" -gt 0 ]; then
+      echo "| $V_SECTION_NAME | $V_TASK_COUNT / $V_TASKS_IN_SECTION | {{wiki:danger.png}} $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
+    else 
+      echo "| $V_SECTION_NAME | $V_TASK_COUNT / $V_TASKS_IN_SECTION | {{wiki:success.png}} |" >> $F_WIKI_SUMMARY
+    fi
   fi
 
 
@@ -354,8 +358,8 @@ check_directory $D_INITIAL_CHECKS
 CN=`cat ~/.LT_SID`
 #msgi "Running tests on: $CN"
 
-echo "====== Checking: $CN on: `date`======"
-echo '~~NOTOC~~'
+echo "====== Checking: $CN on: `date`======" >> $F_WIKI_SUMMARY
+echo '~~NOTOC~~' >> $F_WIKI_SUMMARY
 
 #for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
 for F_IC in `ls ${D_INITIAL_CHECKS}`
