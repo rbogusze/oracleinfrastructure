@@ -312,6 +312,7 @@ f_section_progress()
 #WIP
   if [ ! -n "$V_TASK_RESULT" ]; then
     msgd "OK, empty V_TASK_RESULT so this is the beginning of the section. Reseting the counter." 
+    #echo
     V_TASK_COUNT=0
     V_TASK_FAILED=0
     V_TASK_FAILED_MSG=''
@@ -324,8 +325,13 @@ f_section_progress()
     fi
   fi
 
-  echo "$V_SECTION_NAME $V_TASK_COUNT / $V_TASKS_IN_SECTION $V_TASK_FAILED_MSG"
+  echo -ne "$V_SECTION_NAME $V_TASK_COUNT / $V_TASKS_IN_SECTION $V_TASK_FAILED_MSG"\\r
   exec 3>&1 4>&2 1>$LOG 2>&1
+
+  F_WIKI_SUMMARY=/tmp/wiki_summary.txt
+  if [ "$V_TASK_COUNT" -eq "$V_TASKS_IN_SECTION" ]; then
+    echo "| $V_SECTION_NAME | $V_TASK_COUNT / $V_TASKS_IN_SECTION | $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
+  fi
 
 
   msgd "${FUNCNAME[0]} End."
@@ -392,12 +398,14 @@ do
     esac
   done
 
-exit 0
+#exit 0
   # Done with one section
   exec 1>&3 2>&4
-  echo >&2 "Done"
+  #echo >&2 "Done"
+  echo >&2
   
 done
+echo
 
 
 
