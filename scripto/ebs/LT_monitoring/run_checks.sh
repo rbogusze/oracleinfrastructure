@@ -12,6 +12,11 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
+# Results directory
+V_DATE=`date '+%Y%m%d_%H%M%S'`
+LOG_DIR=/var/tmp/LT_monitoring/$V_DATE
+mkdir -p $LOG_DIR
+
 # Assuming connections as apps to DB stored in ~/.LT_SID
 f_LT_execute_sql()
 {
@@ -326,17 +331,18 @@ f_section_progress()
   fi
 
   echo -ne "$V_SECTION_NAME $V_TASK_COUNT / $V_TASKS_IN_SECTION $V_TASK_FAILED_MSG"\\r
-  exec 3>&1 4>&2 1>$LOG 2>&1
+  msgd "LOG: $LOG"
+  exec 3>&1 4>&2 1>>$LOG 2>&1
 
   # Prepare summary for wiki
-  F_WIKI_SUMMARY=/tmp/wiki_summary.txt
+  F_WIKI_SUMMARY=$LOG_DIR/00_wiki_summary.txt
   if [ "$V_TASK_COUNT" -eq "$V_TASKS_IN_SECTION" ]; then
     echo "| $V_SECTION_NAME | $V_TASK_COUNT / $V_TASKS_IN_SECTION | $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
   fi
 
 
   msgd "${FUNCNAME[0]} End."
-} #f_LT_execute_sql
+} #f_section_progress
 
 
 # Actual run
@@ -364,8 +370,9 @@ do
   #F_IC=10d_prevent_SGA_dynamic_resize
 
   #echo "Section: $F_IC"
-  LOG=/tmp/ala.$F_IC
-  exec 3>&1 4>&2 1>$LOG 2>&1
+  LOG="$LOG_DIR/$F_IC"
+  msgd "LOG: $LOG"
+  exec 3>&1 4>&2 1>>$LOG 2>&1
   echo "===== Section: $F_IC ====="
 
   V_NR_CHECKS_IN_SECTION=`find ${D_INITIAL_CHECKS}/${F_IC} -type f | grep -v '.svn' | wc -l`
@@ -402,20 +409,21 @@ do
 #exit 0
   # Done with one section
   exec 1>&3 2>&4
-  #echo >&2 "Done"
   echo >&2
   
 done
 echo
 
+echo "Check $LOG_DIR for details."
 # Prepare wiki paga
-LOG_DIR=/var/tmp/LT_monitoring
-mkdir -p $LOG_DIR
+F_WIKI_PAGE="/var/www/html/dokuwiki/data/pages/run_checks_log_${V_DATE}.txt"
 
-V_DATE=`date '+%Y%m%d_%H%M%S'`
+for FILE in `ls ${LOG_DIR}`
+do
+  cat ${LOG_DIR}/$FILE >> $F_WIKI_PAGE
+done
 
-(. ./run_checks.wrap 2>&1) | tee $LOG_DIR/run_checks_log_$1.${V_DATE} /var/www/html/dokuwiki/data/pages/run_checks_log_${V_DATE}.txt
-
+# Create link on main page
 echo "[[run_checks_log_${V_DATE}]]\\\\" >> /var/www/html/dokuwiki/data/pages/start.txt
 
 
