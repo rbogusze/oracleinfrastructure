@@ -246,12 +246,12 @@ EOF
 
   # If any of the checks failed I mark it on header
   if [ -n "$V_ELAPSED_LT_BAD" ] || [ -n "$V_RESULT_EQ_BAD" ] || [ -n "$V_RESULT_STR_BAD" ] || [ -n "$V_GETS_LT_BAD" ] || [ -n "$V_RESULT_LT_BAD" ] || [ -n "$V_RESULT_LE_BAD" ] || [ -n "$V_RESULT_EQ_BAD" ] || [ -n "$V_RESULT_GE_BAD" ] || [ -n "$V_RESULT_GT_BAD" ] ; then
-    msgd "All checks are fine"
-    V_HEAD_PREFIX='BLE'
+    msgd "Some checks failed"
+    V_HEAD_PREFIX=''
     V_HEAD_SUFFIX=''
     V_RETURN=1
   else
-    msgd "Some checks failed"
+    msgd "All checks are fine"
     V_HEAD_PREFIX=''
     V_HEAD_SUFFIX=''
     V_RETURN=0
@@ -338,9 +338,9 @@ f_section_progress()
   # Prepare summary for wiki
   if [ "$V_TASK_COUNT" -eq "$V_TASKS_IN_SECTION" ]; then
     if [ "$V_TASK_FAILED" -gt 0 ]; then
-      echo "| $V_SECTION_NAME | $V_TASK_COUNT / $V_TASKS_IN_SECTION | {{wiki:danger.png}} $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
+      echo "| [[run_checks_log_${V_DATE}#${V_SECTION_NAME}]] | $V_TASK_COUNT / $V_TASKS_IN_SECTION | [[run_checks_log_${V_DATE}#${V_SECTION_NAME}|{{wiki:danger.png}}]] $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
     else 
-      echo "| $V_SECTION_NAME | $V_TASK_COUNT / $V_TASKS_IN_SECTION | {{wiki:success.png}} |" >> $F_WIKI_SUMMARY
+      echo "| [[run_checks_log_${V_DATE}#${V_SECTION_NAME}]] | $V_TASK_COUNT / $V_TASKS_IN_SECTION | [[run_checks_log_${V_DATE}#${V_SECTION_NAME}|{{wiki:success.png}}]] |" >> $F_WIKI_SUMMARY
     fi
   fi
 
@@ -377,7 +377,7 @@ do
   LOG="$LOG_DIR/$F_IC"
   msgd "LOG: $LOG"
   exec 3>&1 4>&2 1>>$LOG 2>&1
-  echo "===== Section: $F_IC ====="
+  echo "===== $F_IC ====="
 
   V_NR_CHECKS_IN_SECTION=`find ${D_INITIAL_CHECKS}/${F_IC} -type f | grep -v '.svn' | wc -l`
   echo ${D_INITIAL_CHECKS}/${F_IC}
@@ -428,6 +428,7 @@ do
 done
 
 # Create link on main page
+echo "" >> /var/www/html/dokuwiki/data/pages/start.txt
 echo "[[run_checks_log_${V_DATE}]]\\\\" >> /var/www/html/dokuwiki/data/pages/start.txt
 
 
