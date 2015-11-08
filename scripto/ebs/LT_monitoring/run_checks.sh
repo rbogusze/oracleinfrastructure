@@ -419,17 +419,22 @@ done
 echo
 
 echo "Check $LOG_DIR for details."
-# Prepare wiki paga
-F_WIKI_PAGE="/var/www/html/dokuwiki/data/pages/run_checks_log_${V_DATE}.txt"
 
-for FILE in `ls ${LOG_DIR}`
-do
-  cat ${LOG_DIR}/$FILE >> $F_WIKI_PAGE
-done
+read -p "[wait] Do you want to store the results in wiki? (yes/any)" V_ANSWER
+if [ "$V_ANSWER" = "yes" ]; then
 
-# Create link on main page
-echo "" >> /var/www/html/dokuwiki/data/pages/start.txt
-echo "[[run_checks_log_${V_DATE}]]\\\\" >> /var/www/html/dokuwiki/data/pages/start.txt
+  # Prepare wiki paga
+  F_WIKI_PAGE="/var/www/html/dokuwiki/data/pages/run_checks_log_${V_DATE}.txt"
 
+  for FILE in `ls ${LOG_DIR}`
+  do
+    cat ${LOG_DIR}/$FILE >> $F_WIKI_PAGE
+  done
+
+  # Create link on main page
+  CN_LC=`echo ${CN} | tr '[A-Z]' '[a-z]'`
+  echo "[[run_checks_log_${V_DATE}]]\\\\" >> /var/www/html/dokuwiki/data/pages/lt_checks_${CN_LC}.txt
+
+fi
 
 
