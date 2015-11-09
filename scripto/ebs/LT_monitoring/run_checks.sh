@@ -338,9 +338,9 @@ f_section_progress()
   # Prepare summary for wiki
   if [ "$V_TASK_COUNT" -eq "$V_TASKS_IN_SECTION" ]; then
     if [ "$V_TASK_FAILED" -gt 0 ]; then
-      echo "| [[run_checks_log_${V_DATE}#${V_SECTION_NAME}]] | $V_TASK_COUNT / $V_TASKS_IN_SECTION | [[run_checks_log_${V_DATE}#${V_SECTION_NAME}|{{wiki:danger.png}}]] $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
+      echo "| [[#${V_SECTION_NAME}]] | $V_TASK_COUNT / $V_TASKS_IN_SECTION | [[#${V_SECTION_NAME}|{{wiki:danger.png}}]] $V_TASK_FAILED_MSG |" >> $F_WIKI_SUMMARY
     else 
-      echo "| [[run_checks_log_${V_DATE}#${V_SECTION_NAME}]] | $V_TASK_COUNT / $V_TASKS_IN_SECTION | [[run_checks_log_${V_DATE}#${V_SECTION_NAME}|{{wiki:success.png}}]] |" >> $F_WIKI_SUMMARY
+      echo "| [[#${V_SECTION_NAME}]] | $V_TASK_COUNT / $V_TASKS_IN_SECTION | [[#${V_SECTION_NAME}|{{wiki:success.png}}]] |" >> $F_WIKI_SUMMARY
     fi
   fi
 
@@ -418,22 +418,36 @@ do
 done
 echo
 
+# CN in lowercase
+CN_LC=`echo ${CN} | tr '[A-Z]' '[a-z]'`
+
 echo "Check $LOG_DIR for details."
+echo "or check wiki"
+echo "http://3.62.80.7/dokuwiki/doku.php?id=lt_checks_${CN_LC}"
+
+# Prepare the last run wiki paga
+F_WIKI_PAGE="/var/www/html/dokuwiki/data/pages/run_checks_log_${CN_LC}.txt"
+
+# Clean the last run page
+echo "" > $F_WIKI_PAGE
+
+for FILE in `ls ${LOG_DIR}`
+do
+  cat ${LOG_DIR}/$FILE >> $F_WIKI_PAGE
+done
+
 
 read -p "[wait] Do you want to store the results in wiki? (yes/any)" V_ANSWER
 if [ "$V_ANSWER" = "yes" ]; then
-
-  # Prepare wiki paga
-  F_WIKI_PAGE="/var/www/html/dokuwiki/data/pages/run_checks_log_${V_DATE}.txt"
-
-  for FILE in `ls ${LOG_DIR}`
-  do
-    cat ${LOG_DIR}/$FILE >> $F_WIKI_PAGE
-  done
-
   # Create link on main page
-  CN_LC=`echo ${CN} | tr '[A-Z]' '[a-z]'`
   echo "[[run_checks_log_${V_DATE}]]\\\\" >> /var/www/html/dokuwiki/data/pages/lt_checks_${CN_LC}.txt
+
+  # Copy the last run page to permanent one
+  cp $F_WIKI_PAGE "/var/www/html/dokuwiki/data/pages/run_checks_log_${V_DATE}.txt"
+  echo "Stored permanently under"
+  echo "http://3.62.80.7/dokuwiki/doku.php?id=run_checks_log_${V_DATE}"
+else
+  echo "Not storing the results permanently, you can check it anyway on the last run page"
 
 fi
 
