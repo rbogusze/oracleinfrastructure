@@ -113,6 +113,7 @@ EOF`
     msgd "Run with autotrace on"
     sqlplus -s /nolog << EOF > $F_TMP
     set head off pagesize 0 echo off verify off feedback off heading off
+    set linesize 200
     connect $V_USER/$V_PASS@$CN
     set timing on
     set autotrace on
@@ -122,6 +123,7 @@ EOF
     msgd "Run with autotrace off"
     sqlplus -s /nolog << EOF > $F_TMP
     set head off pagesize 0 echo off verify off feedback off heading off
+    set linesize 200
     connect $V_USER/$V_PASS@$CN
     $V_SQL
 EOF
@@ -137,11 +139,8 @@ EOF
   #why so complicated? V_LT_RESULT=`cat $F_TMP | head -1 | awk '{print $1}' `
   # just remove multiple spaces between the columns
   # | head -1 - because with autotrace on we have explain plan and stats, that is why only first line
-  V_LT_RESULT=`cat $F_TMP | tr "\t" " " | tr -s '[:blank:]' | head -1`
+  V_LT_RESULT=`cat $F_TMP | head -1 | tr -d "\t" | tr -s '[:blank:]' | sed -e 's/^[[:space:]]*//'`
   msgd "V_LT_RESULT: $V_LT_RESULT"
-
-
-
 
   # Comparing the received values with expected
   msgd "Time elapsed less than"
@@ -151,7 +150,7 @@ EOF
     V_TMP2=`echo $V_LT_RESULT_ELAPSED | awk -F"." '{print $1}' | sed -e 's/://g'`
     msgd "V_TMP2: $V_TMP2"
 
-    if [ $V_TMP2 -lt $V_TMP1 ]; then
+    if [ "$V_TMP2" -lt "$V_TMP1" ]; then
       V_ELAPSED_LT_OK="OK, execution time less than expected. Actual: $V_LT_RESULT_ELAPSED Expected: $V_ELAPSED_LT"
     else
       V_ELAPSED_LT_BAD="BAD, execution took longer than expected. Actual: $V_LT_RESULT_ELAPSED Expected: $V_ELAPSED_LT"
@@ -162,7 +161,7 @@ EOF
 
   msgd "Gets less than"
   if [ ! -z $V_GETS_LT ]; then
-    if [ $V_LT_RESULT_GETS -lt $V_GETS_LT ]; then
+    if [ "$V_LT_RESULT_GETS" -lt "$V_GETS_LT" ]; then
       V_GETS_LT_OK="OK, nr of gets time less than expected. Actual: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
     else
       V_GETS_LT_BAD="BAD, nr of gets larger than expected. Actual: $V_LT_RESULT_GETS Expected: $V_GETS_LT"
@@ -173,7 +172,7 @@ EOF
 
   msgd "Result less than"
   if [ ! -z $V_RESULT_LT ]; then
-    if [ $V_LT_RESULT -lt $V_RESULT_LT ]; then
+    if [ "$V_LT_RESULT" -lt "$V_RESULT_LT" ]; then
       V_RESULT_LT_OK="OK, result less than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
     else
       V_RESULT_LT_BAD="BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LT"
@@ -184,7 +183,7 @@ EOF
 
   msgd "Result less or equal than"
   if [ ! -z $V_RESULT_LE ]; then
-    if [ $V_LT_RESULT -le $V_RESULT_LE ]; then
+    if [ "$V_LT_RESULT" -le "$V_RESULT_LE" ]; then
       V_RESULT_LE_OK="OK, result less or equal than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
     else
       V_RESULT_LE_BAD="BAD, result larger than expected. Actual: $V_LT_RESULT Expected: $V_RESULT_LE"
@@ -259,9 +258,13 @@ EOF
 
   echo "==== $V_HEAD_PREFIX `basename $F_LT` $V_HEAD_SUFFIX ===="
   echo "$V_INFO"
+  echo "<hidden Raw test output>"
   echo "<code sql>"
   echo "$V_SQL"
+  echo
+  cat $F_TMP
   echo "</code>"
+  echo "</hidden>"
 
   V_OK_PREFIX=''
   V_OK_SUFFIX='\\'
@@ -372,6 +375,8 @@ do
   #F_IC=08_FND_CONCURRENT_REQUESTS
   #F_IC=09_cache_size_2_processes
   #F_IC=10d_prevent_SGA_dynamic_resize
+  #F_IC=14_custom_indexes
+  #F_IC=15_SQL_performance
 
   #echo "Section: $F_IC"
   LOG="$LOG_DIR/$F_IC"
@@ -380,7 +385,7 @@ do
   echo "===== $F_IC ====="
 
   V_NR_CHECKS_IN_SECTION=`find ${D_INITIAL_CHECKS}/${F_IC} -type f | grep -v '.svn' | wc -l`
-  echo ${D_INITIAL_CHECKS}/${F_IC}
+  msgd "Section dir: ${D_INITIAL_CHECKS}/${F_IC}"
 
   f_section_progress "$F_IC" "$V_NR_CHECKS_IN_SECTION"
 
