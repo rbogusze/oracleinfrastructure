@@ -1,0 +1,4 @@
+execute_sql
+INFO: Make sure number of SPMs is as expected
+SQL: select count(1) from dba_sql_plan_baselines where to_char(created,'YYYY') = '2015' and origin like 'MANUAL%';
+RESULT_EQ: 97

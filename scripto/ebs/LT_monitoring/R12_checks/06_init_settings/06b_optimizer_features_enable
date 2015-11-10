@@ -1,0 +1,4 @@
+execute_sql
+INFO: Make sure we have optimizer_features_enable set to 11.2.0.4, without this RC does not work
+SQL: SELECT value from v$parameter where name='optimizer_features_enable';
+RESULT_STR: 11.2.0.4

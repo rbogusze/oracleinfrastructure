@@ -1,0 +1,4 @@
+execute_sql
+INFO: Make sure there exist custom index GEMS_RA_CUSTOMER_TRX_N97, check details [[R12 GEMS_RA_CUSTOMER_TRX_N97]]
+SQL: select 1 FROM dba_indexes WHERE index_name in ('GEMS_RA_CUSTOMER_TRX_N97') and owner='AR';
+RESULT_STR: 1
