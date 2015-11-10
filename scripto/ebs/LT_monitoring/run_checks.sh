@@ -365,7 +365,7 @@ echo "====== Checking: $CN on: `date`======" >> $F_WIKI_SUMMARY
 echo '~~NOTOC~~' >> $F_WIKI_SUMMARY
 
 #for F_IC in `ls -1t ${D_INITIAL_CHECKS}`
-for F_IC in `ls ${D_INITIAL_CHECKS}`
+for F_IC in `ls ${D_INITIAL_CHECKS} | grep -v "99_attic"`
 do
 
   #F_IC=02_MV_refreshed_fast

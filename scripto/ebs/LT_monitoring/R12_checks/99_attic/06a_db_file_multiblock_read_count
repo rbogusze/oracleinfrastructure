@@ -1,0 +1,4 @@
+execute_sql
+INFO: Make sure we have db_file_multiblock_read_count unset. Details: [[R12 db_file_multiblock_read_count]]
+SQL: select isdefault, ismodified from v$parameter where name = 'db_file_multiblock_read_count';
+RESULT_STR: TRUE FALSE
