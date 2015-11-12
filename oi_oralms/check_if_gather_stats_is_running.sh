@@ -2,8 +2,6 @@
 # This script should be run from crontab and monitor for existing connection for oralms_gather. If it finds a broken connection (eg. as a result of system reboot) it will span one.
 
 # General variables
-GLOBAL_ALERT=/tmp/global_alert.log
-GLOBAL_ALERT_RAW=/tmp/global_alert_raw.log
 PWD_FILE=/home/orainf/.passwords
 
 # Local variables
@@ -44,10 +42,6 @@ run_command_d "cat $CONFIG_FILE"
 #touch $LOCKFILE
 
 
-# Direct all messages to a file
-exec >> $GLOBAL_ALERT 2>&1
-
-
 msgd "Cycle through CONFIG_FILE: $CONFIG_FILE and start the data gathering"
 exec 3<> $CONFIG_FILE
 while read LINEALL <&3
@@ -85,7 +79,7 @@ do {
 
     # prepare command to execute on remote machine
     V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -1/24 | grep -i $CN"
-    V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -24 | grep -i $CN"
+    #V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -24 | grep -i $CN"
 
     mkdir -p ${TMP_LOG_DIR}/${LOG_ID}
     check_directory "${TMP_LOG_DIR}/${LOG_ID}"
@@ -116,7 +110,7 @@ do {
             if [ "${TMP_CHK}" -gt 0 ]; then
               msgd "Found some gather_ files which would indicate recent GS"
               run_command_d "cat ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE}"
-              echo "${LOG_ID} ### WARNING: Gather Stats running in the last 1h ###"
+              echo "${LOG_ID} ### warning: Gather Stats running in the last 1h ###"
             else
               msgd "No gather_ files found, no indication on GS performed"
             fi
