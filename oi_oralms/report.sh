@@ -56,14 +56,18 @@ msgd "Compute Hourly fast_start_mttr_target 480 is set too low messages"
 f_report_stats_from_dir "/tmp/oralms_mttr" > /tmp/oralms_mttr.txt
 run_command_d "cat /tmp/oralms_mttr.txt"
 
+msgd "TNS-12535: TNS:operation timed out"
+f_report_stats_from_dir "/tmp/oralms_tns12535" > /tmp/oralms_tns12535.txt
+run_command_d "cat /tmp/oralms_tns12535.txt"
+
 
 # Get the list of CN that monitor alert log
 $HOME/scripto/perl/ask_ldap.pl "(orainfDbAlertLogMonitoring=TRUE)" "['cn']" > /tmp/oralms_report.txt
 run_command_d "cat /tmp/oralms_report.txt"
 
 # Get the stats for every report I want to include
-echo "--------------------------------------------------------"
-echo "        /h | Redo switches | Ses. Killed | mttr too low"
+echo "--------------------------------------------------------------------"
+echo "        /h | Redo switches | Ses. Killed | mttr too low | TNS12535 |"
 while read LINE
 do
   #echo $LINE
@@ -76,16 +80,19 @@ do
   V_MTTR=`cat /tmp/oralms_mttr.txt | grep "$LINE " | awk '{print $2}'`
   msgd "V_MTTR: $V_MTTR"
 
+  V_TNS12535=`cat /tmp/oralms_tns12535.txt | grep "$LINE " | awk '{print $2}'`
+  msgd "V_TNS12535: $V_TNS12535"
+
   #echo "$LINE $V_REDO $V_KILL"
   #printf "%-10s" "$LINE"
   #echo "$V_REDO $V_KILL"
   #echo "---------"
   #printf "%-10s | %-13s | %-10s" "$LINE" "$V_REDO" "$V_KILL"
-  printf "%-10s | %-13s | %-10s  | %-10s" "$LINE" "$V_REDO" "$V_KILL" "$V_MTTR"
+  printf "%-10s | %-13s | %-10s  | %-12s | %-8s |" "$LINE" "$V_REDO" "$V_KILL" "$V_MTTR" "$V_TNS12535"
   echo ""
 done < /tmp/oralms_report.txt
 
-echo "--------------------------------------------------------"
+echo "--------------------------------------------------------------------"
 
 
 

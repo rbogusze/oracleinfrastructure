@@ -4,7 +4,8 @@
 #set -x
 
 LOCKFILE_ORALMS=/tmp/oralms_filter.lock
-LOCKFILE_SPAN=./locks/oralms_filter_span
+LOCKFILE_SPAN_DIR=/tmp/oralms_filter_span
+LOCKFILE_SPAN=${LOCKFILE_SPAN_DIR}/oralms_filter_span
 GREP=/bin/grep
 ECHO=/bin/echo
 SSH=/usr/bin/ssh
@@ -12,6 +13,9 @@ GLOBAL_ALERT_RAW=/tmp/global_alert_raw.log
 GLOBAL_ALERT=/tmp/global_alert.log
 TMP_LOG_DIR=/var/log/oralms
 REDO_LOGS_DIR=./redo_logs
+
+mkdir -p ${LOCKFILE_SPAN_DIR}
+check_directory ${LOCKFILE_SPAN_DIR}
 
 # create redo logs directory, for how many times each maschine has switched
 mkdir -p ${REDO_LOGS_DIR}
