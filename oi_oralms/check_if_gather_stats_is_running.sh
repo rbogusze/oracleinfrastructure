@@ -1,15 +1,18 @@
 #!/bin/bash
 # This script should be run from crontab and monitor for existing connection for oralms_gather. If it finds a broken connection (eg. as a result of system reboot) it will span one.
 
-LOCKFILE=/tmp/check_if_gather_stats_is_running.lock
+# General variables
 GLOBAL_ALERT=/tmp/global_alert.log
 GLOBAL_ALERT_RAW=/tmp/global_alert_raw.log
 PWD_FILE=/home/orainf/.passwords
-CONFIG_FILE=/tmp/oralms_ldap_list_check_gs.txt
 
+# Local variables
+TMP_LOG_DIR=/tmp/check_if_gather_stats_is_running
+LOCKFILE=$TMP_LOG_DIR/check_if_gather_stats_is_running.lock
+CONFIG_FILE=$TMP_LOG_DIR/oralms_ldap_list_check_gs.txt
 EXP_SSH_CMD=$HOME/oi_oralms/ssh_passwd_common.exp
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -21,9 +24,8 @@ else
 fi
 
 
-V_CMD="\"ls -ltr \$dblog | grep "gather_" | tail\""
-V_CMD="ls -l"
-V_CMD=". ~/.profile_custom; echo \$dblog; ls -ltr \$dblog | grep gather_ | tail"
+mkdir -p $TMP_LOG_DIR
+check_directory "$TMP_LOG_DIR"
 
 # Sanity check
 check_lock $LOCKFILE
@@ -43,7 +45,7 @@ run_command_d "cat $CONFIG_FILE"
 
 
 # Direct all messages to a file
-#exec >> $GLOBAL_ALERT 2>&1
+exec >> $GLOBAL_ALERT 2>&1
 
 
 msgd "Cycle through CONFIG_FILE: $CONFIG_FILE and start the data gathering"
@@ -81,6 +83,14 @@ do {
     msgd "USER_AUTH: $USER_AUTH"
 
 
+    # prepare command to execute on remote machine
+    V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -1/24 | grep -i $CN"
+    V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -24 | grep -i $CN"
+
+    mkdir -p ${TMP_LOG_DIR}/${LOG_ID}
+    check_directory "${TMP_LOG_DIR}/${LOG_ID}"
+    V_DATE=`date '+%Y%m%d_%H%M%S'`
+    
       case $USER_AUTH in
         "key")
           msgd "$USER_AUTH authentication method"
@@ -99,7 +109,17 @@ do {
 
             #/home/orainf/oi_oralms/ssh_passwd.exp ${USERNAME} ${HOST} ${V_PASS} ${LOGFILE_PATH} > ${TMP_LOG_DIR}/${LOG_ID} &
             msgd "V_CMD: $V_CMD"
-            $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${V_CMD}"
+            $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${V_CMD}" > ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE}
+
+            #checking the remote command output in search for "gather_" files which would indicate recent GS
+            TMP_CHK=`cat ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE} | grep -v "spawn" | grep "gather_" | wc -l`
+            if [ "${TMP_CHK}" -gt 0 ]; then
+              msgd "Found some gather_ files which would indicate recent GS"
+              run_command_d "cat ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE}"
+              echo "${LOG_ID} ### WARNING: Gather Stats running in the last 1h ###"
+            else
+              msgd "No gather_ files found, no indication on GS performed"
+            fi
           else
             msge "Unable to find the password file. Skipping this CN. Continuing"
             continue
@@ -115,10 +135,9 @@ do {
    fi
 
 
-#WIP
-exit 0
-      msgd "Sleep 8"
-      sleep 8
+#exit 0
+      msgd "Sleep 1"
+      sleep 1
 
 
    }
