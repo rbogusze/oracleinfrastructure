@@ -119,17 +119,7 @@ EOF`
     set autotrace on
     $V_SQL
 EOF
-  else
-    msgd "Run with autotrace off"
-    sqlplus -s /nolog << EOF > $F_TMP
-    set head off pagesize 0 echo off verify off feedback off heading off
-    set linesize 200
-    connect $V_USER/$V_PASS@$CN
-    $V_SQL
-EOF
-  fi #if [ ! -z $V_AUTOTRACE
-  
- 
+
   # Saving the received values 
   run_command_d "cat $F_TMP"
   V_LT_RESULT_ELAPSED=`cat $F_TMP | grep "^Elapsed:" | sed -e 's/Elapsed:\ //'`
@@ -140,6 +130,21 @@ EOF
   # just remove multiple spaces between the columns
   # | head -1 - because with autotrace on we have explain plan and stats, that is why only first line
   V_LT_RESULT=`cat $F_TMP | head -1 | tr -d "\t" | tr -s '[:blank:]' | sed -e 's/^[[:space:]]*//'`
+  
+  else
+    msgd "Run with autotrace off"
+    sqlplus -s /nolog << EOF > $F_TMP
+    set head off pagesize 0 echo off verify off feedback off heading off
+    set linesize 200
+    connect $V_USER/$V_PASS@$CN
+    $V_SQL
+EOF
+
+  V_LT_RESULT=`cat $F_TMP | tr -d "\t" | tr -s '[:blank:]' | sed -e 's/^[[:space:]]*//'`
+  
+  fi #if [ ! -z $V_AUTOTRACE
+  
+ 
   msgd "V_LT_RESULT: $V_LT_RESULT"
 
   # Comparing the received values with expected
