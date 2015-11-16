@@ -1,4 +1,0 @@
-execute_sql
-INFO: Make sure all expected MV are refreshed in fast mode
-SQL: select count(*) from all_mviews WHERE mview_name LIKE 'GE_%_MV' AND last_refresh_type = 'COMPLETE';
-RESULT_EQ: 2

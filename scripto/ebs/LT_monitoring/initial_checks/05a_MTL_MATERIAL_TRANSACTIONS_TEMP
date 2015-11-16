@@ -1,4 +1,0 @@
-execute_sql
-INFO: Check ini_trans value set for MTL_MATERIAL_TRANSACTIONS_TEMP table
-SQL: SELECT ini_trans FROM dba_tables WHERE table_name='MTL_MATERIAL_TRANSACTIONS_TEMP' AND owner ='INV';
-RESULT_EQ: 255

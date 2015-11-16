@@ -1,4 +1,0 @@
-execute_sql
-INFO: Make sure result_cache is enabled in manual mode
-SQL: SELECT value from v$parameter where name='result_cache_mode';
-RESULT_STR: MANUAL

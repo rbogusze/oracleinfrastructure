@@ -1,4 +1,0 @@
-execute_sql
-INFO: Make sure shared pool is larger than 20G
-SQL: SELECT value from v$parameter where name='shared_pool_size';
-RESULT_GE: 21474836480

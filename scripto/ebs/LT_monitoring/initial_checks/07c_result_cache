@@ -1,4 +1,0 @@
-execute_sql
-INFO: Make sure we have set the hidden parameter _result_cache_global to prevent RC data exchanged between instances in RAC
-SQL: SELECT value from v$parameter where name='_result_cache_global';
-RESULT_STR: FALSE

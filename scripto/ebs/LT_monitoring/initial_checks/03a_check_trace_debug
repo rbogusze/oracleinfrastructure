@@ -1,4 +1,0 @@
-execute_sql
-INFO: Make sure the number of programs with trace enabled is as expected
-SQL: select count(1) from fnd_concurrent_programs WHERE enable_trace ='Y';
-RESULT_LE: 7

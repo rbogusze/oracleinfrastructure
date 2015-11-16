@@ -1,4 +1,0 @@
-execute_sql
-INFO: Make sure shared pool reserved size is larger than 1G
-SQL: SELECT value from v$parameter where name='shared_pool_reserved_size';
-RESULT_GE: 1258291200

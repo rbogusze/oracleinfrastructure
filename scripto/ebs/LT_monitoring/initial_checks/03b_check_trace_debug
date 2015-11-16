@@ -1,4 +1,0 @@
-execute_sql
-INFO: Make sure there are no site enabled diagnostics
-SQL: SELECT distinct fpov.level_id  FROM fnd_profile_options fpo, fnd_profile_option_values fpov, fnd_profile_options_tl fpot, fnd_user fu, fnd_application fap, fnd_responsibility frsp, fnd_nodes fnod, hr_operating_units hou WHERE fpo.profile_option_id        = fpov.profile_option_id(+) AND fpo.profile_option_name        = fpot.profile_option_name AND fu.user_id(+)                  = fpov.level_value AND frsp.application_id(+)         = fpov.level_value_application_id AND frsp.responsibility_id(+)      = fpov.level_value AND fap.application_id(+)          = fpov.level_value AND fnod.node_id(+)                = fpov.level_value AND hou.organization_id(+)         = fpov.level_value AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled') AND fpov.profile_option_value      = 'Y' ;
-RESULT_EQ: 10004
