@@ -1,4 +1,4 @@
 execute_sql
-INFO: Make sure all expected MV are refreshed in fast mode
+INFO: Make sure all expected MV are refreshed in fast mode. Details: [[R12 GE MV refresh complete]]
 SQL: select distinct last_refresh_type FROM all_mviews WHERE mview_name in ('GE_AP_PAYMENTS_CHECKS_MV','GE_FND_FLEXVALUES_MV','GE_GL_CODECOMBINATIONS_MV', 'GE_AP_HOLDS_ALL_MV','GE_AP_INVOICES_ALL_MV','GE_AP_DISTRIBUTION_SETS_MV','GE_AP_VENDOR_SEARCH_MV', 'GE_FND_LOOKUP_VALUES_MV','GE_AP_TERMS_MV','GE_PO_RELEASES_ALL_MV','GE_PO_VENDOR_SITES_MV', 'GE_PO_DISTRIBUTIONS_ALL_MV','GE_PO_LOOKUP_LOAD_MV','GE_PO_LINE_LOCATIONS_ALL_MV','GE_AP_BANK_MV');
 RESULT_STR: FAST
