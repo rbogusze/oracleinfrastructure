@@ -2,8 +2,9 @@
 # ORALMS
 #
 */42 * * * * /home/orainf/oi_oralms/oralms_gather_monitor.sh
-*/32 * * * * /home/orainf/oi_oralms/delete_stale_tail.sh 2>&1 >> /tmp/oralms_delete_stale_tail.log
-0 */1 * * * /home/orainf/oi_oralms/report.sh >> /tmp/global_alert.log
+*/16 * * * * /home/orainf/oi_oralms/delete_stale_tail.sh 2>&1 >> /tmp/global_alert.log
+58 */1 * * * /home/orainf/oi_oralms/report.sh 2>&1 >> /tmp/global_alert.log
+59 */1 * * * /home/orainf/oi_oralms/check_if_gather_stats_is_running.sh >> /tmp/global_alert.log
 
 #
 # MUSAS_AWR - Generate AWR reports
