@@ -7,7 +7,7 @@ column USERNAME format a14
 column EVENT format a30
 column USERNAME format a14
 set linesize 200
-select distinct ses.SID, ses.sql_hash_value, stx.old_hash_value, ses.USERNAME, pro.SPID "OS PID", substr(stx.sql_text,1,200), sw.event,sw.wait_time,ses.serial#
+select distinct ses.SID, ses.sql_hash_value, stx.old_hash_value, ses.USERNAME, pro.SPID "OS PID", substr(stx.sql_text,1,200), sw.event,sw.wait_time,ses.serial#, stx.sql_id
 from V$SESSION ses
     ,V$SQL stx
     ,V$PROCESS pro
