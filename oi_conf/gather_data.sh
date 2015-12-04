@@ -11,7 +11,7 @@ CONFIG_FILE=$TMP_LOG_DIR/ldap_out.txt
 EXP_SCP_CMD=$HOME/oi_conf/scp_passwd_common.exp
 D_CVS_REPO=$HOME/conf_repo
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 
 # Load usefull functions
