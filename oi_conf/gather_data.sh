@@ -1,16 +1,16 @@
 #!/bin/bash
-# This script should be run from crontab and monitor for existing connection for oralms_gather. If it finds a broken connection (eg. as a result of system reboot) it will span one.
+# 
 
 # General variables
 PWD_FILE=/home/orainf/.passwords
 
 # Local variables
-TMP_LOG_DIR=/tmp/check_if_gather_stats_is_running
-LOCKFILE=$TMP_LOG_DIR/check_if_gather_stats_is_running.lock
-CONFIG_FILE=$TMP_LOG_DIR/oralms_ldap_list_check_gs.txt
+TMP_LOG_DIR=/tmp/oi_conf
+LOCKFILE=$TMP_LOG_DIR/lock
+CONFIG_FILE=$TMP_LOG_DIR/ldap_out.txt
 EXP_SSH_CMD=$HOME/oi_oralms/ssh_passwd_common.exp
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -32,11 +32,13 @@ check_file ${EXP_SSH_CMD}
 # check for TMP_LOG_DIR
 msgd "Ask the ldap for all the hosts to chec. We check there where alert logs are monitored"
 
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth']" | awk '{print $1" "$2" ["$3"_"$2"] "$4}' > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth']" | awk '{print $1" "$2" ["$3"_"$2"] "$4}' > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 
 run_command_d "cat $CONFIG_FILE"
+
+exit 0
 
 # Set lock file
 #touch $LOCKFILE
@@ -88,7 +90,7 @@ do {
       case $USER_AUTH in
         "key")
           msgd "$USER_AUTH authentication method"
-          #ssh -o BatchMode=yes ${USERNAME}@${HOST} "pwd"  > ${TMP_LOG_DIR}/${LOG_ID} &
+          msge "WIP"
           PID=$!
           ;;
         "password")
@@ -105,17 +107,6 @@ do {
             msgd "V_CMD: $V_CMD"
             $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${V_CMD}" > ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE}
 
-            #checking the remote command output in search for "gather_" files which would indicate recent GS
-            TMP_CHK=`cat ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE} | grep -v "spawn" | grep "gather_" | wc -l`
-            if [ "${TMP_CHK}" -gt 0 ]; then
-              msgd "Found some gather_ files which would indicate recent GS"
-              run_command_d "cat ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE}"
-              echo "${LOG_ID} ### warning ###"
-              echo "${LOG_ID} ### warning: Gather Stats running in the last 1h ###"
-              echo "${LOG_ID} ### warning ###"
-            else
-              msgd "No gather_ files found, no indication on GS performed"
-            fi
           else
             msge "Unable to find the password file. Skipping this CN. Continuing"
             continue
