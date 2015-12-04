@@ -8,7 +8,8 @@ PWD_FILE=/home/orainf/.passwords
 TMP_LOG_DIR=/tmp/oi_conf
 LOCKFILE=$TMP_LOG_DIR/lock
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out.txt
-EXP_SSH_CMD=$HOME/oi_oralms/ssh_passwd_common.exp
+EXP_SCP_CMD=$HOME/oi_conf/scp_passwd_common.exp
+D_CVS_REPO=$HOME/conf_repo
 
 INFO_MODE=DEBUG
 
@@ -24,21 +25,21 @@ fi
 
 mkdir -p $TMP_LOG_DIR
 check_directory "$TMP_LOG_DIR"
+check_directory $D_CVS_REPO
 
 # Sanity check
 check_lock $LOCKFILE
-check_file ${EXP_SSH_CMD}
+check_file ${EXP_SCP_CMD}
 
 # check for TMP_LOG_DIR
 msgd "Ask the ldap for all the hosts to chec. We check there where alert logs are monitored"
 
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth']" | awk '{print $1" "$2" ["$3"_"$2"] "$4}' > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth', 'orainfDbInitFile']" | awk '{print $1" "$2" ["$3"_"$2"] "$4" "$5}' > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 
 run_command_d "cat $CONFIG_FILE"
 
-exit 0
 
 # Set lock file
 #touch $LOCKFILE
@@ -70,6 +71,10 @@ do {
     USER_AUTH=`echo "${LINE}" | gawk '{ print $4 }'`
     msgd "USER_AUTH: $USER_AUTH"
 
+    # filename to copy from remote host
+    F_COPY_FROM_REMOTE=`echo "${LINE}" | gawk '{ print $5 }'`
+    msgd "F_COPY_FROM_REMOTE: $F_COPY_FROM_REMOTE"
+
     if [ -z "$USER_AUTH" ]; then
       msgd "USER_AUTH was not set by the LDAP parameter orainfOsLogwatchUserAuth, defaulting to key"
       USER_AUTH=key
@@ -78,48 +83,47 @@ do {
     fi
     msgd "USER_AUTH: $USER_AUTH"
 
+    # Change the working directory to local CVS repo
+    cd $D_CVS_REPO
+    mkdir -p "$CN"
+    cvs add $CN > /dev/null 2>&1
+    cd $CN 
 
-    # prepare command to execute on remote machine
-    V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -1/24 | grep -i $CN"
-    #V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -24 | grep -i $CN"
+    case $USER_AUTH in
+      "key")
+        msgd "$USER_AUTH authentication method"
+        msge "WIP"
+        PID=$!
+        ;;
+      "password")
+        msgd "$USER_AUTH authentication method"
+        INDEX_HASH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfOsLogwatchIndexHash']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
+        msgd "INDEX_HASH: $INDEX_HASH"
+        HASH=`echo "$INDEX_HASH" | base64 --decode -i`
+        msgd "HASH: $HASH"
+        if [ -f "$PWD_FILE" ]; then
+          V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}'`
+          #msgd "V_PASS: $V_PASS"
 
-    mkdir -p ${TMP_LOG_DIR}/${LOG_ID}
-    check_directory "${TMP_LOG_DIR}/${LOG_ID}"
-    V_DATE=`date '+%Y%m%d_%H%M%S'`
-    
-      case $USER_AUTH in
-        "key")
-          msgd "$USER_AUTH authentication method"
-          msge "WIP"
-          PID=$!
-          ;;
-        "password")
-          msgd "$USER_AUTH authentication method"
-          INDEX_HASH=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['orainfOsLogwatchIndexHash']" 2>/dev/null | grep -v '^ *$' | tr -d '[[:space:]]'`
-          msgd "INDEX_HASH: $INDEX_HASH"
-          HASH=`echo "$INDEX_HASH" | base64 --decode -i`
-          msgd "HASH: $HASH"
-          if [ -f "$PWD_FILE" ]; then
-            V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}'`
-            #msgd "V_PASS: $V_PASS"
+          $EXP_SCP_CMD ${USERNAME} ${HOST} ${V_PASS} "${F_COPY_FROM_REMOTE}" 
 
-            #/home/orainf/oi_oralms/ssh_passwd.exp ${USERNAME} ${HOST} ${V_PASS} ${LOGFILE_PATH} > ${TMP_LOG_DIR}/${LOG_ID} &
-            msgd "V_CMD: $V_CMD"
-            $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${V_CMD}" > ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE}
-
-          else
-            msge "Unable to find the password file. Skipping this CN. Continuing"
-            continue
-          fi
-
-          ;;
-        *)
-          msge "Unknown Authentication method. Continue. _${USER_AUTH}_"
+        else
+          msge "Unable to find the password file. Skipping this CN. Continuing"
           continue
-          ;;
-      esac
+        fi
 
-   fi
+        ;;
+      *)
+        msge "Unknown Authentication method. Continue. _${USER_AUTH}_"
+        continue
+        ;;
+    esac
+
+    # Adding the files to CVS
+    cvs add * > /dev/null 2>&1
+    cvs commit -m "Auto added on `date -I`"
+
+  fi
 
 
 #exit 0
