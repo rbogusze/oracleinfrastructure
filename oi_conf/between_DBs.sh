@@ -21,9 +21,7 @@ run_command_e "rm -f $F_BETWEEN_INIT"
 cvs remove $F_BETWEEN_INIT
 cvs commit -m "removing $V_CN" $F_BETWEEN_INIT
 msgd "To have fresh numbers and no history I need to delete the file from repository"
-
-
-exit 0
+run_command "rm -f /home/cvs/conf_repo/between_DBs/Attic/init.ora,v"
 
 
 
