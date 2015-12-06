@@ -29,19 +29,92 @@ check_directory $D_CVS_REPO
 # Sanity check
 check_lock $LOCKFILE
 
-# check for TMP_LOG_DIR
+# functions
+f_store_sql_output_in_file()
+{
+  msgd "${FUNCNAME[0]} Begin."
+
+  CONFIG_FILE=$1
+  V_SQL=$2
+  V_NAME=$3
+
+  F_TMP=$TMP_LOG_DIR/sql.tmp
+
+  msgd "CONFIG_FILE: $CONFIG_FILE"
+  check_file $CONFIG_FILE
+  msgd "V_SQL: $V_SQL"
+  check_parameter $V_SQL
+  msgd "V_NAME: $V_NAME"
+  check_parameter $V_NAME
+
+  msgd "Look through the provided targets"
+  while read LINE
+  do
+    echo $LINE
+    CN=`echo $LINE | awk '{print $1}'` 
+    msgd "CN: $CN"
+    check_parameter $CN
+
+    V_USER=`echo $LINE | awk '{print $2}'`
+    msgd "V_USER: $V_USER"
+    check_parameter $V_USER
+
+    INDEX_HASH=`echo $LINE | awk '{print $3}'`
+    msgd "INDEX_HASH: $INDEX_HASH"
+    HASH=`echo "$INDEX_HASH" | base64 --decode -i`
+    msgd "HASH: $HASH"
+    if [ -f "$PWD_FILE" ]; then
+      V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
+      #msgd "V_PASS: $V_PASS"
+    else
+      msge "Unable to find the password file. Exiting"
+      exit 0
+    fi
+
+    # OK, I have username, password and the database, it is time to connect
+    testavail=`sqlplus -S /nolog <<EOF
+set head off pagesize 0 echo off verify off feedback off heading off
+connect $V_USER/$V_PASS@$CN
+select trim(1) result from dual;
+exit;
+EOF`
+
+    if [ "$testavail" != "1" ]; then
+      msge "DB $CN not available, exiting !!"
+      exit 0
+    fi
+
+    sqlplus -s /nolog << EOF > $F_TMP
+    set head off pagesize 0 echo off verify off feedback off heading off
+    set linesize 200
+    connect $V_USER/$V_PASS@$CN
+    $V_SQL
+EOF
+    run_command_d "cat $F_TMP"
+
+
+
+exit 0
+  done < $CONFIG_FILE
+
+
+  msgd "${FUNCNAME[0]} End."
+} #f_store_sql_output_in_file
+
+
+# Actual execution
 msgd "Ask the ldap for all the hosts to chec. We check there where init files are monitored"
 
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth', 'orainfDbInitFile']" | awk '{print $1" "$2" ["$3"_"$2"] "$4" "$5}' > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbRrdoraUser', 'orainfDbRrdoraIndexHash']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
-
 run_command_d "cat $CONFIG_FILE"
 
-
-# Set lock file
-#touch $LOCKFILE
-
+# Execute main function used, where parameters mean:
+# - file with target attributes
+# - SQL to be executed
+# - output file name
+f_store_sql_output_in_file $CONFIG_FILE "select sysdate from dual;" "SPM.txt"
 
 # On exit remove lock file
 rm -f $LOCKFILE
