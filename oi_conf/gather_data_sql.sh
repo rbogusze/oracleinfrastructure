@@ -90,7 +90,7 @@ EOF`
     connect $V_USER/$V_PASS@$CN
     $V_SQL
 EOF
-    run_command_d "cat $F_TMP"
+#    run_command_d "cat $F_TMP"
 
     run_command "cp $F_TMP $D_CVS_REPO/$CN/$V_NAME"
     run_command "cd $D_CVS_REPO/$CN"
@@ -122,7 +122,7 @@ run_command_d "cat $CONFIG_FILE"
 # - file with target attributes
 # - SQL to be executed
 # - output file name
-f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER, BUG_ID from APPLSYS.AD_BUGS order by BUG_NUMBER;" "AD_BUGS.txt"
+f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER from APPLSYS.AD_BUGS where ARU_RELEASE_NAME not in ('11i') order by BUG_NUMBER;" "AD_BUGS.txt"
 f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator, origin  FROM dba_sql_plan_baselines order by sql_handle;" "SPM.txt"
 
 # On exit remove lock file
