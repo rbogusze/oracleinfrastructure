@@ -92,6 +92,14 @@ EOF`
 EOF
     run_command_d "cat $F_TMP"
 
+    run_command "cp $F_TMP $D_CVS_REPO/$CN/$V_NAME"
+    run_command "cd $D_CVS_REPO/$CN"
+    cvs add $V_NAME > /dev/null 2>&1
+    cvs commit -m "Autocommit for $CN" $V_NAME
+
+
+#WIP
+
 
 
 exit 0
@@ -114,7 +122,8 @@ run_command_d "cat $CONFIG_FILE"
 # - file with target attributes
 # - SQL to be executed
 # - output file name
-f_store_sql_output_in_file $CONFIG_FILE "select sysdate from dual;" "SPM.txt"
+f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER, BUG_ID from APPLSYS.AD_BUGS order by BUG_NUMBER;" "AD_BUGS.txt"
+f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator, origin  FROM dba_sql_plan_baselines order by sql_handle;" "SPM.txt"
 
 # On exit remove lock file
 rm -f $LOCKFILE
