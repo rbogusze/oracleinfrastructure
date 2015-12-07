@@ -110,7 +110,8 @@ EOF
 # Actual execution
 msgd "Ask the ldap for all the hosts to chec. We check there where init files are monitored"
 
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbRrdoraUser', 'orainfDbRrdoraIndexHash']" > $CONFIG_FILE
+#WIP
+#$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbRrdoraUser', 'orainfDbRrdoraIndexHash']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
