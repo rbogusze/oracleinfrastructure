@@ -10,7 +10,7 @@ LOCKFILE=$TMP_LOG_DIR/lock_sql
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out_sql.txt
 D_CVS_REPO=$HOME/conf_repo
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -50,10 +50,11 @@ f_store_sql_output_in_file()
   msgd "Look through the provided targets"
   while read LINE
   do
-    echo $LINE
+    msgd "$LINE"
     CN=`echo $LINE | awk '{print $1}'` 
     msgd "CN: $CN"
     check_parameter $CN
+    msgi "Gathering $V_NAME for $CN"
 
     V_USER=`echo $LINE | awk '{print $2}'`
     msgd "V_USER: $V_USER"
@@ -80,8 +81,8 @@ exit;
 EOF`
 
     if [ "$testavail" != "1" ]; then
-      msge "DB $CN not available, exiting !!"
-      exit 0
+      msge "DB $CN not available, skipping !!"
+      continue
     fi
 
     sqlplus -s /nolog << EOF > $F_TMP
@@ -98,11 +99,7 @@ EOF
     cvs commit -m "Autocommit for $CN" $V_NAME
 
 
-#WIP
-
-
-
-exit 0
+#exit 0
   done < $CONFIG_FILE
 
 
@@ -122,8 +119,8 @@ run_command_d "cat $CONFIG_FILE"
 # - file with target attributes
 # - SQL to be executed
 # - output file name
-f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER from APPLSYS.AD_BUGS where ARU_RELEASE_NAME not in ('11i') order by BUG_NUMBER;" "AD_BUGS.txt"
 f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator, origin  FROM dba_sql_plan_baselines order by sql_handle;" "SPM.txt"
+f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER from APPLSYS.AD_BUGS where ARU_RELEASE_NAME not in ('11i') order by BUG_NUMBER;" "AD_BUGS.txt"
 
 # On exit remove lock file
 rm -f $LOCKFILE
