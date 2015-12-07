@@ -10,3 +10,8 @@
 # MUSAS_AWR - Generate AWR reports
 #
 09 23 * * 1-5 . ${HOME}/.bash_profile; cd ${HOME}/oi_musas_awr; ./prepare_exec_cmd.sh > exec_cmd.sh; sh exec_cmd.sh; touch /tmp/ala_ma_kota
+
+#
+# OI_CONF - get and store init file, SPMs, AD_BUGS to spot changes
+#
+40 23 * * 1-5 . ${HOME}/.bash_profile; cd ${HOME}/oi_conf; ./gather_data.sh > /tmp/gather_data.sh_last_run; ./gather_data_sql.sh > /tmp/gather_data_sql.sh_last_run; ./between_DBs.sh > /tmp/between_DBs.sh_last_run
