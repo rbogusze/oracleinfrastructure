@@ -36,8 +36,8 @@ do
 
   msgd "Copy DB init into between init , commit with CN message"  
   run_command_e "cd $D_BETWEEN"
-  #run_command "cat $i > $F_BETWEEN_INIT"
-  run_command "cat $i | grep -v '^#' | sed 's/^\*\.//' | grep -v '^utl_file_dir' | grep -v 'control_files' | grep -v 'dispatchers' | grep -v 'service_names' | grep -v 'remote_listener' | grep -v 'instance_name' | grep -v 'instance_number' | grep -v '_ncomp_shared_objects_dir' | grep -v 'thread=' | grep -v 'undo_tablespace=' | grep -v 'log_archive_dest=' | sort > $F_BETWEEN_INIT"
+  run_command "echo $V_CN > $F_BETWEEN_INIT"
+  run_command "cat $i | grep -v '^#' | sed 's/^\*\.//' | grep -v '^utl_file_dir' | grep -v 'control_files' | grep -v 'dispatchers' | grep -v 'service_names' | grep -v 'remote_listener' | grep -v 'instance_name' | grep -v 'instance_number' | grep -v '_ncomp_shared_objects_dir' | grep -v 'thread=' | grep -v 'undo_tablespace=' | grep -v 'log_archive_dest=' | sort >> $F_BETWEEN_INIT"
   cvs add $F_BETWEEN_INIT
   cvs commit -m "from $V_CN" $F_BETWEEN_INIT
 
@@ -66,7 +66,8 @@ do
 
   msgd "Copy DB init into between init , commit with CN message"  
   run_command_e "cd $D_BETWEEN"
-  run_command "cat $i | sort > $F_BETWEEN_INIT"
+  run_command "echo $V_CN > $F_BETWEEN_INIT"
+  run_command "cat $i | sort >> $F_BETWEEN_INIT"
   cvs add $F_BETWEEN_INIT
   cvs commit -m "from $V_CN" $F_BETWEEN_INIT
 
@@ -95,7 +96,8 @@ do
 
   msgd "Copy DB init into between init , commit with CN message"  
   run_command_e "cd $D_BETWEEN"
-  run_command "cat $i | sort > $F_BETWEEN_INIT"
+  run_command "echo $V_CN > $F_BETWEEN_INIT"
+  run_command "cat $i | sort >> $F_BETWEEN_INIT"
   cvs add $F_BETWEEN_INIT
   cvs commit -m "from $V_CN" $F_BETWEEN_INIT
 
