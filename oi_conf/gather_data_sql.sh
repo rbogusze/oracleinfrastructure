@@ -110,8 +110,7 @@ EOF
 # Actual execution
 msgd "Ask the ldap for all the hosts to chec. We check there where init files are monitored"
 
-#WIP
-#$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbRrdoraUser', 'orainfDbRrdoraIndexHash']" > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbRrdoraUser', 'orainfDbRrdoraIndexHash']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
@@ -120,7 +119,7 @@ run_command_d "cat $CONFIG_FILE"
 # - file with target attributes
 # - SQL to be executed
 # - output file name
-f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator, origin  FROM dba_sql_plan_baselines order by sql_handle;" "SPM.txt"
+f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator FROM dba_sql_plan_baselines where origin LIKE 'MANUAL%' order by sql_handle;" "SPM.txt"
 f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER from APPLSYS.AD_BUGS where ARU_RELEASE_NAME not in ('11i') order by BUG_NUMBER;" "AD_BUGS.txt"
 
 # On exit remove lock file
