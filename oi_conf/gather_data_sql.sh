@@ -93,6 +93,15 @@ EOF`
 EOF
 #    run_command_d "cat $F_TMP"
 
+    msgd "Get the release version to be able to compare oranges with oranges"
+    F_CN_VER=$TMP_LOG_DIR/$CN
+    sqlplus -s /nolog << EOF > $F_CN_VER
+    set head off pagesize 0 echo off verify off feedback off heading off
+    set linesize 200
+    connect $V_USER/$V_PASS@$CN
+    select release_name from apps.fnd_product_groups;
+EOF
+
     run_command "cp $F_TMP $D_CVS_REPO/$CN/$V_NAME"
     run_command "cd $D_CVS_REPO/$CN"
     cvs add $V_NAME > /dev/null 2>&1
