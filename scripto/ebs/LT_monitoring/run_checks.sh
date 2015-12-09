@@ -326,7 +326,6 @@ f_section_progress()
   msgd "V_TASKS_IN_SECTION: $V_TASKS_IN_SECTION"
   msgd "V_TASK_RESULT: $V_TASK_RESULT"
 
-#WIP
   if [ ! -n "$V_TASK_RESULT" ]; then
     msgd "OK, empty V_TASK_RESULT so this is the beginning of the section. Reseting the counter." 
     #echo
@@ -385,6 +384,7 @@ do
   #F_IC=10d_prevent_SGA_dynamic_resize
   #F_IC=14_custom_indexes
   #F_IC=15_SQL_performance
+  #F_IC=13_invalids
 
   #echo "Section: $F_IC"
   LOG="$LOG_DIR/$F_IC"
