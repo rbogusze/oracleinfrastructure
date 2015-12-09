@@ -1,0 +1,5 @@
+execute_sql
+INFO: Make sure INV.MTL_ITEM_LOCATIONS had recently GS.
+DETAILS: [[R12 check GS for order booking from Siebel]]
+SQL: select round(sysdate - last_analyzed) from all_tables where table_name='MTL_ITEM_LOCATIONS' and owner ='INV';
+RESULT_LT: 7

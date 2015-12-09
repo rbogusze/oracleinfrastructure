@@ -1,0 +1,5 @@
+execute_sql
+INFO: Make sure QP.QP_QUALIFIERS had recently GS.
+DETAILS: [[R12 check GS for order booking from Siebel]]
+SQL: select round(sysdate - last_analyzed) from all_tables where table_name='QP_QUALIFIERS' and owner ='QP';
+RESULT_LT: 7

@@ -42,6 +42,9 @@ f_LT_execute_sql()
   V_INFO=`cat $F_LT | grep ^INFO | sed -e 's/^INFO:\ //'`
   msgd "V_INFO: $V_INFO"
 
+  V_DETAILS=`cat $F_LT | grep ^DETAILS | sed -e 's/^DETAILS:\ //'`
+  msgd "V_DETAILS: $V_DETAILS"
+
   # Get the SQL to be executed
   V_SQL=`cat $F_LT | grep ^SQL | sed -e 's/^SQL:\ //'`
   msgd "V_SQL: $V_SQL"
@@ -262,7 +265,7 @@ EOF
   fi
 
   echo "==== $V_HEAD_PREFIX `basename $F_LT` $V_HEAD_SUFFIX ===="
-  echo "$V_INFO"
+  echo "$V_INFO $V_DETAILS"
   echo "<hidden Raw test output>"
   echo "<code sql>"
   echo "$V_SQL"

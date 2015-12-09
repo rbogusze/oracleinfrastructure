@@ -1,4 +1,5 @@
 execute_sql
 INFO: Make sure all expected MV are refreshed in complete mode
+DETAILS: [[R12 GE MV refresh complete]]
 SQL: select distinct last_refresh_type FROM all_mviews WHERE mview_name in ('GEHC_GFB_REGION_MV','GE_HR_ORGANIZATIONS_UNITS_MV','GE_AP_TAX_CODES_MV');
 RESULT_STR: COMPLETE

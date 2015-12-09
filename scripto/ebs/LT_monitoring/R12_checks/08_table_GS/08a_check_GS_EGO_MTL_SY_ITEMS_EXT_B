@@ -1,4 +1,5 @@
 execute_sql
-INFO: Make sure EGO.GO_MTL_SY_ITEMS_EXT_B had recently GS
+INFO: Make sure EGO.GO_MTL_SY_ITEMS_EXT_B had recently GS.
+DETAILS: [[R12 check GS for order booking from Siebel]]
 SQL: select round(sysdate - last_analyzed) from all_tables where table_name='EGO_MTL_SY_ITEMS_EXT_B' and owner ='EGO';
 RESULT_LT: 7
