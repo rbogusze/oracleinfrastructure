@@ -78,6 +78,7 @@ f_do_it init.ora "init.*.ora" "| grep -v '^#' | sed 's/^\*\.//' | grep -v '^utl_
 
 f_do_it SPM.txt SPM.txt "| sort"
 f_do_it AD_BUGS.txt AD_BUGS.txt "| sort"
+f_do_it invalids.txt invalids.txt "| sort"
 
 
 
