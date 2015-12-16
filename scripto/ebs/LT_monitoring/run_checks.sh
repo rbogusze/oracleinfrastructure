@@ -436,7 +436,7 @@ CN_LC=`echo ${CN} | tr '[A-Z]' '[a-z]'`
 
 echo "Check $LOG_DIR for details."
 echo "or check wiki"
-echo "http://3.62.80.7/dokuwiki/doku.php?id=lt_checks_${CN_LC}"
+echo "http://3.62.80.7/dokuwiki/doku.php?id=run_checks_log_${CN_LC}"
 
 # Prepare the last run wiki paga
 F_WIKI_PAGE="/var/www/html/dokuwiki/data/pages/run_checks_log_${CN_LC}.txt"
