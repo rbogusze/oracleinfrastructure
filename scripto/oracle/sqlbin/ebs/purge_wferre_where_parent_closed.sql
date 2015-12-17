@@ -1,9 +1,8 @@
 DECLARE 
 CURSOR Ab_wf IS 
-SELECT /*+ FULL(a) parallel(a,8) */ item_key 
+SELECT /*+ FULL(a) parallel(a,8) */ item_key
 FROM wf_items a
-WHERE item_type = 'WFERROR' and parent_item_type is null 
-AND end_date is null ;
+WHERE item_type = 'WFERROR' and parent_item_key in (select /*+ FULL(b) parallel(b,8) */ item_key from wf_items b where end_date is not NULL) ;
 
 counter number(4) default 0;
 
