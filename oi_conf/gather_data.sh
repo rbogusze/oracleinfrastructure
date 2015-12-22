@@ -121,7 +121,7 @@ do {
 
     # Adding the files to CVS
     cvs add * > /dev/null 2>&1
-    cvs commit -m "Auto added on `date -I`"
+    cvs commit -m "Auto added on `date -I` for $CN"
 
   fi
 

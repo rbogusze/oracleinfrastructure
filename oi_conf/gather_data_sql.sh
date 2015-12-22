@@ -106,7 +106,7 @@ EOF
     run_command "cd $D_CVS_REPO/$CN"
     cvs add $V_NAME > /dev/null 2>&1
     #cvs commit -m "Autocommit for $CN" $V_NAME
-    cvs commit -m "Auto added on `date -I`" $V_NAME
+    cvs commit -m "Auto added on `date -I` for $CN" $V_NAME
 
 
 #exit 0
