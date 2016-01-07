@@ -392,7 +392,7 @@ do
   exec 3>&1 4>&2 1>>$LOG 2>&1
   echo "===== $F_IC ====="
 
-  V_NR_CHECKS_IN_SECTION=`find ${D_INITIAL_CHECKS}/${F_IC} -type f | grep -v '.svn' | wc -l`
+  V_NR_CHECKS_IN_SECTION=`find ${D_INITIAL_CHECKS}/${F_IC} -type f | grep -v '.svn' | grep -v '.swp' | wc -l`
   msgd "Section dir: ${D_INITIAL_CHECKS}/${F_IC}"
 
   f_section_progress "$F_IC" "$V_NR_CHECKS_IN_SECTION"
