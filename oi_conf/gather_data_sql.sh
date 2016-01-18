@@ -131,7 +131,7 @@ run_command_d "cat $CONFIG_FILE"
 # - output file name
 f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator FROM dba_sql_plan_baselines where origin LIKE 'MANUAL%' order by sql_handle;" "SPM.txt"
 f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER from APPLSYS.AD_BUGS where ARU_RELEASE_NAME not in ('11i') order by BUG_NUMBER;" "AD_BUGS.txt"
-f_store_sql_output_in_file $CONFIG_FILE "select owner, object_name, object_type from dba_objects where status !='VALID' AND object_type NOT IN ('SYNONYM') order by owner, object_name;" "invalids.txt"
+f_store_sql_output_in_file $CONFIG_FILE "select owner, object_name, object_type from dba_objects where status !='VALID' AND object_type NOT IN ('SYNONYM','MATERIALIZED VIEW') order by owner, object_name;" "invalids.txt"
 
 # On exit remove lock file
 rm -f $LOCKFILE
