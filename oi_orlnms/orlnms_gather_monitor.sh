@@ -1,18 +1,17 @@
 #!/bin/bash
-# This script should be run from crontab and monitor for existing connection for oralms_gather. If it finds a broken connection (eg. as a result of system reboot) it will span one.
+# This script should be run from crontab and monitor for existing connection for orlnms_gather. If it finds a broken connection (eg. as a result of system reboot) it will span one.
 
-LOCKFILE=/tmp/oralms_gather_monitor.lock
-LOCKFILE_SPAN_DIR=/tmp/orainf/oralms/all/locks
-LOCKFILE_SPAN=oralms_gather_span
-GLOBAL_ALERT=/tmp/global_alert.log
-GLOBAL_ALERT_RAW=/tmp/global_alert_raw.log
-TMP_LOG_DIR=/tmp/oralms
-CONFIG_FILE=/tmp/oralms_ldap_list.txt
+LOCKFILE=/tmp/orlnms_gather_monitor.lock
+LOCKFILE_SPAN_DIR=/tmp/orainf/orlnms/all/locks
+LOCKFILE_SPAN=orlnms_gather_span
+GLOBAL_ALERT=/tmp/global_listener.log
+GLOBAL_ALERT_RAW=/tmp/global_listener_raw.log
+TMP_LOG_DIR=/tmp/orlnms
+CONFIG_FILE=/tmp/orlnms_ldap_list.txt
 AWK_FILE=/tmp/ldap_list.awk
 PWD_FILE=/home/orainf/.passwords
-TAG_CREATION=easy
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -24,7 +23,7 @@ fi
 
 
 # Sanity check
-check_lock $LOCKFILE
+#check_lock $LOCKFILE
 
 # check for TMP_LOG_DIR
 if [ ! -d $TMP_LOG_DIR ] ; then
@@ -35,37 +34,39 @@ if [ ! -d $LOCKFILE_SPAN ] ; then
    mkdir -p $LOCKFILE_SPAN_DIR
 fi
 
-msgd "Ask the ldap for all the alert logs to monitor"
+msgd "Ask the ldap for all the listener logs to monitor"
 
-if [ "$TAG_CREATION" = "easy" ]; then
-  msgd "easy tag creation"
+msgd "easy tag creation"
 
-  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'cn']" | awk '{print $1" "$2" "$3" ["$4"_"$2"]"}' > $CONFIG_FILE
-else
-  msgd "messy tag creation, but equally idented "
-  msgd "first pass, determine length of longest host, sid and tns name from ldap"
-  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $4}'         >  /tmp/conf4.list
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbListenerLogFile=*)(orainfDbListenerLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbListenerLogFile', 'cn']" > $CONFIG_FILE
 
-  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $2}'         >  /tmp/conf2.list
+msgd "If the orainfDbListenerLogFile has multiple values (separated by ',') then we have multiply the rows"
 
-  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']" | awk '{ print $5}'         >  /tmp/conf5.list
+while read LINE
+do
+  echo $LINE
+  USERNAME=`echo ${LINE} | gawk '{ print $1 }'`
+  msgd "USERNAME: $USERNAME"
+  HOST=`echo ${LINE} | gawk '{ print $2 }'`
+  msgd "HOST: $HOST"
+  LOGFILE_PATH=`echo ${LINE} | gawk '{ print $3 }'`
+  msgd "LOGFILE_PATH: $LOGFILE_PATH"
 
-  LEN_4=`cat /tmp/conf4.list | wc -L`
-
-  LEN_2=`cat /tmp/conf2.list | wc -L`
-
-  LEN_5=`cat /tmp/conf5.list | wc -L`
-
-  msgd "AWK_FILE: $AWK_FILE"
-  echo '{ printf $1 " " $2 " " $3 " [" substr($5 "_____________________________",1,' $LEN_5 ') "_" substr($4 "_____________________________",1,' $LEN_4 ') "_" substr($2 "____________________________",1,' $LEN_2 '); v_spnr=split ($3, a, "/"); if (substr(a[v_spnr], 1, 3) == "ale") printf "_A"; if (substr(a[v_spnr], 1, 3) == "drc") printf "_D"; print "] dummy_parm"}' > $AWK_FILE
-
-  $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbAlertLogFile=*)(orainfDbAlertLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbAlertLogFile', 'orclSid','cn']"         | awk -f $AWK_FILE >  $CONFIG_FILE
-fi 
+  msgd "If LOGFILE_PATH contains ',' then we have multiple values"
+  TMP_CHK=`echo $LOGFILE_PATH | tr "," "\n" | wc -l `
+  msgd "TMP_CHK: $TMP_CHK"
+  echo $LOGFILE_PATH | tr "," "\n" > ${CONFIG_FILE}_t1
+  run_command_d "cat ${CONFIG_FILE}_t1"
+  
+  
+done < $CONFIG_FILE
 
 
 check_file $CONFIG_FILE
 
 run_command_d "cat $CONFIG_FILE"
+
+exit 0
 
 # Set lock file
 touch $LOCKFILE
@@ -142,7 +143,7 @@ do {
             V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}'`
             msgd "V_PASS: $V_PASS"
 
-            /home/orainf/oi_oralms/ssh_passwd.exp ${USERNAME} ${HOST} ${V_PASS} ${LOGFILE_PATH} > ${TMP_LOG_DIR}/${LOG_ID} &
+            /home/orainf/oi_orlnms/ssh_passwd.exp ${USERNAME} ${HOST} ${V_PASS} ${LOGFILE_PATH} > ${TMP_LOG_DIR}/${LOG_ID} &
             PID=$!
             touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
           else
