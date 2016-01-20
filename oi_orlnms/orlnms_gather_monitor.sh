@@ -42,6 +42,8 @@ $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbListenerLogFile=*)(orainfDbListenerLo
 
 msgd "If the orainfDbListenerLogFile has multiple values (separated by ',') then we have multiply the rows"
 
+rm -f ${CONFIG_FILE}_tmp
+
 while read LINE
 do
   echo $LINE
@@ -51,22 +53,28 @@ do
   msgd "HOST: $HOST"
   LOGFILE_PATH=`echo ${LINE} | gawk '{ print $3 }'`
   msgd "LOGFILE_PATH: $LOGFILE_PATH"
+  LOG_ID=`echo "${LINE}" | gawk '{ print $4 }'`
+  msgd "LOG_ID: $LOG_ID"
 
   msgd "If LOGFILE_PATH contains ',' then we have multiple values"
   TMP_CHK=`echo $LOGFILE_PATH | tr "," "\n" | wc -l `
   msgd "TMP_CHK: $TMP_CHK"
   echo $LOGFILE_PATH | tr "," "\n" > ${CONFIG_FILE}_t1
   run_command_d "cat ${CONFIG_FILE}_t1"
+  msgd "#######"
+  cat ${CONFIG_FILE}_t1 | awk -v A="$USERNAME" -v B="$HOST" -v C="$LOG_ID" '{print A " " B " " $1 " " C}' >> ${CONFIG_FILE}_tmp
+  msgd "ZZZZZZZ"
   
   
 done < $CONFIG_FILE
+
+run_command "mv ${CONFIG_FILE}_tmp ${CONFIG_FILE}"
 
 
 check_file $CONFIG_FILE
 
 run_command_d "cat $CONFIG_FILE"
 
-exit 0
 
 # Set lock file
 touch $LOCKFILE
@@ -75,7 +83,7 @@ touch $LOCKFILE
 #. /home/orainf/.ssh-agent
 
 # Direct all messages to a file
-exec >> $GLOBAL_ALERT 2>&1
+#exec >> $GLOBAL_ALERT 2>&1
 
 msgd "Cycle through CONFIG_FILE: $CONFIG_FILE and start the data gathering"
 exec 3<> $CONFIG_FILE
@@ -99,7 +107,7 @@ do {
 
 
     # Very not elegant way of obtaining 'cn' because of the whole mess to have the prefix at the same length
-    CN=`echo $LOG_ID | sed 's/\_.*//' | sed 's/^\[//'`
+    CN=$LOG_ID
     msgd "CN: $CN"
    
     # Check the autorisation, if nothing is specified then we assume 'key'
@@ -181,6 +189,8 @@ do {
     fi
 
   fi
+
+exit 0
 
    }
 done
