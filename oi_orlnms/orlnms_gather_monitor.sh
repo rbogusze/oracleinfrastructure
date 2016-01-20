@@ -38,7 +38,7 @@ msgd "Ask the ldap for all the listener logs to monitor"
 
 msgd "easy tag creation"
 
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbListenerLogFile=*)(orainfDbListenerLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbListenerLogFile']" > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbListenerLogFile=*)(orainfDbListenerLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbListenerLogFile', 'cn']" > $CONFIG_FILE
 
 msgd "If the orainfDbListenerLogFile has multiple values (separated by ',') then we have multiply the rows"
 
@@ -53,13 +53,15 @@ do
   msgd "HOST: $HOST"
   LOGFILE_PATH=`echo ${LINE} | gawk '{ print $3 }'`
   msgd "LOGFILE_PATH: $LOGFILE_PATH"
+  CN=`echo ${LINE} | gawk '{ print $4 }'`
+  msgd "CN: $CN"
 
   msgd "If LOGFILE_PATH contains ',' then we have multiple values"
   TMP_CHK=`echo $LOGFILE_PATH | tr "," "\n" | wc -l `
   msgd "TMP_CHK: $TMP_CHK"
   echo $LOGFILE_PATH | tr "," "\n" > ${CONFIG_FILE}_t1
   run_command_d "cat ${CONFIG_FILE}_t1"
-  cat ${CONFIG_FILE}_t1 | awk -v A="$USERNAME" -v B="$HOST" '{print A " " B " " $1}' >> ${CONFIG_FILE}_tmp
+  cat ${CONFIG_FILE}_t1 | awk -v A="$USERNAME" -v B="$HOST" -v C="$CN" '{print A " " B " " $1 " "C}' >> ${CONFIG_FILE}_tmp
   
 done < $CONFIG_FILE
 
@@ -70,7 +72,6 @@ check_file $CONFIG_FILE
 
 run_command_d "cat $CONFIG_FILE"
 
-#exit 0  
 
 # Set lock file
 touch $LOCKFILE
@@ -101,7 +102,7 @@ do {
     LOG_ID=${HOST}_`basename ${LOGFILE_PATH}`
     msgd "LOG_ID: $LOG_ID"
 
-    CN=$LOG_ID
+    CN=`echo ${LINE} | gawk '{ print $4 }'`
     msgd "CN: $CN"
    
     # Check the autorisation, if nothing is specified then we assume 'key'
