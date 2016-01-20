@@ -38,7 +38,7 @@ msgd "Ask the ldap for all the listener logs to monitor"
 
 msgd "easy tag creation"
 
-$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbListenerLogFile=*)(orainfDbListenerLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbListenerLogFile', 'cn']" > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(&(orainfDbListenerLogFile=*)(orainfDbListenerLogMonitoring=TRUE))" "['orainfOsLogwatchUser', 'orclSystemName', 'orainfDbListenerLogFile']" > $CONFIG_FILE
 
 msgd "If the orainfDbListenerLogFile has multiple values (separated by ',') then we have multiply the rows"
 
@@ -53,18 +53,13 @@ do
   msgd "HOST: $HOST"
   LOGFILE_PATH=`echo ${LINE} | gawk '{ print $3 }'`
   msgd "LOGFILE_PATH: $LOGFILE_PATH"
-  LOG_ID=`echo "${LINE}" | gawk '{ print $4 }'`
-  msgd "LOG_ID: $LOG_ID"
 
   msgd "If LOGFILE_PATH contains ',' then we have multiple values"
   TMP_CHK=`echo $LOGFILE_PATH | tr "," "\n" | wc -l `
   msgd "TMP_CHK: $TMP_CHK"
   echo $LOGFILE_PATH | tr "," "\n" > ${CONFIG_FILE}_t1
   run_command_d "cat ${CONFIG_FILE}_t1"
-  msgd "#######"
-  cat ${CONFIG_FILE}_t1 | awk -v A="$USERNAME" -v B="$HOST" -v C="$LOG_ID" '{print A " " B " " $1 " " C}' >> ${CONFIG_FILE}_tmp
-  msgd "ZZZZZZZ"
-  
+  cat ${CONFIG_FILE}_t1 | awk -v A="$USERNAME" -v B="$HOST" '{print A " " B " " $1}' >> ${CONFIG_FILE}_tmp
   
 done < $CONFIG_FILE
 
@@ -75,6 +70,7 @@ check_file $CONFIG_FILE
 
 run_command_d "cat $CONFIG_FILE"
 
+#exit 0  
 
 # Set lock file
 touch $LOCKFILE
@@ -102,11 +98,9 @@ do {
     LOGFILE_PATH=`echo ${LINE} | gawk '{ print $3 }'`
     msgd "LOGFILE_PATH: $LOGFILE_PATH"
     ## when last in LINE and host contains 't' >= 't' !!! ( bash or gawk bug ?? )
-    LOG_ID=`echo "${LINE}" | gawk '{ print $4 }'`
+    LOG_ID=${HOST}_`basename ${LOGFILE_PATH}`
     msgd "LOG_ID: $LOG_ID"
 
-
-    # Very not elegant way of obtaining 'cn' because of the whole mess to have the prefix at the same length
     CN=$LOG_ID
     msgd "CN: $CN"
    
@@ -190,7 +184,7 @@ do {
 
   fi
 
-exit 0
+#exit 0
 
    }
 done
