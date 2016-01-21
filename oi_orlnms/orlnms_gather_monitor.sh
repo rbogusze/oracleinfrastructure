@@ -11,7 +11,7 @@ CONFIG_FILE=/tmp/orlnms_ldap_list.txt
 AWK_FILE=/tmp/ldap_list.awk
 PWD_FILE=/home/orainf/.passwords
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
