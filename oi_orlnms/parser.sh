@@ -3,6 +3,14 @@
 while read line
 do
 
+  # Ignore lines with only date status
+  TMP_CHK=`echo $line | tr " " "\n" | wc -l`
+  #echo "TMP_CHK: $TMP_CHK"
+  if [ "$TMP_CHK" -lt 7 ]; then
+    continue
+  fi
+  
+
 #  echo "$line"
   LOG_NAME=`echo "$line" | awk '{print $1}'`
 #  echo "LOG_NAME: $LOG_NAME"
@@ -18,6 +26,15 @@ do
 #  echo "SERVICE: $SERVICE"
   STATUS=`echo "$line" | awk '{print $NF}' | tr -cd '[[:alnum:]]._-'`
 #  echo "STATUS: $STATUS"
+  DATE=`echo "$line" | awk '{print $2" "$3}'`
+#  echo "DATE: $DATE"
+  EPOCH=`date --date="$DATE" +%s`
+#  echo "EPOCH: $EPOCH"
+
+  # Ignore the lines with just a status
+  if [ "$SERVICE" = "status" ]; then
+    continue
+  fi
 
   # nice, something visible
   #echo "$HOST1 - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
@@ -28,8 +45,8 @@ do
   # custom log format
   #echo "1371769989|${HOST1}_${HOST2}_${USER}_${PROGRAM}|$SERVICE|$STATUS|100"
   #echo "1371769989|1234567890123456789012345678901234567890|$SERVICE|$STATUS|100"
-  FANCY_HOSTNAME=`echo ${HOST1}${HOST2}${USER}${PROGRAM} | tr -cd '[[:alnum:]]'`
-  FANCY_HOSTNAME=`echo ${HOST1}${HOST2}${USER}${PROGRAM} | tr '.' 'x'`
+  #FANCY_HOSTNAME=`echo ${HOST1}${HOST2}${USER}${PROGRAM} | tr -cd '[[:alnum:]]'`
+  #FANCY_HOSTNAME=`echo ${HOST1}${HOST2}${USER}${PROGRAM} | tr '.' 'x'`
   FANCY_HOSTNAME=`echo ${HOST1}_${HOST2}_${USER}_${PROGRAM} | tr '.' 'x'`
   #echo "1371769989|$FANCY_HOSTNAME|$SERVICE|$STATUS|100"
   # this is nice
@@ -41,7 +58,8 @@ do
   else
     BALL_SIZE=1000
   fi
-    echo "1371769989|$FANCY_HOSTNAME|$SERVICE|$STATUS|$BALL_SIZE"
+
+  echo "$EPOCH|$FANCY_HOSTNAME|$SERVICE|$STATUS|$BALL_SIZE"
 
 
 done < "${1:-/dev/stdin}"
