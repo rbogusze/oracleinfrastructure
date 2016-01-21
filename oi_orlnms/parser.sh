@@ -2,6 +2,7 @@
 
 while read line
 do
+
 #  echo "$line"
   LOG_NAME=`echo "$line" | awk '{print $1}'`
 #  echo "LOG_NAME: $LOG_NAME"
@@ -18,12 +19,10 @@ do
   STATUS=`echo "$line" | awk '{print $NF}' | tr -cd '[[:alnum:]]._-'`
 #  echo "STATUS: $STATUS"
 
-  #echo "$HOST1 - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE\" $STATUS 100 \"-\" \"xxx\" " \"-\"
-  #echo "$HOST1 - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE\" $STATUS 100 \"-\" \"xxx\" " \"-\"
-
   # nice, something visible
-  echo "$HOST1 - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
+  #echo "$HOST1 - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
 
+  # ok
   echo "${HOST1}_${HOST2}_${USER}_${PROGRAM} - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
 
 done < "${1:-/dev/stdin}"
