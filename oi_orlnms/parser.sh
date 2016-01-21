@@ -9,11 +9,17 @@ do
   if [ "$TMP_CHK" -lt 7 ]; then
     continue
   fi
-
-
   
+  #echo "####################################"
+  #echo "$line"
 
-#  echo "$line"
+  # Let only lines with status = establish (not 100% sure if that is the right approach)
+  TMP_CHK=`echo $line | grep establish | wc -l`
+  #echo "TMP_CHK: $TMP_CHK"
+  if [ "$TMP_CHK" -eq 0 ]; then
+    continue
+  fi
+
   LOG_NAME=`echo "$line" | awk '{print $1}'`
 #  echo "LOG_NAME: $LOG_NAME"
   HOST1=`echo "$line" | awk -F"HOST=" '{print $2}' | awk -F')' '{print $1}' | tr -d "_"`
@@ -26,12 +32,12 @@ do
 #  echo "USER: $USER"
   SERVICE=`echo "$line" | awk '{print $(NF-2)}'`
 #  echo "SERVICE: $SERVICE"
+
+
   STATUS=`echo "$line" | awk '{print $NF}' | tr -cd '[[:alnum:]]._-'`
 #  echo "STATUS: $STATUS"
   DATE=`echo "$line" | awk '{print $2" "$3}'`
 #  echo "DATE: $DATE"
-  EPOCH=`date --date="$DATE" +%s`
-#  echo "EPOCH: $EPOCH"
 
   # Ignore the lines with just a status
   if [ "$SERVICE" = "status" ]; then
@@ -42,6 +48,11 @@ do
   if [ "$SERVICE" = "ping" ]; then
     continue
   fi
+
+
+
+  EPOCH=`date --date="$DATE" +%s`
+#  echo "EPOCH: $EPOCH"
 
   # I want to see just errors
 #  if [ "$STATUS" -eq 0 ]; then
