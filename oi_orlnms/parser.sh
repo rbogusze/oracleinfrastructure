@@ -23,6 +23,25 @@ do
   #echo "$HOST1 - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
 
   # ok
-  echo "${HOST1}_${HOST2}_${USER}_${PROGRAM} - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
+  #echo "${HOST1}_${HOST2}_${USER}_${PROGRAM} - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
+
+  # custom log format
+  #echo "1371769989|${HOST1}_${HOST2}_${USER}_${PROGRAM}|$SERVICE|$STATUS|100"
+  #echo "1371769989|1234567890123456789012345678901234567890|$SERVICE|$STATUS|100"
+  FANCY_HOSTNAME=`echo ${HOST1}${HOST2}${USER}${PROGRAM} | tr -cd '[[:alnum:]]'`
+  FANCY_HOSTNAME=`echo ${HOST1}${HOST2}${USER}${PROGRAM} | tr '.' 'x'`
+  FANCY_HOSTNAME=`echo ${HOST1}_${HOST2}_${USER}_${PROGRAM} | tr '.' 'x'`
+  #echo "1371769989|$FANCY_HOSTNAME|$SERVICE|$STATUS|100"
+  # this is nice
+  #echo "1371769989|$FANCY_HOSTNAME|$SERVICE|$STATUS|10000"
+
+  # Changing the ball size based on the code - to make the errors visible
+  if [ "$STATUS" -ne 0 ]; then
+    BALL_SIZE=500000
+  else
+    BALL_SIZE=1000
+  fi
+    echo "1371769989|$FANCY_HOSTNAME|$SERVICE|$STATUS|$BALL_SIZE"
+
 
 done < "${1:-/dev/stdin}"
