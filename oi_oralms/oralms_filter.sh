@@ -15,7 +15,6 @@ TMP_LOG_DIR=/var/log/oralms
 REDO_LOGS_DIR=./redo_logs
 
 mkdir -p ${LOCKFILE_SPAN_DIR}
-check_directory ${LOCKFILE_SPAN_DIR}
 
 # create redo logs directory, for how many times each maschine has switched
 mkdir -p ${REDO_LOGS_DIR}
