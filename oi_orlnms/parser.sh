@@ -43,6 +43,12 @@ do
     continue
   fi
 
+  # I want to see just errors
+#  if [ "$STATUS" -eq 0 ]; then
+#    continue 
+#  fi
+
+
   # nice, something visible
   #echo "$HOST1 - - [22/Apr/2009:18:52:51 +1200] \"GET $SERVICE HTTP/1.0\" $STATUS 100 \"-\" \"xxx\" " \"-\"
 
@@ -58,6 +64,7 @@ do
   fi
 
   # custom log format
+  FANCY_HOSTNAME=`echo ${HOST1}_${HOST2}_${USER}_${PROGRAM} | tr '.' 'x'`
   echo "$EPOCH|$FANCY_HOSTNAME|$SERVICE|$STATUS|$BALL_SIZE"
 
 
