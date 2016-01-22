@@ -46,6 +46,17 @@
    46  history > /tmp/hostary_ruby18_from_standard_packages
 
 end up with
+
+remik@remik-laptop:~/oi_orlnms$ ruby --version
+ruby 1.8.7 (2010-01-10 patchlevel 249) [x86_64-linux]
+remik@remik-laptop:~/oi_orlnms$ which ruby
+/usr/bin/ruby
+remik@remik-laptop:~/oi_orlnms$ which gem
+/usr/bin/gem
+remik@remik-laptop:~/oi_orlnms$ gem --version
+1.3.5
+
+
 remik@remik-laptop:~/gltail-master/bin$ ./gl_tail 
 Rubygems and/or bundler missing.
 /usr/lib/ruby/1.8/rubygems/custom_require.rb:31:in `gem_original_require': no such file to load -- gl_tail/version (LoadError)

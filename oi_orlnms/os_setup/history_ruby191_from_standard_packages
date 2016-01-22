@@ -1,0 +1,59 @@
+    1  history
+    2  top
+    3  history
+    4  apt-cache search ruby1.9
+    5  apt-get install ruby1.9.1 ruby1.9.1-dev
+    6  apt-cache search rubygems
+    7  apt-get install rubygems1.9.1
+    8  update-alternatives --set ruby /usr/bin/ruby1.9.1
+    9  update-alternatives --config ruby
+   10  update-alternatives ruby
+   11  apt-get remove libruby1.8 ruby1.8 ruby1.8-dev rubygems1.8
+   12  apt-get install ruby1.9.1 ruby1.9.1-dev
+   13  cd /usr/bin/
+   14  ln -s ruby1.9.1 ruby
+   15  apt-cache search opengl | grep ruby
+   16  apt-get install libopengl-ruby1.9
+   17  apt-cache search ssh | grep ruby
+   18  apt-cache search ssh | grep ruby | grep 9
+   19  apt-get install libnet-ssh2-ruby1.9.1 libnet-ssh-gateway-ruby1.9.1
+   20  apt-cache search ssl | grep ruby | grep 9
+   21  apt-get install libopenssl-ruby1.9.1
+   22  apt-cache search opengl
+   23  apt-cache search opengl | grep ruby
+   24  apt-get install libopengl-ruby1.9
+   25  gem install opengl -v 0.7.0.pre1
+   26  gem install file-tail -v 1.0.10
+   27  gem install chipmunk -v 5.3.4.5
+   28  gem install gltail
+   29  updatedb
+   30  which gltail
+   31  which gl_tail
+   32  which gl-tail
+   33  history 
+   34  history > /tmp/history_ruby191_from_standard_packages
+
+Looks fine ingeneral, does not complain that it needs something, but fails anyway
+remik@remik-laptop:~/gltail-master/bin$ ./gl_tail 
+Rubygems and/or bundler missing.
+/var/lib/gems/1.9.1/gems/needle-1.3.0/lib/needle/definition-context.rb:36: warning: undefining `initialize' may cause serious problem
+/var/lib/gems/1.9.1/gems/needle-1.3.0/lib/needle/definition-context.rb:36: warning: undefining `object_id' may cause serious problem
+/var/lib/gems/1.9.1/gems/needle-1.3.0/lib/needle/definition-context.rb:36: warning: undefining `__send__' may cause serious problem
+/usr/lib/ruby/1.9.1/net/ssh/gateway.rb:38:in `<class:Gateway>': wrong argument type Module (expected Class) (TypeError)
+	from /usr/lib/ruby/1.9.1/net/ssh/gateway.rb:36:in `<top (required)>'
+	from /home/remik/gltail-master/lib/gl_tail.rb:19:in `require'
+	from /home/remik/gltail-master/lib/gl_tail.rb:19:in `<top (required)>'
+	from ./gl_tail:77:in `require'
+	from ./gl_tail:77:in `<main>'
+
+remik@remik-laptop:~/gltail-master/bin$ uname -a
+Linux remik-laptop 2.6.32-38-generic #83-Ubuntu SMP Wed Jan 4 11:12:07 UTC 2012 x86_64 GNU/Linux
+remik@remik-laptop:~/gltail-master/bin$ which ruby
+/usr/bin/ruby
+remik@remik-laptop:~/gltail-master/bin$ ruby --version
+ruby 1.9.1p378 (2010-01-10 revision 26273) [x86_64-linux]
+remik@remik-laptop:~/gltail-master/bin$ which gem
+/usr/bin/gem
+remik@remik-laptop:~/gltail-master/bin$ gem --version
+1.3.5
+
