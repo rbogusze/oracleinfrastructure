@@ -3,6 +3,10 @@
 while read line
 do
 
+
+  V_HOSTNAME=""
+  V_IP=""
+
   # Ignore lines with only date status
   TMP_CHK=`echo $line | tr " " "\n" | wc -l`
   #echo "TMP_CHK: $TMP_CHK"
@@ -126,6 +130,9 @@ do
       SUPERHOST=$V_HOSTNAME
     else
       #echo "Comparison is BAD"
+      #echo "$line"
+      #echo "V_HOSTNAME_FROM_IP: $V_HOSTNAME_FROM_IP"
+      #echo "V_HOSTNAME: $V_HOSTNAME" 
       SUPERHOST=${V_HOSTNAME}_HOST_IP_MISMATCH
     fi
   elif [ ! -z "$V_HOSTNAME" ]; then
