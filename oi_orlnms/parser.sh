@@ -10,8 +10,8 @@ do
     continue
   fi
   
-  echo "####################################"
-  echo "$line"
+  #echo "####################################"
+  #echo "$line"
 
   # Let only lines with status = establish (not 100% sure if that is the right approach)
   TMP_CHK=`echo $line | grep establish | wc -l`
@@ -78,68 +78,68 @@ do
 
   # Deciding on the source host that will be displayed. We have three HOST variables that
   # can contain different values - hostname / ip / string
-  echo "HOST1: ${HOST1}"
-  echo "HOST2: ${HOST2}"
-  echo "HOST3: ${HOST3}"
+  #echo "HOST1: ${HOST1}"
+  #echo "HOST2: ${HOST2}"
+  #echo "HOST3: ${HOST3}"
 
   #if the value has '-' it is probably hostname
   TMP_CHK=`echo ${HOST1} | grep '-' | wc -l`
-  echo "TMP_CHK: $TMP_CHK"
+  #echo "TMP_CHK: $TMP_CHK"
   if [ "$TMP_CHK" -gt 0 ]; then
-    echo "HOST1 contains hostname" 
+    #echo "HOST1 contains hostname" 
     V_HOSTNAME=$HOST1
   fi 
 
   if [[ $HOST2 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "HOST2 contains IP address"
+    #echo "HOST2 contains IP address"
     V_IP=$HOST2
   fi
 
   if [[ $HOST3 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "HOST3 contains IP address"
+    #echo "HOST3 contains IP address"
     V_IP=$HOST3
   fi
 
 
-  echo "V_HOSTNAME: $V_HOSTNAME" 
-  echo "V_IP: $V_IP" 
+  #echo "V_HOSTNAME: $V_HOSTNAME" 
+  #echo "V_IP: $V_IP" 
 
   # If we have V_IP let's resolve the IP to name
   if [ ! -z "$V_IP" ]; then
-    echo "Check if I have resolved it already"
+    #echo "Check if I have resolved it already"
     TMP_CHK=`cat /tmp/resolve.txt | grep "$V_IP" | wc -l`
-    echo "TMP_CHK: $TMP_CHK"
+    #echo "TMP_CHK: $TMP_CHK"
     if [ "$TMP_CHK" -lt 1 ]; then
-      echo "Hostname was not resolved from DNS before, doing it" 
+      #echo "Hostname was not resolved from DNS before, doing it" 
       getent hosts $V_IP >> /tmp/resolve.txt
     fi
     V_HOSTNAME_FROM_IP=`cat /tmp/resolve.txt | grep "$V_IP" | awk '{print $2}' | awk -F"." '{print $1}'`
-    echo "V_HOSTNAME_FROM_IP: $V_HOSTNAME_FROM_IP"
+    #echo "V_HOSTNAME_FROM_IP: $V_HOSTNAME_FROM_IP"
  
   fi 
 
   
   if [ ! -z "$V_HOSTNAME" ] && [ ! -z "$V_HOSTNAME_FROM_IP" ]; then
-    echo "SUPERHOST set by comparing V_HOSTNAME and V_HOSTNAME_FROM_IP"
+    #echo "SUPERHOST set by comparing V_HOSTNAME and V_HOSTNAME_FROM_IP"
     if [ "$V_HOSTNAME" = "$V_HOSTNAME_FROM_IP" ]; then
-      echo "Comparison if fine"
+      #echo "Comparison if fine"
       SUPERHOST=$V_HOSTNAME
     else
-      echo "Comparison is BAD"
+      #echo "Comparison is BAD"
       SUPERHOST=${V_HOSTNAME}_HOST_IP_MISMATCH
     fi
   elif [ ! -z "$V_HOSTNAME" ]; then
-    echo "SUPERHOST set from V_HOSTNAME"
+    #echo "SUPERHOST set from V_HOSTNAME"
     SUPERHOST=$V_HOSTNAME
   elif [ ! -z "$V_HOSTNAME_FROM_IP" ]; then
-    echo "SUPERHOST set from IP"
+    #echo "SUPERHOST set from IP"
     SUPERHOST=$V_HOSTNAME_FROM_IP
   else
-    echo "Failed to get hostname"
+    #echo "Failed to get hostname"
     SUPERHOST="NO_SOURCE_FOUND"
   fi
 
-  echo "SUPERHOST: ${SUPERHOST}"
+  #echo "SUPERHOST: ${SUPERHOST}"
 
 
   # custom log format
