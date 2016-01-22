@@ -26,7 +26,7 @@ do
 
   LOG_NAME=`echo "$line" | awk '{print $1}'`
 #  echo "LOG_NAME: $LOG_NAME"
-  HOST1=`echo "$line" | awk -F"HOST=" '{print $2}' | awk -F')' '{print $1}' | tr -d "_"`
+  HOST1=`echo "$line" | awk -F"HOST=" '{print $2}' | awk -F')' '{print $1}' | tr -d "_" | awk -F"." '{print $1}'`
 #  echo "HOST1: $HOST1"
   HOST2=`echo "$line" | awk -F"HOST=" '{print $3}' | awk -F')' '{print $1}'`
 #  echo "HOST2: $HOST2"
@@ -134,6 +134,8 @@ do
       #echo "V_HOSTNAME_FROM_IP: $V_HOSTNAME_FROM_IP"
       #echo "V_HOSTNAME: $V_HOSTNAME" 
       SUPERHOST=${V_HOSTNAME}_HOST_IP_MISMATCH
+      #echo "SUPERHOST: ${SUPERHOST}"
+      #exit 0
     fi
   elif [ ! -z "$V_HOSTNAME" ]; then
     #echo "SUPERHOST set from V_HOSTNAME"
