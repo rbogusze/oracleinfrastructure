@@ -1,0 +1,46 @@
+    1  cd /media/
+    2  ls
+    3  cd VBOXADDITIONS_4.3.12_93733/
+    4  ls
+    5  ./VBoxLinuxAdditions.run 
+    6  reboot
+    7  cat /etc/apt/apt.conf
+    8  vi /etc/apt/apt.conf
+    9  apt-get install rubygems rake ruby1.8-dev libgl1-mesa-dev libglu1-mesa-dev libglut3-dev build-essential
+   10  apt-cache search opengl | grep ruby
+   11  apt-get install libopengl-ruby
+   12  apt-cache search ssh | grep ruby
+   13  apt-get install libnet-ssh-gateway-ruby 
+   14  apt-cache search ssl | grep ruby
+   15  apt-get install libopenssl-ruby
+   16  apt-cache search tail | grep ruby
+   17  apt-get install libmaruku-ruby librack-ruby libvorbisfile-ruby
+   18  apt-cache search file | grep ruby
+   19  apt-cache search file | grep ruby | grep tail
+   20  which gem
+   21  gem --version
+   22  ruby --version
+   23  gem install file-tail
+   24  export http_proxy=http://3.187.157.236:9400
+   25  export ftp_proxy=http://3.187.157.236:9400
+   26  export https_proxy=http://3.187.157.236:9400
+   27  gem install file-tail
+   28  apt-cache search ruby | grep tins
+   29  apt-cache search ruby | grep file
+   30  apt-cache search ruby | grep tail
+   31  apt-cache search ruby | grep file
+   32  apt-get install libfilesystem-ruby1.8
+   33  gem install file_tail
+   34  gem install --pre file-tail -r
+   35  gem install file-tail
+   36  gem install file-tail -v 1.0.10
+   37  apt-cache search chipmunk
+   38  gem install chipmunk
+   39  gem install chipmunk -v 5.3.4.5
+   40* apt-cache search
+   41  gem install gl_tail
+   42  gem install gltail
+   43  gem install opengl -v 0.7.0.pre1
+   44  gem install gltail
+   45  apt-get install subversion
+   46  history > /tmp/hostary_ruby18_from_standard_packages
