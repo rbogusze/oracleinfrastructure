@@ -87,8 +87,57 @@ do
   echo "TMP_CHK: $TMP_CHK"
   if [ "$TMP_CHK" -gt 0 ]; then
     echo "HOST1 contains hostname" 
-    SUPERHOST=$HOST1
+    V_HOSTNAME=$HOST1
   fi 
+
+  if [[ $HOST2 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "HOST2 contains IP address"
+    V_IP=$HOST2
+  fi
+
+  if [[ $HOST3 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo "HOST3 contains IP address"
+    V_IP=$HOST3
+  fi
+
+
+  echo "V_HOSTNAME: $V_HOSTNAME" 
+  echo "V_IP: $V_IP" 
+
+  # If we have V_IP let's resolve the IP to name
+  if [ ! -z "$V_IP" ]; then
+    echo "Check if I have resolved it already"
+    TMP_CHK=`cat /tmp/resolve.txt | grep "$V_IP" | wc -l`
+    echo "TMP_CHK: $TMP_CHK"
+    if [ "$TMP_CHK" -lt 1 ]; then
+      echo "Hostname was not resolved from DNS before, doing it" 
+      getent hosts $V_IP >> /tmp/resolve.txt
+    fi
+    V_HOSTNAME_FROM_IP=`cat /tmp/resolve.txt | grep "$V_IP" | awk '{print $2}' | awk -F"." '{print $1}'`
+    echo "V_HOSTNAME_FROM_IP: $V_HOSTNAME_FROM_IP"
+ 
+  fi 
+
+  
+  if [ ! -z "$V_HOSTNAME" ] && [ ! -z "$V_HOSTNAME_FROM_IP" ]; then
+    echo "SUPERHOST set by comparing V_HOSTNAME and V_HOSTNAME_FROM_IP"
+    if [ "$V_HOSTNAME" = "$V_HOSTNAME_FROM_IP" ]; then
+      echo "Comparison if fine"
+      SUPERHOST=$V_HOSTNAME
+    else
+      echo "Comparison is BAD"
+      SUPERHOST=${V_HOSTNAME}_HOST_IP_MISMATCH
+    fi
+  elif [ ! -z "$V_HOSTNAME" ]; then
+    echo "SUPERHOST set from V_HOSTNAME"
+    SUPERHOST=$V_HOSTNAME
+  elif [ ! -z "$V_HOSTNAME_FROM_IP" ]; then
+    echo "SUPERHOST set from IP"
+    SUPERHOST=$V_HOSTNAME_FROM_IP
+  else
+    echo "Failed to get hostname"
+    SUPERHOST="NO_SOURCE_FOUND"
+  fi
 
   echo "SUPERHOST: ${SUPERHOST}"
 
