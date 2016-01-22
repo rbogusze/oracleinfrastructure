@@ -150,8 +150,8 @@ do
 
 
   # custom log format
-  #FANCY_HOSTNAME=`echo ${HOST1}_${HOST2}_${HOST3}_${USER}_${PROGRAM} | tr '.' 'x'`
-  FANCY_HOSTNAME=`echo ${SUPERHOST}_${USER}_${PROGRAM} | tr '.' 'x'`
+  #FANCY_HOSTNAME=`echo ${SUPERHOST}_${USER}_${PROGRAM} | tr '.' 'x'`
+  FANCY_HOSTNAME=`echo ${SUPERHOST}_${USER}_${PROGRAM} | tr '.' 'x' | sed 's/__*/_/g' | sed 's/_$//'`
   echo "$EPOCH|$FANCY_HOSTNAME|$SERVICE|$STATUS|$BALL_SIZE"
 
 
