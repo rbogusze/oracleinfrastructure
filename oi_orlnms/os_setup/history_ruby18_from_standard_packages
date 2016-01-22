@@ -44,3 +44,16 @@
    44  gem install gltail
    45  apt-get install subversion
    46  history > /tmp/hostary_ruby18_from_standard_packages
+
+end up with
+remik@remik-laptop:~/gltail-master/bin$ ./gl_tail 
+Rubygems and/or bundler missing.
+/usr/lib/ruby/1.8/rubygems/custom_require.rb:31:in `gem_original_require': no such file to load -- gl_tail/version (LoadError)
+	from /usr/lib/ruby/1.8/rubygems/custom_require.rb:31:in `require'
+	from ./../lib/gl_tail.rb:39
+	from ./../lib/gl_tail.rb:39:in `each'
+	from ./../lib/gl_tail.rb:39
+	from ./gl_tail:77:in `require'
+	from ./gl_tail:77
+
+and no idea what to do next, maybe try with ruby 1.9 from default packages as much as possible
