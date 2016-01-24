@@ -114,7 +114,7 @@ do {
               msgd "Found some gather_ files which would indicate recent GS"
               run_command_d "cat ${TMP_LOG_DIR}/${LOG_ID}/${V_DATE}"
               echo "${LOG_ID} ### warning ###"
-              echo "${LOG_ID} ### warning: Gather Stats running in the last 1h ###"
+              echo "${LOG_ID} ### warning: Gather Stats running in the last 24h ###"
               echo "${LOG_ID} ### warning ###"
             else
               msgd "No gather_ files found, no indication on GS performed"
