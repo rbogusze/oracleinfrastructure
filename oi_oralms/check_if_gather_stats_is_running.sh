@@ -78,8 +78,11 @@ do {
 
 
     # prepare command to execute on remote machine
-    V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -1/24 | grep -i $CN"
     #V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -24 | grep -i $CN"
+    # this 1/24 does not mean 1h - Solaris find does not do arythmetics
+    #V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -1/24 | grep -i $CN"
+    # With Solaris find I can only check last day, 1 and 1/24 mean the same for him
+    V_CMD=". ~/.profile_custom; find \$dblog -name gather_* -mtime -1 | grep -i $CN"
 
     mkdir -p ${TMP_LOG_DIR}/${LOG_ID}
     check_directory "${TMP_LOG_DIR}/${LOG_ID}"
