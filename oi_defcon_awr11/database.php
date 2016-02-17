@@ -80,7 +80,7 @@ $html_filename=str_replace(".txt",".html",$html_filename);
 echo "<a href=\"$html_filename\" >" . str_replace(".txt",".html",$filename) . "</a>";
 echo "<BR><BR>";
 echo "<a href=\"db_statistics.php?dir=$dir&filename=$filename\" >Database Statistics</a> ";
-echo "<a href=\"sga_breakdown.php?dir=$dir&filename=$filename\" >SGA Statistics</a> ";
+echo "<a href=\"sga_breakdown.php?dir=$dir&filename=$filename\" >Shared Pool Statistics</a> ";
 
 //Show diagnostics for the current date
 //echo "<BR><BR> Diagnostic scripts ( includes contents of cache ) <BR>";
