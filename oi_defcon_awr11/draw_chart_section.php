@@ -25,7 +25,7 @@ $graph = new Graph($chart_width,$chart_height,'auto');
 $graph->SetScale("textlin");
 
 $top = 30;
-$bottom = 75;
+$bottom = 85;
 $left = 90;
 $right = 30;
 $graph->Set90AndMargin($left,$right,$top,$bottom);
