@@ -4,7 +4,7 @@
 error_reporting(E_ERROR);
 
 // Draw Pictures with section data
-function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_module, $section_name, $data_values_executions, $timestamp, $width, $height) {
+function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_module, $section_name, $data_values_executions, $timestamp, $width, $height, $sql_id) {
   //$tmp1 = base64_encode(serialize(array_reverse($chart_data)));
   //$tmp2 = base64_encode(serialize(array_reverse($chart_leg)));
   $tmp1 = base64_encode(serialize($chart_data));
@@ -32,16 +32,17 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
     $each_data_module = each($data_module);
     $each_data_executions = each($data_values_executions);
     print "<tr><td>";
-    //print "<a href=\"show_file.php?filename=". $dir . "hash_history/awr_" . $db_sid . "_" . $each_chart_leg["value"] . $filename2 .  "\" > " . $each_data_module["value"] . "</a>";
-    //echo "<BR>each_chart_leg[value]: " . $each_chart_leg["value"];
-    //echo "<BR>filename2: " . $filename2;
-    //echo "";
+    if ( $sql_id[$each_chart_leg["value"]] ) {
+      //echo "ala " . $each_chart_leg["value"] . " zebra: " . $sql_id[$each_chart_leg["value"]]; 
+      print "<span style=\"background-color: " . $sql_id[$each_chart_leg["value"]] . "\">";
+    }
+//WIP
     print "<a href=\"show_file.php?filename=". $dir . "hash_history/awr_" . $db_sid . "_" . $each_chart_leg["value"] . $filename2 .  "\" > " . $each_data_module["value"] . "</a>";
     print "</td><td>";
     print "<a href=\"hash_history.php?dir=" . $dir . "hash_history/" . "&hash_value=" . $each_chart_leg["value"] . "\" >" . $each_chart_leg["value"] . "</a>"; 
     print "</td><td width=80>";
     print $each_data_executions["value"];
-
+    print "</span>";
     print "</td></tr>";
   }
   echo "</table>";
@@ -74,8 +75,14 @@ $data_values4_counter = 0;
 $data_values5_counter = 0;
 $data_values6_counter = 0;
 $data_values7_counter = 0;
+$sql_id_colors_counter = 0;
 $section = 0;
 $counter_top = 20;
+
+//populate clors
+$sql_id_colors[0] = 'green';
+$sql_id_colors[1] = 'blue';
+$sql_id_colors[2] = 'red';
 
 // Extract from the filename data time of creation nedded for hash view
 preg_match ("/....-..-../", $filename, $match_result);
@@ -202,6 +209,9 @@ while (!feof($fh))
         $data_values5_sql[$data_values5_counter] = $sql_text;
         $data_values5_executions[$data_values5_counter] = (float) $trash2;
         $data_values5_counter++;
+        //Start to color SQLIDs
+        $sql_id[$trash7] = $sql_id_colors[$sql_id_colors_counter];
+        $sql_id_colors_counter++;
       } 
       if ($section_name == "Executions") {
         if ($data_values6_counter > $counter_top) { continue; } //I just want to see top 20
@@ -248,21 +258,21 @@ fclose ($fh);
 
 echo "<table><tr><td>";
 
-draw_chart_section($dir, $filename, $data_values5, $data_values5_label, $data_values5_module, "Elapsed_Time", $data_values5_executions, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values5, $data_values5_label, $data_values5_module, "Elapsed_Time", $data_values5_executions, $timestamp, 400, 500, $sql_id);
 echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values1, $data_values1_label, $data_values1_module, "Buffer_Gets", $data_values1_executions, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values1, $data_values1_label, $data_values1_module, "Buffer_Gets", $data_values1_executions, $timestamp, 400, 500, $sql_id);
 echo "</td>";
 echo "</tr><tr>";
 echo "<td>";
-draw_chart_section($dir, $filename, $data_values2, $data_values2_label, $data_values2_module, "Physical_Reads", $data_values2_executions, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values2, $data_values2_label, $data_values2_module, "Physical_Reads", $data_values2_executions, $timestamp, 400, 500, $sql_id);
 echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500, $sql_id);
 echo "</td>";
 echo "</tr><tr>";
 echo "<td>";
-draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Executions", $data_values6, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Executions", $data_values6, $timestamp, 400, 500, $sql_id);
 echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7_executions, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7_executions, $timestamp, 400, 500, $sql_id);
 echo "</td></tr><tr><td>";
 
 //Now I need to build a large array and sort it by time elapsed
