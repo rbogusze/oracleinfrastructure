@@ -81,6 +81,7 @@ echo "<a href=\"$html_filename\" >" . str_replace(".txt",".html",$filename) . "<
 echo "<BR><BR>";
 echo "<a href=\"db_statistics.php?dir=$dir&filename=$filename\" >Database Statistics</a> ";
 echo "<a href=\"sga_breakdown.php?dir=$dir&filename=$filename\" >Shared Pool Statistics</a> ";
+echo "<a href=\"wait_events.php?dir=$dir&filename=$filename\" >Wait Events</a> ";
 
 //Show diagnostics for the current date
 //echo "<BR><BR> Diagnostic scripts ( includes contents of cache ) <BR>";
