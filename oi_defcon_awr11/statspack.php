@@ -75,6 +75,7 @@ $data_values5_counter = 0;
 $data_values6_counter = 0;
 $data_values7_counter = 0;
 $section = 0;
+$counter_top = 20;
 
 // Extract from the filename data time of creation nedded for hash view
 preg_match ("/....-..-../", $filename, $match_result);
@@ -157,6 +158,7 @@ while (!feof($fh))
       
       // Bulding arrays with hash and values
       if ($section_name == "Buffer_Gets") {
+        if ($data_values1_counter > $counter_top) { continue; } //I just want to see top 20
         $data_values1[$data_values1_counter] = $trash1;			//Buffer Gets
         $data_values1_label[$data_values1_counter] = $trash8;	//SQL Id
         $data_values1_module[$data_values1_counter] = $module_name;
@@ -166,6 +168,7 @@ while (!feof($fh))
         $data_values1_counter++;
       }
       if ($section_name == "Physical_Reads") {
+        if ($data_values2_counter > $counter_top) { continue; } //I just want to see top 20
         $data_values2[$data_values2_counter] = $trash1;		//Physical Reads
         $data_values2_label[$data_values2_counter] = $trash7; //SQL Id
         $data_values2_module[$data_values2_counter] = $module_name;
@@ -175,6 +178,7 @@ while (!feof($fh))
         $data_values2_counter++;
       }
       if ($section_name == "CPU_Usage") {
+        if ($data_values3_counter > $counter_top) { continue; } //I just want to see top 20
         $data_values3[$data_values3_counter] = $trash1;		// CPU Time (s)
         $data_values3_label[$data_values3_counter] = $trash8;    //sql_id
         $data_values3_module[$data_values3_counter] = $module_name;  //module name
@@ -183,6 +187,7 @@ while (!feof($fh))
         $data_values3_counter++;
       }
       if ($section_name == "Parse_Calls") {
+        if ($data_values4_counter > $counter_top) { continue; } //I just want to see top 20
         $data_values4[$data_values4_counter] = $trash1;
         $data_values4_label[$data_values4_counter] = $hash_value;
         $data_values4_module[$data_values4_counter] = $module_name;
@@ -190,6 +195,7 @@ while (!feof($fh))
         $data_values4_counter++;
       }
       if ($section_name == "Elapsed_Time") {
+        if ($data_values5_counter > $counter_top) { continue; } //I just want to see top 20
         $data_values5[$data_values5_counter] = $trash1; //Elapsed Time (s)
         $data_values5_label[$data_values5_counter] = $trash7; //sql_id
         $data_values5_module[$data_values5_counter] = $module_name;
@@ -198,6 +204,7 @@ while (!feof($fh))
         $data_values5_counter++;
       } 
       if ($section_name == "Executions") {
+        if ($data_values6_counter > $counter_top) { continue; } //I just want to see top 20
         $data_values6[$data_values6_counter] = (float) $trash1; //Executions
         $data_values6_label[$data_values6_counter] = $trash7; //sql_id
         $data_values6_module[$data_values6_counter] = $module_name;
@@ -205,6 +212,7 @@ while (!feof($fh))
         $data_values6_counter++;
       } 
       if ($section_name == "Cluster_Wait") {
+        if ($data_values7_counter > $counter_top) { continue; } //I just want to see top 20
         $data_values7[$data_values7_counter] = $trash1; //Cluster Wait Time
         $data_values7_label[$data_values7_counter] = $trash8; //sql_id
         $data_values7_module[$data_values7_counter] = $module_name;
@@ -254,7 +262,7 @@ echo "</tr><tr>";
 echo "<td>";
 draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Executions", $data_values6, $timestamp, 400, 500);
 echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7_executions, $timestamp, 400, 500);
 echo "</td></tr><tr><td>";
 
 //Now I need to build a large array and sort it by time elapsed
