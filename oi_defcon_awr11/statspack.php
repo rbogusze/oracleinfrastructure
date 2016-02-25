@@ -39,7 +39,7 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
     print "<a href=\"show_file.php?filename=". $dir . "hash_history/awr_" . $db_sid . "_" . $each_chart_leg["value"] . $filename2 .  "\" > " . $each_data_module["value"] . "</a>";
     print "</td><td>";
     print "<a href=\"hash_history.php?dir=" . $dir . "hash_history/" . "&hash_value=" . $each_chart_leg["value"] . "\" >" . $each_chart_leg["value"] . "</a>"; 
-    print "</td><td>";
+    print "</td><td width=80>";
     print $each_data_executions["value"];
 
     print "</td></tr>";
@@ -72,6 +72,7 @@ $data_values2_counter = 0;
 $data_values3_counter = 0;
 $data_values4_counter = 0;
 $data_values5_counter = 0;
+$data_values6_counter = 0;
 $section = 0;
 
 // Extract from the filename data time of creation nedded for hash view
@@ -106,7 +107,7 @@ while (!feof($fh))
   if (strstr ( $data, "SQL ordered by Physical Reads ")) { echo "<font color='green'>"; $section_name = "Physical_Reads"; }
   if (strstr ( $data, "SQL ordered by CPU ")) { echo "<font color='green'>"; $section_name = "CPU_Usage"; }
   if (strstr ( $data, "SQL ordered by Elapsed ")) { $section_name = "Elapsed_Time"; }
-  if (strstr ( $data, "SQL ordered by Executions ")) { echo "<font color='green'>"; $section_name = "Executions_Rows"; }
+  if (strstr ( $data, "SQL ordered by Executions ")) { echo "<font color='green'>"; $section_name = "Executions"; }
   if (strstr ( $data, "SQL ordered by Parse Calls ")) { echo "<font color='green'>"; $section_name = "Parse_Calls"; }
   if (strstr ( $data, "SQL ordered by Sharable Memory ")) { echo "<font color='green'>"; $section_name = "Sharable_Mem"; }
   if (strstr ( $data, "SQL ordered by User I/O Wait Time ")) { echo "<font color='green'>"; $section_name = "User_IO_Wait"; }
@@ -193,12 +194,22 @@ while (!feof($fh))
         $data_values5_executions[$data_values5_counter] = (float) $trash2;
         $data_values5_counter++;
       } 
+      if ($section_name == "Executions") {
+        $data_values6[$data_values6_counter] = (float) $trash1; //Executions
+        $data_values6_label[$data_values6_counter] = $trash7; //sql_id
+        $data_values6_module[$data_values6_counter] = $module_name;
+        $data_values6_sql[$data_values6_counter] = $sql_text;
+        $data_values6_counter++;
+      } 
+
+
+
     } // if ( is_numeric($trash1)
 
   } // if ( $section )
 
   // Spot sections end
-  if (strstr ( $data, "Instance Activity Stats ")) { echo "<font color='blue'>"; $section = 0; }
+  if (strstr ( $data, "Key Instance Activity Stats ")) { echo "<font color='blue'>"; $section = 0; }
 
   //echo $data . "</font>";
   echo "</font>";
@@ -227,6 +238,10 @@ echo "<td>";
 draw_chart_section($dir, $filename, $data_values2, $data_values2_label, $data_values2_module, "Physical_Reads", $data_values2_executions, $timestamp, 400, 500);
 echo "</td><td>";
 draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500);
+echo "</td>";
+echo "</tr><tr>";
+echo "<td>";
+draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Eexecutions", $data_values6, $timestamp, 400, 500);
 echo "</td></tr><tr><td>";
 
 //Now I need to build a large array and sort it by time elapsed
