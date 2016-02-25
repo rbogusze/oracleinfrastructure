@@ -157,7 +157,7 @@ while (!feof($fh))
         $data_values1_label[$data_values1_counter] = $trash8;	//SQL Id
         $data_values1_module[$data_values1_counter] = $module_name;
         $data_values1_sql[$data_values1_counter] = $sql_text;
-        $data_values1_executions[$data_values1_counter] = $trash2;	//Executions
+        $data_values1_executions[$data_values1_counter] = (float) $trash2;	//Executions
         $data_values1_elapsedtime[$data_values1_counter] = $trash6;	//Elapsed Time (s)
         $data_values1_counter++;
       }
@@ -166,7 +166,7 @@ while (!feof($fh))
         $data_values2_label[$data_values2_counter] = $trash7; //SQL Id
         $data_values2_module[$data_values2_counter] = $module_name;
         $data_values2_sql[$data_values2_counter] = $sql_text;
-        $data_values2_executions[$data_values2_counter] = $trash3; //Executions
+        $data_values2_executions[$data_values2_counter] = (float) $trash3; //Executions
         $data_values2_elapsedtime[$data_values2_counter] = $trash6;	//Elapsed Time (s)
         $data_values2_counter++;
       }
@@ -175,7 +175,7 @@ while (!feof($fh))
         $data_values3_label[$data_values3_counter] = $trash8;    //sql_id
         $data_values3_module[$data_values3_counter] = $module_name;  //module name
         $data_values3_sql[$data_values3_counter] = $sql_text;
-        $data_values3_executions[$data_values3_counter] = $trash2;
+        $data_values3_executions[$data_values3_counter] = (float) $trash2;
         $data_values3_counter++;
       }
       if ($section_name == "Parse_Calls") {
@@ -190,7 +190,7 @@ while (!feof($fh))
         $data_values5_label[$data_values5_counter] = $trash7; //sql_id
         $data_values5_module[$data_values5_counter] = $module_name;
         $data_values5_sql[$data_values5_counter] = $sql_text;
-        $data_values5_executions[$data_values5_counter] = $trash2;
+        $data_values5_executions[$data_values5_counter] = (float) $trash2;
         $data_values5_counter++;
       } 
     } // if ( is_numeric($trash1)
@@ -218,7 +218,7 @@ fclose ($fh);
 
 echo "<table><tr><td>";
 
-draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values5, $data_values5_label, $data_values5_module, "Elapsed_Time", $data_values5_executions, $timestamp, 400, 500);
 echo "</td><td>";
 draw_chart_section($dir, $filename, $data_values1, $data_values1_label, $data_values1_module, "Buffer_Gets", $data_values1_executions, $timestamp, 400, 500);
 echo "</td>";
@@ -226,7 +226,7 @@ echo "</tr><tr>";
 echo "<td>";
 draw_chart_section($dir, $filename, $data_values2, $data_values2_label, $data_values2_module, "Physical_Reads", $data_values2_executions, $timestamp, 400, 500);
 echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values5, $data_values5_label, $data_values5_module, "Elapsed_Time", $data_values5_executions, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500);
 echo "</td></tr><tr><td>";
 
 //Now I need to build a large array and sort it by time elapsed
