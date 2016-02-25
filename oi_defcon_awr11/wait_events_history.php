@@ -5,7 +5,7 @@
 require_once("/home/orainf/scripto/php/my_library.php");
 require("header.php");
 require("hash_history_functions.php");
-echo "<tt>Database Statistics History<BR></tt>";
+echo "<tt>Wait Events History<BR></tt>";
 #echo "<table><td width=1000 valign=top border=1>";
 
 $dir=$_GET['dir'];
@@ -54,9 +54,9 @@ for($i=0; $i<count($filenames_array); $i++)
     $data = fgets($fh);
     if (strlen($data) == 0) { continue; }
     // Spot sections start
-    if (strstr ( $data, "SGA breakdown difference ")) { echo "<font color='green'>"; $section = 1; }
+    if (strstr ( $data, "Foreground Wait Events ")) { echo "<font color='green'>"; $section = 1; }
     // Spot section end, then exit the while loop.
-    if (strstr ( $data, "Streams CPU/IO Usage ")) { echo "<font color='red'>"; $section = 0; break; }
+    if (strstr ( $data, "Wait Event Histogram ")) { echo "<font color='red'>"; $section = 0; break; }
     if ( $section ) {
       //echo "<br> data: $data <br>";
       //if (strstr ( $data, $statname . "  " )) { 
@@ -64,10 +64,11 @@ for($i=0; $i<count($filenames_array); $i++)
         //echo "<br> pos: " . strpos( $data, $statname );
         if ( strpos( $data, $statname ) == 0 ) {
           //echo "<br> data: $data <br>";
-          list($trash1, $trash2, $trash3, $trash4) = preg_split("/[\s][\s]+/",$data);
-          $trash2 = str_replace(",", "", $trash2);  // | Total   |
-          $trash3 = str_replace(",", "", $trash3);  // | per Second   |
-          $trash4 = str_replace(",", "", $trash4);  // | per Trans   |
+          list($trash1, $trash2, $trash3, $trash4, $trash5) = preg_split("/[\s][\s]+/",$data);
+          $trash2 = str_replace(",", "", $trash2);  // | 
+          $trash3 = str_replace(",", "", $trash3);  // | 
+          $trash4 = str_replace(",", "", $trash4);  // | 
+          $trash5 = str_replace(",", "", $trash5);  // | 
 
           if ( is_numeric($trash2) && is_numeric($trash3)  ) {
             // echo "<br> data: $data <br>";
@@ -75,6 +76,7 @@ for($i=0; $i<count($filenames_array); $i++)
             $data_values1[$data_values_counter] = $trash2;
             $data_values2[$data_values_counter] = $trash3;
             $data_values3[$data_values_counter] = $trash4;
+            $data_values4[$data_values_counter] = $trash5;
             
           } // if ( is_numeric($trash2)
           $section_found = 0;
@@ -84,6 +86,7 @@ for($i=0; $i<count($filenames_array); $i++)
         $data_values1[$data_values_counter] = -100;
         $data_values2[$data_values_counter] = -100;
         $data_values3[$data_values_counter] = -100;
+        $data_values4[$data_values_counter] = -100;
         }
 
       }
@@ -111,9 +114,9 @@ echo "<br>";
 //echo "<BR>before the draw2";
 //show_array($filenames_array_date);
 
-draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Total", 0, "", "");
-//draw_chart($data_values2, $filenames_array_date, ("Statistik: " . $statname), "per Second", 0, "");
-//draw_chart($data_values3, $filenames_array_date, ("Statistik: " . $statname), "per Trans", 0, "");
+draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Waits", 0, "", "");
+draw_chart($data_values3, $filenames_array_date, ("Statistik: " . $statname), "Total Wait Time (s)", 0, "");
+draw_chart($data_values4, $filenames_array_date, ("Statistik: " . $statname), "Avg wait (ms)", 0, "");
 
 
 

@@ -58,7 +58,7 @@ if (is_file($dir . $filename) ) {
 
       if ( is_numeric($trash2) && is_numeric($trash3)  ) {
         //echo "<br> data: $data <br>";
-        echo "<tr><td><a href=\"sga_breakdown_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash4</td><td>$trash5</td></tr>";
+        echo "<tr><td><a href=\"wait_events_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash4</td><td>$trash5</td></tr>";
       } // if ( is_numeric($trash2)
 
     } // if ( $section )
