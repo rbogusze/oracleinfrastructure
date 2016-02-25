@@ -37,29 +37,41 @@ echo "Data: $data\n";
       $data = trim($data);
       // Separate the string into pieces
       //list($trash1, $trash2, $trash3, $trash4, $trash4, $trash4, $hash_value) = split(' ',$data);
-      list($trash1, $trash2, $trash3, $trash4, $trash5, $trash6, $trash7) = split(' ',$data);
+      list($trash1, $trash2, $trash3, $trash4, $trash5, $trash6, $trash7, $trash8) = split(' ',$data);
       // If the all the tokens are number I assume we are in the first line describing
       // SQL with values. This is a bit naive, but I see no other way. 
       // There is a bug here too, we can only see Beffer gets and phisical_reads data only this way
       $trash1 = str_replace(",", "", $trash1);
       $trash2 = str_replace(",", "", $trash2);
       $trash3 = str_replace(",", "", $trash3);
+      $trash4 = str_replace(",", "", $trash4);
+      $trash5 = str_replace(",", "", $trash5);
+      $trash6 = str_replace(",", "", $trash6);
+      $trash7 = str_replace(",", "", $trash7);
       if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash3) && is_numeric($trash4) && is_numeric($trash5) && ! is_numeric($trash6) ) {
         echo "Ala ma kota, sql_id na 6 polu: $trash6\n";
         $hash_array[$hash_array_counter] = $trash6;
   	$hash_array_counter++;
+        continue;
       } // if ( is_numeric($trash1)
  
-      if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash3) && is_numeric($trash4) && is_numeric($trash5) && is_numeric($trash6) && ! is_numeric($trash7) ) {
+      if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash4) && is_numeric($trash5) && is_numeric($trash6) && ! is_numeric($trash7) ) {
         echo "Ala ma kota, sql_id na 7 polu: $trash7\n";
         $hash_array[$hash_array_counter] = $trash7;
   	$hash_array_counter++;
+        continue;
+      } // if ( is_numeric($trash1)
+      if ( is_numeric($trash1) && is_numeric($trash2) && is_numeric($trash4) && is_numeric($trash5) && is_numeric($trash6) && is_numeric($trash7) && ! is_numeric($trash8) ) {
+        echo "Ala ma kota, sql_id na 8 polu: $trash8\n";
+        $hash_array[$hash_array_counter] = $trash8;
+  	$hash_array_counter++;
+        continue;
       } // if ( is_numeric($trash1)
 
     } // if ( $section )
 
     // Spot sections end
-    if (strstr ( $data, "SQL ordered by Parse Calls ")) { $section = 0; break; }
+    if (strstr ( $data, "Key Instance Activity Stats ")) { $section = 0; break; }
   }
   // close file
   fclose ($fh);
