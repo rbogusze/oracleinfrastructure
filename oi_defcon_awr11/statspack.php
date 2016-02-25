@@ -73,6 +73,7 @@ $data_values3_counter = 0;
 $data_values4_counter = 0;
 $data_values5_counter = 0;
 $data_values6_counter = 0;
+$data_values7_counter = 0;
 $section = 0;
 
 // Extract from the filename data time of creation nedded for hash view
@@ -100,7 +101,8 @@ while (!feof($fh))
   // Spot sections start
   if (strstr ( $data, "SQL ordered by Elapsed Time ")) { echo "<font color='red'>"; $section = 1; }
 
-  // echo "<br> data: $data <br>";
+//WIP
+//   echo "<br> data: $data <br>";
 
   // Spot sections
   if (strstr ( $data, "SQL ordered by Gets  ")) { echo "<font color='green'>"; $section_name = "Buffer_Gets"; }
@@ -114,7 +116,8 @@ while (!feof($fh))
   if (strstr ( $data, "SQL ordered by Version Count ")) { echo "<font color='green'>"; $section_name = "Version_Count"; }
   if (strstr ( $data, "SQL ordered by Cluster Wait Time ")) { echo "<font color='green'>"; $section_name = "Cluster_Wait"; }
   if (strstr ( $data, "Total - Physical Reads as a percentage of Total Disk ")) { echo "<font color='green'>"; $section_name = "TotalPhysical"; }
-  if (strstr ( $data, "Key Instance Activity Stats ")) { continue;  }
+  //if (strstr ( $data, "Key Instance Activity Stats ")) { continue;  }
+  if (strstr ( $data, "Key Instance Activity Stats ")) { echo "<font color='green'>"; $section = 0; continue;  }
 
 
 
@@ -201,6 +204,14 @@ while (!feof($fh))
         $data_values6_sql[$data_values6_counter] = $sql_text;
         $data_values6_counter++;
       } 
+      if ($section_name == "Cluster_Wait") {
+        $data_values7[$data_values7_counter] = $trash1; //Cluster Wait Time
+        $data_values7_label[$data_values7_counter] = $trash8; //sql_id
+        $data_values7_module[$data_values7_counter] = $module_name;
+        $data_values7_sql[$data_values7_counter] = $sql_text;
+        $data_values7_executions[$data_values7_counter] = (float) $trash2;
+        $data_values7_counter++;
+      } 
 
 
 
@@ -241,7 +252,9 @@ draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_va
 echo "</td>";
 echo "</tr><tr>";
 echo "<td>";
-draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Eexecutions", $data_values6, $timestamp, 400, 500);
+draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Executions", $data_values6, $timestamp, 400, 500);
+echo "</td><td>";
+draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7, $timestamp, 400, 500);
 echo "</td></tr><tr><td>";
 
 //Now I need to build a large array and sort it by time elapsed
