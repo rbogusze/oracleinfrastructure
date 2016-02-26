@@ -59,8 +59,9 @@ read
 # Kill all the spanned processes
 echo "Please wait untill I kill all the spawned processes"
 for i in `ls -1 ${LOCKFILE_SPAN}_*.lock`; do
+  echo "i: $i"
   # get proccess PID
-  PID=`echo $i | awk -F _ '{ print $4 }'`
+  PID=`echo $i | awk -F _ '{ print $6 }'`
   echo "Killing PID : ${PID}"
   kill ${PID}
   echo "Removing lock file: $i"

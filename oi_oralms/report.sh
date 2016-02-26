@@ -60,14 +60,18 @@ msgd "TNS-12535: TNS:operation timed out"
 f_report_stats_from_dir "/tmp/oralms_tns12535" > /tmp/oralms_tns12535.txt
 run_command_d "cat /tmp/oralms_tns12535.txt"
 
+msgd "Global Enqueue Services Deadlock detected"
+f_report_stats_from_dir "/tmp/oralms_global_deadlock" > /tmp/oralms_global_deadlock.txt
+run_command_d "cat /tmp/oralms_global_deadlock.txt"
+
 
 # Get the list of CN that monitor alert log
 $HOME/scripto/perl/ask_ldap.pl "(orainfDbAlertLogMonitoring=TRUE)" "['cn']" > /tmp/oralms_report.txt
 run_command_d "cat /tmp/oralms_report.txt"
 
 # Get the stats for every report I want to include
-echo "--------------------------------------------------------------------"
-echo "        /h | Redo switches | Ses. Killed | mttr too low | TNS12535 |"
+echo "------------------------------------------------------------------------------------"
+echo "        /h | Redo switches | Ses. Killed | mttr too low | TNS12535 | Glob Deadlock |"
 while read LINE
 do
   #echo $LINE
@@ -83,16 +87,19 @@ do
   V_TNS12535=`cat /tmp/oralms_tns12535.txt | grep "$LINE " | awk '{print $2}'`
   msgd "V_TNS12535: $V_TNS12535"
 
+  V_GLOBAL_DEADLOCK=`cat /tmp/oralms_global_deadlock.txt | grep "$LINE " | awk '{print $2}'`
+  msgd "V_GLOBAL_DEADLOCK: $V_GLOBAL_DEADLOCK"
+
   #echo "$LINE $V_REDO $V_KILL"
   #printf "%-10s" "$LINE"
   #echo "$V_REDO $V_KILL"
   #echo "---------"
   #printf "%-10s | %-13s | %-10s" "$LINE" "$V_REDO" "$V_KILL"
-  printf "%-10s | %-13s | %-10s  | %-12s | %-8s |" "$LINE" "$V_REDO" "$V_KILL" "$V_MTTR" "$V_TNS12535"
+  printf "%-10s | %-13s | %-10s  | %-12s | %-8s | %-13s |" "$LINE" "$V_REDO" "$V_KILL" "$V_MTTR" "$V_TNS12535" "$V_GLOBAL_DEADLOCK"
   echo ""
 done < /tmp/oralms_report.txt
 
-echo "--------------------------------------------------------------------"
+echo "------------------------------------------------------------------------------------"
 
 
 
