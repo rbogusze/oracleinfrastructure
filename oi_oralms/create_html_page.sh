@@ -13,6 +13,8 @@ fi
 
 tail -n 200 /tmp/global_alert.log | tac > /tmp/global_alert.log_for_html
 
+V_TABLE=0
+
 cat ~/scripto/html/header.txt
 while read LINE
 do
@@ -33,8 +35,29 @@ do
     echo "<font color=\"magenta\">"
   fi
 
-  if [[ "$LINE" =~ "###" ]] || [[ "$LINE" =~ "warning" ]] || [[ "$LINE" =~ "gather_monitor" ]]; then
+  if [[ "$LINE" =~ "\#\#\#" ]] || [[ "$LINE" =~ "warning" ]] || [[ "$LINE" =~ "gather_monitor" ]]; then
     echo "<font color=\"cyan\">"
+  fi
+
+  if [[ "$LINE" =~ "-------" ]] && [[ "$V_TABLE" -eq 0 ]] ; then
+    V_TABLE=1
+    echo "<table border=1>"
+    continue
+  fi
+
+  if [[ "$LINE" =~ "\|" ]]; then
+    echo "<tr><td>"
+    echo "$LINE" | sed -e 's/|/<\/td><td>/g'
+    echo "</td></tr>"
+    continue
+  fi
+
+
+
+  if [[ "$LINE" =~ "-------" ]] && [[ "$V_TABLE" -eq 1 ]] ; then
+    V_TABLE=0
+    echo "</table>"
+    continue
   fi
 
   echo "$LINE" 
