@@ -19,6 +19,9 @@ fi
 
 # New way that allows multiple start/stop times
 
+D_LOG=/tmp/awr_reports_log
+mkdir -p $D_LOG
+
 msgd "List the CN that are candidates"
 $HOME/scripto/perl/ask_ldap.pl "(&(orainfDbMusasMonitoring=TRUE)(orainfDbMusasMonitoringMode=awr))" "['cn']" > /tmp/prepare_exec_cmd_cn.txt
 run_command_d "cat /tmp/prepare_exec_cmd_cn.txt"
@@ -45,18 +48,20 @@ do
       break
     fi
       msgd "$line $line2"
-      $HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " `date -I`" }' > /tmp/prepare_exec_cmd_cn_multi.txt
+      V_DATE=`date -I`
+      msgd "V_DATE: $V_DATE"
+      $HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " xxdatexx"}' | sed "s/xxdatexx/$V_DATE/"> /tmp/prepare_exec_cmd_cn_multi.txt
       run_command_d "cat /tmp/prepare_exec_cmd_cn_multi.txt"
       V_MULTI_RUN=`cat /tmp/prepare_exec_cmd_cn_multi.txt`
       msgd "V_MULTI_RUN: $V_MULTI_RUN"
-      echo "$V_MULTI_RUN $line $line2 > /tmp/awr_reports_${CN}_`date -I`_${RANDOM}.log"
+      echo "$V_MULTI_RUN $line $line2 > $D_LOG/awr_reports_${CN}_`date -I`_${RANDOM}.log"
 
 
     done < /tmp/prepare_exec_cmd_cn_start.txt 3< /tmp/prepare_exec_cmd_cn_end.txt
    
   else
     msgd "One time, standard run"
-    $HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser','orainfDbMusasStart','orainfDbMusasEnd']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " `date -I` " $3 " " $4 " > /tmp/awr_reports.log" }' 
+    $HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser','orainfDbMusasStart','orainfDbMusasEnd']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " `date -I` " $3 " " $4 " > $D_LOG/awr_reports_${CN}_`date -I`_${RANDOM}.log" }' 
   fi
   
 done < /tmp/prepare_exec_cmd_cn.txt
