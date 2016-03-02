@@ -29,6 +29,9 @@ run_command_d "cat /tmp/prepare_exec_cmd_cn.txt"
 msgd "Cleaning log dir"
 rm -f /tmp/awr_reports*.log
 
+V_DATE=`date -I`
+msgd "V_DATE: $V_DATE"
+
 msgd "Loop through the CNs"
 while read CN
 do
@@ -48,8 +51,6 @@ do
       break
     fi
       msgd "$line $line2"
-      V_DATE=`date -I`
-      msgd "V_DATE: $V_DATE"
       $HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " xxdatexx"}' | sed "s/xxdatexx/$V_DATE/"> /tmp/prepare_exec_cmd_cn_multi.txt
       run_command_d "cat /tmp/prepare_exec_cmd_cn_multi.txt"
       V_MULTI_RUN=`cat /tmp/prepare_exec_cmd_cn_multi.txt`
@@ -61,7 +62,12 @@ do
    
   else
     msgd "One time, standard run"
-    $HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser','orainfDbMusasStart','orainfDbMusasEnd']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " `date -I` " $3 " " $4 " > $D_LOG/awr_reports_${CN}_`date -I`_${RANDOM}.log" }' 
+    #$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser','orainfDbMusasStart','orainfDbMusasEnd']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " xxdatexx " $3 " " $4 " > $D_LOG/awr_reports_${CN}_`date -I`_${RANDOM}.log" }' | sed "s/xxdatexx/$V_DATE/" 
+    $HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn','orainfDbRrdoraUser','orainfDbMusasStart','orainfDbMusasEnd']" | awk '{ print "${HOME}/oi_musas_awr/awr_reports.sh " $1 " " $2 " xxdatexx " $3 " " $4 }' | sed "s/xxdatexx/$V_DATE/" > /tmp/prepare_exec_cmd_cn_multi.txt
+    run_command_d "cat /tmp/prepare_exec_cmd_cn_multi.txt"
+    V_MULTI_RUN=`cat /tmp/prepare_exec_cmd_cn_multi.txt`
+    msgd "V_MULTI_RUN: $V_MULTI_RUN"
+    echo "$V_MULTI_RUN > $D_LOG/awr_reports_${CN}_`date -I`_${RANDOM}.log"
   fi
   
 done < /tmp/prepare_exec_cmd_cn.txt
