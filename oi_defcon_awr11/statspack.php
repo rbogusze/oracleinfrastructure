@@ -100,6 +100,7 @@ $sql_id_colors[16] = '#8181F7';
 $sql_id_colors[17] = '#D8D8D8';
 $sql_id_colors[18] = '#CBCBCB';
 $sql_id_colors[19] = '#B2B2B2';
+$sql_id_colors[20] = '#A4A4A4';
 
 // Extract from the filename data time of creation nedded for hash view
 preg_match ("/....-..-../", $filename, $match_result);
