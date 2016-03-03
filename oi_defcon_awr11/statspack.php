@@ -80,27 +80,26 @@ $section = 0;
 $counter_top = 20;
 
 //populate clors
-$sql_id_colors[0] = '#F6CECE';
-$sql_id_colors[1] = '#F5BCA9';
-$sql_id_colors[2] = '#F5D0A9';
-$sql_id_colors[3] = '#F3E2A9';
-$sql_id_colors[4] = '#F3F781';
-$sql_id_colors[5] = '#D8F781';
-$sql_id_colors[6] = '#BEF781';
-$sql_id_colors[7] = '#9FF781';
-$sql_id_colors[8] = '#81F7BE';
-$sql_id_colors[9] = '#81F7D8';
-$sql_id_colors[10] = '#81F7F3';
-$sql_id_colors[11] = '#81DAF5';
-$sql_id_colors[12] = '#81BEF7';
-$sql_id_colors[13] = '#819FF7';
-$sql_id_colors[14] = '#8181F7';
-$sql_id_colors[15] = '#9F81F7';
-$sql_id_colors[16] = '#BE81F7';
-$sql_id_colors[17] = '#F781F3';
-$sql_id_colors[18] = '#F781D8';
-$sql_id_colors[19] = '#F7819F';
-$sql_id_colors[20] = '#D8D8D8';
+$sql_id_colors[0] = '#F781F3';
+$sql_id_colors[1] = '#BE81F7';
+$sql_id_colors[2] = '#F6CECE';
+$sql_id_colors[3] = '#F5BCA9';
+$sql_id_colors[4] = '#F5D0A9';
+$sql_id_colors[5] = '#F3E2A9';
+$sql_id_colors[6] = '#F3F781';
+$sql_id_colors[7] = '#D8F781';
+$sql_id_colors[8] = '#BEF781';
+$sql_id_colors[9] = '#9FF781';
+$sql_id_colors[10] = '#81F7BE';
+$sql_id_colors[11] = '#81F7D8';
+$sql_id_colors[12] = '#81F7F3';
+$sql_id_colors[13] = '#81DAF5';
+$sql_id_colors[14] = '#81BEF7';
+$sql_id_colors[15] = '#819FF7';
+$sql_id_colors[16] = '#8181F7';
+$sql_id_colors[17] = '#D8D8D8';
+$sql_id_colors[18] = '#CBCBCB';
+$sql_id_colors[19] = '#B2B2B2';
 
 // Extract from the filename data time of creation nedded for hash view
 preg_match ("/....-..-../", $filename, $match_result);
