@@ -35,7 +35,7 @@ find /KASZTELAN > KASZTELAN.txt
 cvs add KASZTELAN.txt
 cvs commit -m "Auto commit on `date -I`"
 
-
-
-
+find /home/remik/Dropbox > Dropbox.txt
+cvs add Dropbox.txt
+cvs commit -m "Auto commit on `date -I`"
 
