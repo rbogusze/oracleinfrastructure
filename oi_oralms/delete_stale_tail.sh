@@ -44,8 +44,9 @@ do
       run_command "kill -9 $V_KILL_PID"
     fi    
 
-    msgd "Deleting the log file. It would be overwritten anyway at the next gather"
-    rm -f ${D_ORALMS}${F_TAIL}
+    # this seems to cause weird issues where the tail to global alert is lost, but local works
+    #msgd "Deleting the log file. It would be overwritten anyway at the next gather"
+    #rm -f ${D_ORALMS}${F_TAIL}
 
   else
     msgd "tail file looks fresh"

@@ -15,9 +15,6 @@ TMP_LOG_DIR=/var/log/oralms
 
 mkdir -p ${LOCKFILE_SPAN_DIR}
 
-# now as parameter
-#LOGSURFER_CONFIG_FILE=./logsurfer_global_alert_raw.conf
-
 # Upon exit, remove lockfile.
 trap "{ rm -f $LOCKFILE_ORALMS ; exit 255; }" EXIT
 
@@ -39,7 +36,7 @@ LOGSURFER_CONFIG_FILE="$1"
 echo "Using configuration file: ${LOGSURFER_CONFIG_FILE}"
 
 
-# Filter global_alert_raw.log to global_alert.log based on rules defined in logsurfer_global_alert_raw.conf
+# Filter global_alert_raw.log to global_alert.log based on rules defined in configuration file provided as $1
 logsurfer -f -s -c ${LOGSURFER_CONFIG_FILE} ${GLOBAL_ALERT_RAW} >> ${GLOBAL_ALERT} &
 PID=$!
 touch ${LOCKFILE_SPAN}_${PID}_.lock
