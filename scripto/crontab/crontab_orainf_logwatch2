@@ -5,6 +5,7 @@
 */16 * * * * /home/orainf/oi_oralms/delete_stale_tail.sh 2>&1 >> /tmp/global_alert.log
 58 */1 * * * /home/orainf/oi_oralms/report.sh 2>&1 >> /tmp/global_alert.log
 59 */1 * * * /home/orainf/oi_oralms/check_if_gather_stats_is_running.sh >> /tmp/global_alert.log
+* * * * * /home/orainf/oi_oralms/create_html_page.sh > /var/www/html/alert_log.html
 
 #
 # MUSAS_AWR - Generate AWR reports
