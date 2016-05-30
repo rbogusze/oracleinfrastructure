@@ -17,14 +17,14 @@ D_ORALMS=/tmp/oralms/
 F_LIMIT=/tmp/oralms_limit.tmp
 
 # store file reference with timestamp older than 1h
-touch -d '-3 hour' $F_LIMIT
+touch -d '-6 hour' $F_LIMIT
 
 # loop through the tail directory
 for F_TAIL in `ls ${D_ORALMS}`
 do
   msgd "################## $F_TAIL #################"
   if [ ${F_LIMIT} -nt ${D_ORALMS}/${F_TAIL} ]; then
-    msgi "[gather_monitor] File ${F_TAIL} has not been touched in the last 3h. Killing the tail. Please wait for connection refresh."
+    msgi "[gather_monitor] File ${F_TAIL} has not been touched in the last 6h. Killing the tail. Please wait for connection refresh."
     # checking if ssh session exists
     # get the hostname from the F_TAIL
     V_HOSTNAME=`echo ${F_TAIL} | awk -F"_" '{print $2}' | tr -d "]"`
