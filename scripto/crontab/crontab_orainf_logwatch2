@@ -1,6 +1,8 @@
 #
 # ORALMS
 #
+@reboot (. ~/.bash_profile; touch /tmp/global_alert_raw.log; touch global_alert.log; cd ~/oi_oralms; /usr/bin/screen -dmS alert_log ./oralms_filter.sh filter_all.conf)
+@reboot (. ~/.bash_profile; sleep 10; cd tmp; /usr/bin/screen -dmS timestamp /usr/bin/watch -n 900 '/bin/date >> /tmp/global_alert_raw.log')
 */42 * * * * /home/orainf/oi_oralms/oralms_gather_monitor.sh
 */16 * * * * /home/orainf/oi_oralms/delete_stale_tail.sh 2>&1 >> /tmp/global_alert.log
 58 */1 * * * /home/orainf/oi_oralms/report.sh 2>&1 >> /tmp/global_alert.log
