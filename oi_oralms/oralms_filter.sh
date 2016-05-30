@@ -37,7 +37,7 @@ echo "Using configuration file: ${LOGSURFER_CONFIG_FILE}"
 
 
 # Filter global_alert_raw.log to global_alert.log based on rules defined in configuration file provided as $1
-logsurfer -f -s -c ${LOGSURFER_CONFIG_FILE} ${GLOBAL_ALERT_RAW} >> ${GLOBAL_ALERT} &
+/usr/local/bin/logsurfer -f -s -c ${LOGSURFER_CONFIG_FILE} ${GLOBAL_ALERT_RAW} >> ${GLOBAL_ALERT} &
 PID=$!
 touch ${LOCKFILE_SPAN}_${PID}_.lock
 
