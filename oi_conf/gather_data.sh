@@ -1,5 +1,7 @@
 #!/bin/bash
 # 
+# If orainfDbInitFile= is set, then the instance is taken under consideration. If you want to disable it
+# just remove that attribute from the entity
 
 # General variables
 PWD_FILE=/home/orainf/.passwords
