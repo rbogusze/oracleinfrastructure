@@ -1,5 +1,6 @@
--- 3600 MHz  SPARC-T5 Elapsed: 00:00:02.61
+-- 3600 MHz  SPARC-T5                        Elapsed: 00:00:02.61
 -- Intel(R) Xeon(R) CPU E5-2609 v2 @ 2.50GHz Elapsed: 00:00:01.80
+-- Intel(R) Core(TM) i7-3770 CPU @ 3.40GHz   Elapsed: 00:00:01.02
 select count(*) from (SELECT 'F' || TO_CHAR(Level - 1)          AS FibonacciOrdinal,
        (      (POWER(1 + SQRT(5), Level - 1) 
           -    POWER(1 - SQRT(5), Level - 1))
