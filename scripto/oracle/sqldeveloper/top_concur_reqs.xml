@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<displays>
+<display id="6db16377-014c-1000-8017-7f00000155b0" type="" style="Table" enable="true">
+	<name><![CDATA[top concur reqs]]></name>
+	<description><![CDATA[]]></description>
+	<tooltip><![CDATA[]]></tooltip>
+	<drillclass><![CDATA[]]></drillclass>
+	<CustomValues>
+		<TYPE>horizontal</TYPE>
+	</CustomValues>
+	<query>
+		<sql><![CDATA[SELECT
+   f.application_short_name app,
+   SUBSTR(p.user_concurrent_program_name,1,55) description,
+p.concurrent_program_name PROGRAM,
+   r.priority,
+   COUNT(*) cnt,
+   SUM(actual_completion_date - actual_start_date) * 24 elapsed,
+   AVG(actual_completion_date - actual_start_date) * 24 average,
+   MAX(actual_completion_date - actual_start_date) * 24 MAX,
+   MIN(actual_completion_date - actual_start_date) * 24 MIN,
+   STDDEV(actual_completion_date - actual_start_date) * 24 STDDEV,
+   STDDEV(actual_start_date - requested_start_date) * 24 wstddev,
+   SUM(actual_start_date - requested_start_date) * 24 waited,
+   AVG(actual_start_date - requested_start_date) * 24 avewait,
+   c.request_class_name TYPE
+FROM apps.fnd_concurrent_queues fcq,
+     apps.fnd_concurrent_queue_content fcqc,
+     apps.fnd_concurrent_request_class c,
+     apps.fnd_application f,
+     apps.fnd_concurrent_programs_vl p,
+     apps.fnd_concurrent_requests r
+WHERE r.program_application_id = p.application_id
+   AND r.concurrent_program_id = p.concurrent_program_id
+ --AND r.status_code IN ('C','G','E','R')
+  -- AND actual_completion_date BETWEEN sysdate-30  AND sysdate
+   AND p.application_id = f.application_id
+   AND r.program_application_id = f.application_id
+   AND r.request_class_application_id = c.application_id(+)
+   AND r.concurrent_request_class_id = c.request_class_id(+)
+   AND r.request_class_application_id = fcqc.type_application_id(+)
+   AND r.concurrent_request_class_id = fcqc.type_id(+)
+   AND fcqc.queue_application_id = fcq.application_id(+)
+   AND fcqc.concurrent_queue_id = fcq.concurrent_queue_id(+)
+GROUP BY
+   c.request_class_name,
+   f.application_short_name,
+   p.concurrent_program_name,
+   p.user_concurrent_program_name,
+   r.priority
+ORDER BY 3]]></sql>
+	</query>
+		<pdf version="VERSION_1_7" compression="CONTENT">
+			<docproperty title="null" author="null" subject="null" keywords="null" />
+			<cell toppadding="2" bottompadding="2" leftpadding="2" rightpadding="2" horizontalalign="LEFT" verticalalign="TOP" wrap="true" />
+			<column>
+				<heading font="null" size="10" style="NORMAL" color="-16777216" rowshading="-1" labeling="FIRST_PAGE" />
+				<footing font="null" size="10" style="NORMAL" color="-16777216" rowshading="-1" labeling="NONE" />
+				<blob blob="NONE" zip="false" />
+			</column>
+			<table font="null" size="10" style="NORMAL" color="-16777216" userowshading="false" oddrowshading="-1" evenrowshading="-1" showborders="true" spacingbefore="12" spacingafter="12" horizontalalign="LEFT" />
+			<header enable="false" generatedate="false">
+				<data>
+				
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+				
+				
+				
+				
+				
+				
+				null																																																																																																																																																																																																																																																																						</data>
+			</header>
+			<footer enable="false" generatedate="false">
+				<data value="null" />
+			</footer>
+			<security enable="false" useopenpassword="false" openpassword="null" encryption="EXCLUDE_METADATA">
+				<permission enable="false" permissionpassword="null" allowcopying="true" allowprinting="true" allowupdating="false" allowaccessdevices="false" />
+			</security>
+			<pagesetup papersize="LETTER" orientation="1" measurement="in" margintop="1.0" marginbottom="1.0" marginleft="1.0" marginright="1.0" />
+		</pdf>
+	<display id="" type="" style="Table" enable="true">
+		<name><![CDATA[PROGRAM]]></name>
+		<description><![CDATA[]]></description>
+		<tooltip><![CDATA[]]></tooltip>
+		<drillclass><![CDATA[]]></drillclass>
+		<CustomValues>
+			<TYPE>horizontal</TYPE>
+		</CustomValues>
+		<query>
+			<sql><![CDATA[select INST_ID,
+                                      (cpu_time/1000000) "CPU_Seconds",
+                                      disk_reads "Disk_Reads",
+                                      buffer_gets "Buffer_Gets",
+                                      executions "Executions",
+                                      case when rows_processed = 0 then null
+                                           else round((buffer_gets/nvl(replace(rows_processed,0,1),1))) 
+                                           end "Buffer_gets/rows_proc",
+                                      round((buffer_gets/nvl(replace(executions,0,1),1))) "Buffer_gets/executions",
+                                      (elapsed_time/1000000) "Elapsed_Seconds", 
+                                      --round((elapsed_time/1000000)/nvl(replace(executions,0,1),1)) "Elapsed/Execution",
+                                      Sql_text "SQL",
+                                      module "Module",SQL_ID
+                                 from gv$sql s
+                                 where     module like '%'||:PROGRAM||'%' and sql_id in (
+select distinct sql_id from (
+WITH sql_class AS
+(select sql_id, state, count(*) occur from 
+  (select   sql_id
+  ,  CASE  WHEN session_state = 'ON CPU' THEN 'CPU'       
+           WHEN session_state = 'WAITING' AND wait_class IN ('User I/O') THEN 'IO'
+           ELSE 'WAIT' END state            
+    from gv$active_session_history             
+    where   session_type IN ( 'FOREGROUND')     
+    and module like '%'||:PROGRAM||'%'
+ --   and sample_time  between trunc(sysdate,'MI') - :minutes/24/60 and trunc(sysdate,'MI')
+ )
+    group by sql_id, state),
+     ranked_sqls AS 
+(select sql_id,  sum(occur) sql_occur  , rank () over (order by sum(occur)desc) xrank
+from sql_class           
+group by sql_id )
+select sc.sql_id, state, occur from sql_class sc, ranked_sqls rs
+where rs.sql_id = sc.sql_id 
+--and rs.xrank <= :top_n 
+order by xrank, sql_id, state ))
+order by elapsed_time desc nulls last]]></sql>
+			<binds>
+				<bind id="PROGRAM">
+					<prompt><![CDATA[PROGRAM]]></prompt>
+					<tooltip><![CDATA[PROGRAM]]></tooltip>
+					<value><![CDATA[NULL_VALUE]]></value>
+					<bracket><![CDATA[null]]></bracket>
+				</bind>
+			</binds>
+		</query>
+			<pdf version="VERSION_1_7" compression="CONTENT">
+				<docproperty title="null" author="null" subject="null" keywords="null" />
+				<cell toppadding="2" bottompadding="2" leftpadding="2" rightpadding="2" horizontalalign="LEFT" verticalalign="TOP" wrap="true" />
+				<column>
+					<heading font="null" size="10" style="NORMAL" color="-16777216" rowshading="-1" labeling="FIRST_PAGE" />
+					<footing font="null" size="10" style="NORMAL" color="-16777216" rowshading="-1" labeling="NONE" />
+					<blob blob="NONE" zip="false" />
+				</column>
+				<table font="null" size="10" style="NORMAL" color="-16777216" userowshading="false" oddrowshading="-1" evenrowshading="-1" showborders="true" spacingbefore="12" spacingafter="12" horizontalalign="LEFT" />
+				<header enable="false" generatedate="false">
+					<data>
+					
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+					
+					
+					
+					
+					
+					
+					null																																																																																																																																																																																																																																																																																																																												</data>
+				</header>
+				<footer enable="false" generatedate="false">
+					<data value="null" />
+				</footer>
+				<security enable="false" useopenpassword="false" openpassword="null" encryption="EXCLUDE_METADATA">
+					<permission enable="false" permissionpassword="null" allowcopying="true" allowprinting="true" allowupdating="false" allowaccessdevices="false" />
+				</security>
+				<pagesetup papersize="LETTER" orientation="1" measurement="in" margintop="1.0" marginbottom="1.0" marginleft="1.0" marginright="1.0" />
+			</pdf>
+	</display>
+	<display id="" type="" style="Table" enable="true">
+		<name><![CDATA[HIST]]></name>
+		<description><![CDATA[]]></description>
+		<tooltip><![CDATA[]]></tooltip>
+		<drillclass><![CDATA[]]></drillclass>
+		<CustomValues>
+			<TYPE>horizontal</TYPE>
+		</CustomValues>
+		<query>
+			<sql><![CDATA[select day,serial,value from
+(
+select
+  to_char(s.begin_interval_time,'mm/dd')  day,
+  'Elapsed time(s)' serial,
+  ROUND(AVG((SQL.ELAPSED_TIME_DELTA/1000000/nvl(replace(sql.executions_delta,0,1),1) )),2) value
+from
+   dba_hist_sqlstat        sql,
+   dba_hist_snapshot         s
+where
+   s.snap_id = sql.snap_id
+   AND SQL.sql_id=:SQL_ID
+   GROUP BY to_char(s.begin_interval_time,'mm/dd'),sql_id 
+   union all
+(select
+  to_char(s.begin_interval_time,'mm/dd')  day,
+  'Executions' serial,
+  SUM(sql.executions_delta)     value
+from
+   dba_hist_sqlstat        sql,
+   dba_hist_snapshot         s
+where
+   s.snap_id = sql.snap_id
+   AND SQL.sql_id=:SQL_ID
+   GROUP BY to_char(s.begin_interval_time,'mm/dd'),sql_id ) 
+)
+order by day desc]]></sql>
+			<binds>
+				<bind id="SQL_ID">
+					<prompt><![CDATA[SQL_ID]]></prompt>
+					<tooltip><![CDATA[SQL_ID]]></tooltip>
+					<value><![CDATA[NULL_VALUE]]></value>
+					<bracket><![CDATA[null]]></bracket>
+				</bind>
+			</binds>
+		</query>
+			<pdf version="VERSION_1_7" compression="CONTENT">
+				<docproperty title="null" author="null" subject="null" keywords="null" />
+				<cell toppadding="2" bottompadding="2" leftpadding="2" rightpadding="2" horizontalalign="LEFT" verticalalign="TOP" wrap="true" />
+				<column>
+					<heading font="null" size="10" style="NORMAL" color="-16777216" rowshading="-1" labeling="FIRST_PAGE" />
+					<footing font="null" size="10" style="NORMAL" color="-16777216" rowshading="-1" labeling="NONE" />
+					<blob blob="NONE" zip="false" />
+				</column>
+				<table font="null" size="10" style="NORMAL" color="-16777216" userowshading="false" oddrowshading="-1" evenrowshading="-1" showborders="true" spacingbefore="12" spacingafter="12" horizontalalign="LEFT" />
+				<header enable="false" generatedate="false">
+					<data>
+					
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+						
+					
+					
+					
+					
+					
+					
+					null																																																																																																																																																																																																																																																																																																																												</data>
+				</header>
+				<footer enable="false" generatedate="false">
+					<data value="null" />
+				</footer>
+				<security enable="false" useopenpassword="false" openpassword="null" encryption="EXCLUDE_METADATA">
+					<permission enable="false" permissionpassword="null" allowcopying="true" allowprinting="true" allowupdating="false" allowaccessdevices="false" />
+				</security>
+				<pagesetup papersize="LETTER" orientation="1" measurement="in" margintop="1.0" marginbottom="1.0" marginleft="1.0" marginright="1.0" />
+			</pdf>
+	</display>
+</display>
+</displays>
