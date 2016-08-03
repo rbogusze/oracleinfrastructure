@@ -12,7 +12,7 @@ AWK_FILE=/tmp/ldap_list.awk
 PWD_FILE=/home/orainf/.passwords
 TAG_CREATION=easy
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -150,6 +150,20 @@ do {
             continue
           fi
 
+          ;;
+        "ask")
+          msgd "$USER_AUTH authentication method"
+#WIP
+          read -p "Please provide the password for ${USERNAME} ${HOST}" V_PASS
+          msgi "Ask user for password"
+          msgd "hashing the password, so I can use the same expect script"
+          V_PASS=`echo "$V_PASS" | base64`
+          msgd "V_PASS: $V_PASS"
+          
+          /home/orainf/oi_oralms/ssh_passwd.exp ${USERNAME} ${HOST} ${V_PASS} ${LOGFILE_PATH} > ${TMP_LOG_DIR}/${LOG_ID} &
+          PID=$!
+          touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
+           
           ;;
         *)
           msge "Unknown Authentication method. Continue. _${USER_AUTH}_"
