@@ -21,14 +21,14 @@ $oczy = array(
   ),
   "oko2" => array (
      "description" => "hejo",
-     "location" => "nie wiem gdzie",
+     "location" => "salon",
      "video_url" => "http://192.168.1.233:8081",
      "hostname" => "192.168.1.233",
      "rank" => 400
   ),
   "oko3" => array (
      "description" => "hejo",
-     "location" => "hej tam",
+     "location" => "przedpokoj",
      "video_url" => "http://192.168.1.234:8081",
      "hostname" => "192.168.1.233",
      "rank" => 400
