@@ -1,3 +1,15 @@
+-- Largest segments in DB
+select owner, segment_name, segment_type, round((bytes)/1024/1024/1024) SIZE_GB from dba_segments order by size_gb desc;
+select round(sum(bytes)/1024/1024/1024) SIZE_GB from dba_segments;
+
+select round(sum(bytes)/1024/1024/1024) SIZE_GB from dba_segments where segment_name in 
+('XLA_DIAG_SOURCES');
+
+select * from dba_tables where table_name = 'FND_LOG_MESSAGES';
+
+
+
+
 -- Size information
 select round(sum(bytes)/1024/1024/1024) SIZE_GB from dba_segments where segment_name in 
 ('WF_ITEM_ACTIVITY_STATUSES','WF_ITEM_ACTIVITY_STATUSES_N1','WF_ITEM_ACTIVITY_STATUSES_PK','WF_ITEM_ACTIVITY_STATUSES_N2','WF_ITEM_ACTIVITY_STATUSES_N3','WF_ITEM_ACTIVITY_STATUSES_N4',
@@ -598,7 +610,7 @@ select count(*) from WF_NOTIFICATION_OUT;
 
 select round(sum(bytes)/1024/1024/1024) SIZE_GB from dba_segments where segment_name = 'WF_NOTIFICATION_OUT';
 
-select * from dba_lobs where segment_name='SYS_LOB0002693761C00040$$';
+select * from dba_lobs where segment_name='SYS_LOB0000034032C00004$$';
 
 select owner,segment_name, round((bytes)/1024/1024/1024) SIZE_GB, tablespace_name, segment_type from dba_segments where segment_name = 'SYS_LOB0002693761C00040$$';
 

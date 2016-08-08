@@ -1,12 +1,14 @@
---- tmp
-@active4
- 
-Migrate REC=>F189: Enable triggers	52.53	667741450	667741449	23-JAN-16	23-JAN-16			1	501667759	R	R		50
+-- Basic info
+select name from v$database;
+select * from v$version;
+select COMMENTS from  registry$history where COMMENTS like 'PSU%';
+select release_name from apps.fnd_product_groups;
+select patch_level from apps.fnd_product_installations where patch_level like '%AD%';
+select patch_level from apps.fnd_product_installations where patch_level like '%ATG%';
+select patch_level from apps.fnd_product_installations where patch_level like '%FND%';
 
-REQUEST_ID	SID	SERIAL#	SPID
-667741450	8696	4537	21115
-667741450	8696	4537	26854
-667741450	8696	4537	27083
+-- bugs
+select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '&p';
 
 -- connect SID to request id, Vijay
 select fcr.oracle_session_id, fcr.request_id,fcr.PARENT_REQUEST_ID from apps.fnd_concurrent_requests fcr where fcr.oracle_session_id 
@@ -92,13 +94,6 @@ check scripto/oracle/sqlbin/cm.sql
 @cm1
 @cm2
 
--- Basic info
-select name from v$database;
-select * from v$version;
-select COMMENTS from  registry$history where COMMENTS like 'PSU%';
-select release_name from apps.fnd_product_groups;
-select patch_level from apps.fnd_product_installations where patch_level like '%AD%';
-select patch_level from apps.fnd_product_installations where patch_level like '%FND%';
 
 
 

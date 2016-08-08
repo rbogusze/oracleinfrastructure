@@ -3,6 +3,16 @@ select * from dual;
 -- Version
 @version
 
+-- Invalids
+column owner format a15
+column object_name format a32
+column Object_TYPE format a20
+
+select name from v$database;
+select count(*) from dba_objects where status != 'VALID';                    
+Select owner, object_name,Object_TYPE  from dba_objects where status != 'VALID';
+
+
 -- Where is the app tier If I can access DB
 select * from FND_NODES;
 select machine, count(*) from v$session group by machine order by 2 desc;
@@ -18,7 +28,10 @@ select group#,thread#,status from v$log;
 
 SELECT C_LOG.ROWID FROM FND_LOGINS C_LOG WHERE C_LOG.SPID = :B1;
 
-select table_name, last_analyzed, sample_size, num_rows, blocks from all_tables where table_name='FND_USER';
+select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where num_rows is not null order by num_rows desc;
+
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select * from APPS.FND_LOG_MESSAGES order by timestamp desc;
 
 select * from dba_jobs;
 select * from dba_jobs where job in (34048429, 34049915, 34048427, 34048405);

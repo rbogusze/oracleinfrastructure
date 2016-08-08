@@ -7,15 +7,6 @@ EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/arch/redolog_2_
 EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/arch/redolog_1_6879_893556513.arc');
 
 
--- glrac
-EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/arch/redo01a.log');
--- itestc1
-EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/itestc1/redo08a.log');
-EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/itestc1/redo01a.log');
-EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/itestc1/redo02a.log');
-EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/itestc1/redo07a.log');
-EXECUTE DBMS_LOGMNR.ADD_LOGFILE ('/export/home/applmgr/212469221/itestc1/redo07a.log');
-
 
 EXECUTE DBMS_LOGMNR.START_LOGMNR(OPTIONS => DBMS_LOGMNR.DICT_FROM_ONLINE_CATALOG);
 

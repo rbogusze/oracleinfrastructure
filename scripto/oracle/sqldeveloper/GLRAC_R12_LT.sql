@@ -2,7 +2,7 @@
 ALTER session SET nls_date_format = 'YYYY-MM-DD HH24';
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 SELECT /*+ FULL(a)*/
-  COUNT(*) FROM RCV_HEADERS_INTERFACE a;
+  COUNT(*) FROM APPS.RCV_HEADERS_INTERFACE a;
 /* this should take <1sek, and consume <2200 blocks in consistent gets, return <50000 rows  */
  
 -- 2. MV are refreshed in fast mode
@@ -15,8 +15,8 @@ SELECT mview_name,
   last_refresh_type,
   last_refresh_date
 FROM all_mviews
-WHERE mview_name LIKE 'XX_%_MV'
-AND last_refresh_type = 'COMPLETE'
+--WHERE mview_name LIKE '%_MV'
+where last_refresh_type = 'COMPLETE'
 ORDER BY last_refresh_date;
 /*
 we should only see: XX_AP_TAX_CODES_MV, XX_HR_ORGANIZATIONS_UNITS_MV
@@ -42,9 +42,9 @@ SELECT mview_name,
   last_refresh_type,
   last_refresh_date
 FROM all_mviews
-WHERE mview_name LIKE 'XX_%_MV'
+--WHERE mview_name LIKE 'XX_%_MV'
 --WHERE mview_name LIKE '%'
-AND last_refresh_type = 'FAST'
+where last_refresh_type = 'FAST'
 ORDER BY last_refresh_date;
 
 /*
@@ -101,9 +101,6 @@ and last_refresh_type in ('COMPLETE','NA')
 
 
 
-
-
-
 -- 3. Disable trace enabled programs
 SELECT fcp.CONCURRENT_PROGRAM_NAME,
   fcpl.USER_CONCURRENT_PROGRAM_NAME
@@ -133,14 +130,14 @@ SELECT fpo.profile_option_name SHORT_NAME,
   DECODE (fpov.level_id, 10001, 'Site', 10002, 'Application', 10003, 'Responsibility', 10004, 'User', 10005, 'Server', 'UnDef') LEVEL_SET,
   DECODE (TO_CHAR (fpov.level_id), '10001', '', '10002', fap.application_short_name, '10003', frsp.responsibility_key, '10005', fnod.node_name, '10006', hou.name, '10004', fu.user_name, 'UnDef') "CONTEXT",
   fpov.profile_option_value VALUE
-FROM fnd_profile_options fpo,
-  fnd_profile_option_values fpov,
-  fnd_profile_options_tl fpot,
-  fnd_user fu,
-  fnd_application fap,
-  fnd_responsibility frsp,
-  fnd_nodes fnod,
-  hr_operating_units hou
+FROM apps.fnd_profile_options fpo,
+  apps.fnd_profile_option_values fpov,
+  apps.fnd_profile_options_tl fpot,
+  apps.fnd_user fu,
+  apps.fnd_application fap,
+  apps.fnd_responsibility frsp,
+  apps.fnd_nodes fnod,
+  apps.hr_operating_units hou
 WHERE fpo.profile_option_id        = fpov.profile_option_id(+)
 AND fpo.profile_option_name        = fpot.profile_option_name
 AND fu.user_id(+)                  = fpov.level_value
@@ -152,6 +149,13 @@ AND hou.organization_id(+)         = fpov.level_value
 AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled')
 AND fpov.profile_option_value      = 'Y'
 ORDER BY short_name, context;
+
+
+
+-- site profile change history
+-- Go to Oracle Applications Manager, Applications Dashboard, Site Map, System Configuration / Site-level Profiles
+-- User Profile Name: FND: Diagnostics, Last updated After: (some past date), Last Updated Before: (today), -> Go
+
 
 -- for automated check
 SELECT distinct fpov.level_id  
@@ -459,6 +463,7 @@ shared_pool_size          big integer 20G
 SELECT COMPONENT ,OPER_TYPE,oper_mode,FINAL_SIZE Final,to_char(start_time,'dd-mon hh24:mi:ss') Started FROM V$SGA_RESIZE_OPS;
 select * from V$SGA_RESIZE_OPS;
 SELECT count(*) FROM V$SGA_RESIZE_OPS where oper_type in ('GROW','SHRINK') and component not in ('streams pool'); 
+show parameter name
 /*
 Make sure there are no dynamic resize operations are going on.
 
@@ -467,6 +472,12 @@ We should NOT see any SHRINK or GROW operations going on
 
 show parameter streams
 show parameter db_cache_advice
+show parameter sga
+show parameter shared
+show parameter cache
+show parameter memory
+
+@tbs
 
 --11. Check redo size >= 5G
 select * from v$log;
