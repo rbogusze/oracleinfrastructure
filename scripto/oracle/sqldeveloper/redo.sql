@@ -5,7 +5,7 @@ from v$archived_log)
 group by trunc(COMPLETION_TIME) 
 order by trunc(COMPLETION_TIME) desc; 
 
--- Archivelog size each hour
+-- Archivelog size each hour GB
 alter session set nls_date_format = 'YYYY-MM-DD HH24';
 select 
   trunc(COMPLETION_TIME,'HH24') TIME, 
@@ -14,6 +14,9 @@ from
   V$ARCHIVED_LOG 
 group by 
   trunc (COMPLETION_TIME,'HH24') order by 1 desc;
+
+-- Archivelog size each hour MB
+select trunc(COMPLETION_TIME,'HH24') TIME, round(SUM(BLOCKS * BLOCK_SIZE)/1024/1024) SIZE_MB from V$ARCHIVED_LOG group by trunc (COMPLETION_TIME,'HH24') order by 1 desc;
  
 select * from v$archived_log;
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";

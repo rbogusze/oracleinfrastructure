@@ -104,8 +104,8 @@ and last_refresh_type in ('COMPLETE','NA')
 -- 3. Disable trace enabled programs
 SELECT fcp.CONCURRENT_PROGRAM_NAME,
   fcpl.USER_CONCURRENT_PROGRAM_NAME
-FROM fnd_concurrent_programs fcp,
-  fnd_concurrent_programs_tl fcpl
+FROM apps.fnd_concurrent_programs fcp,
+  apps.fnd_concurrent_programs_tl fcpl
 WHERE fcp.concurrent_program_id = fcpl.concurrent_program_id
 AND enable_trace                ='Y';
 
@@ -200,12 +200,12 @@ SELECT DISTINCT a.application_short_name app_short,
   ||u.user_name, 'Unknown') d_level,
   profile_option_value optval,
   v.last_update_date updated
-FROM fnd_profile_options_vl o,
-  fnd_profile_option_values v,
-  fnd_application a,
-  fnd_application a2,
-  fnd_responsibility r,
-  fnd_user u
+FROM apps.fnd_profile_options_vl o,
+  apps.fnd_profile_option_values v,
+  apps.fnd_application a,
+  apps.fnd_application a2,
+  apps.fnd_responsibility r,
+  apps.fnd_user u
 WHERE ( upper(o.user_profile_option_name) LIKE '%DEBUG%'
 OR upper(o.user_profile_option_name) LIKE '%TRACE%'
   --or upper(o.user_profile_option_name) like '%LOGG%'
@@ -226,6 +226,23 @@ ORDER BY 2,1,3,4;
 There should be no programs that have trace enabled during the LT
 -- ?any other debug programs?
 */
+
+-- check what is in FND_LOG_MESSAGES as a result of FND: Diagnostics
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select * from APPLSYS.FND_LOG_MESSAGES order by timestamp desc;
+-- number of messages every hour
+alter session set nls_date_format = 'YYYY-MM-DD HH24';
+select trunc(timestamp,'HH24') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES group by trunc (timestamp,'HH24') order by 1 desc;
+select * from apps.fnd_user where user_id = 1372; -- SOA
+-- largest contributors in last xh
+select module, count(*) from APPLSYS.FND_LOG_MESSAGES where timestamp > (sysdate - 1/24) group by module order by count(*) desc;
+--check size of tables
+select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('FND_EXCEPTION_NOTES','FND_OAM_BIZEX_SENT_NOTIF','FND_LOG_METRICS','FND_LOG_UNIQUE_EXCEPTIONS','FND_LOG_EXCEPTIONS','FND_LOG_MESSAGES','FND_LOG_TRANSACTION_CONTEXT','FND_LOG_ATTACHMENTS');
+select table_name, last_analyzed, num_rows, blocks from dba_tables where table_name in ('FND_LOG_MESSAGES');
+select round(sum(bytes)/1024/1024/1024) SIZE_GB from dba_segments where segment_name in 
+('FND_EXCEPTION_NOTES','FND_OAM_BIZEX_SENT_NOTIF','FND_LOG_METRICS','FND_LOG_UNIQUE_EXCEPTIONS','FND_LOG_EXCEPTIONS','FND_LOG_MESSAGES','FND_LOG_TRANSACTION_CONTEXT','FND_LOG_ATTACHMENTS');
+select count(*) from APPS.FND_LOG_MESSAGES;
+
 
 
 -- 4. Disable pending requests

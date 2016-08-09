@@ -1,5 +1,7 @@
 select * from dual;
 
+
+
 -- Version
 @version
 
@@ -166,14 +168,9 @@ set linesize 200
 @tpt/snapper stats 5 1 714
 
 
-@tpt/snapper ash 15 1 714
-
-glprod2:1352,16511
-glprod2:1587,6395
-glprod3:8467,1393
-
-glprod3:2853,17401
-glprod3:9420,20205
+@tpt/snapper ash 15 1 50
+@tpt/sqlt f3g2hz7dpfy1t
+select * from v$sql where sql_id = 'f3g2hz7dpfy1t';
 
 -- Monitoring space
 @tbs
@@ -381,4 +378,12 @@ select tablespace_name, round(sum(bytes)/1024/1024 ,2) as free_space
        from dba_free_space
        group by tablespace_name
        order by tablespace_name ;
+       
+-- tmp
+select * from DBA_SCHEDULER_JOBS;
+--OWNER	JOB_NAME
+--APPS	XXDNVGL_SLA_PA_REF
+select count(*) from "APPS"."XXDNVGL_SLA_PA_VW";
+SELECT job_name, job_class, operation, status FROM DBA_SCHEDULER_JOB_LOG where job_name like 'XXDNVGL_SLA_PA_REF';
+SELECT * FROM DBA_SCHEDULER_JOB_LOG where job_name like 'XXDNVGL_SLA_PA_REF';
        

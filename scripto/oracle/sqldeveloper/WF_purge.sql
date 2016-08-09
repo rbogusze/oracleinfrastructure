@@ -81,7 +81,7 @@ and ses.sid in (select d.sid
     where a.controlling_manager = b.concurrent_process_id
     and c.pid = b.oracle_process_id
     and b.session_id=d.audsid
-    and a.request_id in ('4771','5440')
+    and a.request_id in ('3568752')
     --and a.phase_code = 'R'
 )
 order by ses.sid
@@ -95,7 +95,7 @@ select distinct ses.SID, stx.sql_id, ses.sql_hash_value, ses.USERNAME, pro.SPID 
 where ses.paddr = pro.addr
 and ses.status = 'ACTIVE'
 and stx.hash_value = ses.sql_hash_value
-and ses.client_identifier='212469221'
+and ses.client_identifier='xxx'
 order by 1;
 
 -- check bind variables

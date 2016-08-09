@@ -17,10 +17,30 @@ in (select s.audsid from gv$session s where s.sid='&Sid');
 
 
 select request_id, phase_code, status_code, ARGUMENT_TEXT, ACTUAL_START_DATE, ACTUAL_COMPLETION_DATE  from apps.fnd_concurrent_requests 
-where request_id in ('272180','265392');
+where request_id in ('3568752');
 
 
-
+-- combo: check what is request doing
+select distinct ses.SID, stx.sql_id, ses.sql_hash_value, ses.USERNAME, pro.SPID "OS PID", stx.sql_text from 
+     V$SESSION ses
+    ,V$SQL stx
+    ,V$PROCESS pro
+where ses.paddr = pro.addr
+and ses.status = 'ACTIVE'
+and stx.hash_value = ses.sql_hash_value
+and ses.sid in (select d.sid
+    from apps.fnd_concurrent_requests a,
+    apps.fnd_concurrent_processes b,
+    v$process c,
+    v$session d
+    where a.controlling_manager = b.concurrent_process_id
+    and c.pid = b.oracle_process_id
+    and b.session_id=d.audsid
+    and a.request_id in ('3568752')
+    --and a.phase_code = 'R'
+)
+order by ses.sid
+;
 
 
 -- Vijay connect request with SID
