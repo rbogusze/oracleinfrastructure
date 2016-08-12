@@ -5,7 +5,7 @@
 #
 
 LOCKFILE=/tmp/awr_reports.lock
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -87,8 +87,9 @@ select trim(1) result from dual;
 exit;
 EOF`
 
+msgd "testavail: $testavail"
 if [ "$testavail" != "1" ]; then
-  msge "DB $CN not available, exiting !!" 
+  msge "Not connected to $CN exiting !! Turn on DEBUG on check the logs." 
   rm -f $LOCKFILE
   exit 0
 else
