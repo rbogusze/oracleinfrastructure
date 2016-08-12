@@ -5,7 +5,7 @@
 #
 
 LOCKFILE=/tmp/awr_reports.lock
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -57,7 +57,7 @@ elif [ ${V_PASS_SOURCING} = "hash" ]; then
   HASH=`echo "$INDEX_HASH" | base64 --decode -i`
   msgd "HASH: $HASH"
   if [ -f "$PWD_FILE" ]; then
-    V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
+    V_PASS=`cat $PWD_FILE | grep "$HASH " | awk '{print $2}' | base64 --decode -i`
     #msgd "V_PASS: $V_PASS"
   else
     msge "Unable to find the password file. Exiting"
