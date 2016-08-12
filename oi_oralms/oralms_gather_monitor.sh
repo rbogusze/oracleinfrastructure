@@ -12,7 +12,7 @@ AWK_FILE=/tmp/ldap_list.awk
 PWD_FILE=/home/orainf/.passwords
 TAG_CREATION=easy
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -154,7 +154,9 @@ do {
         "ask")
           msgd "$USER_AUTH authentication method"
 #WIP
-          read -p "Please provide the password for ${USERNAME} ${HOST}" V_PASS
+          msga "Please provide the password for ${USERNAME} ${HOST}"
+          read -s V_PASS
+          echo
           msgi "Ask user for password"
           msgd "hashing the password, so I can use the same expect script"
           V_PASS=`echo "$V_PASS" | base64`

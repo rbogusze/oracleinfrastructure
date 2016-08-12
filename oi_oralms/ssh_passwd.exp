@@ -10,8 +10,8 @@ set password [exec echo $password_hash | base64 --decode -i ]
 
 spawn ssh -t $username@$hostname "tail -f $commands1"
 sleep 1
-#expect "password:"
-expect "PASSCODE:"
+expect "password:"
+#expect "PASSCODE:"
 send "$password\r"
 sleep 1
 
