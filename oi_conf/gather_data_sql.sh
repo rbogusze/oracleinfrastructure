@@ -10,7 +10,7 @@ LOCKFILE=$TMP_LOG_DIR/lock_sql
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out_sql.txt
 D_CVS_REPO=$HOME/conf_repo
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -88,13 +88,14 @@ EOF`
     #sqlplus -s /nolog << EOF > $F_TMP
     sqlplus -s /nolog << EOF
     set head off pagesize 0 echo off verify off feedback off heading off
-    set linesize 2200
+    set linesize 2000
     set trimspool on
     set trimout on
     set wrap off
     set termout off
     spool $F_TMP
     connect $V_USER/$V_PASS@$CN
+    alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
     $V_SQL
 EOF
 #    run_command_d "cat $F_TMP"
@@ -131,17 +132,17 @@ $HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbRrdoraUse
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
 
+#exit 0
+
 # Execute main function used, where parameters mean:
 # - file with target attributes
 # - SQL to be executed
 # - output file name
+
 f_store_sql_output_in_file $CONFIG_FILE "select owner,table_name,num_rows,last_analyzed from dba_tables where owner not in ('SYS','SYSTEM') and num_rows is not null and num_rows > 10000 order by owner, table_name;" "dba_tables.txt"
-
-exit 0
-
 f_store_sql_output_in_file $CONFIG_FILE "select owner, object_name, object_type from dba_objects where status !='VALID' AND object_type NOT IN ('SYNONYM','MATERIALIZED VIEW') order by owner, object_name;" "invalids.txt"
 f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator FROM dba_sql_plan_baselines where origin LIKE 'MANUAL%' order by sql_handle, plan_name;" "SPM.txt"
-f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER from APPLSYS.AD_BUGS where ARU_RELEASE_NAME not in ('11i') order by BUG_NUMBER;" "AD_BUGS.txt"
+f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where last_update_date > TO_DATE('2015/01/01', 'yyyy/mm/dd') order by last_update_date desc;" "AD_BUGS.txt"
 f_store_sql_output_in_file $CONFIG_FILE "select owner,segment_name, round(sum(bytes)/1024/1024) SIZE_MB from dba_segments group by owner,segment_name having sum(bytes)/1024/1024 > 100 order by 1,2 desc;" "dba_segments.txt"
 
 # On exit remove lock file
