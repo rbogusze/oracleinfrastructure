@@ -13,7 +13,7 @@ CONFIG_FILE=$TMP_LOG_DIR/ldap_out.txt
 EXP_SCP_CMD=$HOME/oi_conf/scp_passwd_common.exp
 D_CVS_REPO=$HOME/conf_repo
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -42,9 +42,10 @@ check_file $CONFIG_FILE
 
 run_command_d "cat $CONFIG_FILE"
 
+#exit 0
 
 # Set lock file
-#touch $LOCKFILE
+touch $LOCKFILE
 
 
 msgd "Cycle through CONFIG_FILE: $CONFIG_FILE and start the data gathering"
@@ -120,6 +121,14 @@ do {
         continue
         ;;
     esac
+
+    # if there are any spfiles convert them to plain txt files
+    for i in `ls -1 | grep spfile`
+    do
+      msgd "Found spfile, will convert it to plain txt"
+      strings $i | grep -v '__' > ${i}.txt
+      mv ${i}.txt $i 
+    done
 
     # Adding the files to CVS
     cvs add * > /dev/null 2>&1
