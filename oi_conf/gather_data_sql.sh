@@ -10,7 +10,7 @@ LOCKFILE=$TMP_LOG_DIR/lock_sql
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out_sql.txt
 D_CVS_REPO=$HOME/conf_repo
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -85,9 +85,15 @@ EOF`
       continue
     fi
 
-    sqlplus -s /nolog << EOF > $F_TMP
+    #sqlplus -s /nolog << EOF > $F_TMP
+    sqlplus -s /nolog << EOF
     set head off pagesize 0 echo off verify off feedback off heading off
-    set linesize 200
+    set linesize 2200
+    set trimspool on
+    set trimout on
+    set wrap off
+    set termout off
+    spool $F_TMP
     connect $V_USER/$V_PASS@$CN
     $V_SQL
 EOF
@@ -130,6 +136,9 @@ run_command_d "cat $CONFIG_FILE"
 # - SQL to be executed
 # - output file name
 f_store_sql_output_in_file $CONFIG_FILE "select owner,table_name,num_rows,last_analyzed from dba_tables where owner not in ('SYS','SYSTEM') and num_rows is not null and num_rows > 10000 order by owner, table_name;" "dba_tables.txt"
+
+exit 0
+
 f_store_sql_output_in_file $CONFIG_FILE "select owner, object_name, object_type from dba_objects where status !='VALID' AND object_type NOT IN ('SYNONYM','MATERIALIZED VIEW') order by owner, object_name;" "invalids.txt"
 f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator FROM dba_sql_plan_baselines where origin LIKE 'MANUAL%' order by sql_handle, plan_name;" "SPM.txt"
 f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER from APPLSYS.AD_BUGS where ARU_RELEASE_NAME not in ('11i') order by BUG_NUMBER;" "AD_BUGS.txt"

@@ -11,8 +11,8 @@ set password [exec echo $password_hash | base64 --decode -i ]
 #spawn ssh -t $username@$hostname "$commands1"
 spawn scp $username@$hostname:"$commands1" .
 sleep 1
-#expect "password:"
-expect "PASSCODE:"
+expect "password:"
+#expect "PASSCODE:"
 send "$password\r"
 sleep 1
 
