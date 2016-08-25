@@ -13,7 +13,7 @@ else
 fi
 
 INFO_MODE=DEBUG
-#INFO_MODE=INFO
+INFO_MODE=INFO
 
 USER=$1
 PASS=$2
@@ -30,15 +30,15 @@ msgi "ala"
 V_PREVIOUS=0
 while [ 1 ]
 do
-
+  V_P1=$RANDOM
+  V_P2=$RANDOM
   STARTTIME=$(date +%s%3N)
-  f_user_execute_sql "SELECT * FROM (select task.task_number tasknumber, task.task_name, task_details taskdetails, task.task_id taskid, task.billable_flag, task.project_id, task.start_date, task.completion_date, task.chargeable_flag, proj.project_number, proj.project_details from pa_online_tasks_v task ,pa_online_projects_v proj where proj.project_id = task.project_id) QRSLT WHERE (TaskId = 164539 and project_id = 43065) ORDER BY tasknumber;" "$USER/$PASS@$DB"
+  f_user_execute_sql "SELECT * FROM (select task.task_number tasknumber, task.task_name, task_details taskdetails, task.task_id taskid, task.billable_flag, task.project_id, task.start_date, task.completion_date, task.chargeable_flag, proj.project_number, proj.project_details from pa_online_tasks_v task ,pa_online_projects_v proj where proj.project_id = task.project_id) QRSLT WHERE (TaskId = $V_P1 and project_id = $V_P2) ORDER BY tasknumber;" "$USER/$PASS@$DB"
   msgd "$V_EXECUTE_SQL" 
   ENDTIME=$(date +%s%3N)
 
   V_ELA=`expr ${ENDTIME} - ${STARTTIME}`
   echo "$V_ELA"
-  exit 0
 done
 
 
