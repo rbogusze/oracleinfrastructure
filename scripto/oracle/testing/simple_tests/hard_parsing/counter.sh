@@ -13,7 +13,7 @@ else
 fi
 
 INFO_MODE=DEBUG
-#INFO_MODE=INFO
+INFO_MODE=INFO
 
 USER=$1
 PASS=$2
@@ -27,7 +27,18 @@ msgd "DB: $DB"
 check_parameter $DB
 
 msgi "ala"
-f_user_execute_sql "select sysdate from dual;" "$USER/$PASS@$DB"
-msgd "$V_EXECUTE_SQL"
+V_PREVIOUS=0
+while [ 1 ]
+do
+  f_user_execute_sql "select name, value from v\$sysstat where name = 'parse count (hard)';" "$USER/$PASS@$DB"
+  msgd "$V_EXECUTE_SQL"
+  V_CURRENT=`echo $V_EXECUTE_SQL | awk '{print $NF}'`
+  msgd "V_PREVIOUS: $V_PREVIOUS"
+  V_DELTA=`expr ${V_CURRENT} - ${V_PREVIOUS} `
+  echo $V_DELTA
+
+  sleep 5
+  V_PREVIOUS=$V_CURRENT
+done
 
 
