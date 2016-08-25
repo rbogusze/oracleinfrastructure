@@ -546,7 +546,7 @@ f_user_execute_sql()
   check_file $SQLPLUS
   check_parameter $2
 
-  F_EXECUTE_SQL=/tmp/sql_output.tmp_${USERNAME}_${ORACLE_SID}
+  F_EXECUTE_SQL=/tmp/sql_output.tmp_${USERNAME}_${ORACLE_SID}_$$
  
   msgd "Executing SQL: $1"
   $SQLPLUS -S "$2" <<EOF > $F_EXECUTE_SQL
