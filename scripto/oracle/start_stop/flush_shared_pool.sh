@@ -13,6 +13,7 @@ sqlplus / as sysdba << EOF
 show parameter instance_name
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select sysdate from dual;
+prompt Executing alter system flush shared_pool
 alter system flush shared_pool;
 exit;
 EOF
