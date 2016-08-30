@@ -17,7 +17,7 @@ sqlplus -S / as sysdba << EOF > $LOG_DIR/$F_LIST
 set heading off
 set feedback off
 set pagesize 0
-select address, hash_value from v\$sqlarea where executions = 1;
+select address, hash_value from v\$sqlarea where executions = 1 and sql_text not like '%dbms_shared_pool.purge%';
 exit;
 EOF
 
@@ -25,17 +25,14 @@ F_EXEC=purge_commands_`date '+%Y%m%d%H%M%S'`.sql
 echo "Looping through the list to prepare purge commands"
 while read LINE
 do
-  echo $LINE | awk '{print "exec dbms_shared_pool.purge (\047"$1","$2"\047,\047C\047);"}' >> $LOG_DIR/$F_EXEC
-done < $LOG_DIR/$F_LIST
+  V_PURGE=`echo $LINE | awk '{print "exec dbms_shared_pool.purge (\047"$1","$2"\047,\047C\047);"}' `
+  echo $V_PURGE
 
-#exit 0
-
-echo "Executing the purge"
-sqlplus -S / as sysdba << EOF 
-@$LOG_DIR/$F_EXEC
-commit;
+  echo "Executing the purge"
+  sqlplus -S / as sysdba << EOF 
+$V_PURGE
 exit;
 EOF
 
-
+done < $LOG_DIR/$F_LIST
 
