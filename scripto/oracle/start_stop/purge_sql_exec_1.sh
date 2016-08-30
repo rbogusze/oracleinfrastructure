@@ -25,14 +25,16 @@ F_EXEC=purge_commands_`date '+%Y%m%d%H%M%S'`.sql
 echo "Looping through the list to prepare purge commands"
 while read LINE
 do
-  V_PURGE=`echo $LINE | awk '{print "exec dbms_shared_pool.purge (\047"$1","$2"\047,\047C\047);"}' `
-  echo $V_PURGE
+  echo $LINE | awk '{print "exec dbms_shared_pool.purge (\047"$1","$2"\047,\047C\047);"}' >> $LOG_DIR/$F_EXEC
+done < $LOG_DIR/$F_LIST
 
-  echo "Executing the purge"
-  sqlplus -S / as sysdba << EOF 
-$V_PURGE
+
+echo "Executing the purge"
+sqlplus -S / as sysdba << EOF 
+@$LOG_DIR/$F_EXEC
+commit;
 exit;
 EOF
 
-done < $LOG_DIR/$F_LIST
+
 
