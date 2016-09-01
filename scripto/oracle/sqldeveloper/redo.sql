@@ -4,18 +4,14 @@ from (select distinct first_change#,first_time,blocks,block_size,completion_time
 from v$archived_log) 
 group by trunc(COMPLETION_TIME) 
 order by trunc(COMPLETION_TIME) desc; 
+select * from v$archived_log order by completion_time desc;
 
 -- Archivelog size each hour GB
 alter session set nls_date_format = 'YYYY-MM-DD HH24';
-select 
-  trunc(COMPLETION_TIME,'HH24') TIME, 
-   round(SUM(BLOCKS * BLOCK_SIZE)/1024/1024/1024) SIZE_GB
-from 
-  V$ARCHIVED_LOG 
-group by 
-  trunc (COMPLETION_TIME,'HH24') order by 1 desc;
+select trunc(COMPLETION_TIME,'HH24') TIME, round(SUM(BLOCKS * BLOCK_SIZE)/1024/1024/1024) SIZE_GB from V$ARCHIVED_LOG group by trunc (COMPLETION_TIME,'HH24') order by 1 desc;
 
 -- Archivelog size each hour MB
+alter session set nls_date_format = 'YYYY-MM-DD HH24';
 select trunc(COMPLETION_TIME,'HH24') TIME, round(SUM(BLOCKS * BLOCK_SIZE)/1024/1024) SIZE_MB from V$ARCHIVED_LOG group by trunc (COMPLETION_TIME,'HH24') order by 1 desc;
  
 select * from v$archived_log;

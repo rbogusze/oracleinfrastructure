@@ -86,22 +86,25 @@ select mview_name,
   last_refresh_type,
   last_refresh_date
 FROM all_mviews
-WHERE mview_name in ('GEHC_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV');
+WHERE mview_name in ('XX_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV');
 
 
 select distinct last_refresh_type 
 FROM all_mviews
-WHERE mview_name in ('GEHC_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV');
+WHERE mview_name in ('XX_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV');
 
 select count(1)
 FROM all_mviews
-WHERE mview_name in ('GEHC_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV')
+WHERE mview_name in ('XX_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV')
 and last_refresh_type in ('COMPLETE','NA')
 ;
 
 
 
 -- 3. Disable trace enabled programs
+-- Nice links:
+-- http://www.bluegecko.dk/ebs/identify-performance-decrease-due-to-enabled-trace-in-an-e-business-suite-r12-environment/
+
 SELECT fcp.CONCURRENT_PROGRAM_NAME,
   fcpl.USER_CONCURRENT_PROGRAM_NAME
 FROM apps.fnd_concurrent_programs fcp,
@@ -113,14 +116,6 @@ select count(1) from fnd_concurrent_programs WHERE enable_trace ='Y';
 
 /*
 This is what is generally seen: (should be none, but this is what we have and noone considers this an issue)
-
-MSRFWOR	Refresh Collection Snapshots
-GEHC_AP_GLOBAL_HOLD	GEHC Internal AP On Hold Detail Report
-GEMCLONE	GEMS eOM and OM Extract to Downstream Systems
-GEMOMDSR	Demand Sourcing Requisitions Processor
-MSCCLRFS	APS Collections Refresh Snapshot Thread
-XX_AP_RBC_EFT	GE AP RBC EFT Payment Program
-GEMOMXOR	GEMS Demand Orders Listing
 
 */
 
@@ -146,7 +141,7 @@ AND frsp.responsibility_id(+)      = fpov.level_value
 AND fap.application_id(+)          = fpov.level_value
 AND fnod.node_id(+)                = fpov.level_value
 AND hou.organization_id(+)         = fpov.level_value
-AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled')
+AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled','SLA: Enable Diagnostics')
 AND fpov.profile_option_value      = 'Y'
 ORDER BY short_name, context;
 
@@ -175,7 +170,7 @@ AND frsp.responsibility_id(+)      = fpov.level_value
 AND fap.application_id(+)          = fpov.level_value
 AND fnod.node_id(+)                = fpov.level_value
 AND hou.organization_id(+)         = fpov.level_value
-AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled')
+AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled','SLA: Enable Diagnostics')
 AND fpov.profile_option_value      = 'Y'
 ;
 
@@ -230,20 +225,54 @@ There should be no programs that have trace enabled during the LT
 -- check what is in FND_LOG_MESSAGES as a result of FND: Diagnostics
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select * from APPLSYS.FND_LOG_MESSAGES order by timestamp desc;
+select * from apps.fnd_user where user_id = 1372; -- SOA
 -- number of messages every hour
 alter session set nls_date_format = 'YYYY-MM-DD HH24';
 select trunc(timestamp,'HH24') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES group by trunc (timestamp,'HH24') order by 1 desc;
-select * from apps.fnd_user where user_id = 1372; -- SOA
+-- number of messages every year
+alter session set NLS_DATE_FORMAT = "YYYY";
+select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'YEAR') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'YEAR') order by 1 desc;
+-- number of messages every month
+alter session set NLS_DATE_FORMAT = "YYYY-MM";
+select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'MONTH') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'MONTH') order by 1 desc;
 -- largest contributors in last xh
 select module, count(*) from APPLSYS.FND_LOG_MESSAGES where timestamp > (sysdate - 1/24) group by module order by count(*) desc;
 --check size of tables
 select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('FND_EXCEPTION_NOTES','FND_OAM_BIZEX_SENT_NOTIF','FND_LOG_METRICS','FND_LOG_UNIQUE_EXCEPTIONS','FND_LOG_EXCEPTIONS','FND_LOG_MESSAGES','FND_LOG_TRANSACTION_CONTEXT','FND_LOG_ATTACHMENTS');
-select table_name, last_analyzed, num_rows, blocks from dba_tables where table_name in ('FND_LOG_MESSAGES');
-select round(sum(bytes)/1024/1024/1024) SIZE_GB from dba_segments where segment_name in 
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('FND_LOG_MESSAGES');
+select round(sum(bytes)/1024/1024) SIZE_MB from dba_segments where segment_name in 
 ('FND_EXCEPTION_NOTES','FND_OAM_BIZEX_SENT_NOTIF','FND_LOG_METRICS','FND_LOG_UNIQUE_EXCEPTIONS','FND_LOG_EXCEPTIONS','FND_LOG_MESSAGES','FND_LOG_TRANSACTION_CONTEXT','FND_LOG_ATTACHMENTS');
-select count(*) from APPS.FND_LOG_MESSAGES;
+select round(sum(bytes)/1024/1024) SIZE_MB from dba_segments where segment_name in 
+('FND_LOG_MESSAGES','FND_LOG_MESSAGES_N7','FND_LOG_MESSAGES_N4','FND_LOG_MESSAGES_N5','FND_LOG_MESSAGES_N8','SYS_IL0000098862C00019$$','SYS_IL0000098862C00020$$');
+-- nr of rows in FND_LOG_MESSAGES
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select /*+ FULL(a) parallel(a,8) */ sysdate, count(*) from APPS.FND_LOG_MESSAGES a;
+-- check LOB segments in FND_LOG_ATTACHMENTS
+select * from dba_tables where table_name = 'FND_LOG_MESSAGES';
+select * from dba_indexes where table_name = 'FND_LOG_MESSAGES';
+MESSAGE_TEXT	CLOB
+CONTENT	BLOB
+select * from dba_lobs where table_name = 'FND_LOG_ATTACHMENTS';
 
-
+-- check what is in XLA_DIAG_SOURCES as a result of SLA: Enable Diagnostics
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select * from XLA.XLA_DIAG_SOURCES a order by creation_date desc;
+select /*+ FULL(a) parallel(a,8) */ * from XLA.XLA_DIAG_SOURCES a order by creation_date desc;
+@tbs
+-- just raw number count
+select /*+ FULL(a) parallel(a,8) */ count(*) from XLA.XLA_DIAG_SOURCES a ;
+-- number of messages every month in XLA_DIAG_SOURCES
+alter session set NLS_DATE_FORMAT = "YYYY-MM";
+select /*+ FULL(a) parallel(a,8) */ trunc(creation_date,'MONTH') TIME, count(*) from XLA.XLA_DIAG_SOURCES a group by trunc (creation_date,'MONTH') order by 1 desc;
+-- what is in dictionary
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select table_name, tablespace_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('XLA_DIAG_SOURCES','XLA_DIAG_EVENTS');
+-- what is new in it
+select * from XLA.XLA_DIAG_SOURCES order by creation_date desc;
+-- size of it all
+select round(sum(bytes)/1024/1024) SIZE_MB from dba_segments where segment_name in 
+('XLA_DIAG_SOURCES','XLA_DIAG_SOURCES_N1','XLA_DIAG_EVENTS');
 
 -- 4. Disable pending requests
 SELECT phase_code,
@@ -455,6 +484,9 @@ and    n.language = 'US'
 
 
 --10. Prevent SGA resize despite sga_target=0
+--MOS:
+-- High 'Cursor: Pin S Wait On X', 'Library Cache Lock' And "Latch: Shared Pool" Waits due to Shared Pool/Buffer Cache Resize Activity (Doc ID 742599.1)
+
 SELECT value from v$parameter where name='_memory_imm_mode_without_autosga';
 
 show parameter memory
@@ -476,11 +508,12 @@ NAME                             TYPE        VALUE
 shared_pool_reserved_size big integer 1200M                              
 shared_pool_size          big integer 20G                                
 */
-
-SELECT COMPONENT ,OPER_TYPE,oper_mode,FINAL_SIZE Final,to_char(start_time,'dd-mon hh24:mi:ss') Started FROM V$SGA_RESIZE_OPS;
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+SELECT COMPONENT ,OPER_TYPE,oper_mode,FINAL_SIZE Final,start_time, end_time FROM V$SGA_RESIZE_OPS order by start_time desc;
 select * from V$SGA_RESIZE_OPS;
 SELECT count(*) FROM V$SGA_RESIZE_OPS where oper_type in ('GROW','SHRINK') and component not in ('streams pool'); 
 show parameter name
+select * from v$sgastat where name = 'KGH: NO ACCESS';
 /*
 Make sure there are no dynamic resize operations are going on.
 
@@ -503,6 +536,11 @@ select distinct bytes from v$log;
 --12. Check DOP on couple of tables
 select table_name, num_rows, blocks, last_analyzed, degree from all_tables where table_name in ('OE_ORDER_LINES_ALL', 'MTL_SYSTEM_ITEMS_B', 'MTL_ITEM_CATEGORIES');
 select distinct degree from all_tables where table_name in ('OE_ORDER_LINES_ALL', 'MTL_SYSTEM_ITEMS_B', 'MTL_ITEM_CATEGORIES');
+
+select table_name, num_rows, blocks, last_analyzed, degree from dba_tables where degree not in ('         1');
+select degree, count(*) from dba_tables group by degree; 
+select * from dba_tables where last_analyzed is null and owner not in ('SYSTEM','SYS','MDSYS','ODM');
+select count(*) from dba_tables where last_analyzed is null;
 
 --13. Invalids
 select object_name, owner, object_type from dba_objects where status != 'VALID' and object_type not in ('SYNONYM') order by owner;

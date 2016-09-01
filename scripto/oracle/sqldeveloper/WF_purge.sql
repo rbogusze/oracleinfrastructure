@@ -81,7 +81,7 @@ and ses.sid in (select d.sid
     where a.controlling_manager = b.concurrent_process_id
     and c.pid = b.oracle_process_id
     and b.session_id=d.audsid
-    and a.request_id in ('3568752')
+    and a.request_id in ('3994487')
     --and a.phase_code = 'R'
 )
 order by ses.sid
@@ -134,7 +134,7 @@ and stx.hash_value = ses.sql_hash_value
 and a.controlling_manager = b.concurrent_process_id
 and pro.pid = b.oracle_process_id
 and b.session_id=ses.audsid
-and a.request_id in ('667741398')
+and a.request_id in ('3994487')
 and a.phase_code = 'R'
 order by ses.sid
 ;

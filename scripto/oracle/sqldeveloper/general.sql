@@ -1,6 +1,9 @@
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select * from APPLSYS.AD_BUGS;
 select * from dual;
 
-
+-- find my session
+SELECT SID, SERIAL#, OSUSER, USERNAME, MACHINE, PROCESS FROM V$SESSION WHERE audsid = userenv('SESSIONID');
 
 -- Version
 @version
@@ -14,6 +17,21 @@ select name from v$database;
 select count(*) from dba_objects where status != 'VALID';                    
 Select owner, object_name,Object_TYPE  from dba_objects where status != 'VALID';
 
+-- do we have dictionary statistics
+select OWNER, TABLE_NAME, LAST_ANALYZED, num_rows from dba_tables where owner='SYS' and table_name like '%$' order by last_analyzed desc; 
+select OWNER, TABLE_NAME, LAST_ANALYZED, num_rows from dba_tables where owner='SYS' and table_name = 'SYN$';
+-- SYS	SYN$	2015/12/28 11:31:44	76954
+select count(*) from SYS.SYN$;
+
+-- do we have fixed objects statistics
+select OWNER, TABLE_NAME, LAST_ANALYZED from dba_tab_statistics where table_name='X$KGLDP'; 
+--OWNER	TABLE_NAME	LAST_ANALYZED
+--SYS	X$KGLDP	2015/09/04 19:37:58
+select * from sys.aux_stats$; 
+
+
+-- Largest objects in DB
+select owner, segment_name, segment_type, round(bytes/1024/1024/1024) SIZE_GB from dba_segments order by 4 desc;
 
 -- Where is the app tier If I can access DB
 select * from FND_NODES;
@@ -73,7 +91,7 @@ select owner, index_name, table_name, pct_free, ini_trans, max_trans, last_analy
 
 -- bind variables
 SELECT name,      position ,      datatype_string ,      was_captured,      value_string  
-FROM   v$sql_bind_capture  WHERE  sql_id = 'f3rznjycf1n84';
+FROM   v$sql_bind_capture  WHERE  sql_id = '8t7gxquf6h1hw';
 
 --FND_LOGIN
 select count(*) from FND_LOGIN_RESP_FORMS;
@@ -91,8 +109,8 @@ where p.addr = s.paddr and s.status = 'KILLED';
 
 -- snapper
 @tpt/snapper ash 15 1 all
-@tpt/snapper ash 15 1 4203
-@tpt/snapper stats 5 1 4203
+@tpt/snapper ash 15 1 1189
+@tpt/snapper stats 5 1 1189
 @tpt/sqlid gnm9yr4rp7pad
 
 -- latches and mutex general
@@ -379,11 +397,44 @@ select tablespace_name, round(sum(bytes)/1024/1024 ,2) as free_space
        group by tablespace_name
        order by tablespace_name ;
        
+       
+-- check how many SQLs reuse the plan, how many are hard parsed for no subsequent use which suggests literals usage
+select * from v$sql;
+select executions, count(*) from v$sql group by executions order by 2 desc;
+select count(*) from v$sql;
+select executions from v$sql order by executions desc;
+select executions,sql_text from v$sql order by executions desc;
+
+-- preparing a query to automatically purge the
+select count(*) from v$sqlarea where executions = 1;
+select count(*) from v$sql where executions = 1;
+select address, hash_value, executions, loads, version_count, invalidations, parse_calls, sql_text from v$sqlarea where executions = 1 and sql_text not like '%dbms_shared_pool.purge%';
+select address, hash_value from v$sqlarea where executions = 1;
+
+
+       
+-- check if query was is running in parallel
+SELECT QCSID, SID, INST_ID "Inst", SERVER_GROUP "Group", SERVER_SET "Set",
+  DEGREE "Degree", REQ_DEGREE "Req Degree"
+FROM GV$PX_SESSION ORDER BY QCSID, QCINST_ID, SERVER_GROUP, SERVER_SET;
+
+show parameter parallel
+show parameter resour
+select * from V$SYSSTAT where name like '%parallel%';
+select * from V$MYSTAT;
+
+   
+-- AWR retention time
+select dbid from v$database;
+select * from dba_hist_wr_control;
+   
 -- tmp
 select * from DBA_SCHEDULER_JOBS;
+
 --OWNER	JOB_NAME
 --APPS	XXDNVGL_SLA_PA_REF
 select count(*) from "APPS"."XXDNVGL_SLA_PA_VW";
 SELECT job_name, job_class, operation, status FROM DBA_SCHEDULER_JOB_LOG where job_name like 'XXDNVGL_SLA_PA_REF';
 SELECT * FROM DBA_SCHEDULER_JOB_LOG where job_name like 'XXDNVGL_SLA_PA_REF';
+select owner, table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where blocks > num_rows and owner not in ('SYS') order by blocks desc ;
        

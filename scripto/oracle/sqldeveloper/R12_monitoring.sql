@@ -15,9 +15,9 @@ select fcr.oracle_session_id, fcr.request_id,fcr.PARENT_REQUEST_ID from apps.fnd
 in (select s.audsid from gv$session s where s.sid='&Sid');
 
 
-
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select request_id, phase_code, status_code, ARGUMENT_TEXT, ACTUAL_START_DATE, ACTUAL_COMPLETION_DATE  from apps.fnd_concurrent_requests 
-where request_id in ('3568752');
+where request_id in ('4216335');
 
 
 -- combo: check what is request doing
@@ -36,7 +36,7 @@ and ses.sid in (select d.sid
     where a.controlling_manager = b.concurrent_process_id
     and c.pid = b.oracle_process_id
     and b.session_id=d.audsid
-    and a.request_id in ('3568752')
+    and a.request_id in ('4216335')
     --and a.phase_code = 'R'
 )
 order by ses.sid
@@ -137,7 +137,7 @@ select a.request_id, c.spid, d.sid, d.serial#, c.inst_id from apps.fnd_concurren
 where a.controlling_manager = b.concurrent_process_id
 and c.pid = b.oracle_process_id
 and b.session_id=d.audsid
-and a.request_id = 667741450;
+and a.request_id = 3994487;
 
 
 --	CCMs Currently Running 
@@ -687,7 +687,7 @@ set echo on
 
 -- test
 
--- Vijay connect request with SID
+-- Vijay provide SID, you will receive request ID
 select r.request_id req_id,r.concurrent_program_id,r.parent_request_id,fu.user_name ,
        r.phase_code p,
        r.status_code s,
@@ -710,7 +710,7 @@ select r.request_id req_id,r.concurrent_program_id,r.parent_request_id,fu.user_n
        gv$instance                      gi,
        applsys.fnd_concurrent_processes cp,
        applsys.fnd_user fu
-where ss.sid = 86
+where ss.sid = 775
    and status_code = 'R'
    and ss.audsid(+) = r.oracle_session_id
    and pp.inst_id(+) = ss.inst_id
@@ -749,7 +749,18 @@ order by request_id desc;
 
 -- From Tausif, monitoring what is user doing, SSO
 select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
-       last_call_et,status from gv$session where client_identifier='212420636';
+       last_call_et,status from gv$session where client_identifier='SMW';
+       
+select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
+       last_call_et,status from gv$session where client_identifier='KHWA';
+       
+       show parameter name
+       
+select * from v$sql where sql_id ='0uan6npnsf1tg';
+       
+-- From Tausif, monitoring what is user doing, SSO
+select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
+       last_call_et,status from gv$session where SID=6303;
        
 select * from gv$session where sid=2422;
 
