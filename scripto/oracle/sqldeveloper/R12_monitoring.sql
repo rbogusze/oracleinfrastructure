@@ -754,6 +754,9 @@ select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,modu
 select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
        last_call_et,status from gv$session where client_identifier='KHWA';
        
+select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
+       last_call_et,status from gv$session where client_identifier='KHWA';       
+       
        show parameter name
        
 select * from v$sql where sql_id ='0uan6npnsf1tg';

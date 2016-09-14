@@ -49,21 +49,6 @@ ORDER BY last_refresh_date;
 
 /*
 This should be:
-XX_AP_PAYMENTS_CHECKS_MV		DEMAND	FORCE	PREBUILT	DIRLOAD_DML	FAST	2015/11/15 22:16:00
-XX_FND_FLEXVALUES_MV		DEMAND	FORCE	PREBUILT	DIRLOAD_DML	FAST	2015/11/16 05:58:06
-XX_GL_CODECOMBINATIONS_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 05:58:11
-XX_AP_HOLDS_ALL_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 10:02:03
- XX_AP_INVOICES_ALL_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 10:02:03
- XX_AP_DISTRIBUTION_SETS_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 10:02:03
- XX_AP_VENDOR_SEARCH_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 10:02:03
- XX_FND_LOOKUP_VALUES_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 10:02:03
- XX_AP_TERMS_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 10:02:03
- XX_PO_RELEASES_ALL_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 11:49:16
- XX_PO_VENDOR_SITES_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 11:49:26
- XX_PO_DISTRIBUTIONS_ALL_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 11:49:31
- XX_PO_LOOKUP_LOAD_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 11:49:31
- XX_PO_LINE_LOCATIONS_ALL_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 11:49:31
- XX_AP_BANK_MV		DEMAND	FORCE	IMMEDIATE	DIRLOAD_DML	FAST	2015/11/16 11:49:56
 
 */
 
@@ -93,11 +78,6 @@ select distinct last_refresh_type
 FROM all_mviews
 WHERE mview_name in ('XX_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV');
 
-select count(1)
-FROM all_mviews
-WHERE mview_name in ('XX_GFB_REGION_MV','XX_HR_ORGANIZATIONS_UNITS_MV','XX_AP_TAX_CODES_MV')
-and last_refresh_type in ('COMPLETE','NA')
-;
 
 
 
@@ -224,6 +204,9 @@ There should be no programs that have trace enabled during the LT
 
 -- check what is in FND_LOG_MESSAGES as a result of FND: Diagnostics
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('FND_LOG_MESSAGES');
+
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select * from APPLSYS.FND_LOG_MESSAGES order by timestamp desc;
 select * from apps.fnd_user where user_id = 1372; -- SOA
 -- number of messages every hour
@@ -235,12 +218,17 @@ select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'YEAR') TIME, count(*) from 
 -- number of messages every month
 alter session set NLS_DATE_FORMAT = "YYYY-MM";
 select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'MONTH') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'MONTH') order by 1 desc;
--- largest contributors in last xh
-select module, count(*) from APPLSYS.FND_LOG_MESSAGES where timestamp > (sysdate - 1/24) group by module order by count(*) desc;
+-- number of messages every day
+alter session set NLS_DATE_FORMAT = "YYYY-MM-DD";
+select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'DAY') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'DAY') order by 1 desc;
+-- largest contributors in last xh, grouped by module
+select module, count(*) from APPLSYS.FND_LOG_MESSAGES where timestamp > (sysdate - 1) group by module order by count(*) desc;
+-- largest contributors, grouped by user_id
+select user_id, count(*) from APPLSYS.FND_LOG_MESSAGES group by user_id order by count(*) desc;
+
+
 --check size of tables
 select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('FND_EXCEPTION_NOTES','FND_OAM_BIZEX_SENT_NOTIF','FND_LOG_METRICS','FND_LOG_UNIQUE_EXCEPTIONS','FND_LOG_EXCEPTIONS','FND_LOG_MESSAGES','FND_LOG_TRANSACTION_CONTEXT','FND_LOG_ATTACHMENTS');
-alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
-select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('FND_LOG_MESSAGES');
 select round(sum(bytes)/1024/1024) SIZE_MB from dba_segments where segment_name in 
 ('FND_EXCEPTION_NOTES','FND_OAM_BIZEX_SENT_NOTIF','FND_LOG_METRICS','FND_LOG_UNIQUE_EXCEPTIONS','FND_LOG_EXCEPTIONS','FND_LOG_MESSAGES','FND_LOG_TRANSACTION_CONTEXT','FND_LOG_ATTACHMENTS');
 select round(sum(bytes)/1024/1024) SIZE_MB from dba_segments where segment_name in 

@@ -430,11 +430,7 @@ select * from dba_hist_wr_control;
    
 -- tmp
 select * from DBA_SCHEDULER_JOBS;
+show parameter recovery
 
---OWNER	JOB_NAME
---APPS	XXDNVGL_SLA_PA_REF
-select count(*) from "APPS"."XXDNVGL_SLA_PA_VW";
-SELECT job_name, job_class, operation, status FROM DBA_SCHEDULER_JOB_LOG where job_name like 'XXDNVGL_SLA_PA_REF';
-SELECT * FROM DBA_SCHEDULER_JOB_LOG where job_name like 'XXDNVGL_SLA_PA_REF';
-select owner, table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where blocks > num_rows and owner not in ('SYS') order by blocks desc ;
+
        
