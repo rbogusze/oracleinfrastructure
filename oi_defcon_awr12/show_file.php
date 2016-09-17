@@ -19,6 +19,7 @@ if (is_file($filename) ) {
   $fh = fopen ($filename, "r") or die("Could not open file");
   // read file
   echo "<pre>";
+  $highlight = "";
   while (!feof($fh))
   {
     $data = fgets($fh);
