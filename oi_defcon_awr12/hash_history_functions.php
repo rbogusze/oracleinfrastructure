@@ -22,6 +22,67 @@ function rem_array_filter($array)
 } //function rem_array_filter
 
 
+
+// add to dates some milestones, so that it is easy to corelate changes in the graph 
+// (or lack of the change) to some major events
+function rem_add_events($array)
+{
+  #$array[10]="ala ma kota asasasasas" . " " . $array[10];
+  #echo "<BR>";
+  #print_r ($array);
+  #echo "<BR>";
+
+  // open history file with events
+  // sanity check
+  $filename = "/var/www/html/oi_defcon_awr12/history.txt";
+  if (is_file($filename) ) {
+  // open file
+  $fh = fopen ($filename, "r") or die("Could not open file");
+  // read file
+  while (!feof($fh))
+  {
+    $data = fgets($fh);
+    // remove FF char
+    $data = str_replace("\f",'',$data);
+
+    list($data_date,$data_legend) = split('#',$data);
+    #print "<BR>" . $data . " - " . $data_date . " - " . $data_legend . "<BR>" ;
+
+    //loop through the array, and if the matching date is found add the legend
+    for($j=0;$j<count($array);$j++)
+    {
+      #print "Checking: " . $array[$j] . "<br>";
+      if ( $array[$j] == $data_date) {
+        $array[$j] = $data_legend . " " . $array[$j];
+        #$array[$j] = $array[$j] . $data_legend;
+        #echo $array[$j] . "<br>";
+        $array[$j] = preg_replace("/[^A-Za-z0-9 -]/", '', $array[$j]);
+      }
+    }
+    #echo "Done for $data";
+    $j=0;
+
+
+  } // while (!feof($fh))
+
+  // close file
+  fclose ($fh);
+  } else {
+  echo "No history file found. Ignoring.\n";
+  }
+
+  #echo "<BR>";
+  #print_r ($array);
+  #echo "<BR>";
+
+
+//WIP
+
+
+  return $array;
+} //rem_add_events
+
+
 // Draw the chart
 // $data_values - array - Values eg 2500 PIO
 // $data_values_label - array - Timestamp 
@@ -29,6 +90,10 @@ function rem_array_filter($array)
 // $section_name - string
 // $draw_sql_explain - sring - clean hash Y/N
 function draw_chart($data_values, $data_values_label, $chart_data_label, $section_name, $draw_sql_explain, $dir, $filenames_array) {
+  // add to dates some milestones, so that it is easy to corelate changes in the graph 
+  // (or lack of the change) to some major events
+  $data_values_label=rem_add_events($data_values_label);
+
   $tmp1 = base64_encode(serialize(array_reverse($data_values)));
   $tmp2 = base64_encode(serialize(array_reverse($data_values_label)));
   sort($filenames_array);
@@ -53,9 +118,10 @@ function draw_chart($data_values, $data_values_label, $chart_data_label, $sectio
     // chart_data - values like 2500 PIO
     // chart_leg - legent to values like timestamp
     // chart_data_label - Subtitle
-    //echo "<BR> ala ma kota wielkiego";
+    // echo "<BR> ala ma kota wielkiego";
     //show_array($data_values);
     //show_array($data_values_label);
+
     echo "<img src=\"draw_chart.php?chart_data=$tmp1&chart_leg=$tmp2&chart_data_label=$chart_data_label&chart_title=$section_name\" border=0 align=center width= height=>";
     // For troubleschooting
     // echo "<a href=\"draw_chart.php?data_values=$tmp1&chart_leg=$tmp2&data_values_label=$data_values_label&chart_title=$section_name\" >aaa </a>";
