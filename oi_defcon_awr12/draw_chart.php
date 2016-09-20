@@ -19,7 +19,7 @@ $chart_data_label=$_GET['chart_data_label'];
 $graph = new Graph(1250,450,"auto");
 $graph->SetScale("textint");
 //$graph->img->SetMargin(120,30,50,75);
-$graph->img->SetMargin(120,30,50,155);
+$graph->img->SetMargin(120,30,50,165);
 $graph->AdjBackgroundImage(0.4,0.7,-1); //setting BG type
 $graph->SetShadow();
 $graph->title->Set($chart_title);
