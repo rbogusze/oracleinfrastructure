@@ -136,7 +136,7 @@ msgd "Executing SQL. Please wait"
 sqlplus -S /nolog << EOF > $TMP_FILE
 set head off pagesize 0 echo off verify off feedback off heading off
 connect $V_USER/$V_PASS@$CN
-select sysdate from dual;
+$SQL_FILE_CONTENT
 EOF
 
 cat $TMP_FILE
