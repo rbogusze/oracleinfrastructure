@@ -52,13 +52,13 @@ echo "Is going to be SQL executed on the following hosts:"
 echo -n -e '\E[30m'
 cat $DB_LIST
 
-#echo -n -e '\E[35m'
-#read -p "Do you REALLY want to execute the above SQL command on databases in selected hosts (yes/no)? " REPLY
-#echo -n -e '\E[30m'
-#if [ ! "$REPLY" = "yes" ]; then 
-#  echo "User aborded mission." 
-#  exit 1
-#fi
+echo -n -e '\E[35m'
+read -p "Do you REALLY want to execute the above SQL command on databases in selected hosts (yes/no)? " REPLY
+echo -n -e '\E[30m'
+if [ ! "$REPLY" = "yes" ]; then 
+  echo "User aborded mission." 
+  exit 1
+fi
 
 
 
@@ -131,9 +131,11 @@ else
   msgi "Running on: $CN as $V_USER"
 fi
 
+#sqlplus /nolog << EOF > $TMP_FILE
+#set head off pagesize 0 echo off verify off feedback off heading off
 msgd "Executing SQL. Please wait"
 sqlplus -S /nolog << EOF > $TMP_FILE
-set head off pagesize 0 echo off verify off feedback off heading off
+set head off pagesize 0 echo off verify off heading off
 connect $V_USER/$V_PASS@$CN
 $SQL_FILE_CONTENT
 EOF
