@@ -11,7 +11,7 @@
 # The list of username#tns_alias pairs is stored in $DB_LIST
 # The commands to be executed are stored in $SQL_FILE
 #
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 
 LOCKFILE=/tmp/replay_sql.lock
@@ -52,7 +52,7 @@ echo "Is going to be SQL executed on the following hosts:"
 echo -n -e '\E[30m'
 cat $DB_LIST
 
-echo -n -e '\E[35m'
+#echo -n -e '\E[35m'
 #read -p "Do you REALLY want to execute the above SQL command on databases in selected hosts (yes/no)? " REPLY
 #echo -n -e '\E[30m'
 #if [ ! "$REPLY" = "yes" ]; then 
@@ -129,17 +129,17 @@ if [ "$testavail" != "1" ]; then
   rm -f $LOCKFILE
   exit 0
 else
-  msgi "DB $CN available , generating AWR reports"
+  msgi "Running on: $CN as $V_USER"
 fi
 
-msgi "Executing SQL. Please wait"
-#sqlplus /nolog << EOF 
-sqlplus /nolog << EOF > /dev/null
+msgd "Executing SQL. Please wait"
+sqlplus -S /nolog << EOF > $TMP_FILE
 set head off pagesize 0 echo off verify off feedback off heading off
 connect $V_USER/$V_PASS@$CN
 select sysdate from dual;
 EOF
 
+cat $TMP_FILE
 
 
 }
