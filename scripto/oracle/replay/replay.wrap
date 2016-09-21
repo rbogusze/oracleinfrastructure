@@ -125,9 +125,8 @@ EOF`
 
 msgd "testavail: $testavail"
 if [ "$testavail" != "1" ]; then
-  msge "Not connected to $CN exiting !! Turn on DEBUG on check the logs."
-  rm -f $LOCKFILE
-  exit 0
+  msge "Unable to connected to $CN as $V_USER . Wrong password? Skipping"
+  continue
 else
   msgi "Running on: $CN as $V_USER"
 fi
