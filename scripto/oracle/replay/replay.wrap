@@ -123,7 +123,6 @@ select trim(1) result from dual;
 exit;
 EOF`
 
-
 msgd "testavail: $testavail"
 if [ "$testavail" != "1" ]; then
   msge "Not connected to $CN exiting !! Turn on DEBUG on check the logs."
@@ -131,10 +130,9 @@ if [ "$testavail" != "1" ]; then
   exit 0
 else
   msgi "DB $CN available , generating AWR reports"
+fi
 
 msgi "Executing SQL. Please wait"
-exit 0
-
 #sqlplus /nolog << EOF 
 sqlplus /nolog << EOF > /dev/null
 set head off pagesize 0 echo off verify off feedback off heading off
@@ -144,7 +142,7 @@ EOF
 
 
 
-}  
+}
 done
 exec 3>&-
 
