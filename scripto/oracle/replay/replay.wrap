@@ -16,6 +16,11 @@
 
 LOCKFILE=/tmp/replay_sql.lock
 TMP_FILE=/tmp/replay_sql.tmp
+F_HISTORY=/tmp/replay_sql.history
+
+# this is just for automated history file comments
+V_HISTORY_COMMENTS=$1
+rm -f $F_HISTORY
 
 SQL_FILE=${HOME}/scripto/oracle/replay/replay.sql
 DB_LIST=${HOME}/scripto/oracle/replay/replay.dblist
@@ -129,6 +134,8 @@ if [ "$testavail" != "1" ]; then
   continue
 else
   msgi "Running on: $CN as $V_USER"
+  echo "$(date -I)#$CN#$V_HISTORY_COMMENTS" >> $F_HISTORY
+
 fi
 
 #sqlplus /nolog << EOF > $TMP_FILE
@@ -149,3 +156,7 @@ exec 3>&-
 
 # Upon exit, remove lockfile.
 rm -f $LOCKFILE
+
+msgi "Summary for defcon legend available under /tmp/replay_sql.history"
+# worse, doing the right way
+#cat $DB_LIST | awk -F'#' '{print "xxx#" $2}' | sed s/xxx/$(date -I)/ | while IFS= read -r line; do echo "${line}#$V_HISTORY_COMMENTS"; done > /tmp/replay_sql.history
