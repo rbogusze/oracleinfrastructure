@@ -10,6 +10,7 @@ echo "<tt>Database Statistics History<BR></tt>";
 
 $dir=$_GET['dir'];
 $statname=$_GET['statname'];
+$date_with_time=$_GET['date_with_time'];
 
 //echo "<BR> dir: $dir";
 //echo "<BR> statname: $statname";
@@ -99,9 +100,20 @@ echo "<br> $filenames_array[0]";
 // Extract from the filename data time of creation 
 for($i=0; $i<count($filenames_array); $i++)
 {
-  preg_match ("/....-..-../", $filenames_array[$i], $match_result);
-  $filenames_array_date[$i]=$match_result[0];
-  //echo "<br> zebra $match_result[0]";
+  if ( $date_with_time ) {
+    //echo "Preserving date with time";
+    preg_match ("/....-..-.._..:../", $filenames_array[$i], $match_result);
+    $filenames_array_date[$i]=$match_result[0];
+    //echo "<br> zebra $match_result[0] $date_with_time";
+  } else {
+    //echo "Standard date only to tegend";
+    preg_match ("/....-..-../", $filenames_array[$i], $match_result);
+    $filenames_array_date[$i]=$match_result[0];
+    //echo "<br> zebra $match_result[0] $date_with_time";
+  }
+
+//WIP
+
 } // for
 
 echo "<br>";
