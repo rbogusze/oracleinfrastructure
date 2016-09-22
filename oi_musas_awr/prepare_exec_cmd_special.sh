@@ -14,7 +14,7 @@ fi
 # Secelted CN for the whole day every hour, like
 # ./awr_reports_special.sh UAT1 system 2016-09-21 11:00 12:00
 # ./awr_reports_special.sh UAT1 system 2016-09-21 12:00 13:00                                                                             
-DATE=2016-09-22
+DATE=2016-09-21
 
 for i in {1..23}
 do
