@@ -123,7 +123,7 @@ echo "<br>";
 //echo "<BR>before the draw2";
 //show_array($filenames_array_date);
 
-draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Total", 0, "", "");
+draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Total", 0, $dir, "");
 //draw_chart($data_values2, $filenames_array_date, ("Statistik: " . $statname), "per Second", 0, "");
 //draw_chart($data_values3, $filenames_array_date, ("Statistik: " . $statname), "per Trans", 0, "");
 
