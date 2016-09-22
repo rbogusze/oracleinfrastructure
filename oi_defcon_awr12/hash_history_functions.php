@@ -62,7 +62,7 @@ function rem_add_events($array,$dir)
         $array[$j] = $data_legend . " " . $array[$j];
         #$array[$j] = $array[$j] . $data_legend;
         #echo $array[$j] . "<br>";
-        $array[$j] = preg_replace("/[^A-Za-z0-9 -]/", '', $array[$j]);
+        $array[$j] = preg_replace("/[^A-Za-z0-9 -=_]/", '', $array[$j]);
       }
     }
     #echo "Done for $data";
