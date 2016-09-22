@@ -158,5 +158,6 @@ exec 3>&-
 rm -f $LOCKFILE
 
 msgi "Summary for defcon legend available under /tmp/replay_sql.history"
+msgi "You can do that if you like it: cat /tmp/replay_sql.history >> /var/www/html/oi_defcon_awr12/history.txt"
 # worse, doing the right way
 #cat $DB_LIST | awk -F'#' '{print "xxx#" $2}' | sed s/xxx/$(date -I)/ | while IFS= read -r line; do echo "${line}#$V_HISTORY_COMMENTS"; done > /tmp/replay_sql.history
