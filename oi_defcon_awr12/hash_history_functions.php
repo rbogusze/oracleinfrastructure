@@ -53,6 +53,10 @@ function rem_add_events($array,$dir)
 
     list($data_date,$data_cn,$data_legend) = split('#',$data);
     #print "<BR>" . $data . " - " . $data_date . " - " . $data_cn . " - " . $data_legend . "<BR>" ;
+    #print "<BR> data_date: " . $data_date;
+    #print "<BR> data_cn: " . $data_cn;
+    #print "<BR> cn: " . $cn;
+    #print "<BR>";
 
     //loop through the array, and if the matching date is found add the legend
     for($j=0;$j<count($array);$j++)

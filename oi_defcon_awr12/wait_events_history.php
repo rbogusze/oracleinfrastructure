@@ -10,9 +10,25 @@ echo "<tt>Wait Events History<BR></tt>";
 
 $dir=$_GET['dir'];
 $statname=$_GET['statname'];
+$date_with_time=$_GET['date_with_time'];
+
 
 //echo "<BR> dir: $dir";
 //echo "<BR> statname: $statname";
+
+echo "<table><td>";
+$back_url = $_SERVER['HTTP_REFERER'];
+echo "<a href=\"$back_url\" >Previous</a> ";
+
+echo "</td><td>";
+echo "<a href=\"index.php\" >Back to DB list</a> ";
+echo "</td><td>";
+//echo "<BR> dir: $dir";
+//echo "<BR> statname: $statname";
+$date_with_time_url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&date_with_time=Y';
+echo "<a href=\"$date_with_time_url\" >Dates with time</a> ";
+echo "</td></table>";
+
 
 $filenames_array = array();
 $filenames_array_counter = 0;
@@ -102,9 +118,18 @@ echo "<br> $filenames_array[0]";
 // Extract from the filename data time of creation 
 for($i=0; $i<count($filenames_array); $i++)
 {
-  preg_match ("/....-..-../", $filenames_array[$i], $match_result);
-  $filenames_array_date[$i]=$match_result[0];
-  //echo "<br> zebra $match_result[0]";
+  if ( $date_with_time ) {
+    //echo "Preserving date with time";
+    preg_match ("/....-..-.._..:../", $filenames_array[$i], $match_result);
+    $filenames_array_date[$i]=$match_result[0];
+    //echo "<br> zebra $match_result[0] $date_with_time";
+  } else {
+    //echo "Standard date only to legend";
+    preg_match ("/....-..-../", $filenames_array[$i], $match_result);
+    $filenames_array_date[$i]=$match_result[0];
+    //echo "<br> zebra $match_result[0] $date_with_time";
+  }
+
 } // for
 
 echo "<br>";
@@ -114,9 +139,9 @@ echo "<br>";
 //echo "<BR>before the draw2";
 //show_array($filenames_array_date);
 
-draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Waits", 0, "", "");
-draw_chart($data_values3, $filenames_array_date, ("Statistik: " . $statname), "Total Wait Time (s)", 0, "");
-draw_chart($data_values4, $filenames_array_date, ("Statistik: " . $statname), "Avg wait (ms)", 0, "");
+draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Waits", 0, $dir, "");
+draw_chart($data_values3, $filenames_array_date, ("Statistik: " . $statname), "Total Wait Time (s)", 0, $dir);
+draw_chart($data_values4, $filenames_array_date, ("Statistik: " . $statname), "Avg wait (ms)", 0, $dir);
 
 
 

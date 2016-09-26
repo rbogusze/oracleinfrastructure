@@ -12,8 +12,20 @@ $dir=$_GET['dir'];
 $statname=$_GET['statname'];
 $date_with_time=$_GET['date_with_time'];
 
+
+
+echo "<table><td>";
+$back_url = $_SERVER['HTTP_REFERER'];
+echo "<a href=\"$back_url\" >Previous</a> ";
+
+echo "</td><td>";
+echo "<a href=\"index.php\" >Back to DB list</a> ";
+echo "</td><td>";
 //echo "<BR> dir: $dir";
 //echo "<BR> statname: $statname";
+$date_with_time_url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&date_with_time=Y';
+echo "<a href=\"$date_with_time_url\" >Dates with time</a> ";
+echo "</td></table>";
 
 $filenames_array = array();
 $filenames_array_counter = 0;
@@ -106,13 +118,12 @@ for($i=0; $i<count($filenames_array); $i++)
     $filenames_array_date[$i]=$match_result[0];
     //echo "<br> zebra $match_result[0] $date_with_time";
   } else {
-    //echo "Standard date only to tegend";
+    //echo "Standard date only to legend";
     preg_match ("/....-..-../", $filenames_array[$i], $match_result);
     $filenames_array_date[$i]=$match_result[0];
     //echo "<br> zebra $match_result[0] $date_with_time";
   }
 
-//WIP
 
 } // for
 
