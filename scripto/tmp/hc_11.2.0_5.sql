@@ -1150,3 +1150,4 @@ spool off
 DROP TABLE TEMPAQHC_DROPME;
 
 exit;
+REM ala ma kota
