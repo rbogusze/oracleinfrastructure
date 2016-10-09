@@ -19,7 +19,7 @@ $oczy = array(
   ),
   "oko2" => array (
      "description" => "hejo",
-     "location" => "pokój Adasia",
+     "location" => "pokÃ³j Adasia",
      "video_url" => "http://192.168.1.233:8081",
      "hostname" => "192.168.1.233",
      "rank" => 400
