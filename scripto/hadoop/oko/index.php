@@ -4,8 +4,6 @@
 //Include HTML header
 require("header.php");
 
-print "ala ma kota";
-
 //Global variables
 $min_size = 10;
 $max_size = 100;
@@ -14,7 +12,7 @@ $max_size = 100;
 $oczy = array(
   "oko1" => array (
      "description" => "hejo",
-     "location" => "salon1",
+     "location" => "garaz",
      "video_url" => "http://192.168.1.232:8081",
      "hostname" => "192.168.1.232",
      "rank" => 400
@@ -28,7 +26,7 @@ $oczy = array(
   ),
   "oko3" => array (
      "description" => "hejo",
-     "location" => "garaz",
+     "location" => "salon kominek",
      "video_url" => "http://192.168.1.234:8081",
      "hostname" => "192.168.1.233",
      "rank" => 400
@@ -45,21 +43,22 @@ $last = count($oczy) - 1;
 echo "<BR>";
 
 print "<table border=1>";
+print "<tr><td colspan=3>";
+#print "<img src=http://192.168.1.234:8081/ border=0 width=600</a>";
+print "<img src=http://192.168.1.227/video.cgi border=0 width=600</a>";
+print "</td></tr>";
 print "<tr><td>";
 foreach ($oczy as $i => $row)
 {
   $isFirst = ($i == 0);
   $isLast = ($i == $last);
 
-  echo "<img src=" . $row['video_url'] . "/ border=0 width=" . $row['rank'] . "></a>";
-  echo $i . " " . $row['location'] . "<BR>";
+  echo "<a><img src=" . $row['video_url'] . "/ border=0 width=" . $row['rank'] . "></a>";
+  //echo "<BR" . $i . " " . $row['location'] . "<BR>";
+  echo "<br><a>" . $i . " " . $row['location'] . "</a>";
 
   print "</td><td>";
 }
-print "</td></tr>";
-print "<tr><td>";
-#print "<img src=http://192.168.1.234:8081/ border=0 width=600</a>";
-print "<img src=http://192.168.1.227/video.cgi border=0 width=600</a>";
 print "</td></tr>";
 
 print "</table>";
