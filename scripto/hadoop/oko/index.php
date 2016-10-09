@@ -14,21 +14,21 @@ $max_size = 100;
 $oczy = array(
   "oko1" => array (
      "description" => "hejo",
-     "location" => "pracownia",
+     "location" => "salon1",
      "video_url" => "http://192.168.1.232:8081",
      "hostname" => "192.168.1.232",
      "rank" => 400
   ),
   "oko2" => array (
      "description" => "hejo",
-     "location" => "salon",
+     "location" => "pokój Adasia",
      "video_url" => "http://192.168.1.233:8081",
      "hostname" => "192.168.1.233",
      "rank" => 400
   ),
   "oko3" => array (
      "description" => "hejo",
-     "location" => "przedpokoj",
+     "location" => "garaz",
      "video_url" => "http://192.168.1.234:8081",
      "hostname" => "192.168.1.233",
      "rank" => 400
@@ -56,7 +56,12 @@ foreach ($oczy as $i => $row)
 
   print "</td><td>";
 }
-print "</tr></td>";
+print "</td></tr>";
+print "<tr><td>";
+#print "<img src=http://192.168.1.234:8081/ border=0 width=600</a>";
+print "<img src=http://192.168.1.227/video.cgi border=0 width=600</a>";
+print "</td></tr>";
+
 print "</table>";
 
 
