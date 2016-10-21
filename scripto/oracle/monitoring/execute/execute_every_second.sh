@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# Execute a query through history, like time machine, to spot changes to the base table
+#
+# $ ./execute_every_second.sh VIS system manager
+#
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
   echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
