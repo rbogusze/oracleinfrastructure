@@ -42,7 +42,7 @@ else
 fi
 
 
-DATE_START=`date --date="2006-03-01 13:07:00"`
+DATE_START=`date --date="2016-10-21 03:07:00"`
 NR_DAYS_BACK=10
 
 myvar=0
@@ -61,8 +61,9 @@ connect $V_USER/$V_PASS@$CN
 EOF
 
   cat $TMP_FILE
-
   myvar=$(( $myvar + 1 ))
+
+#exit 0
 done
 
 echo "Done."
