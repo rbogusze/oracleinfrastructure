@@ -19,15 +19,16 @@ CN=$1
 V_USER=$2
 V_PASS=$3
 
-DATE_START=`date --date="2016-10-25 04:27:00"`
+#DATE_START=`date --date="2016-10-25 04:27:00"`
+DATE_START=`date --date="2016-10-25 04:08:12"`
 NR_DAYS_BACK=1800
 #NR_DAYS_BACK=2
 
 SQL_FILE=./query.sql
 TMP_FILE_BASE=/tmp/execute_every_second.tmp
 
-MASTER_FILE=/tmp/execute_every_second.tmp.master
 V_RANDOM=$RANDOM
+MASTER_FILE=/tmp/execute_every_second.tmp.${V_RANDOM}_master
 F_EQUAL=/tmp/execute_every_second.tmp.${V_RANDOM}_equal
 F_DIFF=/tmp/execute_every_second.tmp.${V_RANDOM}_diff
 touch $F_EQUAL
@@ -94,6 +95,7 @@ EOF
     echo "$CHECK_FOR_DATE" >> $F_DIFF
   fi
 
+sleep 1
 #exit 0
 done
 
