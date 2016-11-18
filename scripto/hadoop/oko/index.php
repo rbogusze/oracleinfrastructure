@@ -46,6 +46,8 @@ print "<table border=1>";
 print "<tr><td colspan=3>";
 #print "<img src=http://192.168.1.234:8081/ border=0 width=600</a>";
 print "<img src=http://192.168.1.227/video.cgi border=0 width=600</a>";
+#print "</td><td colspan=3>";
+print "<img src=http://192.168.1.226/video.cgi border=0 width=600</a>";
 print "</td></tr>";
 print "<tr><td>";
 foreach ($oczy as $i => $row)
