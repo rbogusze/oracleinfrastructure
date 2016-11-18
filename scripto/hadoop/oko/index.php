@@ -12,7 +12,7 @@ $max_size = 100;
 $oczy = array(
   "oko1" => array (
      "description" => "hejo",
-     "location" => "garaz",
+     "location" => "garaż",
      "video_url" => "http://192.168.1.232:8081",
      "hostname" => "192.168.1.232",
      "rank" => 400
@@ -55,7 +55,7 @@ foreach ($oczy as $i => $row)
 
   echo "<a><img src=" . $row['video_url'] . "/ border=0 width=" . $row['rank'] . "></a>";
   //echo "<BR" . $i . " " . $row['location'] . "<BR>";
-  echo "<br><a>" . $i . " " . $row['location'] . "</a>";
+  echo "<br><a>" . $i . ": " . $row['location'] . "</a>";
 
   print "</td><td>";
 }
