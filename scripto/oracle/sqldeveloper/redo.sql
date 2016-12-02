@@ -19,7 +19,13 @@ select trunc(COMPLETION_TIME,'HH24') TIME, round(SUM(BLOCKS * BLOCK_SIZE)/1024/1
 -- How many redo switches are in each hour
 alter session set nls_date_format = 'YYYY-MM-DD HH24';
 select trunc(first_time,'HH24'), count(*) from V$ARCHIVED_LOG group by trunc(first_time,'HH24') order by 1 desc;
- 
+
+-- Archive log generated in the last week
+select round(sum(blocks*block_size)/1024/1024/1024) SIZE_GB
+from (select distinct first_change#,first_time,blocks,block_size,completion_time
+from v$archived_log where completion_time > sysdate -1); 
+
+
  
 -- tmp 
 select * from v$archived_log;

@@ -55,7 +55,7 @@ select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from WF_NOTIFICATION_ATTRI
 
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select request_id, phase_code, status_code, ARGUMENT_TEXT, ACTUAL_START_DATE, ACTUAL_COMPLETION_DATE  from apps.fnd_concurrent_requests 
-where request_id in ('5630746','5630742');
+where request_id in ('3427974','5630742');
 
 -- 593261442  - the one that does not work
 -- 593331642 - my with 10000
@@ -81,7 +81,7 @@ and ses.sid in (select d.sid
     where a.controlling_manager = b.concurrent_process_id
     and c.pid = b.oracle_process_id
     and b.session_id=d.audsid
-    and a.request_id in ('3994487')
+    and a.request_id in ('3427974')
     --and a.phase_code = 'R'
 )
 order by ses.sid
@@ -422,6 +422,11 @@ select /*+ FULL(a) parallel(a,8) */ item_type, count(*) from WF_ITEMS a group by
 -- **** stat4 show number of items for every year
 alter session set NLS_DATE_FORMAT = "YYYY";
 select /*+ FULL(a) parallel(a,8) */ trunc(begin_date, 'YEAR'), item_type, count(*) from WF_ITEMS a group by trunc(begin_date, 'YEAR'), item_type having count(*) > 1000 order by trunc(begin_date, 'YEAR') desc;
+
+-- **** stat4b show number of items for every month
+alter session set NLS_DATE_FORMAT = "YYYY-MM";
+select /*+ FULL(a) parallel(a,8) */ trunc(begin_date, 'MONTH'), item_type, count(*) from WF_ITEMS a group by trunc(begin_date, 'MONTH'), item_type having count(*) > 1000 order by trunc(begin_date, 'MONTH') desc;
+
 
 -- **** stat5 show number of OEOL items for every year
 alter session set NLS_DATE_FORMAT = "YYYY";

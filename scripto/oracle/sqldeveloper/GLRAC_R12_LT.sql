@@ -1,6 +1,6 @@
 -- 1. Reorg of the RCV_HEADERS_INTERFACE table
 ALTER session SET nls_date_format = 'YYYY-MM-DD HH24';
-alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+alter session set NLS_DATE_FORMAT = "YYYY-MM-DD HH24:MI:SS";
 SELECT /*+ FULL(a)*/
   COUNT(*) FROM APPS.RCV_HEADERS_INTERFACE a;
 /* this should take <1sek, and consume <2200 blocks in consistent gets, return <50000 rows  */
@@ -220,11 +220,14 @@ alter session set NLS_DATE_FORMAT = "YYYY-MM";
 select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'MONTH') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'MONTH') order by 1 desc;
 -- number of messages every day
 alter session set NLS_DATE_FORMAT = "YYYY-MM-DD";
-select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'DAY') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'DAY') order by 1 desc;
+  --WRONG DAY is Start day of the week select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'DAY') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'DAY') order by 1 desc;
+select /*+ FULL(a) parallel(a,8) */ trunc(timestamp,'DDD') TIME, count(*) from APPLSYS.FND_LOG_MESSAGES a group by trunc (timestamp,'DDD') order by 1 desc;
 -- largest contributors in last xh, grouped by module
 select module, count(*) from APPLSYS.FND_LOG_MESSAGES where timestamp > (sysdate - 1) group by module order by count(*) desc;
 -- largest contributors, grouped by user_id
 select user_id, count(*) from APPLSYS.FND_LOG_MESSAGES group by user_id order by count(*) desc;
+-- largest contributors in last 24h, grouped by user_id
+select user_id, count(*) from APPLSYS.FND_LOG_MESSAGES where timestamp > (sysdate - 1) group by user_id order by count(*) desc;
 
 
 --check size of tables
@@ -242,6 +245,7 @@ select * from dba_indexes where table_name = 'FND_LOG_MESSAGES';
 MESSAGE_TEXT	CLOB
 CONTENT	BLOB
 select * from dba_lobs where table_name = 'FND_LOG_ATTACHMENTS';
+
 
 -- check what is in XLA_DIAG_SOURCES as a result of SLA: Enable Diagnostics
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";

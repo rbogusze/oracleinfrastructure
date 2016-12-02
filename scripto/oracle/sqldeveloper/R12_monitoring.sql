@@ -6,6 +6,9 @@ select release_name from apps.fnd_product_groups;
 select patch_level from apps.fnd_product_installations where patch_level like '%AD%';
 select patch_level from apps.fnd_product_installations where patch_level like '%ATG%';
 select patch_level from apps.fnd_product_installations where patch_level like '%FND%';
+select patch_level from apps.fnd_product_installations where patch_level like '%PER%';
+select patch_level from apps.fnd_product_installations where patch_level like '%HR_%';
+select patch_level from apps.fnd_product_installations where patch_level like '%AR_%';
 
 -- bugs
 select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '&p';
@@ -17,7 +20,7 @@ in (select s.audsid from gv$session s where s.sid='&Sid');
 
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select request_id, phase_code, status_code, ARGUMENT_TEXT, ACTUAL_START_DATE, ACTUAL_COMPLETION_DATE  from apps.fnd_concurrent_requests 
-where request_id in ('4216335');
+where request_id in ('4811536');
 
 
 -- combo: check what is request doing
@@ -36,7 +39,7 @@ and ses.sid in (select d.sid
     where a.controlling_manager = b.concurrent_process_id
     and c.pid = b.oracle_process_id
     and b.session_id=d.audsid
-    and a.request_id in ('4216335')
+    and a.request_id in ('3429080')
     --and a.phase_code = 'R'
 )
 order by ses.sid
@@ -347,6 +350,9 @@ ORDER BY 7 ASC;
 select 'Trace Enabled' ||';'||  concurrent_program_name ||';' || substr(user_concurrent_program_name,1,30), last_update_date
 from apps.fnd_Concurrent_programs_vl
 where enable_trace = 'Y';
+
+-- who is logged into EBS at the moment and which responsibility is using
+select vs.CLIENT_IDENTIFIER "User" , to_char(vs.logon_time,'DD-MON-YY HH24:MI:SS') "Logged in at:", vs.status "And is currently:", fr.RESPONSIBILITY_NAME "Uses responsibility:" from gv$session vs, apps.fnd_responsibility_vl fr  where vs.CLIENT_IDENTIFIER is not null and vs.CLIENT_IDENTIFIER not in ('GUEST','ANONYMOUS') and vs.ACTION is not null and vs.action!='/' and vs.CLIENT_IDENTIFIER not like 'DNVGL_USR_%' and fr.RESPONSIBILITY_KEY=(substr(vs.ACTION, (instr(vs.ACTION,'/',1,1)+1)))  order by 1;
 
 -- WIP
 select * from apps.fnd_concurrent_requests;
@@ -684,6 +690,38 @@ set verify on
 set feedback on
 set echo on
 
+/*
+From MOS: How To Trace a Concurrent Request And Generate TKPROF File (Doc ID 453527.1)
+
+Run the following SQL to find out the Raw trace name and location for the concurrent program.  
+The SQL prompts the user for the request id
+*/
+
+SELECT 'Request id: '||request_id ,  
+'Trace id: '||oracle_Process_id,  
+'Trace Flag: '||req.enable_trace,  
+'Trace Name:  
+'||dest.value||'/'||lower(dbnm.value)||'_ora_'||oracle_process_id||'.trc',  
+'Prog. Name: '||prog.user_concurrent_program_name,  
+'File Name: '||execname.execution_file_name|| execname.subroutine_name ,  
+'Status : '||decode(phase_code,'R','Running')  
+||'-'||decode(status_code,'R','Normal'),  
+'SID Serial: '||ses.sid||','|| ses.serial#,  
+'Module : '||ses.module  
+from fnd_concurrent_requests req, v$session ses, v$process proc,  
+v$parameter dest, v$parameter dbnm, fnd_concurrent_programs_vl prog,  
+fnd_executables execname  
+where req.request_id = &request  
+and req.oracle_process_id=proc.spid(+)  
+and proc.addr = ses.paddr(+)  
+and dest.name='user_dump_dest'  
+and dbnm.name='db_name'  
+and req.concurrent_program_id = prog.concurrent_program_id  
+and req.program_application_id = prog.application_id  
+--- and prog.application_id = execname.application_id  
+and prog.executable_application_id = execname.application_id
+and prog.executable_id=execname.executable_id; 
+
 
 -- test
 
@@ -755,7 +793,7 @@ select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,modu
        last_call_et,status from gv$session where client_identifier='KHWA';
        
 select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
-       last_call_et,status from gv$session where client_identifier='KHWA';       
+       last_call_et,status from gv$session where client_identifier='GORSMI';       
        
        show parameter name
        
