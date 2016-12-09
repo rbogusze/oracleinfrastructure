@@ -10,7 +10,7 @@ LOCKFILE=$TMP_LOG_DIR/lock_sql
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out_sql.txt
 D_CVS_REPO=$HOME/conf_repo
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -72,6 +72,17 @@ f_store_sql_output_in_file()
       exit 0
     fi
 
+    msgd "Sanity check, trying to tnsping first to CN: $CN"
+    tnsping ${CN} > /tmp/run_initial_checks_tnsping.txt
+    if [ $? -eq 0 ]; then
+      msgd "OK, tnsping works"
+    else
+      msge "Error, tnsping $CN does not work. Skip this one."
+      run_command_d "cat /tmp/run_initial_checks_tnsping.txt"
+      continue
+    fi
+
+
     # OK, I have username, password and the database, it is time to connect
     testavail=`sqlplus -S /nolog <<EOF
 set head off pagesize 0 echo off verify off feedback off heading off
@@ -127,7 +138,7 @@ EOF
 # Actual execution
 msgd "Ask the ldap for all the hosts to chec. We check there where init files are monitored"
 
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbRrdoraUser', 'orainfDbRrdoraIndexHash']" > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbReadOnlyUser', 'orainfDbReadOnlyIndexHash']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
@@ -142,7 +153,7 @@ run_command_d "cat $CONFIG_FILE"
 f_store_sql_output_in_file $CONFIG_FILE "select owner,table_name,num_rows,last_analyzed from dba_tables where owner not in ('SYS','SYSTEM') and num_rows is not null and num_rows > 10000 order by owner, table_name;" "dba_tables.txt"
 f_store_sql_output_in_file $CONFIG_FILE "select owner, object_name, object_type from dba_objects where status !='VALID' AND object_type NOT IN ('SYNONYM','MATERIALIZED VIEW') order by owner, object_name;" "invalids.txt"
 f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator FROM dba_sql_plan_baselines where origin LIKE 'MANUAL%' order by sql_handle, plan_name;" "SPM.txt"
-f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where last_update_date > TO_DATE('2015/01/01', 'yyyy/mm/dd') order by last_update_date desc;" "AD_BUGS.txt"
+f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where last_update_date > TO_DATE('2016/01/01', 'yyyy/mm/dd') order by last_update_date desc;" "AD_BUGS.txt"
 f_store_sql_output_in_file $CONFIG_FILE "select owner,segment_name, round(sum(bytes)/1024/1024) SIZE_MB from dba_segments group by owner,segment_name having sum(bytes)/1024/1024 > 100 order by 1,2 desc;" "dba_segments.txt"
 
 # On exit remove lock file
