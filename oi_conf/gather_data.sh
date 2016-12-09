@@ -13,7 +13,7 @@ CONFIG_FILE=$TMP_LOG_DIR/ldap_out.txt
 EXP_SCP_CMD=$HOME/oi_conf/scp_passwd_common.exp
 D_CVS_REPO=$HOME/conf_repo
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 
 # Load usefull functions
@@ -64,6 +64,17 @@ do {
     msgd "HOST: $HOST"
     LOG_ID=`echo "${LINE}" | gawk '{ print $3 }'`
     msgd "LOG_ID: $LOG_ID"
+
+    msgd "Sanity check if I can ping to the host: $HOST"
+    ping -c 1 $HOST >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      msgd "System $OS_USER_NAME @ $HOST found (ping). Continuing."
+      echo -n ""
+    else
+      msge "Host $HOST not found (ping). Skipping."
+      continue
+    fi
+
 
 
     # Very not elegant way of obtaining 'cn' because of the whole mess to have the prefix at the same length
