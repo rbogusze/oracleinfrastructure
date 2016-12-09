@@ -229,7 +229,9 @@ run_command_d "cat FNAMES.TXT"
 
 msgd "We should have the awr and txt reports now in tmp dir"
 msgd "Checking if there are no fatal ORA- in files that will make them unusable"
-
+msgd "`pwd`"
+msgd "FTXT: $FTXT"
+msgd "FHTML: $FHTML"
 TMP_CHK=`cat $FTXT $FHTML | grep "ORA-20019" | wc -l`
 msgd "TMP_CHK: $TMP_CHK"
 if [ $TMP_CHK -gt 1 ]; then
