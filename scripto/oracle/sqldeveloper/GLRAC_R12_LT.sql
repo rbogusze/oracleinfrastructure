@@ -121,8 +121,8 @@ AND frsp.responsibility_id(+)      = fpov.level_value
 AND fap.application_id(+)          = fpov.level_value
 AND fnod.node_id(+)                = fpov.level_value
 AND hou.organization_id(+)         = fpov.level_value
-AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled','SLA: Enable Diagnostics')
-AND fpov.profile_option_value      = 'Y'
+AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled','SLA: Enable Diagnostics','Sign-On:Audit Level')
+AND fpov.profile_option_value      in ('Y','D')
 ORDER BY short_name, context;
 
 

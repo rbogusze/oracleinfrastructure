@@ -414,6 +414,9 @@ select count(*) from v$sql where executions = 1;
 select address, hash_value, executions, loads, version_count, invalidations, parse_calls, sql_text from v$sqlarea where executions = 1 and sql_text not like '%dbms_shared_pool.purge%';
 select address, hash_value from v$sqlarea where executions = 1;
 
+-- checking how many temporary tables 'LCMT_*' are in shared pool
+select * from v$sql where sql_text like '%LCMT_%';
+
 
        
 /* ########################################################

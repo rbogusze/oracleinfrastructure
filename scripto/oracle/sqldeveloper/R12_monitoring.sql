@@ -19,8 +19,15 @@ in (select s.audsid from gv$session s where s.sid='&Sid');
 
 
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
-select request_id, phase_code, status_code, ARGUMENT_TEXT, ACTUAL_START_DATE, ACTUAL_COMPLETION_DATE  from apps.fnd_concurrent_requests 
-where request_id in ('4811536');
+select request_id, phase_code, status_code, ARGUMENT_TEXT, ACTUAL_START_DATE, ACTUAL_COMPLETION_DATE  
+from apps.fnd_concurrent_requests 
+where request_id in ('4874132');
+
+select *
+from apps.fnd_concurrent_requests 
+where request_id in ('4838222');
+
+CONCURRENT_PROGRAM_ID
 
 
 -- combo: check what is request doing
@@ -39,7 +46,7 @@ and ses.sid in (select d.sid
     where a.controlling_manager = b.concurrent_process_id
     and c.pid = b.oracle_process_id
     and b.session_id=d.audsid
-    and a.request_id in ('3429080')
+    and a.request_id in ('4907350')
     --and a.phase_code = 'R'
 )
 order by ses.sid
@@ -770,8 +777,8 @@ ORDER BY id1, request;
 -- from Swapan
 -- 1) find out concurrent program id 
 select parent_request_id,phase_code,status_code,concurrent_program_id,logfile_node_name,logfile_name,os_process_id,to_char(actual_start_date,'dd-mon-yy HH24:mi:ss')start_date,to_char(actual_completion_date,'dd-mon-yy HH24:mi:ss') completion_date,ROUND( ( NVL( actual_completion_date, sysdate ) - actual_start_date ) * 24*60, 2 ) duration
-from fnd_concurrent_requests
-where request_id=668786402;
+from applsys.fnd_concurrent_requests
+where request_id=4874132;
 
 -- 2) place that here and u will get history 
 SELECT request_id,phase_code,status_code, TO_CHAR( request_date, 'DD-MON-YYYY HH24:MI:SS' )
@@ -780,8 +787,8 @@ requested_start_date, TO_CHAR( actual_start_date, 'DD-MON-YYYY HH24:MI:SS' )
 actual_start_date, TO_CHAR( actual_completion_date, 'DD-MON-YYYY HH24:MI:SS' )
 actual_completion_date, TO_CHAR( sysdate, 'DD-MON-YYYY HH24:MI:SS' )
 current_date, ROUND( ( NVL( actual_completion_date, sysdate ) - actual_start_date ) * 24*60, 2 ) duration,ARGUMENT_TEXT
-FROM FND_CONCURRENT_REQUESTS
-WHERE concurrent_program_id = 1013524
+FROM applsys.FND_CONCURRENT_REQUESTS
+WHERE concurrent_program_id = 91350
 order by request_id desc; 
 
 
