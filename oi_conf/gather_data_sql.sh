@@ -120,7 +120,7 @@ EOF
     select release_name from apps.fnd_product_groups;
 EOF
 
-    run_command "cp $F_TMP $D_CVS_REPO/$CN/$V_NAME"
+    run_command "cat $F_TMP | tr -s '[:blank:]' > $D_CVS_REPO/$CN/$V_NAME"
     run_command "cd $D_CVS_REPO/$CN"
     cvs add $V_NAME > /dev/null 2>&1
     #cvs commit -m "Autocommit for $CN" $V_NAME
