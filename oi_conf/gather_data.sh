@@ -133,12 +133,20 @@ do {
         ;;
     esac
 
+    run_command_d "ls -l" 
+
     # if there are any spfiles convert them to plain txt files
     for i in `ls -1 | grep spfile`
     do
       msgd "Found spfile, will convert it to plain txt"
-      strings $i | grep -v '__' > ${i}.txt
-      mv ${i}.txt $i 
+      # one of the ways, but breaks some lines in weird places
+      #strings $i | grep -v '__' > ${i}.txt
+      
+      # better, but requires sqlplus from databse binaries
+      echo -e "create pfile=\047`pwd`/${i}.txt\047 from spfile=\047`pwd`/${i}\047;" | sqlplus / as sysdba
+
+      cat ${i}.txt | grep -v '__' > $i 
+      rm -f ${i}.txt
     done
 
     # Adding the files to CVS
@@ -147,8 +155,6 @@ do {
 
   fi
 
-
-#exit 0
       msgd "Sleep 1"
       sleep 1
 
