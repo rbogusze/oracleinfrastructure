@@ -51,6 +51,14 @@ f_store_sql_output_in_file()
   while read LINE
   do
     msgd "$LINE"
+    msgd "Skip line if it is a comment"
+    if [[ "$LINE" = \#* ]]; then
+      msgd "Line is a comment, skipping"      
+      continue
+    else
+      msgd "Line is NOT a comment. Procceding"
+    fi
+
     CN=`echo $LINE | awk '{print $1}'` 
     msgd "CN: $CN"
     check_parameter $CN
@@ -136,10 +144,6 @@ EOF
 
 
 # Actual execution
-msgd "Ask the ldap for all the hosts to chec. We check there where init files are monitored"
-
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbReadOnlyUser', 'orainfDbReadOnlyIndexHash']" > $CONFIG_FILE
-
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
 

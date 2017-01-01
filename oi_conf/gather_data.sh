@@ -26,7 +26,6 @@ else
 fi
 
 
-mkdir -p $TMP_LOG_DIR
 check_directory "$TMP_LOG_DIR"
 check_directory $D_CVS_REPO
 
@@ -35,16 +34,8 @@ check_directory $D_CVS_REPO
 check_file ${EXP_SCP_CMD}
 check_file ${EXP_SSH_CMD}
 
-# check for TMP_LOG_DIR
-msgd "Ask the ldap for all the hosts to chec. We check there where alert logs are monitored"
-
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth', 'orainfDbInitFile', 'orclSid']" | awk '{print $1" "$2" ["$3"_"$2"] "$4" "$5" "$6}' > $CONFIG_FILE
-
 check_file $CONFIG_FILE
-
 run_command_d "cat $CONFIG_FILE"
-
-#exit 0
 
 # Set lock file
 touch $LOCKFILE
@@ -57,6 +48,16 @@ do {
   msgd "################################################################################################"
   msgd "LINEALL: $LINEALL"
   LINE=${LINEALL}
+
+  msgd "Skip line if it is a comment"
+  if [[ "$LINE" = \#* ]]; then
+    msgd "Line is a comment, skipping"      
+    continue
+  else
+    msgd "Line is NOT a comment. Procceding"
+  fi
+
+
   if [ ! -z "$LINE" ]; then
     LOG_ID=""
     # set variables
