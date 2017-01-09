@@ -94,7 +94,7 @@ do {
 #    F_COPY_FROM_REMOTE=`echo "${LINE}" | gawk '{ print $5 }'`
 #    msgd "F_COPY_FROM_REMOTE: $F_COPY_FROM_REMOTE"
 
-    V_ORACLE_SID=`echo "${LINE}" | gawk '{ print $6 }'`
+    V_ORACLE_SID=`echo "${LINE}" | gawk '{ print $5 }'`
     msgd "V_ORACLE_SID: $V_ORACLE_SID"
     check_parameter $V_ORACLE_SID
 
@@ -127,8 +127,14 @@ do {
         if [ -f "$PWD_FILE" ]; then
           V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}'`
           #msgd "V_PASS: $V_PASS"
-          EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID; export ORAENV_ASK=NO; . oraenv; echo -e 'create pfile=\047/tmp/dbinit.txt\047 from spfile;' | sqlplus / as sysdba "
+          # on RAC the oratab contains DB_NAME which is not equal instance name. 
+          # That is why I remove last digit, if it exists to be able to use oraenv to set up the env.
+          V_ORACLE_SID_NO_LAST_DIGIT=`echo $V_ORACLE_SID | sed 's/[12]$//'`
+          msgd "V_ORACLE_SID_NO_LAST_DIGIT: $V_ORACLE_SID_NO_LAST_DIGIT"
+
+          EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; . oraenv; export ORACLE_SID=$V_ORACLE_SID; echo -e 'create pfile=\047/tmp/dbinit.txt\047 from spfile;' | sqlplus / as sysdba "
           msgd "EXECUTE_ON_REMOTE: $EXECUTE_ON_REMOTE"
+
           $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${EXECUTE_ON_REMOTE}" 
 
           # now the spfile location is actually irrelevant, as we just have the init

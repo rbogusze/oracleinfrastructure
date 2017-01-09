@@ -32,7 +32,10 @@ touch $LOCKFILE
 # check for TMP_LOG_DIR
 msgd "Ask the ldap for all the hosts to chec. We check there where alert logs are monitored"
 
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth', 'orainfDbInitFile', 'orclSid']" | awk '{print $1" "$2" ["$3"_"$2"] "$4" "$5" "$6}' > $CONFIG_FILE
+# old way
+#$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth', 'orainfDbInitFile', 'orclSid']" | awk '{print $1" "$2" ["$3"_"$2"] "$4" "$5" "$6}' > $CONFIG_FILE
+# including everyting, as I do not really have to know the spfile location
+$HOME/scripto/perl/ask_ldap.pl "(orainfOsLogwatchUser=*)" "['orainfOsLogwatchUser', 'orclSystemName', 'cn', 'orainfOsLogwatchUserAuth', 'orclSid']" | awk '{print $1" "$2" ["$3"_"$2"] "$4" "$5" "$6}' > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 
