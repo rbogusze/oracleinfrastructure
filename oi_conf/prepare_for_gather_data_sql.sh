@@ -24,8 +24,9 @@ check_lock $LOCKFILE
 
 # Actual execution
 msgd "Ask the ldap for all the hosts to chec. We check there where init files are monitored"
-
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbReadOnlyUser', 'orainfDbReadOnlyIndexHash']" > $CONFIG_FILE
+# org
+#$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitFile=*)" "['cn', 'orainfDbReadOnlyUser', 'orainfDbReadOnlyIndexHash']" > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbReadOnlyUser=*)" "['cn', 'orainfDbReadOnlyUser', 'orainfDbReadOnlyIndexHash']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"

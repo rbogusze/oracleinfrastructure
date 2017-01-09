@@ -57,6 +57,7 @@ f_store_sql_output_in_file()
       continue
     else
       msgd "Line is NOT a comment. Procceding"
+      sleep 2
     fi
 
     CN=`echo $LINE | awk '{print $1}'` 
