@@ -49,12 +49,14 @@ do {
   msgd "LINEALL: $LINEALL"
   LINE=${LINEALL}
 
+
   msgd "Skip line if it is a comment"
   if [[ "$LINE" = \#* ]]; then
     msgd "Line is a comment, skipping"      
     continue
   else
     msgd "Line is NOT a comment. Procceding"
+    sleep 2
   fi
 
 
@@ -131,7 +133,7 @@ do {
           # That is why I remove last digit, if it exists to be able to use oraenv to set up the env.
           V_ORACLE_SID_NO_LAST_DIGIT=`echo $V_ORACLE_SID | sed 's/[12]$//'`
           # Dirty way of excluding some db_names from removal. No idea how to do it more eleganlty.
-          if [ "$V_ORACLE_SID" = "DEMOR2" ]; then
+          if [ "$V_ORACLE_SID" = "DEMOR2" ] || [ "$V_ORACLE_SID" = "DEVNGFR2" ] || [ "$V_ORACLE_SID" = "SITR2" ] ; then
             V_ORACLE_SID_NO_LAST_DIGIT=$V_ORACLE_SID
           fi
           msgd "V_ORACLE_SID_NO_LAST_DIGIT: $V_ORACLE_SID_NO_LAST_DIGIT"
