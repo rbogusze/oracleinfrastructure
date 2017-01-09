@@ -130,6 +130,10 @@ do {
           # on RAC the oratab contains DB_NAME which is not equal instance name. 
           # That is why I remove last digit, if it exists to be able to use oraenv to set up the env.
           V_ORACLE_SID_NO_LAST_DIGIT=`echo $V_ORACLE_SID | sed 's/[12]$//'`
+          # Dirty way of excluding some db_names from removal. No idea how to do it more eleganlty.
+          if [ "$V_ORACLE_SID" = "DEMOR2" ]; then
+            V_ORACLE_SID_NO_LAST_DIGIT=$V_ORACLE_SID
+          fi
           msgd "V_ORACLE_SID_NO_LAST_DIGIT: $V_ORACLE_SID_NO_LAST_DIGIT"
 
           EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; . oraenv; export ORACLE_SID=$V_ORACLE_SID; echo -e 'create pfile=\047/tmp/dbinit.txt\047 from spfile;' | sqlplus / as sysdba "
