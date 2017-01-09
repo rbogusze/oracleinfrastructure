@@ -138,9 +138,13 @@ do {
           fi
           msgd "V_ORACLE_SID_NO_LAST_DIGIT: $V_ORACLE_SID_NO_LAST_DIGIT"
 
+          #
+          # Get init file
+          #
+
+          msgd "Create pfile from spfile"
           EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; . oraenv; export ORACLE_SID=$V_ORACLE_SID; echo -e 'create pfile=\047/tmp/dbinit.txt\047 from spfile;' | sqlplus / as sysdba "
           msgd "EXECUTE_ON_REMOTE: $EXECUTE_ON_REMOTE"
-
           $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${EXECUTE_ON_REMOTE}" 
 
           # now the spfile location is actually irrelevant, as we just have the init
@@ -148,12 +152,28 @@ do {
           msgd "F_COPY_FROM_REMOTE: $F_COPY_FROM_REMOTE"
 
           $EXP_SCP_CMD ${USERNAME} ${HOST} ${V_PASS} "${F_COPY_FROM_REMOTE}" 
-          #run_command_d "pwd"
-          #run_command_d "ls -l"
           msgd "Some init file cleanup"
           check_file "dbinit.txt"
           run_command "cat dbinit.txt | grep -v '__' > dbinit.txt.tmp "
           run_command "mv dbinit.txt.tmp dbinit.txt"
+
+          #
+          # get opatch lsinventory
+          # 
+          msgd "Run opatch lsinventory and copy the results"
+          EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; . oraenv; export ORACLE_SID=$V_ORACLE_SID; \$ORACLE_HOME/OPatch/opatch lsinventory > /tmp/${V_ORACLE_SID}_opatch_lsinventory.txt"
+          msgd "EXECUTE_ON_REMOTE: $EXECUTE_ON_REMOTE"
+          $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${EXECUTE_ON_REMOTE}" 
+
+          F_COPY_FROM_REMOTE="/tmp/${V_ORACLE_SID}_opatch_lsinventory.txt"
+          msgd "F_COPY_FROM_REMOTE: $F_COPY_FROM_REMOTE"
+          $EXP_SCP_CMD ${USERNAME} ${HOST} ${V_PASS} "${F_COPY_FROM_REMOTE}" 
+          msgd "Some opatch report file cleanup, to delete the lines that change with every run and prevent proper comparison"
+          check_file "${V_ORACLE_SID}_opatch_lsinventory.txt"
+          run_command "cat ${V_ORACLE_SID}_opatch_lsinventory.txt | grep -v 'Log file location' | grep -v 'Lsinventory Output file location' > opatch_lsinventory.txt.tmp"
+          run_command "rm -f ${V_ORACLE_SID}_opatch_lsinventory.txt"
+          run_command "mv opatch_lsinventory.txt.tmp opatch_lsinventory.txt"
+
 
         else
           msge "Unable to find the password file. Skipping this CN. Continuing"
