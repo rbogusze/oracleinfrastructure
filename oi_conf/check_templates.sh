@@ -173,16 +173,15 @@ do
 
   done < $V_INITFILE
 
-  #echo ""
+  echo
 
   if [ -f $D_TMP/oracle_infra_ERROR.txt ]; then
-    msgi "You are on $USERNAME at `uname -n`"
-    msge "Parameters with wrong values or that should not be set for DB: $ORACLE_SID"
-    cat $D_TMP/oracle_infra_ERROR.txt | sort
+    msge "Parameters with wrong values or that should not be set for DB: $CN"
+    #cat $D_TMP/oracle_infra_ERROR.txt | sort
   fi
 
   if [ -f $D_TMP/oracle_infra_CHANGE.txt ]; then
-    msgi "To change the configuration according to template you can issue:"
+    msgi "To change the configuration according to template you can issue something similar to:"
     # for hidden parameters include them into "" to work
     while read LINE
     do
