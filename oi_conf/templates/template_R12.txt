@@ -1,10 +1,3 @@
-ignore:db_name::
-do_not_set:sga_max_size::
-check_if_equal:timed_statistics:true:
-check_if_equal:_b_tree_bitmap_plans:false:
-check_if_more:open_cursors:2000
-check_if_set:control_files::
-
 check_if_equal:_disable_fast_validate:TRUE
 check_if_equal:_immediate_commit_propagation:TRUE
 check_if_equal:_lm_global_posts:TRUE
@@ -12,11 +5,11 @@ check_if_equal:_optimizer_autostats_job:FALSE
 check_if_equal:_system_trig_enabled:TRUE
 check_if_equal:aq_tm_processes:1
 check_if_equal:archive_lag_target:0
-check_if_set:audit_file_dest
+check_if_set:audit_file_dest:
 check_if_equal:audit_sys_operations:TRUE
-ignore:cluster_database
+ignore:cluster_database::
 check_if_equal:compatible:'12'
-check_if_set:control_files
+check_if_set:control_files:
 check_if_equal:cursor_sharing:'EXACT'
 check_if_equal:db_block_checking:'MEDIUM'
 check_if_equal:db_block_checksum:'TYPICAL'
