@@ -3,7 +3,7 @@
 # Checks if init file is in accordace to the template set as 'orainfDbInitTemplate' attribute
 # 
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -63,6 +63,13 @@ do
   msgd "V_INITFILE: $V_INITFILE"
   check_file $V_INITFILE
 
+  #filter init file and remove leading *.
+  cat $V_INITFILE | sed 's/^[^.]*\.//' > $D_TMP/init.tmp
+  V_INITFILE=$D_TMP/init.tmp
+  msgd "V_INITFILE: $V_INITFILE"
+  check_file $V_INITFILE
+
+
   msgd "Checking if all the parameters that should have value are set"
   # To do that I scan the template in search for check_if_* parameters and make sure that they are set in init
   # I do not check their values, but only the existence
@@ -73,18 +80,23 @@ do
     TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
     TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }'`
     TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }'`
-    #msgd "TEMPLATE_LINE: $TEMPLATE_LINE"
-    #msgd "TEMPLATE_ACTION: $TEMPLATE_ACTION"
+    msgd "TEMPLATE_LINE: $TEMPLATE_LINE"
+    msgd "TEMPLATE_ACTION: $TEMPLATE_ACTION"
     if [ `echo $TEMPLATE_ACTION | grep check_if_ | wc -l` -gt 0 ]; then
       if [ `cat $V_INITFILE | grep "^${TEMPLATE_PAR}=" | wc -l` -lt 1 ]; then
         echo "parameter should be set: $TEMPLATE_PAR" >> $D_TMP/oracle_infra_ERROR.txt
+        msgd "Parameter should be set: $TEMPLATE_PAR"
         # I make the $TEMPLATE_VALUE uppercase to be consisten with how Oracle shows then
         #  during show parameter
         TEMPLATE_VALUE=`echo $TEMPLATE_VALUE | tr '[a-z]' '[A-Z]'`
         echo "alter system set $TEMPLATE_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
+      else
+        msgd "Parameter is set in the init, this is all I wanted to check."
       fi
     fi
+
   done < $V_TEMPLATE
+
 
   echo
   msgd "Loop through the init file and analyse the contents"
@@ -183,7 +195,6 @@ do
     #cat $D_TMP/oracle_infra_CHANGE.txt | sort
   fi
   msgi "Done"
-
 
 
 done < $CONFIG_FILE
