@@ -9,20 +9,23 @@ check_if_equal:_lm_global_posts:TRUE
 check_if_equal:_optimizer_autostats_job:FALSE
 check_if_equal:_system_trig_enabled:TRUE
 do_not_set:_optimizer_adaptive_cursor_sharing:
+do_not_set:optimizer_use_sql_plan_baselines:
+check_if_equal:plsql_optimize_level:2:MP Doc ID 396009.1
 check_if_equal:aq_tm_processes:1
-check_if_equal:archive_lag_target:0
-check_if_set:audit_file_dest:
+ignore:archive_lag_target:0
+ignore:audit_file_dest:
 check_if_equal:audit_sys_operations:TRUE
 ignore:cluster_database::
 ignore:db_flashback_retention_target::
 ignore:local_listener::
-check_if_equal:compatible:'12'
+ignore:shared_servers::
+check_if_equal:compatible:'12.1.0'
 check_if_set:control_files:
-check_if_equal:cursor_sharing:'EXACT'
+check_if_equal:cursor_sharing:'EXACT':MP Doc ID 396009.1
 check_if_equal:db_block_checking:'MEDIUM'
 check_if_equal:db_block_checksum:'TYPICAL'
 check_if_equal:db_block_size:8192
-check_if_more:db_cache_size:858993459
+ignore:db_cache_size:858993459
 ignore:db_create_file_dest:'+DATA'
 check_if_set:db_files:512
 check_if_equal:db_lost_write_protect:'TYPICAL'
@@ -38,7 +41,7 @@ check_if_equal:dml_locks:10000
 check_if_equal:event:'10995 trace name context forever, level 16'
 ignore:instance_number:1
 check_if_equal:java_jit_enabled:FALSE
-check_if_more:java_pool_size:1073741824
+ignore:java_pool_size:1073741824
 check_if_more:job_queue_processes:64
 check_if_more:large_pool_size:524288000
 ignore:log_archive_config:
@@ -73,7 +76,7 @@ check_if_equal:parallel_force_local:TRUE
 check_if_equal:parallel_max_servers:8
 check_if_equal:parallel_min_servers:0
 ignore:pga_aggregate_limit:
-check_if_more:pga_aggregate_target:2147483648
+ignore:pga_aggregate_target:
 check_if_equal:plsql_code_type:'INTERPRETED'
 check_if_equal:processes:4000
 check_if_equal:recyclebin:'off'

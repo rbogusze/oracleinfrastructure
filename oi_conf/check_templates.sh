@@ -19,7 +19,7 @@ D_INITFILE=/home/orainf/conf_repo
 D_TMP=/tmp
 
 # 
-#$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitTemplate=*)" "['cn', 'orainfDbInitTemplate']" > $CONFIG_FILE
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitTemplate=*)" "['cn', 'orainfDbInitTemplate']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
@@ -71,6 +71,8 @@ do
 
 
   msgd "Checking if all the parameters that should have value are set"
+  echo "#Changes as a result of parameter existence" >> $D_TMP/oracle_infra_ERROR.txt
+  echo "#Changes as a result of parameter existence" >> $D_TMP/oracle_infra_CHANGE.txt
   # To do that I scan the template in search for check_if_* parameters and make sure that they are set in init
   # I do not check their values, but only the existence
   while read TEMPLATE_LINE
@@ -83,7 +85,7 @@ do
     msgd "TEMPLATE_LINE: $TEMPLATE_LINE"
     msgd "TEMPLATE_ACTION: $TEMPLATE_ACTION"
     if [ `echo $TEMPLATE_ACTION | grep check_if_ | wc -l` -gt 0 ]; then
-      if [ `cat $V_INITFILE | grep "^${TEMPLATE_PAR}=" | wc -l` -lt 1 ]; then
+      if [ `cat $V_INITFILE | tr '[A-Z]' '[a-z]' | grep "^${TEMPLATE_PAR}=" | wc -l` -lt 1 ]; then
         echo "parameter should be set: $TEMPLATE_PAR" >> $D_TMP/oracle_infra_ERROR.txt
         msgd "Parameter should be set: $TEMPLATE_PAR"
         # I make the $TEMPLATE_VALUE uppercase to be consisten with how Oracle shows then
@@ -100,10 +102,12 @@ do
 
   echo
   msgd "Loop through the init file and analyse the contents"
+  echo "#Changes as a result of contents analysis" >> $D_TMP/oracle_infra_ERROR.txt
+  echo "#Changes as a result of contents analysis" >> $D_TMP/oracle_infra_CHANGE.txt
   while read INIT_LINE
   do
-    #echo -n "."
     msgri "."
+    msgd "---------------------------------"
     # Get init parameter from $INIT_LINE
     INIT_PAR=`echo $INIT_LINE | awk -F"=" '{ print $1 }' | tr '[A-Z]' '[a-z]'`
     INIT_VALUE=`echo $INIT_LINE | awk -F"=" '{ print $2 }' | awk -F"#" '{print $1}' | tr '[A-Z]' '[a-z]' `
@@ -125,10 +129,13 @@ do
     TEMPLATE_LINE=`cat $V_TEMPLATE | grep ":$INIT_PAR:"`
     TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
     TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }'`
-    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }'`
+    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }' | tr '[A-Z]' '[a-z]'`
     TEMPLATE_COMMENT=`echo $TEMPLATE_LINE | awk -F":" '{ print $4 }'`
     #echo $TEMPLATE_LINE; echo $TEMPLATE_ACTION; echo $TEMPLATE_PAR; echo $TEMPLATE_VALUE; echo $TEMPLATE_COMMENT
+    msgd "TEMPLATE_LINE: $TEMPLATE_LINE"
+    msgd "TEMPLATE_PAR: $TEMPLATE_PAR"
     msgd "TEMPLATE_ACTION: $TEMPLATE_ACTION"
+    msgd "TEMPLATE_VALUE: $TEMPLATE_VALUE"
 
     case $TEMPLATE_ACTION in
     "ignore")
@@ -137,25 +144,31 @@ do
       ;;
     "check_if_equal")
       if [ ! "$INIT_VALUE" = "$TEMPLATE_VALUE" ]; then
+        msgdm "CHANGE REQUIRED $INIT_LINE, should be: $TEMPLATE_VALUE"
         echo "value not equal: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
         echo "alter system set $INIT_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
       else
+        msgd "nothing to do $INIT_VALUE = $TEMPLATE_VALUE"
         echo "value equal: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
       fi 
       ;;
     "check_if_less")
       if [ "$INIT_VALUE" -gt "$TEMPLATE_VALUE" ]; then
+        msgdm "CHANGE REQUIRED $INIT_LINE gt $TEMPLATE_VALUE"
         echo "value too large: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
         echo "alter system set $INIT_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
       else
+        msgd "nothing to do $INIT_VALUE gt $TEMPLATE_VALUE"
         echo "value correct: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
       fi 
       ;;
     "check_if_more")
       if [ "$INIT_VALUE" -lt "$TEMPLATE_VALUE" ]; then
+        msgdm "CHANGE REQUIRED $INIT_LINE lt $TEMPLATE_VALUE"
         echo "value too small: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
         echo "alter system set $INIT_PAR=$TEMPLATE_VALUE scope=spfile sid='*';" >> $D_TMP/oracle_infra_CHANGE.txt
       else
+        msgd "nothing to do $INIT_VALUE lt $TEMPLATE_VALUE"
         echo "value correct: $INIT_LINE" >> $D_TMP/oracle_infra_OK.txt
       fi 
       ;;
