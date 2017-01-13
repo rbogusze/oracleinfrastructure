@@ -3,7 +3,7 @@
 # Checks if init file is in accordace to the template set as 'orainfDbInitTemplate' attribute
 # 
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -78,7 +78,7 @@ do
     #echo -n "."
     msgri "."
     TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
-    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }'`
+    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }' | tr '[A-Z]' '[a-z]'`
     TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }'`
     msgd "TEMPLATE_LINE: $TEMPLATE_LINE"
     msgd "TEMPLATE_ACTION: $TEMPLATE_ACTION"
@@ -105,9 +105,10 @@ do
     #echo -n "."
     msgri "."
     # Get init parameter from $INIT_LINE
-    INIT_PAR=`echo $INIT_LINE | awk -F"=" '{ print $1 }' | awk -F"." '{print $2}'`
+    INIT_PAR=`echo $INIT_LINE | awk -F"=" '{ print $1 }' | tr '[A-Z]' '[a-z]'`
     INIT_VALUE=`echo $INIT_LINE | awk -F"=" '{ print $2 }' | awk -F"#" '{print $1}' | tr '[A-Z]' '[a-z]' `
     #echo $INIT_PAR; echo $INIT_VALUE
+    msgd "INIT_LINE: $INIT_LINE"
     msgd "INIT_PAR: $INIT_PAR"
     msgd "INIT_VALUE: $INIT_VALUE"
 
