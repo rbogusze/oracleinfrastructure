@@ -19,7 +19,7 @@ D_INITFILE=/home/orainf/conf_repo
 D_TMP=/tmp
 
 # 
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitTemplate=*)" "['cn', 'orainfDbInitTemplate']" > $CONFIG_FILE
+#$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitTemplate=*)" "['cn', 'orainfDbInitTemplate']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"

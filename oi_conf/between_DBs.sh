@@ -73,9 +73,7 @@ f_do_it()
 # Just do it
 # - name of the file
 # - search string for find
-f_do_it init.ora "init.*.ora" "| grep -v '^#' | sed 's/^\*\.//' | grep -v '^utl_file_dir' | grep -v 'control_files' | grep -v 'dispatchers' | grep -v 'service_names' | grep -v 'remote_listener' | grep -v 'instance_name' | grep -v 'instance_number' | grep -v '_ncomp_shared_objects_dir' | grep -v 'thread=' | grep -v 'undo_tablespace=' | grep -v 'log_archive_dest=' | sort"
-
-f_do_it spfile.ora "spfile.*.ora" "| grep -v '^#' | sed 's/^\*\.//' | grep -v '^utl_file_dir' | grep -v 'control_files' | grep -v 'dispatchers' | grep -v 'service_names' | grep -v 'remote_listener' | grep -v 'instance_name' | grep -v 'instance_number' | grep -v '_ncomp_shared_objects_dir' | grep -v 'thread=' | grep -v 'undo_tablespace=' | grep -v 'log_archive_dest=' | sort"
+f_do_it init.ora "dbinit.txt" "| grep -v '^#' | sed 's/^[^.]*\.//' | grep -v '^utl_file_dir' | grep -v 'control_files' | grep -v 'dispatchers' | grep -v 'service_names' | grep -v 'remote_listener' | grep -v 'instance_name' | grep -v 'instance_number' | grep -v '_ncomp_shared_objects_dir' | grep -v 'thread=' | grep -v 'undo_tablespace=' | grep -v 'log_archive_dest=' | sort"
 
 f_do_it SPM.txt SPM.txt "| sort"
 f_do_it AD_BUGS.txt AD_BUGS.txt "| sort"
