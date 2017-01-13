@@ -122,6 +122,19 @@ msgd()
   fi
 }
 
+# [debug] in magenta
+msgdm()
+{
+  if [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[35m'
+    echo -n "[debug] "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+
 # [info] in green
 msgi()
 {
