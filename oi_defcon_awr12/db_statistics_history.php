@@ -11,6 +11,7 @@ echo "<tt>Database Statistics History<BR></tt>";
 $dir=$_GET['dir'];
 $statname=$_GET['statname'];
 $date_with_time=$_GET['date_with_time'];
+$date_no_history=$_GET['date_no_history'];
 
 
 
@@ -21,10 +22,12 @@ echo "<a href=\"$back_url\" >Previous</a> ";
 echo "</td><td>";
 echo "<a href=\"index.php\" >Back to DB list</a> ";
 echo "</td><td>";
-//echo "<BR> dir: $dir";
-//echo "<BR> statname: $statname";
 $date_with_time_url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&date_with_time=Y';
 echo "<a href=\"$date_with_time_url\" >Dates with time</a> ";
+echo "</td><td>";
+$date_no_history_url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&date_no_history=Y';
+echo "<a href=\"$date_no_history_url\" >Dates with no history</a> ";
+echo "</td><td>";
 echo "</td></table>";
 
 $filenames_array = array();
@@ -134,7 +137,7 @@ echo "<br>";
 //echo "<BR>before the draw2";
 //show_array($filenames_array_date);
 
-draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Total", 0, $dir, "");
+draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Total", 0, $dir, "dummy", $date_no_history);
 //draw_chart($data_values2, $filenames_array_date, ("Statistik: " . $statname), "per Second", 0, "");
 //draw_chart($data_values3, $filenames_array_date, ("Statistik: " . $statname), "per Trans", 0, "");
 

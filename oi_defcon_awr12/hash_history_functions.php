@@ -98,14 +98,18 @@ function rem_add_events($array,$dir)
 // $chart_data_label - string Hash
 // $section_name - string
 // $draw_sql_explain - sring - clean hash Y/N
-function draw_chart($data_values, $data_values_label, $chart_data_label, $section_name, $draw_sql_explain, $dir, $filenames_array) {
+function draw_chart($data_values, $data_values_label, $chart_data_label, $section_name, $draw_sql_explain, $dir, $filenames_array, $date_no_history) {
   // add to dates some milestones, so that it is easy to corelate changes in the graph 
   // (or lack of the change) to some major events
-  $data_values_label=rem_add_events($data_values_label,$dir);
+  // echo "<BR> date_no_history: $date_no_history <BR>";
+  if ( ! $date_no_history ) {
+    $data_values_label=rem_add_events($data_values_label,$dir);
+  }
 
   $tmp1 = base64_encode(serialize(array_reverse($data_values)));
   $tmp2 = base64_encode(serialize(array_reverse($data_values_label)));
   sort($filenames_array);
+
 
   // There is a problem with URI beeing too long: Request-URI Too Large, which can prevent
   // some images from appearing. Default is: LimitRequestLine 8190 
@@ -120,7 +124,7 @@ function draw_chart($data_values, $data_values_label, $chart_data_label, $sectio
     //show_array($filtered_data_values);
     //echo "<BR> ala ma kota wielkiego";
     //show_array($filtered_data_values_label);
-    draw_chart($filtered_data_values, $filtered_data_values_label, $chart_data_label, $section_name, $draw_sql_explain, $dir);
+    draw_chart($filtered_data_values, $filtered_data_values_label, $chart_data_label, $section_name, $draw_sql_explain, $dir, $filenames_array, $date_no_history);
   } else {
 
     // Description of draw_chart.php
