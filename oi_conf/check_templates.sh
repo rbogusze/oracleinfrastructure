@@ -19,7 +19,7 @@ D_INITFILE=/home/orainf/conf_repo
 D_TMP=/tmp
 
 # 
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitTemplate=*)" "['cn', 'orainfDbInitTemplate']" > $CONFIG_FILE
+#$HOME/scripto/perl/ask_ldap.pl "(orainfDbInitTemplate=*)" "['cn', 'orainfDbInitTemplate']" > $CONFIG_FILE
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
@@ -71,8 +71,8 @@ do
 
 
   msgd "Checking if all the parameters that should have value are set"
-  echo "#Changes as a result of parameter existence" >> $D_TMP/oracle_infra_ERROR.txt
-  echo "#Changes as a result of parameter existence" >> $D_TMP/oracle_infra_CHANGE.txt
+  echo "#Changes as a result of parameter non existence" >> $D_TMP/oracle_infra_ERROR.txt
+  echo "#Changes as a result of parameter non existence" >> $D_TMP/oracle_infra_CHANGE.txt
   # To do that I scan the template in search for check_if_* parameters and make sure that they are set in init
   # I do not check their values, but only the existence
   while read TEMPLATE_LINE
