@@ -3,7 +3,7 @@
 # Checks if init file is in accordace to the template set as 'orainfDbInitTemplate' attribute
 # 
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -23,6 +23,8 @@ D_TMP=/tmp
 
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
+
+#exit 0
 
 check_directory $D_TEMPLATE
 check_directory $D_INITFILE
@@ -181,6 +183,9 @@ do
       ;;
     *)
       echo "Unknown parameter for template: $INIT_PAR"
+      msgi "INIT_LINE: $INIT_LINE"
+      msgi "INIT_PAR: $INIT_PAR"
+      msgi "INIT_VALUE: $INIT_VALUE"
       exit 0
       ;;
    esac
