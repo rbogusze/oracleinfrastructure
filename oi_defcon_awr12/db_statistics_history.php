@@ -14,6 +14,8 @@ $date_with_time=$_GET['date_with_time'];
 $date_no_history=$_GET['date_no_history'];
 $history_range=$_GET['history_range'];
 
+echo "<br>dir:" . $dir . "<br>statname:" . $statname . "<br>";
+
 echo "<table><tr><td>";
 $date_with_range = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&history_range=30';
 echo "<a href=\"$date_with_range\" >Last 30 days</a> ";
