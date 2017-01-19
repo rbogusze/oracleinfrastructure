@@ -5,12 +5,9 @@
 require_once("/home/orainf/scripto/php/my_library.php");
 require("header.php");
 echo "<tt>Database Statistics <BR></tt>";
-#echo "<table><td width=1000 valign=top border=1>";
 
-//echo file_get_contents("http://logwatch/oi_defcon_awr12/db_statistics_history.php?dir=/var/www/html/awr_reports/PROD1_08:00_16:00/AWR_txt_day/&statname=db%20block%20changes&history_range=30");
-
-//require("footer.php");
-//exit;
+//Statistics for which I want to see graph, for other display link
+$interesting_stats = array("db block changes", "execute count");
 
 $dir=$_GET['dir'];
 $filename=$_GET['filename'];
@@ -53,16 +50,17 @@ if (is_file($dir . $filename) ) {
       if ( is_numeric($trash2) && is_numeric($trash3)  ) {
         //echo "<br> data: $data <br>";
         echo "<tr><td><a href=\"db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash3</td><td>$trash4</td></tr>";
-        echo "<tr><td><a href=\"db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>";
-        echo "<tr><td>";
+
+        //As there is too many statistics to display them all (little point) I select only those I am interested in
+        if (in_array($trash1, $interesting_stats)) {
         //replace space with %20
-        $trash1 = str_replace(" ", "%20", $trash1); 
-        $remote_url = "db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "&history_range=118";
-        echo "<br> remote_url: $remote_url <br>";
-        //echo "<img src=\"db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >";
-        //echo include("\"db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >");
-        //echo file_get_contents("http://logwatch/oi_defcon_awr12/db_statistics_history.php?dir=/var/www/html/awr_reports/PROD1_08:00_16:00/AWR_txt_day/&statname=db%20block%20changes&history_range=30");
-        echo file_get_contents("http://logwatch/oi_defcon_awr12/" . $remote_url);
+          $trash1 = str_replace(" ", "%20", $trash1); 
+          $remote_url = "db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "&history_range=118&silent=1" ;
+          echo "<tr><td colspan=4>";
+          //echo "<br> remote_url: $remote_url <br>";
+          echo file_get_contents("http://logwatch/oi_defcon_awr12/" . $remote_url);
+          echo "</tr></td>";
+        } //if (strstr ( $trash1, "db block changes"))
         echo "</tr></td>";
       } // if ( is_numeric($trash2)
 

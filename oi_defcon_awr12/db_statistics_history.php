@@ -5,15 +5,21 @@
 require_once("/home/orainf/scripto/php/my_library.php");
 require("header.php");
 require("hash_history_functions.php");
-echo "<tt>Database Statistics History<BR></tt>";
-#echo "<table><td width=1000 valign=top border=1>";
 
 $dir=$_GET['dir'];
 $statname=$_GET['statname'];
 $date_with_time=$_GET['date_with_time'];
 $date_no_history=$_GET['date_no_history'];
 $history_range=$_GET['history_range'];
+$silent=$_GET['silent'];
 
+if (! $history_range) {
+  $history_range = 60;
+}
+
+// do not show any messages / options when silent switch is on
+if ( ! $silent ) {
+echo "<tt>Database Statistics History<BR></tt>";
 echo "<br>dir:" . $dir . "<br>statname:" . $statname . "<br>";
 
 echo "<table><tr><td>";
@@ -32,9 +38,6 @@ echo "</td><td>";
 $date_with_range = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&history_range=unlimited';
 echo "<a href=\"$date_with_range\" >Unlimited days</a> ";
 echo "</td><td>";
-if (! $history_range) {
-  $history_range = 60;
-}
 
 echo "Current History Range: $history_range ";
 
@@ -54,34 +57,8 @@ echo "<a href=\"$date_no_history_url\" >Dates with no history</a> ";
 echo "</td><td>";
 echo "</td></tr></table>";
 
-$filenames_array = array();
-$filenames_array_counter = 0;
+} //if ( $silent)
 
-//-- old way
-/*
-if (is_dir($dir)) {
-   if ($dh = opendir($dir)) {
-      while (($file = readdir($dh)) !== false) {
-        //echo "filename: $file : filetype: " . filetype($dir . $file) . "<BR>";
-        if ( filetype($dir . $file) == 'file'  ) {
-          if ( strstr( $file, ".txt") ) {
-            $filenames_array[$filenames_array_counter] = $file;
-            $filenames_array_counter++;
-          }
-        } // if (filetype($dir . $file) == file) 
-      } //while (($file = readdir($dh)) !== false)
-   closedir($dh);
-   } // if ($dh = opendir($dir))
-} // if (is_dir($dir))
-
-//echo "<BR> ala ma kota";
-rsort($filenames_array);
-show_array($filenames_array);
-*/
-//-- old way
-//exit;
-
-//----
 $filenames_array = array();
 $filenames_array_counter = 0;
 // Open a known directory, and proceed to read its contents to array 
@@ -133,7 +110,6 @@ rsort($filenames_array);
 
 
 
-//----
 // Now I have the list of files in an array. Get to them and look for statistic.
 $data_values_counter = 0;
 for($i=0; $i<count($filenames_array); $i++)
@@ -190,7 +166,7 @@ for($i=0; $i<count($filenames_array); $i++)
 } // for($i=0; $i<count($filenames_array
 
 //show_array($data_values3);
-echo "<br> $filenames_array[0]";
+//echo "<br> $filenames_array[0]";
 // Extract from the filename data time of creation 
 for($i=0; $i<count($filenames_array); $i++)
 {
