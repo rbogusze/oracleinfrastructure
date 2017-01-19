@@ -7,7 +7,7 @@ require("header.php");
 echo "<tt>Database Statistics <BR></tt>";
 
 //Statistics for which I want to see graph, for other display link
-$interesting_stats = array("db block changes", "execute count");
+$interesting_stats = array("db block changes", "execute count", "logons cumulative", "parse count (total)", "parse time elapsed", "physical reads", "physical writes", "redo size", "user calls", "sorts (memory)", "user logons cumulative", "");
 
 $dir=$_GET['dir'];
 $filename=$_GET['filename'];
