@@ -12,10 +12,32 @@ $dir=$_GET['dir'];
 $statname=$_GET['statname'];
 $date_with_time=$_GET['date_with_time'];
 $date_no_history=$_GET['date_no_history'];
+$history_range=$_GET['history_range'];
+
+echo "<table><tr><td>";
+$date_with_range = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&history_range=30';
+echo "<a href=\"$date_with_range\" >Last 30 days</a> ";
+echo "</td><td>";
+$date_with_range = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&history_range=60';
+echo "<a href=\"$date_with_range\" >Last 60 days</a> ";
+echo "</td><td>";
+$date_with_range = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&history_range=180';
+echo "<a href=\"$date_with_range\" >Last 180 days</a> ";
+echo "</td><td>";
+$date_with_range = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&history_range=360';
+echo "<a href=\"$date_with_range\" >Last 360 days</a> ";
+echo "</td><td>";
+$date_with_range = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&history_range=unlimited';
+echo "<a href=\"$date_with_range\" >Unlimited days</a> ";
+echo "</td><td>";
+if (! $history_range) {
+  $history_range = 60;
+}
+
+echo "Current History Range: $history_range ";
 
 
-
-echo "<table><td>";
+echo "</td></tr><tr><td>";
 $back_url = $_SERVER['HTTP_REFERER'];
 echo "<a href=\"$back_url\" >Previous</a> ";
 
@@ -28,12 +50,13 @@ echo "</td><td>";
 $date_no_history_url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . '&date_no_history=Y';
 echo "<a href=\"$date_no_history_url\" >Dates with no history</a> ";
 echo "</td><td>";
-echo "</td></table>";
+echo "</td></tr></table>";
 
 $filenames_array = array();
 $filenames_array_counter = 0;
 
-
+//-- old way
+/*
 if (is_dir($dir)) {
    if ($dh = opendir($dir)) {
       while (($file = readdir($dh)) !== false) {
@@ -51,10 +74,64 @@ if (is_dir($dir)) {
 
 //echo "<BR> ala ma kota";
 rsort($filenames_array);
-//show_array($filenames_array);
+show_array($filenames_array);
+*/
+//-- old way
 //exit;
 
+//----
+$filenames_array = array();
+$filenames_array_counter = 0;
+// Open a known directory, and proceed to read its contents to array 
+// Prepare a table with every statspack file
+if (is_dir($dir)) {
+   if ($dh = opendir($dir)) {
+      while (($file = readdir($dh)) !== false) {
+        //echo "filename: $file : filetype: " . filetype($dir . $file) . "<BR>";
+        if (filetype($dir . $file) == file) {
 
+            //echo "<BR> Found: file: $file zzzz <BR>";
+            // determine if file is in the requested time range 
+            if ( $history_range != "unlimited") {
+              //get creation file time as a baseline. Prone to copying of files.
+              //or get it from filename. Prone to filename format change.
+              //echo "<BR> file: $file";
+              //old statspack one$date_to_check = substr ($file, 5, 10);
+              preg_match ("/....-..-../", $file, $match_result);
+              $date_to_check=$match_result[0];
+              //echo "<BR> date_to_check: $date_to_check";
+              $today = date("Y-m-d");
+              $date_to_check_unix = mktime(0, 0, 0, substr($date_to_check, 5, 2), substr($date_to_check, 8, 2), substr($date_to_check, 0,4));
+              $today_unix = mktime(0, 0, 0, substr($today, 5, 2), substr($today, 8, 2), substr($today, 0,4));
+              //echo "<BR> today_unix: $today_unix";
+              //echo "<BR> date_to_check_unix: $date_to_check_unix";
+              
+              //echo "<BR> Number of sec between: " . ($today_unix - $date_to_check_unix . "<BR>");
+              # Check if number of scends elapsed bigger than history_range
+              if (($today_unix - $date_to_check_unix) > ($history_range * 24 * 60 * 60)) {
+                //echo "<BR> Bigger!!! skipping this file. <BR>";
+                continue;  //To skip adding this filename to filenames array
+              } 
+            }
+            // create an array
+            $filenames_array[$filenames_array_counter] = $file;
+            $filenames_array_counter++;
+
+
+        } // if (filetype($dir . $file) == file) 
+      } //while (($file = readdir($dh)) !== false)
+   closedir($dh);
+   } // if ($dh = opendir($dir))
+} // if (is_dir($dir))
+
+
+//echo "<BR> ala ma kota";
+rsort($filenames_array);
+show_array($filenames_array);
+
+
+
+//----
 // Now I have the list of files in an array. Get to them and look for statistic.
 $data_values_counter = 0;
 for($i=0; $i<count($filenames_array); $i++)
