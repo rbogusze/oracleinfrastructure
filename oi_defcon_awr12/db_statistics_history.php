@@ -127,7 +127,7 @@ if (is_dir($dir)) {
 
 //echo "<BR> ala ma kota";
 rsort($filenames_array);
-show_array($filenames_array);
+//show_array($filenames_array);
 
 
 
