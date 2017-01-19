@@ -52,7 +52,7 @@ if (is_file($dir . $filename) ) {
         echo "<tr><td><a href=\"db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash3</td><td>$trash4</td></tr>";
 
         //As there is too many statistics to display them all (little point) I select only those I am interested in
-//        if (in_array($trash1, $interesting_stats)) {
+        if (in_array($trash1, $interesting_stats)) {
         //replace space with %20
           $trash1 = str_replace(" ", "%20", $trash1); 
           $remote_url = "db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "&history_range=118&silent=1" ;
@@ -60,7 +60,7 @@ if (is_file($dir . $filename) ) {
           //echo "<br> remote_url: $remote_url <br>";
           echo file_get_contents("http://logwatch/oi_defcon_awr12/" . $remote_url);
           echo "</tr></td>";
-//        } //if (in_array($trash1, $interesting_stats))
+        } //if (in_array($trash1, $interesting_stats))
         echo "</tr></td>";
       } // if ( is_numeric($trash2)
 
