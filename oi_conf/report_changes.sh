@@ -3,7 +3,7 @@
 # Report what has changed in CVS
 # 
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
