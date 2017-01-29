@@ -24,11 +24,19 @@ $oczy = array(
      "hostname" => "192.168.1.233",
      "rank" => 400
   ),
-  "oko3" => array (
+/*  "oko3" => array (
      "description" => "hejo",
      "location" => "salon kominek",
      "video_url" => "http://192.168.1.234:8081",
      "hostname" => "192.168.1.233",
+     "rank" => 400
+  ),
+*/
+  "oko4" => array (
+     "description" => "hejo",
+     "location" => "salon kominek",
+     "video_url" => "http://192.168.1.236:8081",
+     "hostname" => "192.168.1.236",
      "rank" => 400
   )
 );
