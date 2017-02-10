@@ -94,7 +94,6 @@ ignore:shared_pool_reserved_size:107374182
 ignore:shared_pool_size:1073741824
 check_if_equal:sql92_security:TRUE
 ignore:standby_file_management:'AUTO'
-streams:streams_pool_size:52428800
 check_if_equal:temp_undo_enabled:TRUE
 ignore:thread:1
 check_if_equal:undo_management:'AUTO'
@@ -286,4 +285,6 @@ do_not_set:plsql_warnings:
 do_not_set:query_rewrite_enabled:
 do_not_set:result_cache_max_size:
 do_not_set:skip_unusable_indexes:
+do_not_set:resource_limit:
 ignore:core_dump_dest:
+ignore:streams_pool_size:
