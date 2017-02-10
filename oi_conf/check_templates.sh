@@ -24,7 +24,40 @@ D_TMP=/tmp
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
 
-#exit 0
+# BEGIN of functions
+f_convert_init_value_to_bytes()
+{
+  # Info section 
+  msgd "${FUNCNAME[0]} Beginning."
+
+  msgd "INIT_VALUE: $INIT_VALUE"
+  INIT_VALUE=`echo $INIT_VALUE | tr '[a-z]' '[A-Z]'`
+  msgd "INIT_VALUE: $INIT_VALUE"
+
+  V_TMP=`echo $INIT_VALUE | grep M | wc -l`
+  msgd "V_TMP: $V_TMP"
+  if [ "$V_TMP" -eq 1 ]; then
+    msgd "We have MB"
+    INIT_VALUE=`echo $INIT_VALUE | tr -d 'M'`
+    msgd "INIT_VALUE: $INIT_VALUE"
+    INIT_VALUE=`expr ${INIT_VALUE} \* 1024 \* 1024 `
+  fi
+
+  V_TMP=`echo $INIT_VALUE | grep G | wc -l`
+  msgd "V_TMP: $V_TMP"
+  if [ "$V_TMP" -eq 1 ]; then
+    msgd "We have GB"
+    INIT_VALUE=`echo $INIT_VALUE | tr -d 'G'`
+    msgd "INIT_VALUE: $INIT_VALUE"
+    INIT_VALUE=`expr ${INIT_VALUE} \* 1024 \* 1024 \* 1024`
+  fi
+
+  msgd "${FUNCNAME[0]} Finished."
+} #f_convert_init_value_to_bytes
+
+
+# END of functions
+
 
 check_directory $D_TEMPLATE
 check_directory $D_INITFILE
@@ -165,6 +198,12 @@ do
       fi 
       ;;
     "check_if_more")
+      # I am assuming that $INIT_VALUE is a number now, but there can be cases when it is like 1M or 1G
+      # have to convert that to bytes first
+      msgd "INIT_VALUE: $INIT_VALUE"
+      f_convert_init_value_to_bytes 
+      msgd "INIT_VALUE: $INIT_VALUE"
+
       if [ "$INIT_VALUE" -lt "$TEMPLATE_VALUE" ]; then
         msgdm "CHANGE REQUIRED $INIT_LINE lt $TEMPLATE_VALUE"
         echo "value too small: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
