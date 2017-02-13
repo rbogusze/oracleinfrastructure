@@ -24,6 +24,8 @@ D_TMP=/tmp
 check_file $CONFIG_FILE
 run_command_d "cat $CONFIG_FILE"
 
+#exit 0
+
 # BEGIN of functions
 f_convert_init_value_to_bytes()
 {
@@ -188,6 +190,7 @@ do
       fi 
       ;;
     "check_if_less")
+      f_convert_init_value_to_bytes 
       if [ "$INIT_VALUE" -gt "$TEMPLATE_VALUE" ]; then
         msgdm "CHANGE REQUIRED $INIT_LINE gt $TEMPLATE_VALUE"
         echo "value too large: $INIT_LINE, should be: $TEMPLATE_VALUE" >> $D_TMP/oracle_infra_ERROR.txt
