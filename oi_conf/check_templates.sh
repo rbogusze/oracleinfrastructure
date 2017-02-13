@@ -116,9 +116,13 @@ do
   do
     #echo -n "."
     msgri "."
-    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
-    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }' | tr '[A-Z]' '[a-z]'`
-    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }'`
+#    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
+#    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }' | tr '[A-Z]' '[a-z]'`
+#    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }'`
+
+    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F"#" '{ print $1 }'`
+    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F"#" '{ print $2 }' | tr '[A-Z]' '[a-z]'`
+    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F"#" '{ print $3 }'`
     msgd "TEMPLATE_LINE: $TEMPLATE_LINE"
     msgd "TEMPLATE_ACTION: $TEMPLATE_ACTION"
     if [ `echo $TEMPLATE_ACTION | grep check_if_ | wc -l` -gt 0 ]; then
@@ -163,11 +167,17 @@ do
       exit 1
     fi
 
-    TEMPLATE_LINE=`cat $V_TEMPLATE | grep ":$INIT_PAR:"`
-    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
-    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }'`
-    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }' | tr '[A-Z]' '[a-z]'`
-    TEMPLATE_COMMENT=`echo $TEMPLATE_LINE | awk -F":" '{ print $4 }'`
+#    TEMPLATE_LINE=`cat $V_TEMPLATE | grep ":$INIT_PAR:"`
+#    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F":" '{ print $1 }'`
+#    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F":" '{ print $2 }'`
+#    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F":" '{ print $3 }' | tr '[A-Z]' '[a-z]'`
+#    TEMPLATE_COMMENT=`echo $TEMPLATE_LINE | awk -F":" '{ print $4 }'`
+
+    TEMPLATE_LINE=`cat $V_TEMPLATE | grep "#${INIT_PAR}#"`
+    TEMPLATE_ACTION=`echo $TEMPLATE_LINE | awk -F"#" '{ print $1 }'`
+    TEMPLATE_PAR=`echo $TEMPLATE_LINE | awk -F"#" '{ print $2 }'`
+    TEMPLATE_VALUE=`echo $TEMPLATE_LINE | awk -F"#" '{ print $3 }' | tr '[A-Z]' '[a-z]'`
+    TEMPLATE_COMMENT=`echo $TEMPLATE_LINE | awk -F"#" '{ print $4 }'`
     #echo $TEMPLATE_LINE; echo $TEMPLATE_ACTION; echo $TEMPLATE_PAR; echo $TEMPLATE_VALUE; echo $TEMPLATE_COMMENT
     msgd "TEMPLATE_LINE: $TEMPLATE_LINE"
     msgd "TEMPLATE_PAR: $TEMPLATE_PAR"
