@@ -26,8 +26,8 @@ ignore:remote_listener::
 check_if_equal:compatible:'12.1.0'
 check_if_set:control_files:
 check_if_equal:cursor_sharing:'EXACT':MP Doc ID 396009.1
-check_if_equal:db_block_checking:'MEDIUM'
-check_if_equal:db_block_checksum:'TYPICAL'
+check_if_equal:db_block_checking:'FALSE'
+check_if_equal:db_block_checksum:'TRUE'
 check_if_equal:db_block_size:8192
 ignore:db_cache_size:858993459
 ignore:db_create_file_dest:'+DATA'
