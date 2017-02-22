@@ -38,6 +38,13 @@ $oczy = array(
      "video_url" => "http://192.168.1.236:8081",
      "hostname" => "192.168.1.236",
      "rank" => 400
+  ),
+  "okox" => array (
+     "description" => "hejo",
+     "location" => "R&D",
+     "video_url" => "http://192.168.1.235:8081",
+     "hostname" => "192.168.1.235",
+     "rank" => 400
   )
 );
 
