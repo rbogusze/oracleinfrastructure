@@ -14,6 +14,6 @@ fi
 
 # To set number of days back, just set the last literal
 
-./prepare_exec_cmd.sh | awk '{print "./bulk_generate.sh "$2" "$3" "$5" "$6" 14"}'
+./prepare_exec_cmd.sh | awk '{print "./bulk_generate.sh "$2" "$3" "$5" "$6" 11"}'
 
 
