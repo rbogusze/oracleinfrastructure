@@ -31,5 +31,7 @@ do
   msgd "$LINE"
   echo $LINE | awk -F'/' '{print $5}'
   check_file $LINE
-  cat $LINE | grep 'Database Patch Set Update' | grep -v 'Sub-patch'
+  #cat $LINE | grep 'Database Patch Set Update' | grep -v 'Sub-patch'
+#  cat $LINE | grep '22173980' #BI patch for wrong results
+  cat $LINE | grep '20907061' #Efficient parsing
 done < $F_LSINV

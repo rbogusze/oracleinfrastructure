@@ -108,8 +108,8 @@ do
 
 
   msgd "Checking if all the parameters that should have value are set"
-  echo "#Changes as a result of parameter non existence" >> $D_TMP/oracle_infra_ERROR.txt
-  echo "#Changes as a result of parameter non existence" >> $D_TMP/oracle_infra_CHANGE.txt
+  #echo "#Changes as a result of parameter non existence" >> $D_TMP/oracle_infra_ERROR.txt
+  #echo "#Changes as a result of parameter non existence" >> $D_TMP/oracle_infra_CHANGE.txt
   # To do that I scan the template in search for check_if_* parameters and make sure that they are set in init
   # I do not check their values, but only the existence
   while read TEMPLATE_LINE
@@ -143,8 +143,8 @@ do
 
   echo
   msgd "Loop through the init file and analyse the contents"
-  echo "#Changes as a result of contents analysis" >> $D_TMP/oracle_infra_ERROR.txt
-  echo "#Changes as a result of contents analysis" >> $D_TMP/oracle_infra_CHANGE.txt
+#  echo "#Changes as a result of contents analysis" >> $D_TMP/oracle_infra_ERROR.txt
+#  echo "#Changes as a result of contents analysis" >> $D_TMP/oracle_infra_CHANGE.txt
   while read INIT_LINE
   do
     msgri "."
