@@ -15,7 +15,7 @@ $oczy = array(
      "location" => "garaż",
      "video_url" => "http://192.168.1.232:8081",
      "hostname" => "192.168.1.232",
-     "rank" => 400
+     "rank" => 300
   ),
   "oko2" => array (
      "description" => "hejo",
@@ -37,7 +37,7 @@ $oczy = array(
      "location" => "salon kominek",
      "video_url" => "http://192.168.1.236:8081",
      "hostname" => "192.168.1.236",
-     "rank" => 400
+     "rank" => 600
   ),
   "okox" => array (
      "description" => "hejo",
@@ -60,9 +60,9 @@ echo "<BR>";
 print "<table border=1>";
 print "<tr><td colspan=3>";
 #print "<img src=http://192.168.1.234:8081/ border=0 width=600</a>";
-print "<img src=http://192.168.1.227/video.cgi border=0 width=600</a>";
+print "<img src=http://192.168.1.227/video.cgi border=0 width=200</a>";
 #print "</td><td colspan=3>";
-print "<img src=http://192.168.1.226/video.cgi border=0 width=600</a>";
+#print "<img src=http://192.168.1.226/video.cgi border=0 width=600</a>";
 print "</td></tr>";
 print "<tr><td>";
 foreach ($oczy as $i => $row)
