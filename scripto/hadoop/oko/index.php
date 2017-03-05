@@ -5,6 +5,8 @@
 require_once("/home/remik/scripto/php/my_library.php");
 require("header.php");
 
+#echo "<body onload=\"parent.window.location.reload()\">"; 
+
 //Global variables
 $min_size = 10;
 $max_size = 100;
@@ -16,6 +18,7 @@ $oczy = array(
      "location" => "garaż",
      "video_url" => "http://192.168.1.232:8081",
      "hostname" => "192.168.1.232",
+     "hot" => 0,
      "rank" => 300
   ),
   "oko2" => array (
@@ -23,13 +26,15 @@ $oczy = array(
      "location" => "pokój Adasia",
      "video_url" => "http://192.168.1.233:8081",
      "hostname" => "192.168.1.233",
-     "rank" => 400
+     "hot" => 0,
+     "rank" => 300
   ),
 /*  "oko3" => array (
      "description" => "hejo",
      "location" => "salon kominek",
      "video_url" => "http://192.168.1.234:8081",
      "hostname" => "192.168.1.233",
+     "hot" => 0,
      "rank" => 400
   ),
 */
@@ -38,14 +43,16 @@ $oczy = array(
      "location" => "salon kominek",
      "video_url" => "http://192.168.1.236:8081",
      "hostname" => "192.168.1.236",
-     "rank" => 600
+     "hot" => 0,
+     "rank" => 300
   ),
   "okox" => array (
      "description" => "hejo",
      "location" => "R&D",
      "video_url" => "http://192.168.1.235:8081",
      "hostname" => "192.168.1.235",
-     "rank" => 400
+     "hot" => 0,
+     "rank" => 300
   )
 );
 
@@ -69,11 +76,17 @@ $newest = array_slice($images, 0, 5);
 show_array($oczy);
 show_array($newest);
 
+$hot_base=300;
+$hot_counter = 1;
 foreach(array_keys($newest) as $paramName) {
   //echo $paramName . "<br>";
   list($trash1, $trash2, $trash3, $trash4) = split('_',$paramName);
   echo "<BR> ala ma kota " . $trash4;
   echo "<BR> rank: " . $oczy[$trash4]['rank'];
+  echo "<BR> hot before: " . $oczy[$trash4]['hot'];
+  $oczy[$trash4]['hot'] = ($hot_base / $hot_counter); 
+  echo "<BR> hot after: " . $oczy[$trash4]['hot'];
+  $hot_counter++;
 }
 
 
@@ -94,8 +107,8 @@ foreach ($oczy as $i => $row)
   $isFirst = ($i == 0);
   $isLast = ($i == $last);
 
-  echo "<a><img src=" . $row['video_url'] . "/ border=0 width=" . $row['rank'] . "></a>";
-  //echo "<BR" . $i . " " . $row['location'] . "<BR>";
+  echo "<a><img src=" . $row['video_url'] . "/ border=0 width=" . ($row['rank'] + $row['hot']) . "></a>";
+  echo "<br><a>score: " . ($row['rank'] + $row['hot']) . "</a>";
   echo "<br><a>" . $i . ": " . $row['location'] . "</a>";
 
   print "</td><td>";
