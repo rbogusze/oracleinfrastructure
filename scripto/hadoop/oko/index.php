@@ -2,6 +2,7 @@
 /* $Id: index.php,v 1.2 2012-05-17 11:04:09 orainf Exp $ */
 
 //Include HTML header
+require_once("/home/remik/scripto/php/my_library.php");
 require("header.php");
 
 //Global variables
@@ -51,6 +52,29 @@ $oczy = array(
 // measure the activity and based on that change the rank value
 $dir = "";
 
+
+// decide what camera is hot
+echo "ala ma kota";
+
+$folder = "/OKO";
+$images = array();
+foreach (scandir($folder) as $node) {
+    $nodePath = $folder . DIRECTORY_SEPARATOR . $node;
+    if (is_dir($nodePath)) continue;
+    $images[$nodePath] = filemtime($nodePath);
+}
+arsort($images);
+$newest = array_slice($images, 0, 5);
+
+show_array($oczy);
+show_array($newest);
+
+foreach(array_keys($newest) as $paramName) {
+  //echo $paramName . "<br>";
+  list($trash1, $trash2, $trash3, $trash4) = split('_',$paramName);
+  echo "<BR> ala ma kota " . $trash4;
+  echo "<BR> rank: " . $oczy[$trash4]['rank'];
+}
 
 
 // loop through the array
