@@ -3,7 +3,7 @@
 # Report what has changed in CVS
 # 
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -48,12 +48,13 @@ case $V_MODE in
       msgd "LINE: $LINE"
       D_CVS_FILE=`dirname $LINE`
       msgd "D_CVS_FILE: $D_CVS_FILE"
-      run_command "cd $D_CVS_FILE"
+      #run_command "cd $D_CVS_FILE"
+      cd $D_CVS_FILE
       F_CVS_FILE=`basename $LINE`
       msgd "F_CVS_FILE: $F_CVS_FILE"
       cvs diff -a -b -B -D $START_DATE -D $END_DATE $F_CVS_FILE | grep -v "cvs server: Diffing" | grep -v "retrieving revision" | grep -v "^diff -a -b -B" 
 
-exit 0
+#exit 0
     done < $F_TMP
 
     ;;
