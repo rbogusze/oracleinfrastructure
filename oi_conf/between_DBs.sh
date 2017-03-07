@@ -28,7 +28,7 @@ f_do_it()
   msgd "V_FIND_SEARCH: $V_FIND_SEARCH"
   check_parameter $V_FIND_SEARCH
   msgd "V_GREP_COND: $V_GREP_COND"
-  check_parameter $V_GREP_COND
+#  check_parameter $V_GREP_COND
 
 
   msgd "Cleanup for $F_BETWEEN_INIT"
@@ -73,8 +73,12 @@ f_do_it()
 # Just do it
 # - name of the file
 # - search string for find
+f_do_it opatch_lsinventory.txt opatch_lsinventory.txt " "
+
+exit 0
 f_do_it init.ora "dbinit.txt" "| grep -v '^#' | sed 's/^[^.]*\.//' | grep -v '^utl_file_dir' | grep -v 'control_files' | grep -v 'dispatchers' | grep -v 'service_names' | grep -v 'remote_listener' | grep -v 'instance_name' | grep -v 'instance_number' | grep -v '_ncomp_shared_objects_dir' | grep -v 'thread=' | grep -v 'undo_tablespace=' | grep -v 'log_archive_dest=' | sort"
 
+f_do_it dba_tables.txt dba_tables.txt "| sort"
 f_do_it SPM.txt SPM.txt "| sort"
 f_do_it AD_BUGS.txt AD_BUGS.txt "| sort"
 f_do_it invalids.txt invalids.txt "| sort"

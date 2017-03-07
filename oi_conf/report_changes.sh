@@ -3,7 +3,7 @@
 # Report what has changed in CVS
 # 
 
-#INFO_MODE=DEBUG
+INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -27,10 +27,13 @@ check_parameter $V_MODE
 
 # Compute start day as one week before today
 CURRENT_DATE=`date -I`
-START_DATE=$(date -I -d "$(date -d $CURRENT_DATE +%Y)-$(date -d $CURRENT_DATE +%m)-$(expr $(date -d $CURRENT_DATE +%d) - 7)")
+DELTA_DAYS=7
+START_DATE=`date -I -d "$CURRENT_DATE $DELTA_DAYS day ago"`
+msgd "START_DATE: $START_DATE"
 
 # Today
 END_DATE=`date -I`
+msgd "END_DATE: $END_DATE"
 
 case $V_MODE in
   "dbinit.txt")
@@ -50,7 +53,7 @@ case $V_MODE in
       msgd "F_CVS_FILE: $F_CVS_FILE"
       cvs diff -a -b -B -D $START_DATE -D $END_DATE $F_CVS_FILE | grep -v "cvs server: Diffing" | grep -v "retrieving revision" | grep -v "^diff -a -b -B" 
 
-#exit 0
+exit 0
     done < $F_TMP
 
     ;;
