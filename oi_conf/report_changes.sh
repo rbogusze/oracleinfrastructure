@@ -35,39 +35,25 @@ msgd "START_DATE: $START_DATE"
 END_DATE=`date -I`
 msgd "END_DATE: $END_DATE"
 
-case $V_MODE in
-  "dbinit.txt")
-    msgi "Provide diff for $V_MODE"
-    msgd "Go through the CVS_DIR and search for dbinit.txt files"
-    find $CVS_DIR -name dbinit.txt > $F_TMP
-    check_file $F_TMP
-    run_command_d "cat $F_TMP"
-    msgd "Loop through provided files list and give cvs diff"
-    while read LINE
-    do
-      msgd "LINE: $LINE"
-      D_CVS_FILE=`dirname $LINE`
-      msgd "D_CVS_FILE: $D_CVS_FILE"
-      #run_command "cd $D_CVS_FILE"
-      cd $D_CVS_FILE
-      F_CVS_FILE=`basename $LINE`
-      msgd "F_CVS_FILE: $F_CVS_FILE"
-      cvs diff -a -b -B -D $START_DATE -D $END_DATE $F_CVS_FILE | grep -v "cvs server: Diffing" | grep -v "retrieving revision" | grep -v "^diff -a -b -B" 
+msgi "Provide diff for $V_MODE"
+msgd "Go through the CVS_DIR and search for $V_MODE files"
+find $CVS_DIR -name $V_MODE > $F_TMP
+check_file $F_TMP
+run_command_d "cat $F_TMP"
+msgd "Loop through provided files list and give cvs diff"
+while read LINE
+do
+  msgd "LINE: $LINE"
+  D_CVS_FILE=`dirname $LINE`
+  msgd "D_CVS_FILE: $D_CVS_FILE"
+  #run_command "cd $D_CVS_FILE"
+  cd $D_CVS_FILE
+  F_CVS_FILE=`basename $LINE`
+  msgd "F_CVS_FILE: $F_CVS_FILE"
+  cvs diff -a -b -B -D $START_DATE -D $END_DATE $F_CVS_FILE | grep -v "cvs server: Diffing" | grep -v "retrieving revision" | grep -v "^diff -a -b -B" 
 
 #exit 0
-    done < $F_TMP
+done < $F_TMP
 
-    ;;
-  "all")
-    msgi "Generating raport from $START_DATE to $END_DATE"
-    cd $CVS_DIR
-    #cvs diff -a -b -B -D $START_DATE -D $END_DATE | grep -v "cvs server: Diffing" | grep -v "retrieving revision" | grep -v "^diff -a -b -B" | mail -s "Orifm weekly changes report" $RECIPIENTS
-    cvs diff -a -b -B -D $START_DATE -D $END_DATE | grep -v "cvs server: Diffing" | grep -v "retrieving revision" | grep -v "^diff -a -b -B" 
-    ;;
-  *)
-    msge "Unknown mode! Exiting."
-    exit 1
-    ;;
-esac
 
 
