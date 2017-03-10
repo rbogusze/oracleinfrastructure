@@ -19,7 +19,7 @@ $oczy = array(
      "video_url" => "http://192.168.1.232:8081",
      "hostname" => "192.168.1.232",
      "hot" => 0,
-     "rank" => 300
+     "rank" => 610
   ),
   "oko2" => array (
      "description" => "hejo",
@@ -27,7 +27,7 @@ $oczy = array(
      "video_url" => "http://192.168.1.233:8081",
      "hostname" => "192.168.1.233",
      "hot" => 0,
-     "rank" => 300
+     "rank" => 610
   ),
 /*  "oko3" => array (
      "description" => "hejo",
@@ -44,7 +44,7 @@ $oczy = array(
      "video_url" => "http://192.168.1.236:8081",
      "hostname" => "192.168.1.236",
      "hot" => 0,
-     "rank" => 300
+     "rank" => 610
   ),
   "okox" => array (
      "description" => "hejo",
@@ -52,7 +52,7 @@ $oczy = array(
      "video_url" => "http://192.168.1.235:8081",
      "hostname" => "192.168.1.235",
      "hot" => 0,
-     "rank" => 300
+     "rank" => 610
   )
 );
 
@@ -61,7 +61,6 @@ $dir = "";
 
 
 // decide what camera is hot
-echo "ala ma kota";
 
 $folder = "/OKO";
 $images = array();
@@ -73,19 +72,19 @@ foreach (scandir($folder) as $node) {
 arsort($images);
 $newest = array_slice($images, 0, 5);
 
-show_array($oczy);
-show_array($newest);
+//show_array($oczy);
+//show_array($newest);
 
 $hot_base=300;
 $hot_counter = 1;
 foreach(array_keys($newest) as $paramName) {
   //echo $paramName . "<br>";
   list($trash1, $trash2, $trash3, $trash4) = split('_',$paramName);
-  echo "<BR> ala ma kota " . $trash4;
-  echo "<BR> rank: " . $oczy[$trash4]['rank'];
-  echo "<BR> hot before: " . $oczy[$trash4]['hot'];
+//  echo "<BR> ala ma kota " . $trash4;
+//  echo "<BR> rank: " . $oczy[$trash4]['rank'];
+//  echo "<BR> hot before: " . $oczy[$trash4]['hot'];
   $oczy[$trash4]['hot'] = ($hot_base / $hot_counter); 
-  echo "<BR> hot after: " . $oczy[$trash4]['hot'];
+//  echo "<BR> hot after: " . $oczy[$trash4]['hot'];
   $hot_counter++;
 }
 
@@ -94,13 +93,25 @@ foreach(array_keys($newest) as $paramName) {
 $last = count($oczy) - 1;
 echo "<BR>";
 
-print "<table border=1>";
-print "<tr><td colspan=3>";
-#print "<img src=http://192.168.1.234:8081/ border=0 width=600</a>";
-print "<img src=http://192.168.1.227/video.cgi border=0 width=200</a>";
-#print "</td><td colspan=3>";
-#print "<img src=http://192.168.1.226/video.cgi border=0 width=600</a>";
+print "<table border=0>";
+print "<tr><td>";
+print "<img src=http://192.168.1.227/video.cgi border=0 width=610</a>";
+print "</td><td>";
+echo "<a><img src=" . $oczy['oko1']['video_url'] . "/ border=0 width="  . $oczy['oko1']['rank'] . "></a>";
 print "</td></tr>";
+print "</table>";
+print "<table border=0>";
+print "<tr><td>";
+echo "<a><img src=" . $oczy['oko2']['video_url'] . "/ border=0 width="  . $oczy['oko2']['rank'] . "></a>";
+print "</td><td>";
+echo "<a><img src=" . $oczy['oko4']['video_url'] . "/ border=0 width="  . $oczy['oko4']['rank'] . "></a>";
+print "</td></tr>";
+print "</table>";
+
+//Include footer file with navigation links
+require("footer.php");
+
+/*
 print "<tr><td>";
 foreach ($oczy as $i => $row)
 {
@@ -114,10 +125,7 @@ foreach ($oczy as $i => $row)
   print "</td><td>";
 }
 print "</td></tr>";
-
 print "</table>";
 
-
-//Include footer file with navigation links
-require("footer.php");
+*/
 
