@@ -13,7 +13,7 @@ set serveroutput on
 select cmd from (
 select '@' || '&1'  as cmd from dual
 union all
-select 'exec dbms_lock.sleep(&2);' as cmd from dual
+select '!sleep &2;' as cmd from dual
 union all
 select 'clear scr' as cmd from dual
 ) , (select rownum from dual connect by level <=&3) ;
@@ -23,3 +23,4 @@ set serveroutput on
 set head on
 clear scr
 @refresh_1.sql
+exit
