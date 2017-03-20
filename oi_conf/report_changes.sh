@@ -31,8 +31,9 @@ DELTA_DAYS=7
 START_DATE=`date -I -d "$CURRENT_DATE $DELTA_DAYS day ago"`
 msgd "START_DATE: $START_DATE"
 
-# Today
-END_DATE=`date -I`
+# Today, end date has to be in the future, then I do not have to mess with exact hours of when the change happened
+#END_DATE=`date -I`
+END_DATE=`date -I -d "$CURRENT_DATE -1 day ago"`
 msgd "END_DATE: $END_DATE"
 
 msgi "Provide diff for $V_MODE"
