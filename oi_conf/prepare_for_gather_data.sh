@@ -11,7 +11,7 @@ TMP_LOG_DIR=/tmp/oi_conf
 LOCKFILE=$TMP_LOG_DIR/lock_prepare_hosts_list
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out.txt
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then

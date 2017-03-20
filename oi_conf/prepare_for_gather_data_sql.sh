@@ -6,7 +6,7 @@ TMP_LOG_DIR=/tmp/oi_conf
 LOCKFILE=$TMP_LOG_DIR/lock_prepare_for_gather_data_sql
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out_sql.txt
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
