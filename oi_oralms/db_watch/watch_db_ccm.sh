@@ -1,17 +1,22 @@
 #!/bin/bash
 # 
+# This will execute somwthing like
+# $ sqlplus read_only/xx@DEVNGFR2 @refresh.sql ccm_currently_running 5 5
+# but will find password for you
+#
 
 # General variables
 PWD_FILE=/home/orainf/.passwords
 
 # Local variables
-TMP_LOG_DIR=/tmp/oi_conf
+TMP_LOG_DIR=/tmp/watch_db_ccm
 LOCKFILE=$TMP_LOG_DIR/lock_sql
 CONFIG_FILE=$TMP_LOG_DIR/ldap_out_sql.txt
 D_CVS_REPO=$HOME/conf_repo
 
 INFO_MODE=DEBUG
 
+CN=$1
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -21,145 +26,63 @@ else
   . $HOME/scripto/bash/bash_library.sh
 fi
 
-
 mkdir -p $TMP_LOG_DIR
 check_directory "$TMP_LOG_DIR"
-check_directory $D_CVS_REPO
 
-# Sanity check
-check_lock $LOCKFILE
+msgd "CN: $CN"
+check_parameter $CN
 
-# functions
-f_store_sql_output_in_file()
-{
-  msgd "${FUNCNAME[0]} Begin."
+msgd "Check LDAP for index hash to readonly user"
+LINE=`$HOME/scripto/perl/ask_ldap.pl "(cn=$CN)" "['cn', 'orainfDbReadOnlyUser', 'orainfDbReadOnlyIndexHash']"`
+msgd "LINE: $LINE"
 
-  CONFIG_FILE=$1
-  V_SQL=$2
-  V_NAME=$3
+V_USER=`echo $LINE | awk '{print $2}'`
+msgd "V_USER: $V_USER"
+check_parameter $V_USER
 
-  F_TMP=$TMP_LOG_DIR/sql.tmp
+INDEX_HASH=`echo $LINE | awk '{print $3}'`
+msgd "INDEX_HASH: $INDEX_HASH"
+HASH=`echo "$INDEX_HASH" | base64 --decode -i`
+msgd "HASH: $HASH"
+if [ -f "$PWD_FILE" ]; then
+  V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
+  #msgd "V_PASS: $V_PASS"
+else
+  msge "Unable to find the password file. Exiting"
+  exit 0
+fi
 
-  msgd "CONFIG_FILE: $CONFIG_FILE"
-  check_file $CONFIG_FILE
-  msgd "V_SQL: $V_SQL"
-  check_parameter $V_SQL
-  msgd "V_NAME: $V_NAME"
-  check_parameter $V_NAME
-
-  msgd "Look through the provided targets"
-  while read LINE
-  do
-    msgd "$LINE"
-    msgd "Skip line if it is a comment"
-    if [[ "$LINE" = \#* ]]; then
-      msgd "Line is a comment, skipping"      
-      continue
-    else
-      msgd "Line is NOT a comment. Procceding"
-      sleep 2
-    fi
-
-    CN=`echo $LINE | awk '{print $1}'` 
-    msgd "CN: $CN"
-    check_parameter $CN
-    msgi "Gathering $V_NAME for $CN"
-
-    V_USER=`echo $LINE | awk '{print $2}'`
-    msgd "V_USER: $V_USER"
-    check_parameter $V_USER
-
-    INDEX_HASH=`echo $LINE | awk '{print $3}'`
-    msgd "INDEX_HASH: $INDEX_HASH"
-    HASH=`echo "$INDEX_HASH" | base64 --decode -i`
-    msgd "HASH: $HASH"
-    if [ -f "$PWD_FILE" ]; then
-      V_PASS=`cat $PWD_FILE | grep $HASH | awk '{print $2}' | base64 --decode -i`
-      #msgd "V_PASS: $V_PASS"
-    else
-      msge "Unable to find the password file. Exiting"
-      exit 0
-    fi
-
-    msgd "Sanity check, trying to tnsping first to CN: $CN"
-    tnsping ${CN} > /tmp/run_initial_checks_tnsping.txt
-    if [ $? -eq 0 ]; then
-      msgd "OK, tnsping works"
-    else
-      msge "Error, tnsping $CN does not work. Skip this one."
-      run_command_d "cat /tmp/run_initial_checks_tnsping.txt"
-      continue
-    fi
+msgd "Sanity check, trying to tnsping first to CN: $CN"
+tnsping ${CN} > /tmp/run_initial_checks_tnsping.txt
+if [ $? -eq 0 ]; then
+  msgd "OK, tnsping works"
+else
+  msge "Error, tnsping $CN does not work. Skip this one."
+  run_command_d "cat /tmp/run_initial_checks_tnsping.txt"
+  continue
+fi
 
 
-    # OK, I have username, password and the database, it is time to connect
-    testavail=`sqlplus -S /nolog <<EOF
+# OK, I have username, password and the database, it is time to connect
+testavail=`sqlplus -S /nolog <<EOF
 set head off pagesize 0 echo off verify off feedback off heading off
 connect $V_USER/$V_PASS@$CN
 select trim(1) result from dual;
 exit;
 EOF`
 
-    if [ "$testavail" != "1" ]; then
-      msge "DB $CN not available, skipping !!"
-      continue
-    fi
+msgd "Checking if I can connect to DB: $CN"
+if [ "$testavail" != "1" ]; then
+  msge "DB $CN not available, exiting !!"
+  exit 1
+fi
 
-    #sqlplus -s /nolog << EOF > $F_TMP
-    sqlplus -s /nolog << EOF
-    set head off pagesize 0 echo off verify off feedback off heading off
-    set linesize 2000
-    set trimspool on
-    set trimout on
-    set wrap off
-    set termout off
-    spool $F_TMP
-    connect $V_USER/$V_PASS@$CN
-    alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
-    $V_SQL
-EOF
-#    run_command_d "cat $F_TMP"
-
-    msgd "Get the release version to be able to compare oranges with oranges"
-    F_CN_VER=$TMP_LOG_DIR/$CN
-    sqlplus -s /nolog << EOF > $F_CN_VER
-    set head off pagesize 0 echo off verify off feedback off heading off
-    set linesize 200
-    connect $V_USER/$V_PASS@$CN
-    select release_name from apps.fnd_product_groups;
+msgd "Actual execution."
+sqlplus -s /nolog << EOF
+connect $V_USER/$V_PASS@$CN
+select * from dual;
 EOF
 
-    run_command "cat $F_TMP | tr -s '[:blank:]' > $D_CVS_REPO/$CN/$V_NAME"
-    run_command "cd $D_CVS_REPO/$CN"
-    cvs add $V_NAME > /dev/null 2>&1
-    #cvs commit -m "Autocommit for $CN" $V_NAME
-    cvs commit -m "Auto added on `date -I` for $CN" $V_NAME
-
-
-#exit 0
-  done < $CONFIG_FILE
-
-
-  msgd "${FUNCNAME[0]} End."
-} #f_store_sql_output_in_file
-
-
-# Actual execution
-check_file $CONFIG_FILE
-run_command_d "cat $CONFIG_FILE"
-
-#exit 0
-
-# Execute main function used, where parameters mean:
-# - file with target attributes
-# - SQL to be executed
-# - output file name
-
-f_store_sql_output_in_file $CONFIG_FILE "select owner,table_name,num_rows,last_analyzed from dba_tables where owner not in ('SYS','SYSTEM') and num_rows is not null and num_rows > 10000 order by owner, table_name;" "dba_tables.txt"
-f_store_sql_output_in_file $CONFIG_FILE "select owner, object_name, object_type from dba_objects where status !='VALID' AND object_type NOT IN ('SYNONYM','MATERIALIZED VIEW') order by owner, object_name;" "invalids.txt"
-f_store_sql_output_in_file $CONFIG_FILE "SELECT sql_handle, plan_name, creator FROM dba_sql_plan_baselines where origin LIKE 'MANUAL%' order by sql_handle, plan_name;" "SPM.txt"
-f_store_sql_output_in_file $CONFIG_FILE "select BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where last_update_date > TO_DATE('2016/01/01', 'yyyy/mm/dd') order by last_update_date desc;" "AD_BUGS.txt"
-f_store_sql_output_in_file $CONFIG_FILE "select owner,segment_name, round(sum(bytes)/1024/1024) SIZE_MB from dba_segments group by owner,segment_name having sum(bytes)/1024/1024 > 100 order by 1,2 desc;" "dba_segments.txt"
 
 # On exit remove lock file
 rm -f $LOCKFILE
