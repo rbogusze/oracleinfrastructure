@@ -77,10 +77,12 @@ if [ "$testavail" != "1" ]; then
   exit 1
 fi
 
-msgd "Actual execution."
+msgd "Actual execution. @refresh.sql what every_x_sec number_of_executions"
+msgd "30 720 - this will take 6h"
+msgd "30 960 - this will take 8h"
 sqlplus -s /nolog << EOF
 connect $V_USER/$V_PASS@$CN
-select * from dual;
+@refresh.sql ccm_currently_running 30 960
 EOF
 
 
