@@ -1,7 +1,7 @@
 set linesize 200
 set pagesize 50
 column ARGUMENT_TEXT format a30
-column USER_CONCURRENT_PROGRAM_NAME format a55
+column USER_CONCURRENT_PROGRAM_NAME format a52
 column USER_NAME format a18
 column DURATION format 999999
 column REQ_ID format 9999999
