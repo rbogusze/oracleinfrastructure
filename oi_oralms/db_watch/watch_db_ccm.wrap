@@ -81,7 +81,7 @@ msgd "30 720 - this will take 6h"
 msgd "30 960 - this will take 8h"
 sqlplus -s /nolog << EOF 
 connect $V_USER/$V_PASS@$CN
-@refresh.sql ccm_currently_running 10 9
+@refresh.sql ccm_currently_running 30 960
 EOF
 
 
