@@ -11,8 +11,6 @@ PWD_FILE=/home/orainf/.passwords
 # Local variables
 TMP_LOG_DIR=/tmp/watch_db_ccm
 LOCKFILE=$TMP_LOG_DIR/lock_sql
-LOGFILE=$TMP_LOG_DIR/`date '+%Y-%m-%d--%H:%M:%S'`_log.txt
-CONFIG_FILE=$TMP_LOG_DIR/ldap_out_sql.txt
 D_CVS_REPO=$HOME/conf_repo
 
 INFO_MODE=DEBUG
