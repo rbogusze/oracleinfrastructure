@@ -1,3 +1,8 @@
+set heading off
+column VALUE format a20
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select sysdate, value from v$parameter where name = 'db_name';
+set heading on
 set linesize 200
 set pagesize 50
 column ARGUMENT_TEXT format a30
