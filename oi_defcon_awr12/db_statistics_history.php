@@ -14,7 +14,7 @@ $history_range=$_GET['history_range'];
 $silent=$_GET['silent'];
 
 if (! $history_range) {
-  $history_range = 60;
+  $history_range = 180;
 }
 
 // do not show any messages / options when silent switch is on
