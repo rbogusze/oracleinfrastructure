@@ -15,7 +15,7 @@ $dir=$_GET['dir'];
 list($trash, $trash, $trash, $trash, $trash, $sid)=split('/', $dir);
 
 echo "<tt>DEFCON for DB: <B> $sid, </B> <a href=\"index.php\" >Back to DB list</a> <BR></tt>";
-echo "<table><td width=550 valign=top>";
+echo "<table><td width=750 valign=top>";
 //echo "<table><td valign=top>";
 
 if (!$eJahr or !$eMonat or !$eJahr) {
@@ -83,6 +83,7 @@ echo "<a href=\"db_statistics.php?dir=$dir&filename=$filename\" >| Database Stat
 echo "<a href=\"db_statistics_graph.php?dir=$dir&filename=$filename\" >| Database Statistics with graphs (slow)</a> ";
 echo "<a href=\"sga_breakdown.php?dir=$dir&filename=$filename\" >| Shared Pool Statistics</a> ";
 echo "<a href=\"wait_events.php?dir=$dir&filename=$filename\" >| Wait Events |</a> ";
+echo "<a href=\"database_sql_history.php?dir=$dir&filename=$filename\" > Database SQL History |</a> ";
 
 //Show diagnostics for the current date
 //echo "<BR><BR> Diagnostic scripts ( includes contents of cache ) <BR>";
