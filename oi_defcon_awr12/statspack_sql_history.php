@@ -22,7 +22,8 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
   //echo "<BR> filename2: $filename2";
 
   echo "<table><tr><td> Module-exp </td><td> FullHistor </td><td> Exec</td></tr>";
-  echo "<tr><td></td><td></td><td></td><td rowspan=50><img src=\"draw_chart_section.php?chart_data=$tmp1&chart_leg=$tmp2&chart_title=$section_name&chart_width=$width&chart_height=$height\" border=0 align=center width= height=></td></tr>";
+//  echo "<tr><td></td><td></td><td></td><td rowspan=50><img src=\"draw_chart_section.php?chart_data=$tmp1&chart_leg=$tmp2&chart_title=$section_name&chart_width=$width&chart_height=$height\" border=0 align=center width= height=></td></tr>";
+  echo "<b>$section_name </b>";
 
   //Now the rest of table
   for($j=0;$j<count($chart_data);$j++)
@@ -277,19 +278,19 @@ fclose ($fh);
 echo "<table><tr><td>";
 
 draw_chart_section($dir, $filename, $data_values5, $data_values5_label, $data_values5_module, "Elapsed_Time", $data_values5_executions, $timestamp, 400, 500, $sql_id);
-echo "</td><td>";
+//echo "</td><td>";
 draw_chart_section($dir, $filename, $data_values1, $data_values1_label, $data_values1_module, "Buffer_Gets", $data_values1_executions, $timestamp, 400, 500, $sql_id);
-echo "</td>";
-echo "</tr><tr>";
-echo "<td>";
+//echo "</td>";
+//echo "</tr><tr>";
+//echo "<td>";
 draw_chart_section($dir, $filename, $data_values2, $data_values2_label, $data_values2_module, "Physical_Reads", $data_values2_executions, $timestamp, 400, 500, $sql_id);
-echo "</td><td>";
+//echo "</td><td>";
 draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500, $sql_id);
-echo "</td>";
-echo "</tr><tr>";
-echo "<td>";
+//echo "</td>";
+//echo "</tr><tr>";
+//echo "<td>";
 draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Executions", $data_values6, $timestamp, 400, 500, $sql_id);
-echo "</td><td>";
+//echo "</td><td>";
 draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7_executions, $timestamp, 400, 500, $sql_id);
 echo "</td></tr><tr><td>";
 

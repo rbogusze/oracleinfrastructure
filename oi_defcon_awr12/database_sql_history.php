@@ -3,7 +3,7 @@
 
 //Include HTML header
 require_once("/home/orainf/scripto/php/my_library.php");
-require("statspack.php");
+require("statspack_sql_history.php");
 require("header.php");
 
 $dir=$_GET['dir'];
