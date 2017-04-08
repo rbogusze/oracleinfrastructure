@@ -44,7 +44,11 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
     print "</td><td width=80>";
     print $each_data_executions["value"];
     print "</span>";
+    print "</td></tr><tr><td colspan=3>";
+    echo "ala aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     print "</td></tr>";
+
+
   }
   echo "</table>";
 
