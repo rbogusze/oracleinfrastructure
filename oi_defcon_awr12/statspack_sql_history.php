@@ -44,8 +44,17 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
     print "</td><td width=80>";
     print $each_data_executions["value"];
     print "</span>";
-    print "</td></tr><tr><td colspan=3>";
+    print "</td></tr><tr><td colspan=4>";
     echo "ala aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+
+    //$trash1 = str_replace(" ", "%20", $trash1);
+    //$remote_url = "db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "&history_range=118&silent=1" ;
+    //echo "<tr><td colspan=4>";
+
+    $remote_url = "hash_history.php?dir=" . $dir . "hash_history/" . "&hash_value=" . $each_chart_leg["value"] ;
+    echo "<br> remote_url: $remote_url <br>";
+    echo file_get_contents("http://logwatch/oi_defcon_awr12/" . $remote_url);
+
     print "</td></tr>";
 
 
