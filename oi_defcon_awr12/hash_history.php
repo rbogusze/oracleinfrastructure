@@ -5,13 +5,19 @@
 require_once("/home/orainf/scripto/php/my_library.php");
 require("header.php");
 require("hash_history_functions.php");
-echo "<tt>SQL History <BR></tt>";
-echo "<table><td width=1000 valign=top>";
 
 $hash_value=$_GET['hash_value'];
 
 $dir=$_GET['dir'];
 $history_range=$_GET['history_range'];
+$silent=$_GET['silent'];
+$show_elapsed_time=$_GET['show_elapsed_time'];
+$show_cpu_time=$_GET['show_cpu_time'];
+$show_executions=$_GET['show_executions'];
+$show_buffer_gets=$_GET['show_buffer_gets'];
+$show_cpu_time_per_exec=$_GET['show_cpu_time_per_exec'];
+$show_elapsed_time_per_exec=$_GET['show_elapsed_time_per_exec'];
+$show_buffer_gets_per_exec=$_GET['show_buffer_gets_per_exec'];
 
 $filenames_array = array();
 $filenames_array_counter = 0;
@@ -19,20 +25,38 @@ $filenames_array_counter = 0;
 $data_values = array();
 $data_values_counter = 0;
 
-// Present the urls with different history range
-if (! $history_range) {
-  $history_range = 60;
-}
-echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=30" . "\" >Last 30 days </a>";
-echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=60" . "\" >Last 60 days </a>";
-echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=180" . "\" >Last 180 days </a>";
-echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=360" . "\" >Last 360 days </a>";
-echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=unlimited" . "\" >Unlimited days </a>";
-
-echo "<BR>Current History Range: $history_range <BR>";
+// by default turn on all sections if not disabled
+if (! $show_elapsed_time) { $show_elapsed_time=yes; }
+if (! $show_cpu_time) { $show_cpu_time=yes; }
+if (! $show_executions) { $show_executions=yes; }
+if (! $show_buffer_gets) { $show_buffer_gets=yes; }
+if (! $show_cpu_time_per_exec) { $show_cpu_time_per_exec=yes; }
+if (! $show_elapsed_time_per_exec) { $show_elapsed_time_per_exec=yes; }
+if (! $show_buffer_gets_per_exec) { $show_buffer_gets_per_exec=yes; }
+//echo "<BR> show_elapsed_time: $show_elapsed_time <BR>";
 
 
-echo "<BR> hash_value: $hash_value <BR>";
+
+
+// do not show any messages / options when silent switch is on
+if ( ! $silent ) {
+  echo "<tt>SQL History <BR></tt>";
+  echo "<table><td width=1000 valign=top>";
+
+  // Present the urls with different history range
+  if (! $history_range) {
+    $history_range = 60;
+  } 
+  echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=30" . "\" >Last 30 days </a>";
+  echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=60" . "\" >Last 60 days </a>";
+  echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=180" . "\" >Last 180 days </a>";
+  echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=360" . "\" >Last 360 days </a>";
+  echo "<a href=\"hash_history.php?dir=". $dir . "&hash_value=" . $hash_value . "&history_range=unlimited" . "\" >Unlimited days </a>";
+
+  echo "<BR>Current History Range: $history_range <BR>";
+  echo "<BR> hash_value: $hash_value <BR>";
+} //if ( $silent)
+
 // Open a known directory, and proceed to read its contents to array 
 // Prepare a table with every statspack file
 if (is_dir($dir)) {
@@ -102,17 +126,18 @@ list($a_buffer_gets_timestamp, $a_buffer_gets, $a_buffer_gets_per_exec, $a_trash
 // 5 - Y/N whether to print the table with SQL explain plans through history. I provide the clean hash number if yes
 // 6 - $dir - directory needed for sql explain plan in the end table
 
-echo "<BR><HR><B>Per instance statistics</B><BR>";
-draw_chart($a_elapsed_time, $a_elapsed_time_timestamp, ("Sql Id: " . $hash_value ), "Elapsed Time (ms)", 0, "");
-draw_chart($a_cpu_time, $a_cpu_time_timestamp, ("Sql Id: " . $hash_value ), "CPU Time (ms)", 0, "");
-draw_chart($a_executions, $a_executions_timestamp, ("Sql Id: " . $hash_value ), "Executions", 0, "");
-draw_chart($a_buffer_gets, $a_buffer_gets_timestamp, ("Sql Id: " . $hash_value ), "Buffer Gets", "$hash_value", "$dir", $filenames_array);
 
-echo "<BR><HR><B>Per execution statistics</B><BR>";
+if ( ! $silent ) { echo "<BR><HR><B>Per instance statistics</B><BR>"; }
+if ( $show_elapsed_time == "yes" ) { draw_chart($a_elapsed_time, $a_elapsed_time_timestamp, ("Sql Id: " . $hash_value ), "Elapsed Time (ms)", 0, ""); }
+if ( $show_cpu_time == "yes" ) { draw_chart($a_cpu_time, $a_cpu_time_timestamp, ("Sql Id: " . $hash_value ), "CPU Time (ms)", 0, ""); }
+if ( $show_executions == "yes" ) { draw_chart($a_executions, $a_executions_timestamp, ("Sql Id: " . $hash_value ), "Executions", 0, ""); }
+if ( $show_buffer_gets == "yes" ) { draw_chart($a_buffer_gets, $a_buffer_gets_timestamp, ("Sql Id: " . $hash_value ), "Buffer Gets", "$hash_value", "$dir", $filenames_array); }
 
-draw_chart($a_cpu_time_per_exec, $a_cpu_time_timestamp, ("Sql Id: " . $hash_value ), "CPU Time (ms) per execution", 0, "");
-draw_chart($a_elapsed_time_per_exec, $a_elapsed_time_timestamp, ("Sql Id: " . $hash_value ), "Elapsed Time (ms) per execution", 0, "");
-draw_chart($a_buffer_gets_per_exec, $a_buffer_gets_timestamp, ("Sql Id: " . $hash_value ), "Buffer Gets per execution", "$hash_value", "$dir", $filenames_array);
+if ( ! $silent ) { echo "<BR><HR><B>Per execution statistics</B><BR>"; }
+
+if ( $show_cpu_time_per_exec == "yes" ) { draw_chart($a_cpu_time_per_exec, $a_cpu_time_timestamp, ("Sql Id: " . $hash_value ), "CPU Time (ms) per execution", 0, ""); }
+if ( $show_elapsed_time_per_exec == "yes" ) { draw_chart($a_elapsed_time_per_exec, $a_elapsed_time_timestamp, ("Sql Id: " . $hash_value ), "Elapsed Time (ms) per execution", 0, ""); }
+if ( $show_buffer_gets_per_exec == "yes" ) { draw_chart($a_buffer_gets_per_exec, $a_buffer_gets_timestamp, ("Sql Id: " . $hash_value ), "Buffer Gets per execution", "$hash_value", "$dir", $filenames_array); }
 //Include footer file with navigation links
 require("footer.php");
 exit;

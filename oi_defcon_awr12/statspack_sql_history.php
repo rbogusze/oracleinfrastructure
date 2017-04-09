@@ -45,14 +45,13 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
     print $each_data_executions["value"];
     print "</span>";
     print "</td></tr><tr><td colspan=4>";
-    echo "ala aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     //$trash1 = str_replace(" ", "%20", $trash1);
     //$remote_url = "db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "&history_range=118&silent=1" ;
     //echo "<tr><td colspan=4>";
 
-    $remote_url = "hash_history.php?dir=" . $dir . "hash_history/" . "&hash_value=" . $each_chart_leg["value"] ;
-    echo "<br> remote_url: $remote_url <br>";
+    $remote_url = "hash_history.php?dir=" . $dir . "hash_history/" . "&hash_value=" . $each_chart_leg["value"] . "&history_range=118&silent=1&show_cpu_time=no&show_buffer_gets=no&show_cpu_time_per_exec=no&show_elapsed_time_per_exec=no&show_buffer_gets_per_exec=no";
+    //echo "<br> remote_url: $remote_url <br>";
     echo file_get_contents("http://logwatch/oi_defcon_awr12/" . $remote_url);
 
     print "</td></tr>";
@@ -291,30 +290,12 @@ fclose ($fh);
 echo "<table><tr><td>";
 
 draw_chart_section($dir, $filename, $data_values5, $data_values5_label, $data_values5_module, "Elapsed_Time", $data_values5_executions, $timestamp, 400, 500, $sql_id);
-//echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values1, $data_values1_label, $data_values1_module, "Buffer_Gets", $data_values1_executions, $timestamp, 400, 500, $sql_id);
-//echo "</td>";
-//echo "</tr><tr>";
-//echo "<td>";
-draw_chart_section($dir, $filename, $data_values2, $data_values2_label, $data_values2_module, "Physical_Reads", $data_values2_executions, $timestamp, 400, 500, $sql_id);
-//echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500, $sql_id);
-//echo "</td>";
-//echo "</tr><tr>";
-//echo "<td>";
-draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Executions", $data_values6, $timestamp, 400, 500, $sql_id);
-//echo "</td><td>";
-draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7_executions, $timestamp, 400, 500, $sql_id);
+//draw_chart_section($dir, $filename, $data_values1, $data_values1_label, $data_values1_module, "Buffer_Gets", $data_values1_executions, $timestamp, 400, 500, $sql_id);
+//draw_chart_section($dir, $filename, $data_values2, $data_values2_label, $data_values2_module, "Physical_Reads", $data_values2_executions, $timestamp, 400, 500, $sql_id);
+//draw_chart_section($dir, $filename, $data_values3, $data_values3_label, $data_values3_module, "CPU_Usage", $data_values3_executions, $timestamp, 400, 500, $sql_id);
+//draw_chart_section($dir, $filename, $data_values6, $data_values6_label, $data_values6_module, "Executions", $data_values6, $timestamp, 400, 500, $sql_id);
+//draw_chart_section($dir, $filename, $data_values7, $data_values7_label, $data_values7_module, "Cluster_Wait", $data_values7_executions, $timestamp, 400, 500, $sql_id);
 echo "</td></tr><tr><td>";
-
-//Now I need to build a large array and sort it by time elapsed
-// not needed from 10g
-//$data_merged_label = array_merge($data_values1_label, $data_values2_label);
-//$data_merged_elapsedtime = array_merge($data_values1_elapsedtime, $data_values2_elapsedtime);
-//$data_merged_module = array_merge($data_values1_module, $data_values2_module);
-//$data_merged_executions = array_merge($data_values1_executions, $data_values2_executions);
-//array_multisort($data_merged_elapsedtime, $data_merged_label, $data_merged_module, $data_merged_executions);
-//draw_chart_section($dir, array_reverse($data_merged_elapsedtime), array_reverse($data_merged_label), array_reverse($data_merged_module), "Elapsed time - in seconds", array_reverse($data_merged_executions), $timestamp, 400, 900);
 
 echo "</td></tr></table>";
 
