@@ -23,7 +23,8 @@ function draw_chart_section($dir, $filename, $chart_data, $chart_leg, $data_modu
 
   echo "<table><tr><td> Module-exp </td><td> FullHistor </td><td> Exec</td></tr>";
 //  echo "<tr><td></td><td></td><td></td><td rowspan=50><img src=\"draw_chart_section.php?chart_data=$tmp1&chart_leg=$tmp2&chart_title=$section_name&chart_width=$width&chart_height=$height\" border=0 align=center width= height=></td></tr>";
-  echo "<b>$section_name </b>";
+  //echo "<b>$section_name </b>";
+  echo "<a name=$section_name>$section_name </a>";
 
   //Now the rest of table
   for($j=0;$j<count($chart_data);$j++)
@@ -286,6 +287,13 @@ fclose ($fh);
 //show_array($data_values2_label);
 //show_array($data_values2_elapsedtime);
 //show_array($data_values2_executions);
+
+echo "<a href=#Elapsed_Time>Elapsed_Time </a>";
+echo "<a href=#Buffer_Gets>Buffer_Gets </a>";
+echo "<a href=#Physical_Reads>Physical_Reads </a>";
+echo "<a href=#CPU_Usage>CPU_Usage </a>";
+echo "<a href=#Executions>Executions </a>";
+echo "<a href=#Cluster_Wait>Cluster_Wait </a>";
 
 echo "<table><tr><td>";
 
