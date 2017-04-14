@@ -3,7 +3,8 @@ select * from APPLSYS.AD_BUGS;
 select * from dual;
 
 -- find my session
-SELECT SID, SERIAL#, OSUSER, USERNAME, MACHINE, PROCESS FROM V$SESSION WHERE audsid = userenv('SESSIONID');
+SELECT SID, SERIAL#, OSUSER, USERNAME, MACHINE, PROCESS 
+FROM V$SESSION WHERE audsid = userenv('SESSIONID');
 
 -- Version
 @version
@@ -92,7 +93,7 @@ select owner, index_name, table_name, pct_free, ini_trans, max_trans, last_analy
 
 -- bind variables
 SELECT name,      position ,      datatype_string ,      was_captured,      value_string  
-FROM   v$sql_bind_capture  WHERE  sql_id = '8t7gxquf6h1hw';
+FROM   v$sql_bind_capture  WHERE  sql_id = '9y3atws32v91s';
 
 --FND_LOGIN
 select count(*) from FND_LOGIN_RESP_FORMS;
@@ -102,6 +103,10 @@ select count(*) from FND_UNSUCCESSFUL_LOGINS;
 
 -- AWR create snap
 exec DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT;
+
+-- AWR retention time
+select dbid from v$database;
+select * from dba_hist_wr_control;
 
 
 -- Finding OS PID from session with status KILLED
@@ -159,7 +164,7 @@ set linesize 200
 
 @tpt/snapper ash=sql_id+event+wait_class+blocking_session+p2+p3 5 1 1275
 @tpt/sqlt apq1zzdn99xv2
-select * from v$sql where sql_id = 'apq1zzdn99xv2';
+select * from v$sql where sql_id = '2rda1m6x0jjbt';
 
 @tpt/snapper ash 15 1 1587
 ---------------------------------------------------------------------------------------------------------------
@@ -266,7 +271,7 @@ How Can Temporary Segment Usage Be Monitored Over Time? (Doc ID 364417.1)
 -- http://download.oracle.com/docs/cd/B19306_01/server.102/b14237/dynviews_2161.htm
 -- V$TEMP_SPACE_HEADER shows total free bytes (allocated but available for reuse are not shown here)
 -- this can show nothing is free, but that means only that it was once allocated and probably can be used again now - see below queries for more accurate info
-select * from V$TEMP_SPACE_HEADER;
+select * from V$TEMP_SPACE_HEADER order by blocks_used desc;
 select TABLESPACE_NAME, round(BYTES_USED/1024/1024) MB_USED, round(BYTES_FREE/1024/1024) MB_FREE from V$TEMP_SPACE_HEADER;
 select file#, name, round(bytes/(1024*1024),2) "SIZE IN MB's" from v$tempfile;
 select TABLESPACE_NAME, FILE_NAME, BYTES, AUTOEXTENSIBLE, MAXBYTES from dba_temp_files order by TABLESPACE_NAME;
@@ -288,7 +293,7 @@ FROM v$session a, v$tempseg_usage b, v$sqlarea c
 WHERE a.saddr = b.session_addr
 AND c.address= a.sql_address
 AND c.hash_value = a.sql_hash_value
-ORDER BY b.tablespace, b.blocks;
+ORDER BY b.blocks desc;
 
 
 /*
@@ -314,6 +319,34 @@ select pool, name, round(bytes/(1024 * 1024)) size_mb from v$sgastat where pool=
 -- SHARED_POOL_SIZE is too small if REQUEST_FAILURES is greater than zero and increasing.
 select * from V$SHARED_POOL_RESERVED;
 
+/*
+##############################################################
+-- Result cache
+##############################################################
+*/
+-- Troubleshooting Performance Issues when Result Cache is Full (Doc ID 2143739.1)
+-- Statistics for Cached Results
+https://docs.oracle.com/cd/E11882_01/server.112/e41573/memory.htm#BGBEEIHB
+select * from V$RESULT_CACHE_OBJECTS;
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select * from V$RESULT_CACHE_OBJECTS order by creation_timestamp desc;
+SELECT name, value FROM V$RESULT_CACHE_STATISTICS;
+select * from v$parameter where name like '%result_cache%';
+select * from v$sql where SQL_TEXT like '%result_cache%' order by last_load_time desc;
+EXECUTE DBMS_RESULT_CACHE.MEMORY_REPORT;
+-- Show the largest objects occupying RC (running that locks the RC for short time)
+select namespace, status, name,
+count(*) number_of_results,
+round(avg(scan_count)) avg_scan_cnt,
+round(max(scan_count)) max_scan_cnt,
+round(sum(block_count)) tot_blk_cnt
+from v$result_cache_objects
+where type = 'Result'
+group by namespace, name, status
+--order by namespace, tot_blk_cnt;
+order by number_of_results desc;
+
+
 
 
 /*
@@ -333,12 +366,7 @@ alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select * from ad_adop_sessions order by apply_start_date desc;
 select * from ad_adop_session_patches order by end_date desc;
 
--- Result cache
-Statistics for Cached Results
-https://docs.oracle.com/cd/E11882_01/server.112/e41573/memory.htm#BGBEEIHB
-select * FROM V$RESULT_CACHE_OBJECTS;
-select * from v$parameter where name like '%result_cache%';
-select * from v$sql where SQL_TEXT like '%result_cache%' order by last_load_time desc;
+
 
 --TEMP
 
@@ -407,6 +435,12 @@ select executions, count(*) from v$sql group by executions order by 2 desc;
 select count(*) from v$sql;
 select executions from v$sql order by executions desc;
 select executions,sql_text from v$sql order by executions desc;
+-- what is new and probably hard-parsed
+select * from v$sql order by last_load_time desc;
+select sql_id, plan_hash_value, executions, module, action, last_load_time, sql_text  from v$sql order by last_load_time desc;
+select count(*) from v$sql where PLAN_HASH_VALUE = 1108335062;
+
+
 
 -- preparing a query to automatically purge the
 select count(*) from v$sqlarea where executions = 1;
@@ -465,6 +499,7 @@ select * from v$session;
 select username, count(*) from v$session group by username;
 select machine, count(*) from v$session group by machine order by 2 desc;
 select program, count(*) from v$session group by program order by 2 desc;
+select status, count(*) from v$session where program ='JDBC Thin Client' group by status order by 2 desc ;
 select min(first_connect), count(*) from icx.icx_sessions;
 
 
@@ -478,266 +513,44 @@ order by a.ksppinm;
 select a.ksppinm  "Parameter", b.ksppstvl "Session Vale", c.ksppstvl "Instance Value"
   from sys.x$ksppi a, sys.x$ksppcv b, sys.x$ksppsv c
  where a.indx = b.indx and a.indx = c.indx
-   and ksppinm in ('_optimizer_aggr_groupby_elim','_optimizer_reduce_groupby_key')
+   and ksppinm in ('_result_cache_global','_optimizer_reduce_groupby_key')
 order by a.ksppinm;
 
 
+-- ASH
+select * from V$ACTIVE_SESSION_HISTORY;
+select * from V$ACTIVE_SESSION_HISTORY where session_id=4943 order by sample_time desc;
+select sample_time, sql_id, sql_plan_operation, session_state, event from V$ACTIVE_SESSION_HISTORY 
+where session_id=2722 order by sample_time desc;
+
+-- scheduler jobs
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+SELECT * FROM DBA_SCHEDULER_JOBS;
+SELECT * FROM DBA_SCHEDULER_JOB_RUN_DETAILS order by actual_start_date desc;
+SELECT * FROM dba_jobs_running;
+SELECT * FROM dba_scheduler_running_jobs;
+
+select client_name, status
+from dba_autotask_client
+where client_name = 'auto space advisor';
 
 /* ########################################################
                   TMP
    ######################################################## */
 
+XXDNVGL.XXDNVGL_PA_PRJ_TASKS_STG_TBL
+
+@o XXDNVGL_PA_PRJ_TASKS_STG_TBL
+
+select OWNER, TABLE_NAME, LAST_ANALYZED, num_rows from dba_tables where table_name in ('XXDNVGL_PA_PRJ_TASKS_STG_TBL','PA_TASKS') order by last_analyzed desc;    
+-- OWNER	TABLE_NAME	LAST_ANALYZED	NUM_ROWS
+-- XXDNVGL	XXDNVGL_PA_PRJ_TASKS_STG_TBL	2017-03-06 06:09:10	35058
+select count(*) from XXDNVGL.XXDNVGL_PA_PRJ_TASKS_STG_TBL;
+-- 21736
 
 
+select result_cache, count(*) from dba_tables group by result_cache;
+select * from V$RESULT_CACHE_OBJECTS;
+select sysdate, value from v$parameter where name = 'db_name';
    
--- AWR retention time
-select dbid from v$database;
-select * from dba_hist_wr_control;
-   
--- tmp
-select * from DBA_SCHEDULER_JOBS;
-show parameter recovery
-select * from v$sql where sql_id ='6ghzns6q0vj5j';
-@o XXDNVGL_ZX_TAX_RATES
-show parameter recycle
-show parameter optimizer_adaptive_features
-show parameter _optimizer_autostats_job
-SELECT a.ksppinm "Parameter",
-       b.ksppstvl "Session Value",
-       c.ksppstvl "Instance Value",
-       decode(bitand(a.ksppiflg/256,1),1,'TRUE','FALSE') IS_SESSION_MODIFIABLE, 
-       decode(bitand(a.ksppiflg/65536,3),1,'IMMEDIATE',2,'DEFERRED',3,'IMMEDIATE','FALSE') IS_SYSTEM_MODIFIABLE
-FROM   sys.x$ksppi a,
-       sys.x$ksppcv b,
-       sys.x$ksppsv c
-WHERE  a.indx = b.indx
-AND    a.indx = c.indx
-AND    a.ksppinm LIKE '/_%' escape '/'
-;
-
-select  * from    apps.ad_bugs where   bug_number = 23703137;
-
-show parameter nls
-
-select value from NLS_DATABASE_PARAMETERS where parameter='NLS_CHARACTERSET';
-select * from NLS_SESSION_PARAMETERS;
-select * from NLS_INSTANCE_PARAMETERS;
-
-select username from dba_users;
-
-select OWNER, TABLE_NAME, LAST_ANALYZED, num_rows, sample_size from dba_tables where owner='HXT';
-select count(*) from HXC.HXC_RETRIEVAL_RANGE_BLKS;
-
-@o pa_online_projects_v
-
-APPS            PA_ONLINE_TASKS_V              VIEW     
-APPS            PA_ONLINE_PROJECTS_V           VIEW   
-
-show parameter shared
-
-
-select OWNER, TABLE_NAME, LAST_ANALYZED, num_rows, sample_size from dba_tables where table_name  = upper('gl_code_combinations') or table_name = upper('gl_temporary_combinations');
-select count(*) from GL.GL_TEMPORARY_COMBINATIONS;
-
-APPS.XXDNVGL_YEAR_WEEK
-
-SELECT v$access.sid, v$session.serial#
-FROM v$session,v$access
-WHERE v$access.sid = v$session.sid and v$access.object = 'FND_CP_FNDSM'
-GROUP BY v$access.sid, v$session.serial#;
-
-
-21087115
-select OWNER, TABLE_NAME, LAST_ANALYZED, num_rows from dba_tables where table_name = 'GL_JE_HEADERS';
-
-select * from APPS.GL_JE_HEADERS;
-select * from APPS.GL_JE_HEADERS AS OF TIMESTAMP to_timestamp('19-10-16 05:47:00','DD-MM-YY HH24:MI:SS');
-
-select * from APPS.GL_JE_HEADERS AS OF TIMESTAMP to_timestamp('19-10-16 04:11:18','DD-MM-YY HH24:MI:SS') WHERE JE_HEADER_ID=4255866;  
-
-select * from APPS.GL_JE_HEADERS AS OF TIMESTAMP to_timestamp('19-10-16 01:00:00','DD-MM-YY HH24:MI:SS') WHERE JE_HEADER_ID=4255866;  
-
-select a.*
-from APPS.GL_JE_HEADERS AS OF TIMESTAMP to_timestamp('20-10-16 01:00:00','DD-MM-YY HH24:MI:SS') a
-where a.JE_HEADER_ID=427031;
-
-select a.*
-from APPS.GL_IMPORT_REFERENCES AS OF TIMESTAMP to_timestamp('20-10-16 04:06:00','DD-MM-YY HH24:MI:SS') a
-where a.JE_HEADER_ID=4274031;
-
-select a.*
-from APPS.GL_JE_BATCHES AS OF TIMESTAMP to_timestamp('20-10-16 07:00:00','DD-MM-YY HH24:MI:SS') a
-where a.JE_BATCH_ID=228639;
-
-select a.*
-from APPS.GL_LEDGERS AS OF TIMESTAMP to_timestamp('15-10-16 01:00:00','DD-MM-YY HH24:MI:SS') a
-where a.ledger_id=2022;
-
-select 
-a.*
-from apps.GL_PERIODS AS OF TIMESTAMP to_timestamp('20-10-16 01:00:00','DD-MM-YY HH24:MI:SS') a
-where a.period_set_name='DNVGL'
-and a.PERIOD_NAME='OCT-16';
-
-select	
-	TO_CHAR(SQ_GL_JE_HDR.JE_BATCH_ID)||'~'||TO_CHAR(SQ_GL_JE_HDR.JE_HEADER_ID)||'~'||TO_CHAR(SQ_GL_JE_HDR.JE_LINE_NUM)||'~'||TO_CHAR(SQ_GL_JE_HDR.GL_SL_LINK_ID)||'~'||SQ_GL_JE_HDR.GL_SL_LINK_TABLE	   C13_INTEGRATION_ID,
-	SQ_GL_JE_HDR.BATCH_NAME	   C1_BATCH_NAME,
-	SQ_GL_JE_HDR.HEADER_NAME	   C2_HEADER_NAME,
-	SQ_GL_JE_HDR.STATUS	   C3_STATUS,
-	SQ_GL_JE_HDR.JE_HEADER_ID	   C4_JE_HEADER_ID,
-	SQ_GL_JE_HDR.JE_LINE_NUM	   C5_JE_LINE_NUM,
-	SQ_GL_JE_HDR.JE_SOURCE	   C6_JE_SOURCE,
-	SQ_GL_JE_HDR.JE_CATEGORY	   C7_JE_CATEGORY,
-	SQ_GL_JE_HDR.GL_SL_LINK_ID	   C8_GL_SL_LINK_ID,
-	SQ_GL_JE_HDR.GL_SL_LINK_TABLE	   C9_GL_SL_LINK_TABLE,
-	SQ_GL_JE_HDR.LEDGER_ID	   C10_GL_LEDGER_ID,
-	SQ_GL_JE_HDR.LEDGER_CATEGORY_CODE	   C11_GL_LEDGER_CATEGORY_CODE,
-	SQ_GL_JE_HDR.END_DATE	   C12_GL_PER_END_DT,
-	SQ_GL_JE_HDR.LAST_UPDATE_DATE	   C14_LAST_UPDATE_DATE
-from	
-( /* Subselect from SDE_ORA_PersistedStage_GLLinkageInformation_GLExtract.W_ORA_GL_LINKAGE_GL_JRNL_PS_SQ_GL_JE_HDR
-*/
-select 
-	   T.LEDGER_ID LEDGER_ID,
-	T.LEDGER_CATEGORY_CODE LEDGER_CATEGORY_CODE,
-	PER.END_DATE END_DATE,
-	GLIMPREF.JE_LINE_NUM JE_LINE_NUM,
-	GLIMPREF.JE_HEADER_ID JE_HEADER_ID,
-	GLIMPREF.GL_SL_LINK_TABLE GL_SL_LINK_TABLE,
-	GLIMPREF.GL_SL_LINK_ID GL_SL_LINK_ID,
-	JHEADER.NAME HEADER_NAME,
-	JHEADER.STATUS STATUS,
-	JBATCH.NAME BATCH_NAME,
-	JHEADER.JE_SOURCE JE_SOURCE,
-	JHEADER.JE_CATEGORY JE_CATEGORY,
-	JHEADER.LAST_UPDATE_DATE LAST_UPDATE_DATE,
-	JBATCH.JE_BATCH_ID JE_BATCH_ID
-from	APPS.GL_JE_BATCHES AS OF TIMESTAMP to_timestamp('24-10-16 05:15:33','DD-MM-YY HH24:MI:SS')   JBATCH,
-APPS.GL_JE_HEADERS AS OF TIMESTAMP to_timestamp('24-10-16 05:15:33','DD-MM-YY HH24:MI:SS')   JHEADER,
-APPS.GL_IMPORT_REFERENCES AS OF TIMESTAMP to_timestamp('24-10-16 05:15:33','DD-MM-YY HH24:MI:SS')   GLIMPREF,
-APPS.GL_LEDGERS AS OF TIMESTAMP to_timestamp('24-10-16 05:15:33','DD-MM-YY HH24:MI:SS')   T, 
-APPS.GL_PERIODS AS OF TIMESTAMP to_timestamp('24-10-16 05:15:33','DD-MM-YY HH24:MI:SS')   PER 
-where	(1=1)
- And (JHEADER.LEDGER_ID=T.LEDGER_ID)
-AND (JHEADER.JE_HEADER_ID=GLIMPREF.JE_HEADER_ID)
-AND (JBATCH.JE_BATCH_ID=JHEADER.JE_BATCH_ID)
-AND (T.PERIOD_SET_NAME=PER.PERIOD_SET_NAME)
-AND (JHEADER.PERIOD_NAME=PER.PERIOD_NAME)
-And (('NULL' IN ('2022,2061,2070,2072,2074,2076,2094,2096,2098,2120,2146,2248')
-       OR ( 'NULL' NOT IN ('2022,2061,2070,2072,2074,2076,2094,2096,2098,2120,2146,2248')
-           AND T.LEDGER_ID IN (2022,2061,2070,2072,2074,2076,2094,2096,2098,2120,2146,2248)
-          )
-)
-AND
-('__NONE__'  IN ('PRIMARY','SECONDARY','ALC_TRANSACTION','ALC_BALANCE','ALC','NONE')
-       OR (   '__NONE__' NOT IN ('PRIMARY','SECONDARY','ALC_TRANSACTION','ALC_BALANCE','ALC','NONE')
-           AND T.LEDGER_CATEGORY_CODE IN ('PRIMARY','SECONDARY','ALC_TRANSACTION','ALC_BALANCE','ALC','NONE')
-          )
-))
- And (GLIMPREF.GL_SL_LINK_ID IS NOT NULL)
- And (
- JHEADER.LAST_UPDATE_DATE>=TO_DATE(SUBSTR('2016-10-17 04:00:01',0,19),'YYYY-MM-DD HH24:MI:SS')
-)
-)   SQ_GL_JE_HDR
-where	(1=1)
---and TO_CHAR(SQ_GL_JE_HDR.JE_HEADER_ID) = '4303929'
-and TO_CHAR(SQ_GL_JE_HDR.JE_BATCH_ID)='232246'
---||'~'||TO_CHAR(SQ_GL_JE_HDR.JE_HEADER_ID)||'~'||TO_CHAR(SQ_GL_JE_HDR.JE_LINE_NUM)||'~'||TO_CHAR(SQ_GL_JE_HDR.GL_SL_LINK_ID)||'~'||SQ_GL_JE_HDR.GL_SL_LINK_TABLE in 
---('228639~4274031~4~15284079~XLAJEL'
---'228639~4274031~3~15284081~XLAJEL',
---'228639~4274031~1~15284082~XLAJEL',
---'228639~4274031~2~15284080~XLAJEL')
-;
-
-SELECT *
-FROM apps.GL_IMPORT_REFERENCES AS OF TIMESTAMP to_timestamp('2016-10-25 04:05:00','YYYY-MM-DD HH24:MI:SS')
-WHERE JE_HEADER_ID = 4306280
-  AND je_line_num = 39; 
-  
-select 'OLD',
-a.integration_id,
-substr(a.integration_id, 1, instr(a.integration_id, '~', 1)-1) batch_id,
-a.batch_name,
-a.header_name, 
-a.je_header_id,
-to_number(a.je_line_num), 
-a.GL_LEDGER_ID,
-a.GL_PER_END_DT,
-a.je_source,
-a.je_category,
-a.LAST_UPDATE_DATE
-from PROD_DW.I$_834591661_2 AS OF TIMESTAMP to_timestamp('2016-10-25 13:02:35','YYYY-MM-DD HH24:MI:SS') a
---from BCKP_20161020_GL_LINK_PS_OK a
-where 1=1
-AND a.JE_HEADER_ID in 4324594
-order by 1 desc, 7 
-;
-
-
-desc APPS.GL_LEDGERS
-
-select * from APPS.GL_LEDGERS order by LAST_UPDATE_DATE desc;
-
-@tbs
-
--- why reftest slow
-alter session set NLS_DATE_FORMAT = "YYYY/MM/DD";
-select OWNER, TABLE_NAME, LAST_ANALYZED, num_rows from dba_tables where table_name in ('PA_TASKS','PA_TASK_TYPES','PA_PROJ_ELEMENT_VERSIONS','PA_PROJ_ELEMENTS','PA_PROJECT_STATUSES','PA_PROJ_ELEM_VER_STRUCTURE','PA_PROJECTS_ALL','PA_PROJECT_TYPES_ALL','PA_PROJ_ELEM_VER_SCHEDULE') order by table_name;
-/*
-OWNER	TABLE_NAME	LAST_ANALYZED	NUM_ROWS
-PA	PA_TASK_TYPES	2016-10-31 02	1
-PA	PA_PROJ_ELEM_VER_SCHEDULE	2016-10-31 02	0
-PA	PA_PROJ_ELEM_VER_STRUCTURE	2016-10-31 02	29770
-PA	PA_PROJ_ELEMENTS	2016-10-31 02	182430
-PA	PA_PROJ_ELEMENT_VERSIONS	2016-10-31 02	183315
-PA	PA_PROJECT_TYPES_ALL	2016-10-31 02	746
-PA	PA_PROJECT_STATUSES	2016-10-31 02	74
-PA	PA_TASKS	2016-10-31 02	153168
-PA	PA_PROJECTS_ALL	2016-10-31 02	29685
-*/
-
-select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '21845816';
-
-alter session set NLS_DATE_FORMAT = "YYYY-MM-DD HH24:MI:SS";
-select OWNER, TABLE_NAME, LAST_ANALYZED, sample_size, num_rows from dba_tables where table_name in ('PA_AGREEMENTS_ALL','GL_LEDGERS','PA_CUST_EVENT_RDL_ALL','PA_DRAFT_REVENUES_ALL','PA_EVENTS','PA_PROJECTS_ALL') order by table_name;
-select OWNER, TABLE_NAME, LAST_ANALYZED, sample_size, num_rows from dba_tables where last_analyzed is not null order by last_analyzed desc;
-select count(*) from dba_tables where trunc(last_analyzed) = trunc(sysdate);
-select count(*) from dba_tables;
-select count(*) from dba_tables where table_name like 'XLA_GLT_%';
-select TABLE_NAME, STATS_UPDATE_TIME from dba_tab_stats_history where table_name ='PA_AGREEMENTS_ALL' order by STATS_UPDATE_TIME desc;
-
-@i PA_DRAFT_REVENUES_ALL
-select OWNER, index_name, TABLE_NAME, LAST_ANALYZED, sample_size, num_rows from dba_indexes where table_name in ('PA_AGREEMENTS_ALL','GL_LEDGERS','PA_CUST_EVENT_RDL_ALL','PA_DRAFT_REVENUES_ALL','PA_EVENTS','PA_PROJECTS_ALL') order by table_name, index_name;
-
--- histograms
-select table_name,column_name,num_buckets from dba_tab_columns where table_name in ('PA_AGREEMENTS_ALL','GL_LEDGERS','PA_CUST_EVENT_RDL_ALL','PA_DRAFT_REVENUES_ALL','PA_EVENTS','PA_PROJECTS_ALL') order by table_name;
-select num_buckets, count(*) from dba_tab_columns where table_name in ('PA_AGREEMENTS_ALL','GL_LEDGERS','PA_CUST_EVENT_RDL_ALL','PA_DRAFT_REVENUES_ALL','PA_EVENTS','PA_PROJECTS_ALL') group by num_buckets ;
-select table_name,column_name,num_buckets from dba_tab_columns where table_name in ('GL_LEDGERS') order by 3 desc;
-
-select count(*) from apps.FND_HISTOGRAM_COLS;
-select count(*) from apps.FND_HISTOGRAM_COLS where table_name in ('PA_AGREEMENTS_ALL','GL_LEDGERS','PA_CUST_EVENT_RDL_ALL','PA_DRAFT_REVENUES_ALL','PA_EVENTS','PA_PROJECTS_ALL');
-
-SELECT fa.application_id           "Application ID",
-       fat.application_name        "Application Name",
-       fa.application_short_name   "Application Short Name",
-       fa.basepath                 "Basepath"
-  FROM fnd_application     fa,
-       fnd_application_tl  fat
- WHERE fa.application_id = fat.application_id
-   AND fat.language      = USERENV('LANG')
-   -- AND fat.application_name = 'Payables'  -- <change it>
- ORDER BY fat.application_name;
- 
- 
-select * from apps.ap_invoice_lines_all where invoice_id = 969815 and line_number = 1;
-
-select do.object_name,sid,s.serial#,s.osuser,
-row_wait_obj#, row_wait_file#, row_wait_block#, row_wait_row#, --s.session_id,
-dbms_rowid.rowid_create ( 1, ROW_WAIT_OBJ#, ROW_WAIT_FILE#, ROW_WAIT_BLOCK#, ROW_WAIT_ROW# )
-from v$session s, dba_objects do
-where s.ROW_WAIT_OBJ# = do.OBJECT_ID 
-and object_name like '%AP_INVOICE%';
-
-
-
 

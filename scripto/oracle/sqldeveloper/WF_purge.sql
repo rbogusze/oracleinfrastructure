@@ -34,7 +34,7 @@ select table_name, num_rows, blocks from all_tables where table_name in
 
 -- Basic statistics to watch purging progress
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
-select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from WF_ITEMS a;
+select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from apps.WF_ITEMS a;
 
 select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from WF_ITEM_ACTIVITY_STATUSES a;
 
@@ -50,7 +50,7 @@ select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from WF_PROCESS_ACTIVITIES
 
 select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from WF_NOTIFICATION_OUT a;
 
-select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from WF_NOTIFICATION_ATTRIBUTES a;
+select /*+ FULL(a) parallel(a,8) */ count(*), sysdate from apps.WF_NOTIFICATION_ATTRIBUTES a;
 
 
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
@@ -217,14 +217,14 @@ select * from fnd_nodes;
 
 -- check for new errors
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
-select /*+ FULL(a) parallel(a,8) */ * from wf_items a where item_type = 'WFERROR' order by begin_date desc;
+select /*+ FULL(a) parallel(a,8) */ * from apps.wf_items a where item_type = 'WFERROR' order by begin_date desc;
 
 select /*+ FULL(a) parallel(a,8) */ * from wf_items a where item_type = 'WFERROR' and trunc(begin_date) = '2016/03/09' 
 order by begin_date desc;
 /*
 */
 
-select * from wf_item_activity_statuses where item_key = '&1';
+select * from apps.wf_item_activity_statuses where item_key = '&1';
 /*
 ITEM_TYPE	ITEM_KEY	PROCESS_ACTIVITY	ACTIVITY_STATUS	ACTIVITY_RESULT_CODE	ASSIGNED_USER	NOTIFICATION_ID	BEGIN_DATE	END_DATE	EXECUTION_TIME	ERROR_NAME	ERROR_MESSAGE	ERROR_STACK	OUTBOUND_QUEUE_ID	DUE_DATE	SECURITY_GROUP_ID	ACTION	PERFORMED_BY	INST_ID
 WFERROR	412961535	61174	ACTIVE	#NULL			2016/01/29		1125903									2
@@ -235,7 +235,7 @@ WFERROR	412961535	271353	COMPLETE	#NULL			2016/01/29	2016/01/29	1125906									
 
 select * from wf_item_activity_statuses_h where notification_id = 502457466;
 
-select * from WF_ITEM_ATTRIBUTE_VALUES where item_key = '429026269';
+select * from apps.WF_ITEM_ATTRIBUTE_VALUES where item_key = '491992';
 /*
 An error occurred in subscription execution but the details are not available. Verify that Workflow API WF_EVENT.SetErrorInfo is used to set the error details in the PLSQL rule function.
 WFERROR	414597735	SUB_GUID	8BC7FF01BC631A21E0340000BEA7000B
@@ -249,7 +249,7 @@ WFERROR	414973314	EVENT_NAME	ge.gfb.ont.real
 
 -- nice, where recent errors come from
 select wf.item_key, wf.begin_date, wfa.text_value
-from WF_ITEM_ATTRIBUTE_VALUES wfa, wf_items wf 
+from apps.WF_ITEM_ATTRIBUTE_VALUES wfa, apps.wf_items wf 
 where wfa.item_type = 'WFERROR' and wfa.name = 'ERROR_STACK' and wf.item_key = wfa.item_key and wf.begin_date > sysdate -1 order by wf.begin_date desc;
 
 
@@ -261,8 +261,11 @@ select /*+ FULL(a) parallel(a,8) */ text_value, count(*) from WF_ITEM_ATTRIBUTE_
 -- **** stat_av_2
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select wf.item_key, wf.begin_date, wfa.text_value
-from WF_ITEM_ATTRIBUTE_VALUES wfa, wf_items wf 
+from apps.WF_ITEM_ATTRIBUTE_VALUES wfa, apps.wf_items wf 
 where wfa.item_type = 'WFERROR' and wfa.name = 'EVENT_NAME' and wf.item_key = wfa.item_key and wf.begin_date > sysdate -1 order by wf.begin_date desc;
+
+--Show the error
+select * from apps.WF_ITEM_ATTRIBUTE_VALUES where item_key = '485440';
 
 select wf.item_key, wf.begin_date, wfa.text_value
 from WF_ITEM_ATTRIBUTE_VALUES wfa, wf_items wf 
@@ -303,7 +306,7 @@ from WF_ITEM_ATTRIBUTE_VALUES wfa, wf_items wf
 where wfa.item_type = 'WFERROR' and wfa.name = 'EVENT_NAME' and wf.item_key = wfa.item_key 
 and wf.begin_date > sysdate -1 group by wfa.text_value order by count(*) desc;
 
-select * from WF_ITEM_ATTRIBUTE_VALUES where item_key = '429026269';
+select * from apps.WF_ITEM_ATTRIBUTE_VALUES where item_key = '492296';
 /*
 ITEM_TYPE	ITEM_KEY	NAME	TEXT_VALUE
 WFERROR	429026269	CONTEXT	WSH
@@ -740,16 +743,7 @@ select queue,msg_id,msg_state,enq_time,deq_time,consumer_name from apps.aq$wf_bp
 
 
 
--- #############################################################
--- Largest tables in DB
--- #############################################################
 
-select owner, segment_name, segment_type, round(sum(bytes)/1024/1024/1024) SIZE_GB 
-from dba_segments group by owner, segment_name, segment_type order by SIZE_GB desc;
-
-select owner, segment_name, segment_type, round(sum(bytes)/1024/1024/1024) SIZE_GB 
-from dba_segments group by owner, segment_name, segment_type 
-having round(sum(bytes)/1024/1024/1024) > 50 order by SIZE_GB desc;
 
 
 
@@ -1168,3 +1162,70 @@ order by state desc;
 
 select * from AQ$WF_BPEL_QTAB where rownum < 5;
 -- takes forever, errors out with cannot extend TEMP
+
+-- #############################################################
+-- Largest tables in DB
+-- #############################################################
+
+select owner, segment_name, segment_type, round(sum(bytes)/1024/1024/1024) SIZE_GB 
+from dba_segments group by owner, segment_name, segment_type order by SIZE_GB desc;
+
+select owner, segment_name, segment_type, round(sum(bytes)/1024/1024/1024) SIZE_GB 
+from dba_segments group by owner, segment_name, segment_type 
+having round(sum(bytes)/1024/1024/1024) > 50 order by SIZE_GB desc;
+
+select owner,segment_name, round((bytes)/1024/1024/1024) SIZE_GB, tablespace_name, segment_type from dba_segments where segment_name = 'SYS_LOB0002693761C00040$$';
+
+-- #############################################################
+-- APPS	SYS_LOB0000034032C00004$$ APPLSYS	FND_LOBS
+-- #############################################################
+
+select * from dba_lobs where segment_name='SYS_LOB0000034032C00004$$';
+/*
+OWNER	TABLE_NAME	COLUMN_NAME	SEGMENT_NAME	TABLESPACE_NAME	INDEX_NAME
+APPLSYS	FND_LOBS	FILE_DATA	SYS_LOB0000034032C00004$$	APPS_TS_MEDIA	SYS_IL0000034032C00004$$
+*/
+
+desc APPLSYS.FND_LOBS
+/*
+Name              Null     Type               
+----------------- -------- ------------------ 
+FILE_ID           NOT NULL NUMBER        
+FILE_NAME                  VARCHAR2(256) 
+FILE_CONTENT_TYPE NOT NULL VARCHAR2(256) 
+FILE_DATA                  BLOB          
+UPLOAD_DATE                DATE          
+EXPIRATION_DATE            DATE          
+PROGRAM_NAME               VARCHAR2(32)  
+PROGRAM_TAG                VARCHAR2(32)  
+LANGUAGE                   VARCHAR2(4)   
+ORACLE_CHARSET             VARCHAR2(30)  
+FILE_FORMAT       NOT NULL VARCHAR2(10)  
+*/
+
+select PROGRAM_TAG, count(*) from apps.fnd_lobs
+where PROGRAM_NAME = 'FNDATTCH'
+group by PROGRAM_TAG;
+
+select * from apps.fnd_lobs order by UPLOAD_DATE desc;
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select count(*), sysdate from apps.fnd_lobs;
+/*
+
+*/
+
+select expiration_date, count(*) from apps.fnd_lobs group by expiration_date;
+select expiration_date, count(*) from apps.fnd_lobs group by expiration_date;
+
+--How can one identify the user that is most consuming the table fnd_lobs with uploaded attachments?
+select fu.user_name, sum(dbms_lob.getlength(file_data)) size_byte
+from fnd_documents fd, fnd_lobs fl, fnd_user fu
+where fd.media_id = fl.file_id
+and fl.program_name ='FNDATTCH'
+and fd.datatype_id = 6
+and fu.user_id=fd.created_by
+group by fu.user_name
+order by 2 desc;
+
+select * from fnd_documents;
+

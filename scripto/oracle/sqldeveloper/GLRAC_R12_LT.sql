@@ -123,7 +123,7 @@ AND fnod.node_id(+)                = fpov.level_value
 AND hou.organization_id(+)         = fpov.level_value
 AND fpot.user_profile_option_name IN ('FND: Diagnostics','FND: Debug Log Enabled','SLA: Enable Diagnostics','Sign-On:Audit Level')
 AND fpov.profile_option_value      in ('Y','D')
-ORDER BY short_name, context;
+ORDER BY context, short_name, context;
 
 
 
@@ -340,6 +340,7 @@ select isdefault, ismodified from v$parameter where name = 'db_file_multiblock_r
 
 --7. result_cache
 select * from v$parameter where name like '%result_cache%';
+show parameter shared
 
 /*
 This should be like the following:
@@ -358,7 +359,12 @@ select * from v$parameter where name = 'optimizer_features_enable';
 --8. FND_CONCURRENT_REQUESTS reorg
 
 select table_name, num_rows, blocks, last_analyzed from all_tables where table_name = 'FND_CONCURRENT_REQUESTS';
-SELECT /*+ FULL(a)*/ COUNT(*) FROM FND_CONCURRENT_REQUESTS a;
+SELECT /*+ FULL(a)*/ COUNT(*) FROM APPS.FND_CONCURRENT_REQUESTS a;
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+SELECT * FROM APPS.FND_CONCURRENT_REQUESTS a order by request_date;
+alter session set NLS_DATE_FORMAT = "YYYY-MM";
+select trunc(request_date, 'MONTH'), count(*) from APPS.FND_CONCURRENT_REQUESTS a group by trunc(request_date, 'MONTH') order by trunc(request_date, 'MONTH') desc;
+
 /*
 This should NOT be
                         rows  blocks 
@@ -561,6 +567,13 @@ AR	GEMS_RA_CUSTOMER_TRX_N97	2	10	06-NOV-15
 
 select owner, index_name, ini_trans, pct_free, last_analyzed FROM dba_indexes WHERE index_name in ('JA_IN_RA_CUSTOMER_TRX_ALL_N1');
 
+--15. Check if Signon tables are purged
+--'Purge Signon Audit data' request should be run
+alter session set NLS_DATE_FORMAT = "YYYY-MM";
+select trunc(start_time, 'MONTH'), count(*) 
+from APPLSYS.FND_LOGIN_RESP_FORMS a 
+group by trunc(start_time, 'MONTH') order by 1 desc;
+
 
 
 -- Automated test
@@ -571,6 +584,8 @@ select count(1) from dba_sql_plan_baselines
 where to_char(created,'YYYY') = '2015'
 and origin like 'MANUAL%';
 
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select table_name, last_analyzed, sample_size, num_rows, blocks from dba_tables where table_name in ('FND_LOGINS','FND_LOGIN_RESPONSIBILITIES','FND_LOGIN_RESP_FORMS','FND_APPL_SESSIONS');
 
 
 --XXX Abandoned. CM cache size 2 x the number of processes - this proved not to help

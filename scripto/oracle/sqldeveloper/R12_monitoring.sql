@@ -9,6 +9,7 @@ select patch_level from apps.fnd_product_installations where patch_level like '%
 select patch_level from apps.fnd_product_installations where patch_level like '%PER%';
 select patch_level from apps.fnd_product_installations where patch_level like '%HR_%';
 select patch_level from apps.fnd_product_installations where patch_level like '%AR_%';
+select patch_level from apps.fnd_product_installations where patch_level like '%FIN_%';
 
 -- bugs
 select BUG_ID, BUG_NUMBER, LAST_UPDATE_DATE from APPLSYS.AD_BUGS where BUG_NUMBER = '&p';
@@ -21,11 +22,11 @@ in (select s.audsid from gv$session s where s.sid='&Sid');
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select request_id, phase_code, status_code, ARGUMENT_TEXT, ACTUAL_START_DATE, ACTUAL_COMPLETION_DATE  
 from apps.fnd_concurrent_requests 
-where request_id in ('4874132');
+where request_id in ('6121386');
 
 select *
 from apps.fnd_concurrent_requests 
-where request_id in ('4838222');
+where request_id in ('6121386');
 
 CONCURRENT_PROGRAM_ID
 
@@ -46,7 +47,7 @@ and ses.sid in (select d.sid
     where a.controlling_manager = b.concurrent_process_id
     and c.pid = b.oracle_process_id
     and b.session_id=d.audsid
-    and a.request_id in ('4907350')
+    and a.request_id in ('6078235')
     --and a.phase_code = 'R'
 )
 order by ses.sid
@@ -290,6 +291,18 @@ a.request_id,a.parent_request_id,a.request_date,a.actual_start_date,a.actual_com
 FROM   apps.fnd_concurrent_requests a,apps.fnd_concurrent_programs b,apps.FND_CONCURRENT_PROGRAMS_TL c,apps.fnd_user d
 WHERE  a.concurrent_program_id=b.concurrent_program_id AND b.concurrent_program_id=c.concurrent_program_id AND
 a.requested_by=d.user_id AND status_code='R' order by Process_time desc;
+
+-- what concurrent manager was executing the request
+select b.CONCURRENT_QUEUE_NAME 
+from apps.fnd_concurrent_processes a,
+apps.fnd_concurrent_queues b, apps.fnd_concurrent_requests c
+where a.CONCURRENT_QUEUE_ID = b.CONCURRENT_QUEUE_ID
+and a.CONCURRENT_PROCESS_ID = c.controlling_manager
+and c.request_id = '&conc_reqid';
+
+
+
+
 
 --????	CCM Prvious Program Times 
 select round((cast(to_char(min(a.actual_completion_date)-min(a.actual_start_date))        
@@ -778,7 +791,7 @@ ORDER BY id1, request;
 -- 1) find out concurrent program id 
 select parent_request_id,phase_code,status_code,concurrent_program_id,logfile_node_name,logfile_name,os_process_id,to_char(actual_start_date,'dd-mon-yy HH24:mi:ss')start_date,to_char(actual_completion_date,'dd-mon-yy HH24:mi:ss') completion_date,ROUND( ( NVL( actual_completion_date, sysdate ) - actual_start_date ) * 24*60, 2 ) duration
 from applsys.fnd_concurrent_requests
-where request_id=4874132;
+where request_id=6121386;
 
 -- 2) place that here and u will get history 
 SELECT request_id,phase_code,status_code, TO_CHAR( request_date, 'DD-MON-YYYY HH24:MI:SS' )
@@ -788,30 +801,56 @@ actual_start_date, TO_CHAR( actual_completion_date, 'DD-MON-YYYY HH24:MI:SS' )
 actual_completion_date, TO_CHAR( sysdate, 'DD-MON-YYYY HH24:MI:SS' )
 current_date, ROUND( ( NVL( actual_completion_date, sysdate ) - actual_start_date ) * 24*60, 2 ) duration,ARGUMENT_TEXT
 FROM applsys.FND_CONCURRENT_REQUESTS
-WHERE concurrent_program_id = 91350
+WHERE concurrent_program_id = 72358
 order by request_id desc; 
 
+-- run ASH based on completed request
+-- challenge: let's say someone says request xxx was running slow, has completed but now I need to say why, what SQLs were run
+--
+-- Input: request number, eg 6169025
+-- Output: client, eg SCOTT
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select fcr.request_id, fcr.phase_code, fcr.status_code, fcr.ARGUMENT_TEXT, fcr.ACTUAL_START_DATE, fcr.ACTUAL_COMPLETION_DATE, fu.USER_NAME as CLIENT
+from apps.fnd_concurrent_requests fcr,
+apps.fnd_user fu
+where fcr.REQUESTED_BY = fu.USER_ID
+and fcr.request_id in ('6169025')
+;
+-- Input: client id, eg 'SCOTT'
+-- Output: ASH actions
+select * from V$ACTIVE_SESSION_HISTORY where client_id='REMIG' order by sample_time desc;
+-- Input: request start and end times, client_id - username of the one who was submitting request
+-- Output: ASH nice report
+-- OEM, ASH Report, impot properly time and Filter, Client, 'SCOTT'
+/*
+Nice links:
+V$ACTIVE_SESSION_HISTORY - desc
+https://docs.oracle.com/cd/B19306_01/server.102/b14237/dynviews_1007.htm#REFRN30299
+*/
 
 -- From Tausif, monitoring what is user doing, SSO
 select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
-       last_call_et,status from gv$session where client_identifier='SMW';
+       last_call_et,status from gv$session where client_identifier='AMTEST';
        
 select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
-       last_call_et,status from gv$session where client_identifier='KHWA';
+       last_call_et,status from gv$session where client_identifier='RONCAT';
        
 select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
-       last_call_et,status from gv$session where client_identifier='GORSMI';       
+       last_call_et,status from gv$session where client_identifier like 'REMIG';
+
+       
+select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
+       last_call_et,status from gv$session where client_identifier in ('JANTAL', 'PIJDER');
        
        show parameter name
        
 select * from v$sql where sql_id ='0uan6npnsf1tg';
        
--- From Tausif, monitoring what is user doing, SSO
-select inst_id, SID, serial#, sql_id, prev_sql_id, client_identifier, event,module,
-       last_call_et,status from gv$session where SID=6303;
-       
-select * from gv$session where sid=2422;
+-- TEMP
 
-SELECT * FROM apps.test_tempo_det ORDER BY 2;
-SELECT * FROM APPS.TEST_TEMPO_DET ORDER BY 2;
+
+
+
+
+
 
