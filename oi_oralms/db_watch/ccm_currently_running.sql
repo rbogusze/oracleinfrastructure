@@ -1,7 +1,8 @@
 set heading off
-column VALUE format a20
+column DB_NAME format a10
+column LOAD format 9999.9
 alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
-select sysdate, value from v$parameter where name = 'db_name';
+select sysdate, sys_context('USERENV','DB_NAME') DB_NAME, round(value,1) LOAD from v$osstat where stat_name='LOAD';
 set heading on
 set linesize 200
 set pagesize 50
