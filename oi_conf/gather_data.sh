@@ -143,8 +143,10 @@ do {
           #
 
           msgd "Create pfile from spfile"
-          EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; . oraenv; export ORACLE_SID=$V_ORACLE_SID; echo -e 'create pfile=\047/tmp/dbinit.txt\047 from spfile;' | sqlplus / as sysdba "
+          #EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; . oraenv; export ORACLE_SID=$V_ORACLE_SID; echo -e 'create pfile=\047/tmp/dbinit.txt\047 from spfile;' | sqlplus / as sysdba "
+          EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; if [[ \$(cat /etc/oratab | grep \$ORACLE_SID | grep -v '^#' | grep -v 'grep' | wc -l) > 0 ]]; then . oraenv; export ORACLE_SID=$V_ORACLE_SID; echo -e 'create pfile=\047/tmp/dbinit.txt\047 from spfile;' | sqlplus / as sysdba ; else echo 'no DB $V_ORACLE_SID found in /etc/oratab' > /tmp/dbinit.txt ; fi"
           msgd "EXECUTE_ON_REMOTE: $EXECUTE_ON_REMOTE"
+
           $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${EXECUTE_ON_REMOTE}" 
 
           # now the spfile location is actually irrelevant, as we just have the init
@@ -161,7 +163,7 @@ do {
           # get opatch lsinventory
           # 
           msgd "Run opatch lsinventory and copy the results"
-          EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; . oraenv; export ORACLE_SID=$V_ORACLE_SID; \$ORACLE_HOME/OPatch/opatch lsinventory > /tmp/${V_ORACLE_SID}_opatch_lsinventory.txt"
+          EXECUTE_ON_REMOTE="pwd; . .bash_profile; env | grep ORA; export ORACLE_SID=$V_ORACLE_SID_NO_LAST_DIGIT; export ORAENV_ASK=NO; if [[ \$(cat /etc/oratab | grep \$ORACLE_SID | grep -v '^#' | grep -v 'grep' | wc -l) > 0 ]]; then . oraenv; export ORACLE_SID=$V_ORACLE_SID; \$ORACLE_HOME/OPatch/opatch lsinventory > /tmp/${V_ORACLE_SID}_opatch_lsinventory.txt ; else echo 'no DB $V_ORACLE_SID found in /etc/oratab' > /tmp/${V_ORACLE_SID}_opatch_lsinventory.txt ; fi"
           msgd "EXECUTE_ON_REMOTE: $EXECUTE_ON_REMOTE"
           $EXP_SSH_CMD ${USERNAME} ${HOST} ${V_PASS} "${EXECUTE_ON_REMOTE}" 
 
