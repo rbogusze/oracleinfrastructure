@@ -84,6 +84,7 @@ echo "<a href=\"db_statistics_graph.php?dir=$dir&filename=$filename\" >| Databas
 echo "<a href=\"sga_breakdown.php?dir=$dir&filename=$filename\" >| Shared Pool Statistics</a> ";
 echo "<a href=\"wait_events.php?dir=$dir&filename=$filename\" >| Wait Events |</a> ";
 echo "<a href=\"database_sql_history.php?dir=$dir&filename=$filename\" > Database SQL History |</a> ";
+echo "<a href=\"db_time_load_profile.php?dir=$dir&filename=$filename\" > DB Time + Load Profile |</a> ";
 
 //Show diagnostics for the current date
 //echo "<BR><BR> Diagnostic scripts ( includes contents of cache ) <BR>";
