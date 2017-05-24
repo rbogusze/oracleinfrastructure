@@ -22,9 +22,9 @@ echo "</td></table>";
 //echo "<BR> dir: $dir";
 //echo "<BR> filename: $filename";
 
-echo "<BR> Sorted by Total Wait Time (s)";
+echo "<BR> DB Time + Load Profile";
 echo "<table border=1>";
-echo "<tr><td>Event</td><td>Waits</td><td>Total Wait Time (s)</td><td>Avg wait (ms)</td></tr>";
+echo "<tr><td>Statistic</td><td>Per Second</td><td>Per Transaction</td></tr>";
 //Open the file and read the Statistics section
 if (is_file($dir . $filename) ) {
   $fh = fopen ($dir . $filename, "r") or die("Could not open file");
@@ -35,9 +35,9 @@ if (is_file($dir . $filename) ) {
 //    $data = str_replace("\f",'',$data);
     if (strlen($data) == 0) { continue; }
     // Spot sections start
-    if (strstr ( $data, "Foreground Wait Events ")) { echo "<font color='black'>"; $section = 1; }
+    if (strstr ( $data, "Load Profile ")) { echo "<font color='black'>"; $section = 1; }
     // Spot section end, then exit the while loop.
-    if (strstr ( $data, "Wait Event Histogram ")) { echo "<font color='red'>"; $section = 0; break; }
+    if (strstr ( $data, "Instance Efficiency ")) { echo "<font color='red'>"; $section = 0; break; }
     if ( $section ) {
       // I need to stripe multiple spaces
 //      $data = preg_replace('/\s\s+/', ' ', $data);
@@ -56,16 +56,16 @@ if (is_file($dir . $filename) ) {
       //preg_match('/\d+/', $data, $numMatch);
       //$trash1 = $textMatch[1];
 
-      //echo "<br> trash1: $trash1 | trash2: $trash2 | trash3: $trash3 | trash4: $trash4 <br>";
+      echo "<br> trash1: $trash1 | trash2: $trash2 | trash3: $trash3 | trash4: $trash4 <br>";
      
-      $trash2 = str_replace(",", "", $trash2);  // | Waits
-      $trash3 = str_replace(",", "", $trash3);  // | %Timeouts
-      $trash4 = str_replace(",", "", $trash4);  // | Total Wait Time (s)
-      $trash5 = str_replace(",", "", $trash5);  // | Avg wait (ms)
+      $trash2 = str_replace(",", "", $trash2);  // | 
+      $trash3 = str_replace(",", "", $trash3);  // | 
+      $trash4 = str_replace(",", "", $trash4);  // | 
+      $trash5 = str_replace(",", "", $trash5);  // | 
 
-      if ( is_numeric($trash2) && is_numeric($trash3)  ) {
+      if ( is_numeric($trash3) && is_numeric($trash4)  ) {
         //echo "<br> data: $data <br>";
-        echo "<tr><td><a href=\"wait_events_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash4</td><td>$trash5</td></tr>";
+        echo "<tr><td><a href=\"wait_events_history.php?dir="  . $dir . "&statname=" . $trash2 . "\" >" . $trash2 . "</a>" . "</td><td>$trash3</td><td>$trash4</td></tr>";
       } // if ( is_numeric($trash2)
 
     } // if ( $section )
