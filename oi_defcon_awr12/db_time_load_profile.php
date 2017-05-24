@@ -56,7 +56,7 @@ if (is_file($dir . $filename) ) {
       //preg_match('/\d+/', $data, $numMatch);
       //$trash1 = $textMatch[1];
 
-      echo "<br> trash1: $trash1 | trash2: $trash2 | trash3: $trash3 | trash4: $trash4 <br>";
+      //echo "<br> trash1: $trash1 | trash2: $trash2 | trash3: $trash3 | trash4: $trash4 <br>";
      
       $trash2 = str_replace(",", "", $trash2);  // | 
       $trash3 = str_replace(",", "", $trash3);  // | 
@@ -65,7 +65,7 @@ if (is_file($dir . $filename) ) {
 
       if ( is_numeric($trash3) && is_numeric($trash4)  ) {
         //echo "<br> data: $data <br>";
-        echo "<tr><td><a href=\"wait_events_history.php?dir="  . $dir . "&statname=" . $trash2 . "\" >" . $trash2 . "</a>" . "</td><td>$trash3</td><td>$trash4</td></tr>";
+        echo "<tr><td><a href=\"db_time_load_profile_history.php?dir="  . $dir . "&statname=" . $trash2 . "\" >" . $trash2 . "</a>" . "</td><td>$trash3</td><td>$trash4</td></tr>";
       } // if ( is_numeric($trash2)
 
     } // if ( $section )

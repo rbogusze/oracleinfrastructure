@@ -124,15 +124,15 @@ for($i=0; $i<count($filenames_array); $i++)
     $data = fgets($fh);
     if (strlen($data) == 0) { continue; }
     // Spot sections start
-    if (strstr ( $data, "Foreground Wait Events ")) { echo "<font color='green'>"; $section = 1; }
+    if (strstr ( $data, "Load Profile ")) { echo "<font color='green'>"; $section = 1; }
     // Spot section end, then exit the while loop.
-    if (strstr ( $data, "Wait Event Histogram ")) { echo "<font color='red'>"; $section = 0; break; }
+    if (strstr ( $data, "Instance Efficiency ")) { echo "<font color='red'>"; $section = 0; break; }
     if ( $section ) {
       //echo "<br> data: $data <br>";
-      //if (strstr ( $data, $statname . "  " )) { 
-      if (strstr ( $data, $statname . "  " ) ) { 
+      //echo "<br> Searching for statname: $statname <br>";
+      if (strstr ( $data, $statname ) ) { 
         //echo "<br> pos: " . strpos( $data, $statname );
-        if ( strpos( $data, $statname ) == 0 ) {
+        if ( strpos( $data, $statname ) > 0 ) {
           //echo "<br> data: $data <br>";
           list($trash1, $trash2, $trash3, $trash4, $trash5) = preg_split("/[\s][\s]+/",$data);
           $trash2 = str_replace(",", "", $trash2);  // | 
@@ -140,13 +140,15 @@ for($i=0; $i<count($filenames_array); $i++)
           $trash4 = str_replace(",", "", $trash4);  // | 
           $trash5 = str_replace(",", "", $trash5);  // | 
 
-          if ( is_numeric($trash2) && is_numeric($trash3)  ) {
-            // echo "<br> data: $data <br>";
+          // echo "<br> trash1: $trash1 | trash2: $trash2 | trash3: $trash3 | trash4: $trash4 <br>";
+
+          if ( is_numeric($trash3) && is_numeric($trash4)  ) {
+             //echo "<br> data: $data <br>";
             //echo "<tr><td><a href=\"db_statistics_history.php?dir="  . $dir . "&statname=" . $trash1 . "\" >" . $trash1 . "</a>" . "</td><td>$trash2</td><td>$trash3</td><td>$trash4</td></tr>";
-            $data_values1[$data_values_counter] = $trash2;
-            $data_values2[$data_values_counter] = $trash3;
-            $data_values3[$data_values_counter] = $trash4;
-            $data_values4[$data_values_counter] = $trash5;
+            $data_values1[$data_values_counter] = $trash3;
+            //$data_values2[$data_values_counter] = $trash3;
+            //$data_values3[$data_values_counter] = $trash4;
+            //$data_values4[$data_values_counter] = $trash5;
             
           } // if ( is_numeric($trash2)
           $section_found = 0;
@@ -154,9 +156,9 @@ for($i=0; $i<count($filenames_array); $i++)
         } else {
         // If I do not file the statistics section in a file. This means a problem.
         $data_values1[$data_values_counter] = -100;
-        $data_values2[$data_values_counter] = -100;
-        $data_values3[$data_values_counter] = -100;
-        $data_values4[$data_values_counter] = -100;
+        //$data_values2[$data_values_counter] = -100;
+        //$data_values3[$data_values_counter] = -100;
+        //$data_values4[$data_values_counter] = -100;
         }
 
       }
@@ -193,9 +195,7 @@ echo "<br>";
 //echo "<BR>before the draw2";
 //show_array($filenames_array_date);
 
-draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Waits", 0, $dir, "");
-draw_chart($data_values3, $filenames_array_date, ("Statistik: " . $statname), "Total Wait Time (s)", 0, $dir);
-draw_chart($data_values4, $filenames_array_date, ("Statistik: " . $statname), "Avg wait (ms)", 0, $dir);
+draw_chart($data_values1, $filenames_array_date, ("Statistik: " . $statname), "Per Second", 0, $dir, "");
 
 
 
