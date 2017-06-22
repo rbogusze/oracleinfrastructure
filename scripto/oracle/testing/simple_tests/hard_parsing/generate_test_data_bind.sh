@@ -13,7 +13,7 @@ else
 fi
 
 INFO_MODE=DEBUG
-#INFO_MODE=INFO
+INFO_MODE=INFO
 
 OUTFILE=/tmp/test_binds.sql
 

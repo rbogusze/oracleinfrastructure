@@ -13,9 +13,9 @@ else
 fi
 
 INFO_MODE=DEBUG
-#INFO_MODE=INFO
+INFO_MODE=INFO
 
-OUTFILE=/tmp/test_binds.sql
+OUTFILE=/tmp/test_literals.sql
 
 END=$1
 check_parameter $END
@@ -30,8 +30,6 @@ while [ ${CURRENT} -ne ${END} ]
 do
   V_P1=$RANDOM
   V_P2=$RANDOM
-  echo "variable id number"
-  echo "exec :id := 99"
   echo "SELECT * FROM (select task.task_number tasknumber, task.task_name, task_details taskdetails, task.task_id taskid, task.billable_flag, task.project_id, task.start_date, task.completion_date, task.chargeable_flag, proj.project_number, proj.project_details from pa_online_tasks_v task ,pa_online_projects_v proj where proj.project_id = task.project_id) QRSLT WHERE (TaskId = $V_P1 and project_id = $V_P2) ORDER BY tasknumber;" >> $OUTFILE
 
   CURRENT=`expr ${CURRENT} + ${STEP}`
