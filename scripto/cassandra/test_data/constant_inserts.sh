@@ -23,7 +23,8 @@ do
   echo "INSERT INTO remik1.table1 (id, name, temperature) values (${CURRENT}, 'manual_ubu3_${V_DATE}', 10);" | cqlsh ubu3
   echo "select * from remik1.table1 where id = ${CURRENT};" | cqlsh ubu3
 
-  sleep 1
+  echo "sleep 5"
+  sleep 5
 done
 
 
