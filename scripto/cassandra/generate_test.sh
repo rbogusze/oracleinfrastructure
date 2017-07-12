@@ -30,7 +30,10 @@ while [ ${CURRENT} -ne ${END} ]
 do
   V_P1=$RANDOM
   V_P2=$RANDOM
-  echo "INSERT INTO table1 (id, name, temperature) values ($CURRENT, 'Zosia_${V_P1}', $V_P2);" >> $OUTFILE
+  # random
+  #echo "INSERT INTO table1 (id, name, temperature) values ($CURRENT, 'Zosia_${V_P1}', $V_P2);" >> $OUTFILE
+  # all with the same temp.
+  echo "INSERT INTO table1 (id, name, temperature) values ($CURRENT, 'Zosia_${V_P1}', 36.6);" >> $OUTFILE
 
   CURRENT=`expr ${CURRENT} + ${STEP}`
 done
