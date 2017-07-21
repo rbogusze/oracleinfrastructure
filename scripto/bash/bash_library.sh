@@ -1822,6 +1822,9 @@ case `uname` in
     MAILCMD=/usr/bin/email
     PING=/usr/bin/ping
     ;;
+  "Darwin")
+    SVN=svn
+    ;;
   *)
     echo "Unknown OS: `uname`. Exiting."
     exit 1
