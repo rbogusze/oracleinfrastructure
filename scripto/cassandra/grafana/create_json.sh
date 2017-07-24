@@ -26,7 +26,8 @@ msgd "A_HOSTS_COUNT: $A_HOSTS_COUNT"
 
 echo "ala ma kota"
 #F_OUT=/tmp/dashboard_${RANDOM}.json
-F_OUT=/tmp/dashboard.json
+#F_OUT=/tmp/dashboard.json
+F_OUT=~/Downloads/dashboard.json
 rm -f $F_OUT
 msgi "Output file: $F_OUT"
 
@@ -37,7 +38,7 @@ cat $F_HEADER >> $F_OUT
 
 msgd "Iterate through the actual graphs"
 msgd "Get the list of sections"
-for i in `find $D_TEMPLATES | grep -v footer.json | grep -v header.json | grep -v foot | grep -v head | grep json | grep 01`
+for i in `find $D_TEMPLATES | grep -v footer.json | grep -v header.json | grep -v foot | grep -v head | grep json`
 do
   msgd "$i"
   msgd "Get the filename"
@@ -45,10 +46,10 @@ do
   msgd "F_SECTION_MAIN: $F_SECTION_MAIN"
   check_file "$D_TEMPLATES/$F_SECTION_MAIN"
   msgd "Setup head and tail files for sections"
-  F_SECTION_HEAD=`echo 01_cpu.json | awk -F"." '{print $1"_head.json"}'`
+  F_SECTION_HEAD=`echo $F_SECTION_MAIN | awk -F"." '{print $1"_head.json"}'`
   msgd "F_SECTION_HEAD: $F_SECTION_HEAD"
   check_file "$D_TEMPLATES/$F_SECTION_HEAD"
-  F_SECTION_FOOT=`echo 01_cpu.json | awk -F"." '{print $1"_foot.json"}'`
+  F_SECTION_FOOT=`echo $F_SECTION_MAIN | awk -F"." '{print $1"_foot.json"}'`
   msgd "F_SECTION_FOOT: $F_SECTION_FOOT"
   check_file "$D_TEMPLATES/$F_SECTION_FOOT"
 
