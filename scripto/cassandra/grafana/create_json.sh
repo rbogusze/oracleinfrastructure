@@ -20,7 +20,8 @@ D_TEMPLATES=~/scripto/cassandra/grafana/templates
 A_HOSTS=("$@")
 
 echo "ala ma kota"
-F_OUT=/tmp/dashboard_${RANDOM}.json
+#F_OUT=/tmp/dashboard_${RANDOM}.json
+F_OUT=/tmp/dashboard.json
 msgi "Output file: $F_OUT"
 
 msgd "Take header"
@@ -30,7 +31,7 @@ cat $F_HEADER >> $F_OUT
 
 msgd "Iterate through the actual graphs"
 msgd "Get the list of sections"
-for i in `find $D_TEMPLATES | grep -v footer.json | grep -v header.json | grep -v foot | grep -v head | grep json`
+for i in `find $D_TEMPLATES | grep -v footer.json | grep -v header.json | grep -v foot | grep -v head | grep json | grep 01`
 do
   msgd "$i"
   msgd "Get the filename"
