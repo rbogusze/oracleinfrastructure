@@ -20,6 +20,8 @@ D_TEMPLATES=~/scripto/cassandra/grafana/templates
 A_HOSTS=("$@")
 A_HOSTS_COUNT=${#A_HOSTS[@]}
 
+A_REFID=("A" "B" "C" "D" "E" "F" "G" "H" "I" "J")
+
 msgd "A_HOSTS_COUNT: $A_HOSTS_COUNT"
 
 echo "ala ma kota"
@@ -59,7 +61,7 @@ do
   do
     echo $V_HOST
     msgd "A_HOSTS: ${A_HOSTS[$CURRENT]}"
-    cat $D_TEMPLATES/$F_SECTION_MAIN | sed -e "s/###HOST###/${A_HOSTS[$CURRENT]}/" >> $F_OUT
+    cat $D_TEMPLATES/$F_SECTION_MAIN | sed -e "s/###HOST###/${A_HOSTS[$CURRENT]}/" | sed -e "s/###REFID###/${A_REFID[$CURRENT]}/" >> $F_OUT
     CURRENT=`expr ${CURRENT} + 1`
     if [ $CURRENT -ge $A_HOSTS_COUNT ]; then
       msgd "This is last iteration, no comma"
