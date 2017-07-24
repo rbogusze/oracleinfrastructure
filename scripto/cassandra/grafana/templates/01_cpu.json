@@ -1,0 +1,20 @@
+            {
+              "application": {
+                "filter": "CPU"
+              },
+              "functions": [],
+              "group": {
+                "filter": "[HOSTS] Databases"
+              },
+              "host": {
+                "filter": "ip-172-16-224-130"
+              },
+              "item": {
+                "filter": "Processor load (1 min average per core)"
+              },
+              "mode": 0,
+              "options": {
+                "showDisabledItems": false
+              },
+              "refId": "A"
+            }

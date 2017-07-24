@@ -1,0 +1,55 @@
+],
+          "thresholds": [
+            {
+              "colorMode": "custom",
+              "fill": false,
+              "line": true,
+              "lineColor": "rgb(255, 0, 0)",
+              "op": "gt",
+              "source": "zabbix",
+              "value": 5
+            }
+          ],
+          "timeFrom": null,
+          "timeShift": null,
+          "title": "CPU load 1 min average per core",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "buckets": null,
+            "mode": "time",
+            "name": null,
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            },
+            {
+              "format": "short",
+              "label": null,
+              "logBase": 1,
+              "max": null,
+              "min": null,
+              "show": true
+            }
+          ]
+        }
+      ],
+      "repeat": null,
+      "repeatIteration": null,
+      "repeatRowId": null,
+      "showTitle": false,
+      "title": "Dashboard Row",
+      "titleSize": "h6"
+    }

@@ -1,0 +1,38 @@
+{
+              "application": {
+                "filter": "Network"
+              },
+              "functions": [
+                {
+                  "def": {
+                    "category": "Alias",
+                    "defaultParams": [],
+                    "name": "setAlias",
+                    "params": [
+                      {
+                        "name": "alias",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "params": [
+                    "128"
+                  ],
+                  "text": "setAlias(128)"
+                }
+              ],
+              "group": {
+                "filter": "[HOSTS] Databases"
+              },
+              "host": {
+                "filter": "ip-172-16-224-128"
+              },
+              "item": {
+                "filter": "eth0: Incoming network traffic"
+              },
+              "mode": 0,
+              "options": {
+                "showDisabledItems": false
+              },
+              "refId": "A"
+            },
