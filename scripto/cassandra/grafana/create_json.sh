@@ -17,6 +17,8 @@ INFO_MODE=DEBUG
 
 D_TEMPLATES=~/scripto/cassandra/grafana/templates
 
+A_HOSTS=(ip-172-16-224-128 ip-172-16-224-129 ip-172-16-224-130)
+
 echo "ala ma kota"
 F_OUT=/tmp/dashboard_${RANDOM}.json
 msgi "Output file: $F_OUT"
@@ -45,11 +47,16 @@ do
 
   msgd "Add head"
   cat $D_TEMPLATES/$F_SECTION_HEAD >> $F_OUT
-
-  
+  msgd "Iterate though the hosts"
+  for V_HOST in "${A_HOSTS[@]}"
+  do
+    echo $V_HOST
+    cat $D_TEMPLATES/$F_SECTION_MAIN >> $F_OUT
+  done
+  msgd "Add foot"
+  cat $D_TEMPLATES/$F_SECTION_FOOT >> $F_OUT
 
 done
-
 
 
 msgd "Take footer"
@@ -57,7 +64,7 @@ F_FOOTER=$D_TEMPLATES/footer.json
 check_file "$F_FOOTER"
 cat $F_FOOTER >> $F_OUT
 
-
+msgi "Output file: $F_OUT"
 
 
 
