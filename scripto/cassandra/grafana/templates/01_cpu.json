@@ -7,7 +7,7 @@
                 "filter": "[HOSTS] Databases"
               },
               "host": {
-                "filter": "ip-172-16-224-130"
+                "filter": "###HOST###"
               },
               "item": {
                 "filter": "Processor load (1 min average per core)"
@@ -16,5 +16,5 @@
               "options": {
                 "showDisabledItems": false
               },
-              "refId": "A"
+              "refId": "###REFID###"
             }

@@ -1,4 +1,4 @@
-{
+            {
               "application": {
                 "filter": "Network"
               },
@@ -16,16 +16,16 @@
                     ]
                   },
                   "params": [
-                    "128"
+                    "###SHOST###"
                   ],
-                  "text": "setAlias(128)"
+                  "text": "setAlias(###SHOST###)"
                 }
               ],
               "group": {
                 "filter": "[HOSTS] Databases"
               },
               "host": {
-                "filter": "ip-172-16-224-128"
+                "filter": "###HOST###"
               },
               "item": {
                 "filter": "eth0: Incoming network traffic"
@@ -34,5 +34,5 @@
               "options": {
                 "showDisabledItems": false
               },
-              "refId": "A"
-            },
+              "refId": "###REFID###"
+            }
