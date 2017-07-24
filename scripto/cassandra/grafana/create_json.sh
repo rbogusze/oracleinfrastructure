@@ -2,7 +2,7 @@
 #$Id: o,v 1.1 2012-05-07 13:47:27 remik Exp $
 #
 # Usage:
-# $ ./generate_test_data_bind.sh 1000
+# $ ./create_json.sh "host1 host2 host3"
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -17,7 +17,7 @@ INFO_MODE=DEBUG
 
 D_TEMPLATES=~/scripto/cassandra/grafana/templates
 
-A_HOSTS=(ip-172-16-224-128 ip-172-16-224-129 ip-172-16-224-130)
+A_HOSTS=("$@")
 
 echo "ala ma kota"
 F_OUT=/tmp/dashboard_${RANDOM}.json
