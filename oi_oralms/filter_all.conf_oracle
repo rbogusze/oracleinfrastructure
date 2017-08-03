@@ -1,0 +1,195 @@
+# execute /bin/cat with the matching line as input
+#pipe '/bin/cat'
+
+#junk
+'^\[.*\]   Current log# .* seq# .* mem# .*:' - - - 0 ignore
+'^\[.*\] Thread .* advanced to log sequence .*' - - - 0 ignore
+'^\[.*\] ARC.: Completed archiving log# .* seq# .*' - - - 0 ignore
+'^\[.*\] ARC.: Failed to archive log# .* seq# .*' - - - 0 ignore
+'^\[.*\] Creating archive destination LOG_ARCHIVE_DEST_.:' - - - 0 ignore
+'^\[.*\] ARC.: Evaluating archive   log .* thread .* sequence .*' - - - 0 ignore
+'^\[.*\] ARC.: Completed archiving  log .* thread .* sequence .*' - - - 0 ignore
+# Incremental checkpoint up to RBA [0x858.1563d.0], current log tail at RBA [0x858.1569c.0]
+'^\[.*\] Incremental checkpoint up to RBA .* current log tail at RBA .*' - - - 0 ignore
+'^\[.*\] SUCCESS: diskgroup ASM_ARCH was mounted' - - - 0 ignore
+'^\[.*\] SUCCESS: diskgroup ASM_ARCH was dismounted' - - - 0 ignore
+'^\[.*\] LOGMINER: End mining logfile: .*' - - - 0 ignore
+'^\[.*\] LOGMINER: Begin mining logfile for session . thread . sequence .*' - - - 0 ignore
+
+# DB Startup
+'^\[.*\] Undo Segment .* Onlined' - - - 0 ignore
+'^\[.*\] Successfully onlined Undo Tablespace' - - - 0 ignore
+'^\[.*\] Database Characterset is' - - - 0 ignore
+'^\[.*\] replication_dependency_tracking turned off' - - - 0 ignore
+'^\[.*\] ... ... .. ..:..:.. ....' - - - 0 ignore
+'^\[.*\] .... started with pid=' - - - 0 ignore
+'^\[.*\] ALTER DATABASE OPEN' - - - 0 ignore
+'^\[.*\] Successful open of redo thread' - - - 0 ignore
+'^\[.*\] System parameters with non-default values:' - - - 0 ignore
+'^\[.*\]   ........................ = ' - - - 0 ignore
+'^\[.*\]   db_file_multiblock_read_count=' - - - 0 ignore
+'^\[.*\]   remote_login_passwordfile=' - - - 0 ignore
+'^\[.*\]   star_transformation_enabled=' - - - 0 ignore
+'^\[.*\] Starting ORACLE instance .normal.' - - - 0 ignore
+'^\[.*\] LICENSE_MAX_SESSION = ' - - - 0 ignore
+'^\[.*\] LICENSE_SESSIONS_WARNING = ' - - - 0 ignore
+'^\[.*\] SCN scheme ' - - - 0 ignore
+'^\[.*\] LICENSE_MAX_USERS = ' - - - 0 ignore
+'^\[.*\] ALTER DATABASE   MOUNT' - - - 0 ignore
+'^\[.*\] Successful mount of redo thread' - - - 0 ignore
+'^\[.*\] Database mounted in Exclusive Mode' - - - 0 ignore
+'^\[.*\] Completed: ALTER DATABASE   MOUNT' - - - 0 ignore
+'^\[.*\] Thread . opened at log sequence' - - - 0 ignore
+'^\[.*\] SMON: enabling cache recovery' - - - 0 ignore
+'^\[.*\] SMON: enabling tx recovery' - - - 0 ignore
+
+# DB Shutdown
+'^\[.*\] Shutting down instance .immediate.' - - - 0 ignore
+'^\[.*\] Shutting down instance .normal.' - - - 0 ignore
+'^\[.*\] License high water mark =' - - - 0 ignore
+'^\[.*\] ALTER DATABASE CLOSE' - - - 0 ignore
+'^\[.*\] ALTER DATABASE DISMOUNT' - - - 0 ignore
+'^\[.*\] SMON: disabling tx recovery' - - - 0 ignore
+'^\[.*\] SMON: disabling cache recovery' - - - 0 ignore
+'^\[.*\] Shutting down archive processes' - - - 0 ignore
+'^\[.*\] Archiving is disabled' - - - 0 ignore
+'^\[.*\] Archive process shutdown avoided' - - - 0 ignore
+'^\[.*\] Thread . closed at log sequence' - - - 0 ignore
+'^\[.*\] Successful close of redo thread' - - - 0 ignore
+'^\[.*\] Shutting down instance: further logons disabled' - - - 0 ignore
+#'' - - - 0 ignore
+
+# Other not very usefull messages
+'^\[.*\] SMON offlining US=' - - - 0 ignore
+
+# Harmless Note:308982.1
+'^\[.*\] Restarting dead background process QMN0' - - - 0 ignore
+
+# well know communication problems
+#'\[HP_42_OL_szpak\] ORA-03113: koniec pliku w kanale komunikacyjnym' - - - 0 ignore
+#'\[HP_42_OL_szpak\] ORA-28546: nie udalo sie zainicjalizowac polaczenia, prawdopodo' - - - 0 ignore
+#'\[HP_42_OL_szpak\] ORA-02068: rezultat powaznego bledu z HP_22.MED.WARSZAWA.PGF' - - - 0 ignore
+#'\[HP_42_OL_szpak\] ORA-02068: rezultat powaznego bledu z HP_32_OK.MED.KATOWICE.PGF' - - - 0 ignore
+#'\[HP_42_OL_szpak\] ORA-02068: rezultat powaznego bledu z HP_61.MED.POZNAN.PGF' - - - 0 ignore
+#'\[HP_42_OL_szpak\] ORA-02068: rezultat powaznego bledu z HP_89.MED.OLSZTYN.PGF' - - - 0 ignore
+#'\[HP_42_OL_szpak\] ORA-02068: rezultat powaznego bledu z HP_42' - - - 0 ignore
+
+# redo switches counted as checkpoints begins messages, works with noarchivelog too
+'^\[.*_.*\] Beginning log switch checkpoint up to RBA .*' - - - 0 exec "triggers/redo_switch.sh $0"
+
+# redo log arch message from 9i
+#'^\[.*_.*\] ARC.: Beginning to archive log .* thread .* sequence .*' - - - 0 exec "redo_logs/redo_switch $0"
+
+# redo log arch message from 8i
+#'^\[.*_.*\] ARC.: Beginning to archive log# .* seq# .*' - - - 0 exec "redo_logs/redo_switch $0"
+
+# New ones with Standby
+'^\[.*\] LGWR: Completed archiving  log .* thread .* sequence .*' - - - 0 ignore
+'^\[.*\] LGWR: Beginning to archive log .* thread .* sequence .*' - - - 0 ignore
+'^\[.*\] ARC.: Archive destination LOG_ARCHIVE_DEST_.: Previously completed' - - - 0 ignore
+#'^\[.*\] Media Recovery Log .*' - - - 0 ignore
+
+# Ignore 10g DG Broker log monitoring messages
+#        DG 2010-01-12-10:58:56  1012000 4 708085065 DMON: MON_PROPERTY operation completed
+#'^\[.*\] DG ....-..-..-..:..:..  ....... . ......... DMON: MON_PROPERTY operation completed' - - - 0 ignore
+#        DG 2010-01-12-11:00:47  2000000 3 708085083 DMON: GET_SITE: success. (len = 348)
+#'^\[.*\] DG ....-..-..-..:..:..  ....... . ......... DMON: GET_SITE: success. .*' - - - 0 ignore
+#        DG 2010-01-12-11:00:47  2000000 3 708085083 DMON: GET_SITE operation completed
+#'^\[.*\] DG ....-..-..-..:..:..  ....... . ......... DMON: GET_SITE operation completed' - - - 0 ignore
+#        DG 2010-01-12-14:56:43  1012000 4 708063401 DMON: CTL_GET_STATUS operation completed
+#'^\[.*\] DG ....-..-..-..:..:..  ....... . ......... DMON: CTL_GET_STATUS operation completed' - - - 0 ignore
+#        DG 2010-01-12-14:57:29        0 2 708063406 DMON: GET_DRC operation completed
+#'^\[.*\] DG ....-..-..-..:..:..  ....... . ......... DMON: GET_DRC operation completed' - - - 0 ignore
+#        DG 2010-01-12-14:57:29        0 2 708063406 DMON: GET_DRC: success. (len = 245)
+#'^\[.*\] DG ....-..-..-..:..:..  ....... . ......... DMON: GET_DRC: success. .*' - - - 0 ignore
+#        DG 2010-03-03-11:33:29        0 2 712623126 DMON: CTL_GET_STATUS forwarded to site DIOICA_DIOICA for processing
+#'^\[.*\] DG ....-..-..-..:..:..  ....... . ......... DMON: CTL_GET_STATUS forwarded to site .*' - - - 0 ignore
+
+# New ones with STAR
+'^\[.*\] ARC.: Unable to archive log .* thread .* sequence .*' - - - 0 ignore
+'^\[.*\]       Log actively being archived by another process' - - - 0 ignore
+
+# Junk with TNS error  12535
+'^\[.*\] Fatal NI connect error .*' - - - 0 ignore
+'^\[.*\]   VERSION INFORMATION:' - - - 0 ignore
+'^\[.*\]         TNS for Solaris: Version 11.2.0.*' - - - 0 ignore
+'^\[.*\]         Oracle Bequeath NT Protocol Adapter for Solaris: Version 11.2.0.*' - - - 0 ignore
+'^\[.*\]         TCP/IP NT Protocol Adapter for Solaris: Version 11.2.0.*' - - - 0 ignore
+'^\[.*\]   Time: .*' - - - 0 ignore
+'^\[.*\]   Tracing not turned on.' - - - 0 ignore
+'^\[.*\]   Tns error struct:' - - - 0 ignore
+'^\[.*\]     ns main err code: 12535' - - - 0 ignore
+'^\[.*\] TNS-00505: TNS:operation timed out' - - - 0 ignore
+'^\[.*\] TNS-00505: Operation timed out' - - - 0 ignore
+'^\[.*\] TNS-12537: TNS:connection closed' - - - 0 ignore
+'^\[.*\]     nt main err code: .*' - - - 0 ignore
+'^\[.*\]     nt secondary err code:.*' - - - 0 ignore
+'^\[.*\].*nt secondary err code:.*' - - - 0 ignore
+'^\[.*\].*LOCAL=NO.*' - - - 0 ignore
+'^\[.*\]     nt OS err code: .*' - - - 0 ignore
+'^\[.*\]   Client address: .*' - - - 0 ignore
+'^\[.*\]   ' - - - 0 ignore
+
+
+# Store the ORA- errors in separate file
+# Ignoring the following errors
+# ORA-12541: TNS:no listener
+# ORA-00060: Deadlock detected.
+# ORA-12535: TNS:operation timed out
+# ORA-12012: b<B3><B1>d przy automatycznym wykonaniu zadania 6
+# ORA-00604: wyst<B1>pi<B3> b<B3><B1>d na poziomie 3 rekurencyjnego SQL
+# ORA-06512: przy "SYS.DBMS_SNAPSHOT", linia 820
+# ORA-01591: blokada utrzymywana przez w<B1>tpliw<B1> transakcj<EA> rozproszon<B1> 39.41.518
+# ORA-04088: b<B3><B1>d w trakcie wykonywania wyzwalacza 'JUNI.T_DKMG_AR_AIUDR'
+# ORA-01034: ORACLE nie jest dostepna
+# ORA-01033: inicjalizacja lub zamkniecie ORACLE w toku
+# ORA-1109 signalled during: ALTER DATABASE CLOSE NORMAL...
+# ORA-16037: user requested cancel of managed recovery operation
+# ORA-03113: koniec pliku w kanale komunikacyjnym
+# ORA-03135: connection lost contact
+# ORA-03114: brak polaczenia z ORACLE
+# ORA-02068: rezultat powa?nego b??du z HP_81_2.MED.LUBLIN.PGF
+# ORA-01092: ORACLE instance terminated. Disconnection forced
+# ORA-12514: TNS:listener does not currently know of service requested in connect descriptor
+# ORA-12170: TNS:Connect timeout occurred
+# ORA-12521: TNS:listener does not currently know of instance requested in connect descriptor
+#'^\[.*\] ORA-.*' 'ORA-12541|ORA-00060|ORA-12535|ORA-12012|ORA-00604|ORA-06512|ORA-01591|ORA-04088|ORA-01034|ORA-01033|ORA-1109|ORA-16037|ORA-03113|ORA-03135|ORA-03114|ORA-02068|ORA-01092|ORA-12514|ORA-12170|ORA-12521' - - 0 continue exec "triggers/create_ORA_err.sh $0"
+
+# OBS special care
+#'\[PRD_wilgadb\] ORA-|\[PRD_lamiadb\] ORA-' 'ORA-12541|ORA-03114|ORA-00002|ORA-000060|ORA-00060|ORA-16058|ORA-1109' - - 0 continue exec "/home/logwatch/oralms/all/send_mail_warning.sh $0"
+#'\[PRD_wilgadb\] ORA-|\[PRD_lamiadb\] ORA-' 'ORA-01555|ORA-12541|ORA-03114|ORA-00002|ORA-000060|ORA-00060|ORA-16058|ORA-12012|ORA-06512|ORA-1109|ORA-01033' - - 0 continue exec "/home/logwatch/oralms/all/send_sms_warning.sh $0"
+
+# MR4 errors send 
+#'^\[MR4.*\] ORA-.*' - - - 0 continue exec "create_MR4_err.sh $0"
+
+# Just print the summary of sessions killed
+'^\[.*_.*\] Immediate Kill Session.*' - - - 0 exec "triggers/immediate_kill.sh $0"
+
+# Just print the summary of 'fast_start_mttr_target is set too low' messages
+'^\[.*_.*\] fast_start_mttr_target .* is set too low.*' - - - 0 exec "triggers/fast_start_mttr_target.sh $0"
+'^\[.*_.*\] FAST_START_MTTR_TARGET .* is set too low.*' - - - 0 exec "triggers/fast_start_mttr_target.sh $0"
+
+# Just print the summary of 'TNS-12535: TNS:operation timed out' messages
+'^\[.*_.*\] TNS-12535: TNS:operation timed out.*' - - - 0 exec "triggers/tns12535.sh $0"
+
+# Just print the summary of 'TNS-12535: TNS:operation timed out' messages
+'^\[.*_.*\] Global Enqueue Services Deadlock detected.*' - - - 0 exec "triggers/global_deadlock.sh $0"
+#  the previous deadlock is followed by trace file location, which is trash
+'^\[.*_.*\]  \/u01\/app\/oracle\/diag\/rdbms\/glprod\/glprod.\/trace\/glprod.*' - - - 0 ignore
+
+# Remove empty lines
+# Do not know why but fucks things up and stops working after a while anyway
+# give it another shot
+'^\[.*_.*\]$' - - - 0 ignore
+
+# Remove lines with only stars
+# Do not know why but fucks things up and stops working after a while anyway
+# give it another shot
+'^\[.*_.*\] \**$' - - - 0 ignore
+
+# cassandra
+'^\[.*_.*\]*.Ignoring interval time of.*' - - - 0 ignore
+
+# Print all lines
+#'.*' - - - 0 pipe '/bin/cat'
+'.*' - - - 0 exec '/bin/echo $0'
