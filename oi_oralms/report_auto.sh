@@ -52,41 +52,39 @@ for V_DIR in `ls /tmp/triggers`
 do
   msgd "V_DIR: $V_DIR"
   f_report_stats_from_dir "/tmp/triggers/$V_DIR" > $V_TRIG_SUMM/$V_DIR
-
 done
 
+# Get the list of CN that monitor alert log
+$HOME/scripto/perl/ask_ldap.pl "(orainfDbAlertLogMonitoring=TRUE)" "['cn']" > /tmp/oralms_report.txt
+run_command_d "cat /tmp/oralms_report.txt"
 
+# Get the stats for every report I want to include
+echo "------------------------------------------------------------------------------------"
+echo "        /h | Redo switches | Ses. Killed | mttr too low | TNS12535 | Glob Deadlock |"
+while read LINE
+do
+  echo $LINE
+  # now I have the system name, I want to see all the info I can get for that target
+  for V_TARGET in `ls $V_TRIG_SUMM`
+  do
+    msgd ": $V_DIR"
+  done
+   
 
+  printf "%-10s | %-13s | %-10s  | %-12s | %-8s | %-13s |" "$LINE" "$V_REDO" "$V_KILL" "$V_MTTR" "$V_TNS12535" "$V_GLOBAL_DEADLOCK"
+  echo ""
+done < /tmp/oralms_report.txt
+
+echo "------------------------------------------------------------------------------------"
 
 exit 0
+
 # ---- old below
-
-
-# Actual run
-msgd "Compute Hourly redo switches"
-f_report_stats_from_dir "/tmp/oralms_redo" > /tmp/oralms_redo.txt
-run_command_d "cat /tmp/oralms_redo.txt"
-
-msgd "Compute Hourly killed sessions"
-f_report_stats_from_dir "/tmp/oralms_sess_killed" > /tmp/oralms_sess_killed.txt
-run_command_d "cat /tmp/oralms_sess_killed.txt"
-
-msgd "Compute Hourly fast_start_mttr_target 480 is set too low messages"
-f_report_stats_from_dir "/tmp/oralms_mttr" > /tmp/oralms_mttr.txt
-run_command_d "cat /tmp/oralms_mttr.txt"
-
-msgd "TNS-12535: TNS:operation timed out"
-f_report_stats_from_dir "/tmp/oralms_tns12535" > /tmp/oralms_tns12535.txt
-run_command_d "cat /tmp/oralms_tns12535.txt"
-
 msgd "Global Enqueue Services Deadlock detected"
 f_report_stats_from_dir "/tmp/oralms_global_deadlock" > /tmp/oralms_global_deadlock.txt
 run_command_d "cat /tmp/oralms_global_deadlock.txt"
 
 
-# Get the list of CN that monitor alert log
-$HOME/scripto/perl/ask_ldap.pl "(orainfDbAlertLogMonitoring=TRUE)" "['cn']" > /tmp/oralms_report.txt
-run_command_d "cat /tmp/oralms_report.txt"
 
 # Get the stats for every report I want to include
 echo "------------------------------------------------------------------------------------"
