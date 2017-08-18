@@ -22,7 +22,7 @@ CLITMPFILE=/tmp/dropKeyspace.tmp
     fi
 
 
-printf "show keyspaces ;\n" > $CLITMPFILE
+printf "desc keyspaces ;\n" > $CLITMPFILE
 
 cqlsh $CASIP -f $CLITMPFILE
 RC=$?
