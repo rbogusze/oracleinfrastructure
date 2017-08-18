@@ -96,6 +96,7 @@
         printf "    -k,--keyspace <keyspace name>      REQUIRED: The name of the keyspace to snapshot\n"
         printf "    -s,--snapshot <snapshot name>      The name of an existing snapshot to package\n"
         printf "    -y,--yaml <cassandra.yaml file>    Alternate cassandra.yaml file\n"
+        printf "    --tag                              Additional tag name\n"
         printf "    --no-timestamp                     Don't include a timestamp in the resulting filename\n"
         exit 0
     }
@@ -121,7 +122,7 @@
     # Great sample getopt implementation by Cosimo Streppone
     # https://gist.github.com/cosimo/3760587#file-parse-options-sh
     SHORT='hvk:s:y:'
-    LONG='help,version,keyspace:,snapshot:,yaml:,no-timestamp'
+    LONG='help,version,keyspace:,snapshot:,yaml:,tag:,no-timestamp,'
     OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
     if [ $? -gt 0 ]; then
@@ -138,6 +139,7 @@
             -k|--keyspace) KEYSPACE="$2"; shift 2;;
             -s|--snapshot) SNAPSHOT="$2"; shift 2;;
             -y|--yaml) INPYAML="$2"; shift 2;;
+            --tag) TAG="$2"; shift 2;;
             --no-timestamp) APPENDTIMESTAMP="no"; shift;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
@@ -278,8 +280,15 @@
         exit 1
     else
         # Include the timestamp in the filename or not (i.e. --no-timestamp)
-        [ "$APPENDTIMESTAMP" == "no" ] && FILENAME="$KEYSPACE.tar.gz" \
-                                       || FILENAME="$KEYSPACE-$TIMESTAMP.tar.gz"
+        [ "$APPENDTIMESTAMP" == "no" ] && FILENAME="$KEYSPACE-$TAG.tar.gz" \
+                                       || FILENAME="$KEYSPACE-$TAG-$TIMESTAMP.tar.gz"
+
+        # [rem] check if file with the same name already exists
+        if [ -f $FILENAME ]; then
+            printf "Backup file: $FILENAME already exists. Exiting.\n"
+            [ "$DUMPDIR" != "/" ] && rm -rf "$DUMPDIR"
+            exit 1
+        fi 
 
         tar --directory "$DUMPDIR" \
             -zcvf $FILENAME \
