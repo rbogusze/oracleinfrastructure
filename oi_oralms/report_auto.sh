@@ -1,7 +1,7 @@
 #!/bin/bash
 # This script should be run from crontab and regulari report about some DB statistics like redo switches and sessions killed
 
-INFO_MODE=DEBUG
+#INFO_MODE=DEBUG
 
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
@@ -44,7 +44,24 @@ f_report_stats_from_dir()
   msgd "${FUNCNAME[0]} End."
 } #f_report_stats_from_dir
 
+
+f_say_how_much_of_event_happened_for_CN()
+{
+  msgd "${FUNCNAME[0]} Begin."
+  V_CN=$1
+  msgd "V_CN: $V_CN"
+  F_STAT=$2
+  msgd "F_STAT: $F_STAT"
+  check_file $F_STAT
+  V_VALUE=`cat $F_STAT | grep "$V_CN " | awk '{print $2}'`
+  printf "%-10s" "$V_VALUE"
+
+  msgd "${FUNCNAME[0]} End."
+} #f_report_stats_from_dir
+
+
 # ---- new now
+# this is just reporting on what happened in the last hour, so it is easy to do the counting now
 V_TRIG_SUMM=/tmp/triggers_summary
 mkdir -p $V_TRIG_SUMM
 check_directory $V_TRIG_SUMM
@@ -56,22 +73,33 @@ done
 
 # Get the list of CN that monitor alert log
 $HOME/scripto/perl/ask_ldap.pl "(orainfDbAlertLogMonitoring=TRUE)" "['cn']" > /tmp/oralms_report.txt
-run_command_d "cat /tmp/oralms_report.txt"
+#run_command_d "cat /tmp/oralms_report.txt"
 
-# Get the stats for every report I want to include
+# Get the stats for every CN - construct header
 echo "------------------------------------------------------------------------------------"
 echo "        /h | Redo switches | Ses. Killed | mttr too low | TNS12535 | Glob Deadlock |"
+
+printf "%-12s" " "
+for V_TARGET in `ls $V_TRIG_SUMM`
+do
+  printf "%-10s" "$V_TARGET"
+done
+echo
+  
+
+# Get the stats for every CN - actual stats
 while read LINE
 do
-  echo $LINE
+  #msgd "LINE: $LINE"
+  printf "%-12s" "$LINE"
   # now I have the system name, I want to see all the info I can get for that target
   for V_TARGET in `ls $V_TRIG_SUMM`
   do
-    msgd ": $V_DIR"
+    msgd "LINE: $LINE"
+    msgd "V_TARGET: $V_TARGET"
+    f_say_how_much_of_event_happened_for_CN "$LINE" "$V_TRIG_SUMM/$V_TARGET" 
   done
-   
 
-  printf "%-10s | %-13s | %-10s  | %-12s | %-8s | %-13s |" "$LINE" "$V_REDO" "$V_KILL" "$V_MTTR" "$V_TNS12535" "$V_GLOBAL_DEADLOCK"
   echo ""
 done < /tmp/oralms_report.txt
 
