@@ -13,6 +13,10 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
+LOCKFILE_SPAN_DIR=/tmp/remote_log_spanned
+LOCKFILE_SPAN=gather_span
+
+
 msgd "Killing my previous spawned processes"
 echo "Please wait untill I kill all the spawned processes"
 cd $LOCKFILE_SPAN_DIR
@@ -26,3 +30,6 @@ for i in `ls -1 ${LOCKFILE_SPAN}_*.lock`; do
   rm -f $i
 done
 echo "Done."
+
+#shortcut
+pkill tail

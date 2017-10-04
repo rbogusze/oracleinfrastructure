@@ -46,13 +46,19 @@ do {
   msgd "Spanning tail through ssh"
   ssh -o BatchMode=yes ${V_USERNAME}@${V_HOSTNAME} "tail -f $V_LOGFILE " > /tmp/remote_log_raw/${V_PREFIX}_${V_LOGNAME} &
   PID=$!
-  sleep 1
+  msgd "PID: $PID"
   touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
-  msgd "Spanning prefix addon"
-  nohup tail -f /tmp/remote_log_raw/${V_PREFIX}_${V_LOGNAME} | awk -v var="${V_PREFIX}" '$0=var" "$0; system("")' > /tmp/remote_log_prefix/${V_PREFIX}_${V_LOGNAME} &
   sleep 1
-  touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
 
+  msgd "Spanning prefix addon"
+  tail -f /tmp/remote_log_raw/${V_PREFIX}_${V_LOGNAME} | awk -v var="${V_PREFIX}" '$0=var" "$0; system("")' > /tmp/remote_log_prefix/${V_PREFIX}_${V_LOGNAME} &
+  #PID=$!
+  #msgd "PID: $PID"
+  #touch ${LOCKFILE_SPAN_DIR}/${LOCKFILE_SPAN}_${PID}_.lock
+  sleep 1
+
+
+exit 0
    }
 done
 exec 3>&-
