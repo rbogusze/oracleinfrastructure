@@ -40,8 +40,11 @@ do {
   msgd "V_LOGNAME: $V_LOGNAME"
   check_parameter $V_LOGNAME
 
-  msgd "Adding prefix, now assuming hostname"
-  V_PREFIX=$V_HOSTNAME
+  msgd "Prefix"
+  #V_PREFIX=$V_HOSTNAME
+  V_PREFIX=`echo $LINE | awk '{print $4}'`
+  msgd "V_PREFIX: $V_PREFIX"
+  check_parameter $V_PREFIX
 
   msgd "Spanning tail through ssh"
   ssh -o BatchMode=yes ${V_USERNAME}@${V_HOSTNAME} "tail -f $V_LOGFILE " > /tmp/remote_log_raw/${V_PREFIX}_${V_LOGNAME} &
