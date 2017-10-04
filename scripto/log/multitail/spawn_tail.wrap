@@ -1,0 +1,16 @@
+#!/bin/bash
+#$Id: _base_script_block.wrap,v 1.1 2012-05-07 13:47:27 remik Exp $
+#
+
+# Load usefull functions
+if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
+  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
+  exit 1
+else
+  . $HOME/scripto/bash/bash_library.sh
+fi
+
+INFO_MODE=DEBUG
+#INFO_MODE=INFO
+
+msgi "ala"
