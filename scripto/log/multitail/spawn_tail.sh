@@ -58,7 +58,7 @@ do {
   sleep 1
 
 
-exit 0
+#exit 0
    }
 done
 exec 3>&-
