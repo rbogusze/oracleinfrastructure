@@ -13,4 +13,26 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
-msgi "ala"
+F_FETCH_THAT=$1
+
+check_file $F_FETCH_THAT
+
+while read LINE
+do
+  echo $LINE
+  V_USERNAME=`echo $LINE | awk '{print $1}'`
+  msgd "V_USERNAME: $V_USERNAME"
+  V_HOSTNAME=`echo $LINE | awk '{print $2}'`
+  msgd "V_HOSTNAME: $V_HOSTNAME"
+  V_LOGFILE=`echo $LINE | awk '{print $3}'`
+  msgd "V_LOGFILE: $V_LOGFILE"
+
+  msgd "Spanning tail through ssh"
+  run_command_e "mkdir -p /tmp/remote_log_raw /tmp/remote_log_prefix"
+#  nohup ssh ${V_USERNAME}@${V_HOSTNAME} 
+
+  msgd "Adding prefix, now assuming hostname"
+  V_PREFIX=$V_HOSTNAME
+
+done < $F_FETCH_THAT
+
