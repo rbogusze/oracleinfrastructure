@@ -21,7 +21,7 @@ check_file $F_FETCH_THAT
 msgd "F_FETCH_THAT: $F_FETCH_THAT"
 
 run_command_e "mkdir -p /tmp/remote_log_raw /tmp/remote_log_prefix $LOCKFILE_SPAN_DIR"
-run_command_e "rm -f /tmp/remote_log_raw/*.log /tmp/remote_log_prefix/*.log"
+run_command_e "rm -f /tmp/remote_log_raw/* /tmp/remote_log_prefix/*"
 
 msgd "Filter out comments"
 F_FETCH_THAT_NO_COMMENT=/tmp/remote_log_raw.input
