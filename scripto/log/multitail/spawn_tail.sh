@@ -23,10 +23,19 @@ msgd "F_FETCH_THAT: $F_FETCH_THAT"
 run_command_e "mkdir -p /tmp/remote_log_raw /tmp/remote_log_prefix $LOCKFILE_SPAN_DIR"
 run_command_e "rm -f /tmp/remote_log_raw/*.log /tmp/remote_log_prefix/*.log"
 
-exec 3<> $F_FETCH_THAT
+msgd "Filter out comments"
+F_FETCH_THAT_NO_COMMENT=/tmp/remote_log_raw.input
+run_command_e "cat $F_FETCH_THAT | grep -v '^#' > $F_FETCH_THAT_NO_COMMENT"
+run_command_d "cat $F_FETCH_THAT_NO_COMMENT"
+
+
+exec 3<> $F_FETCH_THAT_NO_COMMENT
 while read LINE <&3
 do {
   echo $LINE
+
+  
+
   V_USERNAME=`echo $LINE | awk '{print $1}'`
   msgd "V_USERNAME: $V_USERNAME"
   check_parameter $V_USERNAME
