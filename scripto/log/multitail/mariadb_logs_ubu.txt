@@ -1,0 +1,6 @@
+root ubu1 /var/log/mysql/rem_mysql_error.log ubu1_err
+root ubu2 /var/log/mysql/rem_mysql_error.log ubu2_err
+root ubu3 /var/log/mysql/rem_mysql_error.log ubu3_err
+root ubu1 /var/log/mysql/rem_general_mysql.log ubu1_gen
+root ubu2 /var/log/mysql/rem_general_mysql.log ubu2_gen
+root ubu3 /var/log/mysql/rem_general_mysql.log ubu3_gen
