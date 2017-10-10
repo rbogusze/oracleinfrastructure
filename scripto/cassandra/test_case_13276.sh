@@ -35,6 +35,7 @@ msgd "V_SNAP: $V_SNAP"
 echo "drop keyspace remik5;" | tee /dev/tty | cqlsh  
 echo "CREATE KEYSPACE remik5 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};" | tee /dev/tty | cqlsh 
 echo "use remik5; CREATE TABLE table1 ( id int PRIMARY KEY, name text, temperature double);" | tee /dev/tty | cqlsh 
+echo "use remik5; ALTER TABLE remik5.table1 DROP name USING TIMESTAMP 1507300907611000;" | tee /dev/tty | cqlsh 
 
 run_command_e "cd ~/scripto/cassandra"
 run_command "./restore_from_snap.sh remik5 table1 $V_SNAP"
