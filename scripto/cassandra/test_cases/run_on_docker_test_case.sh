@@ -15,13 +15,30 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
-V_TEST_TO_RUN=$1
+V_CAS_VERSION=$1
+msgd "V_CAS_VERSION: $V_CAS_VERSION"
+check_parameter $V_CAS_VERSION
+
+V_TEST_TO_RUN=$2
 msgd "V_TEST_TO_RUN: $V_TEST_TO_RUN"
 check_parameter $V_TEST_TO_RUN
 
-#List cassandra containers
-A_CASSANDRA=( cassandra11 cassandra12 cassandra13 )
 
+echo "I am running on $V_CAS_VERSION"
+case $V_CAS_VERSION in
+  "3.0.9")
+    #List cassandra containers
+    A_CASSANDRA=( cassandra21 cassandra22 cassandra23 )
+    ;;
+  "3.0.14")
+    #List cassandra containers
+    A_CASSANDRA=( cassandra11 cassandra12 cassandra13 )
+    ;;
+  *)
+    echo "Unknown version!!! Exiting."
+    exit 1
+    ;;
+esac
 
 
 msgd "List currently running containers"
