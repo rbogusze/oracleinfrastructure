@@ -28,7 +28,7 @@ echo "I am running on $V_CAS_VERSION"
 case $V_CAS_VERSION in
   "3.0.9")
     #List cassandra containers
-    A_CASSANDRA=( cassandra21 cassandra22 cassandra23 )
+    A_CASSANDRA=( cassandra41 cassandra42 cassandra43 )
     ;;
   "3.0.14")
     #List cassandra containers
