@@ -57,7 +57,7 @@ for i in "${A_CASSANDRA[@]}"
 do
   msgi "Starting $i"
   run_command_e "docker start $i"
-  run_command "sleep 10"
+  run_command "sleep 15"
   run_command_e "docker exec -i -t $i sh -c 'nodetool status'"
 done
 
