@@ -62,28 +62,6 @@ b_check_gc_activity()
   msgb "${FUNCNAME[0]} Finished."
 } #b_template
 
-b_create_keyspaces 1 10
-
-
-exit 0
-
-echo "drop keyspace remik5;" | tee /dev/tty | cqlsh  
-echo "CREATE KEYSPACE remik5 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};" | tee /dev/tty | cqlsh 
-echo "use remik5; CREATE TABLE table1 ( id int PRIMARY KEY, name text, temperature double);" | tee /dev/tty | cqlsh 
-echo "desc keyspace remik5;" | tee /dev/tty | cqlsh  
-run_command_e "cd ~/scripto/cassandra/test_data"
-echo "use remik5; source 'populate_1t.sql';" | tee /dev/tty | cqlsh  
-echo "use remik5; alter table table1 drop name;" | tee /dev/tty | cqlsh  
-echo "use remik5; INSERT INTO table1 (id, temperature) values (234234236, 322);" | tee /dev/tty | cqlsh  
-echo "use remik5; select count(*) from remik5.table1;" | tee /dev/tty | cqlsh  
-run_command_e "nodetool snapshot remik5 > /tmp/remik5.snap"
-cat /tmp/remik5.snap
-V_SNAP=`cat /tmp/remik5.snap | grep "Snapshot directory" | awk '{print $3}'`
-msgd "V_SNAP: $V_SNAP"
-
-echo "drop keyspace remik5;" | tee /dev/tty | cqlsh  
-echo "CREATE KEYSPACE remik5 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};" | tee /dev/tty | cqlsh 
-echo "use remik5; CREATE TABLE table1 ( id int PRIMARY KEY, name text, temperature double);" | tee /dev/tty | cqlsh 
-echo "use remik5; ALTER TABLE remik5.table1 DROP name USING TIMESTAMP 1507300907611000;" | tee /dev/tty | cqlsh 
-
+#b_create_keyspaces 1 10
+b_check_gc_activity "mark0"
 
