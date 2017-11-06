@@ -28,15 +28,25 @@ b_create_keyspaces()
   check_parameter $END
   msgd "END: $END"
 
+  echo "select count(*) from system_schema.tables;" | tee /dev/tty | cqlsh 
+
   STEP=1
   while [ ${CURRENT} -ne ${END} ]
   do
     echo "CREATE KEYSPACE remik${CURRENT} WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};" | tee /dev/tty | cqlsh 
-    echo "use remik${CURRENT}; CREATE TABLE table1 ( id int PRIMARY KEY, name text, temperature double);" | tee /dev/tty | cqlsh 
+
+    for ((i=1;i<=100;i++)); 
+    do 
+      echo $i
+      echo "use remik${CURRENT}; CREATE TABLE table$i ( id int PRIMARY KEY, name text, temperature double);" | tee /dev/tty | cqlsh 
+    done
+
+
     CURRENT=`expr ${CURRENT} + ${STEP}`
     echo ${CURRENT}
   done
 
+  echo "select count(*) from system_schema.tables;" | tee /dev/tty | cqlsh 
   
 
   # Block actions start here
