@@ -63,7 +63,7 @@ b_check_gc_activity()
   check_parameter $V_MARK
   msgd "V_MARK: $V_MARK"
 
-  grep -A10000 -P '^${V_MARK}$' /var/log/cassandra/gc.log.0.current 
+  grep -A10000 -P '^${V_MARK}$' /var/log/cassandra/gc.log.0.current | grep 'Heap before GC invocations' | wc -l
 
   # Block actions start here
   msgb "${FUNCNAME[0]} Finished."
