@@ -63,14 +63,15 @@ b_check_gc_activity()
   check_parameter $V_MARK
   msgd "V_MARK: $V_MARK"
 
-  grep -A10000 -P '^${V_MARK}$' /var/log/cassandra/gc.log.0.current | grep 'Heap before GC invocations' | wc -l
+  V_COUNT=`grep -A10000 -P "^${V_MARK}$" /var/log/cassandra/gc.log.0.current | grep 'Heap before GC invocations' | wc -l`
+  msgd "V_COUNT: $V_COUNT"
 
   # Block actions start here
   msgb "${FUNCNAME[0]} Finished."
 } #b_template
 
 msgd "Create mark in gc.log.0.current"
-run_command "echo 'MARK0 >> /var/log/cassandra/gc.log.0.current'"
+run_command "echo MARK0 >> /var/log/cassandra/gc.log.0.current"
 #b_create_keyspaces 1 10
 b_check_gc_activity "MARK0"
 
