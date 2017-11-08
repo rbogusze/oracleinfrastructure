@@ -68,8 +68,9 @@ b_check_gc_activity()
   V_COUNT=`grep -A10000 -P "^${V_MARK}$" /var/log/cassandra/gc.log.0.current | grep 'Heap before GC invocations' | wc -l`
   msgd "V_COUNT: $V_COUNT"
 
+  V_TABLES=`echo "select count(*) from system_schema.tables;" | cqlsh | grep -v -e "count" -e "Warnings" -e "Aggregation" -e "rows" -e "---" | grep -v '^ *$' | awk '{print $1}' `
  # echo "| $V_MARK | ${V_COUNT} | " >> /tmp/test_case.log
-  printf "%-26s %-9s %s\n" "| $V_MARK" "| ${V_COUNT}" "|" >> /tmp/test_case.log
+  printf "%-36s %-9s %s\n" "| $V_MARK $V_TABLES" "| ${V_COUNT}" "|" >> /tmp/test_case.log
 
   # Block actions start here
   msgb "${FUNCNAME[0]} Finished."
@@ -77,9 +78,11 @@ b_check_gc_activity()
 
 # Actual execution
 #echo "| Event | GC runs | " >> /tmp/test_case.log
-printf "%-26s %-6s %s\n" "| Event" "| GC runs" "|" > /tmp/test_case.log
+printf "%-36s %-6s %s\n" "| Event" "| GC runs" "|" > /tmp/test_case.log
 
 msgd "Create mark in gc.log.0.current, run the test and then print how many GC runs were seen aftet the mark"
+
+
 
 V_MARK="KEYSPACE_1_TABLES_${V_TABLES_PER_KEYSPACE}"
 run_command "echo $V_MARK >> /var/log/cassandra/gc.log.0.current"
@@ -91,5 +94,14 @@ run_command "echo $V_MARK >> /var/log/cassandra/gc.log.0.current"
 b_create_keyspaces 2 10
 b_check_gc_activity "$V_MARK"
 
+V_MARK="KEYSPACE_20_TABLES_${V_TABLES_PER_KEYSPACE}"
+run_command "echo $V_MARK >> /var/log/cassandra/gc.log.0.current"
+b_create_keyspaces 10 20
+b_check_gc_activity "$V_MARK"
+
+V_MARK="KEYSPACE_40_TABLES_${V_TABLES_PER_KEYSPACE}"
+run_command "echo $V_MARK >> /var/log/cassandra/gc.log.0.current"
+b_create_keyspaces 20 40
+b_check_gc_activity "$V_MARK"
 
 cat /tmp/test_case.log
