@@ -15,7 +15,7 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
-V_TABLES_PER_KEYSPACE=10
+V_TABLES_PER_KEYSPACE=100
 
 
 # That creates keyspace with index $1 and up to $2, each keyspace with 100 tables
