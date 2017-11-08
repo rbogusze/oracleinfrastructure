@@ -53,15 +53,24 @@ b_create_keyspaces()
   msgb "${FUNCNAME[0]} Finished."
 } #b_create_keyspaces
 
+# Count the number of GC runs after the provided mark as $1
 b_check_gc_activity()
 {
   # Info section
   msgb "${FUNCNAME[0]} Beginning."
 
+  V_MARK=$1
+  check_parameter $V_MARK
+  msgd "V_MARK: $V_MARK"
+
+  grep -A10000 -P '^${V_MARK}$' /var/log/cassandra/gc.log.0.current 
+
   # Block actions start here
   msgb "${FUNCNAME[0]} Finished."
 } #b_template
 
+msgd "Create mark in gc.log.0.current"
+run_command "echo 'MARK0 >> /var/log/cassandra/gc.log.0.current'"
 #b_create_keyspaces 1 10
-b_check_gc_activity "mark0"
+b_check_gc_activity "MARK0"
 
