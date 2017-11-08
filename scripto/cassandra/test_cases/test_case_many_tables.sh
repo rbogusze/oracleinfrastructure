@@ -15,6 +15,8 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
+V_TABLES_PER_KEYSPACE=10
+
 
 # That creates keyspace with index $1 and up to $2, each keyspace with 100 tables
 b_create_keyspaces()
@@ -35,7 +37,7 @@ b_create_keyspaces()
   do
     echo "CREATE KEYSPACE remik${CURRENT} WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'};" | tee /dev/tty | cqlsh 
 
-    for ((i=1;i<=100;i++)); 
+    for ((i=1;i<=${V_TABLES_PER_KEYSPACE};i++)); 
     do 
       echo $i
       echo "use remik${CURRENT}; CREATE TABLE table$i ( id int PRIMARY KEY, name text, temperature double);" | tee /dev/tty | cqlsh 
@@ -66,12 +68,28 @@ b_check_gc_activity()
   V_COUNT=`grep -A10000 -P "^${V_MARK}$" /var/log/cassandra/gc.log.0.current | grep 'Heap before GC invocations' | wc -l`
   msgd "V_COUNT: $V_COUNT"
 
+ # echo "| $V_MARK | ${V_COUNT} | " >> /tmp/test_case.log
+  printf "%-26s %-9s %s\n" "| $V_MARK" "| ${V_COUNT}" "|" >> /tmp/test_case.log
+
   # Block actions start here
   msgb "${FUNCNAME[0]} Finished."
 } #b_template
 
-msgd "Create mark in gc.log.0.current"
-run_command "echo MARK0 >> /var/log/cassandra/gc.log.0.current"
-#b_create_keyspaces 1 10
-b_check_gc_activity "MARK0"
+# Actual execution
+#echo "| Event | GC runs | " >> /tmp/test_case.log
+printf "%-26s %-6s %s\n" "| Event" "| GC runs" "|" > /tmp/test_case.log
 
+msgd "Create mark in gc.log.0.current, run the test and then print how many GC runs were seen aftet the mark"
+
+V_MARK="KEYSPACE_1_TABLES_${V_TABLES_PER_KEYSPACE}"
+run_command "echo $V_MARK >> /var/log/cassandra/gc.log.0.current"
+b_create_keyspaces 1 2
+b_check_gc_activity "$V_MARK"
+
+V_MARK="KEYSPACE_10_TABLES_${V_TABLES_PER_KEYSPACE}"
+run_command "echo $V_MARK >> /var/log/cassandra/gc.log.0.current"
+b_create_keyspaces 2 10
+b_check_gc_activity "$V_MARK"
+
+
+cat /tmp/test_case.log
