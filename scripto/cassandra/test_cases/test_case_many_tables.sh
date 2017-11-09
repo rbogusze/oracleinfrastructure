@@ -61,12 +61,25 @@ b_check_gc_activity()
   # Info section
   msgb "${FUNCNAME[0]} Beginning."
 
+  V_INFO=$1
+  check_parameter $V_INFO
+  msgd "V_INFO: $V_INFO"
+
+  V_COUNT_OLD=$V_COUNT
+  msgd "V_COUNT_OLD: $V_COUNT_OLD"
+
   V_COUNT=`cat /var/log/cassandra/gc.log.0.current | grep 'Heap before GC invocations' | wc -l`
   msgd "V_COUNT: $V_COUNT"
 
+  #compute delta if previous record exists
+  if [ $V_COUNT_OLD ]; then
+    V_DELTA=`expr ${V_COUNT} - ${V_COUNT_OLD}`
+    msgd "V_DELTA: $V_DELTA"
+  fi
+
   V_TABLES=`echo "select count(*) from system_schema.tables;" | cqlsh | grep -v -e "count" -e "Warnings" -e "Aggregation" -e "rows" -e "---" | grep -v '^ *$' | awk '{print $1}' `
  # echo "| $V_MARK | ${V_COUNT} | " >> /tmp/test_case.log
-  printf "%-36s %-9s %s\n" "| $V_TABLES" "| ${V_COUNT}" "|" >> /tmp/test_case.log
+  printf "%-56s %-16s %-9s %-9s %s\n" "| $V_INFO" "| $V_TABLES" "| ${V_COUNT}" "| $V_DELTA" "|" >> /tmp/test_case.log
 
   # Block actions start here
   msgb "${FUNCNAME[0]} Finished."
@@ -74,22 +87,33 @@ b_check_gc_activity()
 
 # Actual execution
 #echo "| Event | GC runs | " >> /tmp/test_case.log
-printf "%-36s %-6s %s\n" "| Event" "| GC runs" "|" > /tmp/test_case.log
+printf "%-56s %-16s %-9s %-9s %s\n" "| Info" "| Tables count " "| GC runs" "| Delta" "|" > /tmp/test_case.log
 
 msgd "Create mark in gc.log.0.current, run the test and then print how many GC runs were seen aftet the mark"
 
 
+V_IDLE_TIME=600
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
 b_create_keyspaces 1 2
-b_check_gc_activity "$V_MARK"
+b_check_gc_activity "Created 1 keyspace * $V_TABLES_PER_KEYSPACE tables"
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
-#b_create_keyspaces 2 10
-b_check_gc_activity "$V_MARK"
+b_create_keyspaces 2 10
+b_check_gc_activity "Created another 10 keyspaces * $V_TABLES_PER_KEYSPACE tables"
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
-#b_create_keyspaces 10 20
-b_check_gc_activity "$V_MARK"
+b_create_keyspaces 10 20
+b_check_gc_activity "Created another 10 keyspaces * $V_TABLES_PER_KEYSPACE tables"
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
-#b_create_keyspaces 20 40
-b_check_gc_activity "$V_MARK"
+b_create_keyspaces 20 40
+b_check_gc_activity "Created another 20 keyspaces * $V_TABLES_PER_KEYSPACE tables"
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
 cat /tmp/test_case.log
