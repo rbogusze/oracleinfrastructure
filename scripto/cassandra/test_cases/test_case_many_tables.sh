@@ -122,4 +122,10 @@ b_check_gc_activity "Created another 10 keyspaces * $V_TABLES_PER_KEYSPACE table
 run_command "sleep $V_IDLE_TIME"
 b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
+
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
+
 cat /tmp/test_case.log
