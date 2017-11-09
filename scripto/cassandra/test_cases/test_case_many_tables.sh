@@ -112,8 +112,13 @@ b_check_gc_activity "Created another 10 keyspaces * $V_TABLES_PER_KEYSPACE table
 run_command "sleep $V_IDLE_TIME"
 b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
-b_create_keyspaces 20 40
-b_check_gc_activity "Created another 20 keyspaces * $V_TABLES_PER_KEYSPACE tables"
+b_create_keyspaces 20 30
+b_check_gc_activity "Created another 10 keyspaces * $V_TABLES_PER_KEYSPACE tables"
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
+
+b_create_keyspaces 30 40
+b_check_gc_activity "Created another 10 keyspaces * $V_TABLES_PER_KEYSPACE tables"
 run_command "sleep $V_IDLE_TIME"
 b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
