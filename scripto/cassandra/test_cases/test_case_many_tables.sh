@@ -87,7 +87,11 @@ b_check_gc_activity()
 
 # Actual execution
 #echo "| Event | GC runs | " >> /tmp/test_case.log
-printf "%-56s %-16s %-9s %-9s %s\n" "| Info" "| Tables count " "| GC runs" "| GC Delta" "|" > /tmp/test_case.log
+# store some info
+cat /proc/cpuinfo | grep 'model name' > /tmp/test_case.log
+free -m >> /tmp/test_case.log
+ps -ef | grep cassandra | grep -v grep >> /tmp/test_case.log
+printf "%-56s %-16s %-9s %-9s %s\n" "| Info" "| Tables count " "| GC runs" "| GC Delta" "|" >> /tmp/test_case.log
 
 msgd "Create mark in gc.log.0.current, run the test and then print how many GC runs were seen aftet the mark"
 
@@ -129,3 +133,8 @@ run_command "sleep $V_IDLE_TIME"
 b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
 cat /tmp/test_case.log
+
+msgi "Storing results in ~/scripto/cassandra/test_cases/test_results if you find it interesting pleas add and commit to repository"
+run_command "cp /tmp/test_case.log ~/scripto/cassandra/test_cases/test_results/test_case_many_tables.log.`date '+%Y-%m-%d--%H:%M:%S'`"
+
+
