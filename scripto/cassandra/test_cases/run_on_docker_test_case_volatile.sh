@@ -30,13 +30,16 @@ msgi "Stop all docker containsers"
 run_command "docker stop $(docker ps -a -q)"
 run_command "sleep 10"
 
+msgi "Remove cassandra1 container if it exists"
+run_command "docker rm cassandra1"
+
 msgd "List currently running containers"
 run_command "docker ps"
 
 
 msgi "Create cassandra $V_CAS_VERSION cluster"
-#run_command_e "docker run --name cassandra1 -m 2g -d cassandra:$V_CAS_VERSION"
-run_command_e "docker run --name cassandra1 -m 4g -d --rm cassandra:$V_CAS_VERSION"
+# deciding to skip the --rm flag, as I need to bounce cassandra after parameter changes that enable JMX on outside
+run_command_e "docker run --name cassandra1 -m 4g -d cassandra:$V_CAS_VERSION"
 run_command "sleep 60"
 run_command_e "docker run --name cassandra2 -m 2g -d --rm -e CASSANDRA_SEEDS="$(docker inspect --format='{{ .NetworkSettings.IPAddress }}' cassandra1)" cassandra:$V_CAS_VERSION"
 run_command "sleep 60"
@@ -66,6 +69,9 @@ run_command_e "docker exec -i -t cassandra1 sh -c 'cd; svn checkout https://gith
 #run_command_e "docker exec -i -t cassandra1 sh -c '/etc/init.d/ssh start'"
 
 msgi "Expose JMX to outside, but that would require cassandra restart and docker is started in auto destruction mode."
+run_command_e "docker exec -i -t cassandra1 sh -c 'cd ~/scripto; svn update; cd ~/scripto/cassandra/test_cases; ./enable_jmx_to_outside.sh'"
+run_command "docker restart cassandra1"
+run_command "sleep 60"
 
 msgi "Running the test"
 run_command_e "docker exec -i -t cassandra1 sh -c 'cd ~/scripto; svn update; cd ~/scripto/cassandra/test_cases; ./$V_TEST_TO_RUN'"
