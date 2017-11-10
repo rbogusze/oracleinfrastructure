@@ -91,6 +91,7 @@ b_check_gc_activity()
 cat /proc/cpuinfo | grep 'model name' > /tmp/test_case.log
 free -m >> /tmp/test_case.log
 ps -ef | grep cassandra | grep -v grep >> /tmp/test_case.log
+nodetool version >> /tmp/test_case.log
 printf "%-56s %-16s %-9s %-9s %s\n" "| Info" "| Tables count " "| GC runs" "| GC Delta" "|" >> /tmp/test_case.log
 
 msgd "Create mark in gc.log.0.current, run the test and then print how many GC runs were seen aftet the mark"
