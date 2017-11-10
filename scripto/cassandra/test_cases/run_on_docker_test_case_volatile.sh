@@ -58,7 +58,7 @@ run_command_e "docker exec -i -t cassandra1 sh -c 'echo ssh-rsa AAAAB3NzaC1yc2EA
 run_command_e "docker exec -i -t cassandra1 sh -c 'chmod 600 ~/.ssh/authorized_keys'"
 run_command_e "docker exec -i -t cassandra1 sh -c '/etc/init.d/ssh start'"
 run_command_e "docker exec -i -t cassandra1 sh -c 'cd; svn checkout https://github.com/rbogusze/oracleinfrastructure/trunk/scripto'"
-msgi "Installing JDK for jconsole"
+msgi "Installing JDK for jconsole (that is not nice, as I have already running cassandra that is using different java version, I should just expose ports and connect from outside)"
 run_command_e "docker exec -i -t cassandra1 sh -c 'apt-get --assume-yes install -t jessie-backports  openjdk-8-jre-headless ca-certificates-java openjdk-8-jdk'"
 
 msgi "Running the test"
