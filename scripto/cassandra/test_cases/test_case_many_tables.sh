@@ -133,6 +133,15 @@ b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 run_command "sleep $V_IDLE_TIME"
 b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
 
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
+
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
+
+run_command "sleep $V_IDLE_TIME"
+b_check_gc_activity "Idle time for $V_IDLE_TIME sec"
+
 cat /tmp/test_case.log
 
 msgi "Storing results in ~/scripto/cassandra/test_cases/test_results if you find it interesting pleas add and commit to repository"
