@@ -1,0 +1,7 @@
+[authentication]
+username=backup
+password=ala_ma_kota
+
+[connection]
+hostname=172.27.0.11
+port=9042
