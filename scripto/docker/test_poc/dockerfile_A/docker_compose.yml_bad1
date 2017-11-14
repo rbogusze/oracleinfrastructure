@@ -1,0 +1,29 @@
+cassandra_node_A1:
+  image: remek_cassandra:3.0.15
+  restart: no
+  container_name: cassandra_node_A1
+  networks:
+    vpcbr:
+      ipv4_address: 172.17.0.11
+  cap_add:
+    - IPC_LOCK
+  ulimits:
+    memlock: 2147483647
+    nofile: 100000
+    nproc: 8192
+  volumes:
+      - /root/scripto/docker/test_poc/node_A1:/etc/cassandra
+      - /var/lib/container_data/cassandra/node_A1/data:/var/lib/cassandra/data
+      - /var/lib/container_data/cassandra/node_A1/commitlog:/var/lib/cassandra/commitlog
+      - /var/lib/container_data/cassandra/node_A1/log:/var/log/cassandra
+      - /root/scripto/docker/test_poc/cqlshrc:/root/.cassandra:ro
+  environment:
+    EXTERNAL_CONFIGURATION: "true"
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 172.17.0.0/16
+         gateway: 172.17.0.1
