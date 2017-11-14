@@ -166,8 +166,8 @@ USING_G1=$?
 
     
       
-MAX_HEAP_SIZE="8G"
-HEAP_NEWSIZE="2G"
+MAX_HEAP_SIZE="1G"
+HEAP_NEWSIZE="500M"
       
     
 
