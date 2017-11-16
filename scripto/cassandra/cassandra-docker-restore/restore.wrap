@@ -46,8 +46,8 @@ msgi "Hellow World"
 # --------------------------
     # Great sample getopt implementation by Cosimo Streppone
     # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-    SHORT='h:f:k:'
-    LONG='help,backup_file:,keyspace:'
+    SHORT='h:f:k:i:j:'
+    LONG='help,backup_file:,keyspace:,ignore_keyspace_exists:,ignore_table_exists:'
     OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
     if [ $? -gt 0 ]; then
@@ -61,6 +61,8 @@ msgi "Hellow World"
             -h|--help) usage;;
             -f|--backup_file) V_BACKUP_FILE="$2"; shift 2;;
             -k|--keyspace) V_KEYSPACE="$2"; shift 2;;
+            -i|--ignore_keyspace_exists) V_IGNORE_KEYSPACE_EXISTS="$2"; shift 2;;
+            -j|--ignore_table_exists) V_IGNORE_TABLE_EXISTS="$2"; shift 2;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
         esac
@@ -68,6 +70,24 @@ msgi "Hellow World"
 
 msgd "V_BACKUP_FILE: $V_BACKUP_FILE"
 msgd "V_KEYSPACE: $V_KEYSPACE"
+msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
+msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
+
+# # #
+msgd "Set some defaults if they were not set explicitly"
+if [ -z "$V_IGNORE_KEYSPACE_EXISTS" ]; then
+  msgd "V_IGNORE_KEYSPACE_EXISTS was not set explicitly, setting to no"
+  V_IGNORE_KEYSPACE_EXISTS=no
+fi
+if [ -z "$V_IGNORE_TABLE_EXISTS" ]; then
+  msgd "V_IGNORE_TABLE_EXISTS was not set explicitly, setting to no"
+  V_IGNORE_TABLE_EXISTS=no
+fi
+
+msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
+msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
+
+
 
 
 msgd "Check if sstableloader exists in docker"
