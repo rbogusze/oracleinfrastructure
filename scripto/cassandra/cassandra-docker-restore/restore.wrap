@@ -13,25 +13,79 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
+# Functions
+# ---------
+
+  function usage() {
+        printf "Usage: $0 -h\n"
+        printf "       $0 -f <snapshot file> [-n <node address>] [-k <new ks name>] [-d <new dc name>] [-r <new rf>] [-y <cassandra.yaml file>]\n"
+        printf "    -h,--help                          Print usage and exit\n"
+        printf "    -v,--version                       Print version information and exit\n"
+        printf "    -f,--file <snapshot file>          REQUIRED: The snapshot file name (created using the\n"
+        printf "                                       getSnapshot utility\n"
+        printf "    -n,--node <node address>           Destination Cassandra node IP (defaults to the local\n"
+        printf "                                       Cassandra IP if run on a Cassandra node, otherwise\n"
+        printf "                                       required in order to connect to Cassandra.  Will take\n"
+        printf "                                       precedence if provided and run on a Cassandra node\n"
+        printf "    -k,--keyspace <new ks name>        Override the destination keyspace name (defaults to\n"
+        printf "                                       the source keyspace name)\n"
+        printf "    -d,--datacenter <new dc name>      Override the destination datacenter name (defaults\n"
+        printf "                                       to the sourcen datacenter name)\n"
+        printf "    -r,--replication <new rf>          Override the destination replication factor (defaults\n"
+        printf "                                       to source replication factor)\n"
+        printf "    -y,--yaml <cassandra.yaml file>    Alternate cassandra.yaml file\n"
+        exit 0
+  }
+
+
+
+
 msgi "Hellow World"
 
 msgd "Check if file with defaults exists, if not create one."
-
 if [ -f ./restore_defaults.txt ]; then
   msgd "File with defaults exists, sourcing that."
   . ./restore_defaults.txt
 else
   msgi "FIRST time execution, creating file with defaults."
   cat > ./restore_defaults.txt << EOF
-ALA=yes
+V_CREATE_KEYSPACE_IF_NOT_EXISTS=yes
 EOF
   msgi "Please review the file ./restore_defaults.txt contents and check if the defaults are valid, then run the script again"
   msgi "exiting"
   exit 0
 fi
-
 check_file "./restore_defaults.txt"
 
+# Validate Input/Environment
+# --------------------------
+    # Great sample getopt implementation by Cosimo Streppone
+    # https://gist.github.com/cosimo/3760587#file-parse-options-sh
+    SHORT='h:f:k:'
+    LONG='help,backup_file:,keyspace:'
+    OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
+
+    if [ $? -gt 0 ]; then
+        # Exit early if argument parsing failed
+        printf "Error parsing command arguments\n" >&2
+        exit 1
+    fi
+    eval set -- "$OPTS"
+    while true; do
+        case "$1" in
+            -h|--help) usage;;
+            -f|--backup_file) V_BACKUP_FILE="$2"; shift 2;;
+            -k|--keyspace) V_KEYSPACE="$2"; shift 2;;
+            --) shift; break;;
+            *) printf "Error processing command arguments\n" >&2; exit 1;;
+        esac
+    done
+
+msgd "V_BACKUP_FILE: $V_BACKUP_FILE"
+msgd "V_KEYSPACE: $V_KEYSPACE"
+
+
+msgd "Check if sstableloader exists in docker"
 
 
 
