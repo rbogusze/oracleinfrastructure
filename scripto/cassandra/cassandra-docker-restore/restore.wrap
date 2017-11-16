@@ -38,6 +38,42 @@ INFO_MODE=DEBUG
   }
 
 
+f_check_if_keyspace_exists()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  
+  V_CHECK_IF_KEYSPACE_EXISTS=yes
+  msgb "${FUNCNAME[0]} Finished."
+} #f_check_if_keyspace_exists
+
+f_check_if_table_exists()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  V_CHECK_IF_TABLE_EXISTS=yes
+  msgb "${FUNCNAME[0]} Finished."
+} #f_check_if_table_exists
+
+f_load_table()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
+  msgd "Keyspace exists, table does not. Creating table and loading data"
+  msgd "Somehow you need to create table once (using script from first backup file) then load data from all the backup files, if they exist"
+  msgd "Or if V_IGNORE_TABLE_EXISTS is yes just load the data from all the backups"
+  msgd "Table Restore Done."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_load_table
+
+
+f_template()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_template
+
 
 
 msgi "Hellow World"
@@ -46,8 +82,8 @@ msgi "Hellow World"
 # --------------------------
     # Great sample getopt implementation by Cosimo Streppone
     # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-    SHORT='h:f:k:i:j:'
-    LONG='help,backup_file:,keyspace:,ignore_keyspace_exists:,ignore_table_exists:'
+    SHORT='h:f:k:t:i:j:'
+    LONG='help,backup_file:,keyspace:,table:,ignore_keyspace_exists:,ignore_table_exists:'
     OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
     if [ $? -gt 0 ]; then
@@ -61,6 +97,7 @@ msgi "Hellow World"
             -h|--help) usage;;
             -f|--backup_file) V_BACKUP_FILE="$2"; shift 2;;
             -k|--keyspace) V_KEYSPACE="$2"; shift 2;;
+            -t|--table) V_TABLE="$2"; shift 2;;
             -i|--ignore_keyspace_exists) V_IGNORE_KEYSPACE_EXISTS="$2"; shift 2;;
             -j|--ignore_table_exists) V_IGNORE_TABLE_EXISTS="$2"; shift 2;;
             --) shift; break;;
@@ -87,6 +124,48 @@ fi
 msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
 msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
 
+# # #
+msgd "Check what should I do"
+if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
+  msgd "Both keyspace and table is provided, so I am about to restore a table"
+  f_check_if_keyspace_exists $V_KEYSPACE
+  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
+  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+    msge "You want to restore a table in a keyspace but the keyspace does not exists. Exiting."
+  else
+    msgd "Keyspace exists. Continuing."
+    msgd "Checking if table already exists"
+    f_check_if_table_exists $V_KEYSPACE $V_TABLE
+    msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
+    if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
+      msgd "Keyspace exists, table does not. Creating table and loading data"
+      f_load_table $V_KEYSPACE $V_TABLE
+    elif [ "$V_CHECK_IF_TABLE_EXISTS" = "yes" ]; then
+      msgd "Keyspace exists, table exists. Deciding what to do based on V_IGNORE_TABLE_EXISTS value"
+      if [ "$V_IGNORE_TABLE_EXISTS" = "no" ]; then
+        msge "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
+        msge "There was no parameter set to ignore it (use '--ignore_table_exists yes' to force loading data anyway) "
+        msge "Exiting."
+        exit 1
+      elif [ "$V_IGNORE_TABLE_EXISTS" = "yes" ]; then
+        msgd "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
+        msgd "There WAS parameter set to ignore it, loading data anyway) "
+        f_load_table $V_KEYSPACE $V_TABLE
+      else
+        msge "Unknown value of V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS. Exiting"
+        exit 1 
+      fi
+    else
+      msge "Unknown value of V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS. Exiting"
+      exit 1
+    fi
+  fi
+
+elif [ "$V_KEYSPACE" ] && [ -z "$V_TABLE" ]; then
+  msgd "Only keyspace provided, so I am about to restore keyspace" 
+else
+  msge "Provide keyspace"
+fi
 
 
 
