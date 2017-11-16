@@ -1,0 +1,786 @@
+#!/bin/bash
+#$Id: _base_script_block.wrap,v 1.1 2012-05-07 13:47:27 remik Exp $
+#
+
+# Load usefull functions
+if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
+  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
+  exit 1
+else
+  . $HOME/scripto/bash/bash_library.sh
+fi
+
+INFO_MODE=DEBUG
+#INFO_MODE=INFO
+
+b_setup_yum_repository()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+  "CentOS release 4.7 (Final)_i686")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    if [ -f /etc/yum.conf ]; then
+      cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
+    fi
+    check_file "./sup_files/yum.conf.CentOS_4.7_i686"
+    run_command "cp ./sup_files/yum.conf.CentOS_4.7_i686 /etc/yum.conf"
+    run_command "yum clean all"
+    ;;
+  "Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    msgi "Doing nothing"
+    ;;
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+
+    msgi "Base CentOS repository"
+    if [ -f /etc/yum.conf ]; then
+      cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
+    fi
+    check_file "./sup_files/yum.conf.CentOS_5.7_x86_64"
+    run_command "cp ./sup_files/yum.conf.CentOS_5.7_x86_64 /etc/yum.conf"
+    run_command "yum clean all"
+
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+    ;;
+  "Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+
+    msgi "Base CentOS repository"
+    if [ -f /etc/yum.conf ]; then
+      cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
+    fi
+    check_file "./sup_files/yum.conf.CentOS_5.8_x86_64"
+    run_command "cp ./sup_files/yum.conf.CentOS_5.8_x86_64 /etc/yum.conf"
+    run_command "yum clean all"
+
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+    ;;
+
+  "Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64")
+    msgi "Not changing default OEM repositories"
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el5.rf.x86_64.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+    ;;
+
+  "Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686")
+    msgi "Not changing default OEM repositories"
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el5.rf.i386.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.3-1.el5.rf.i386.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+    ;;
+
+  "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
+    msga "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+
+    if [ -f /etc/yum.conf ]; then
+      cp /etc/yum.conf /var/tmp/yum.conf_`date -I`
+      run_command "echo 'metadata_expire=5000d' >> /etc/yum.conf "
+    fi
+
+    msgi "Base OEL repository"
+    check_file "$SCRIPTO_DIR/sup_files/public-yum-ol6.repo.ol6_u3_base"
+    run_command "cp $SCRIPTO_DIR/sup_files/public-yum-ol6.repo.ol6_u3_base /etc/yum.repos.d/public-yum-ol6.repo"
+    run_command "yum clean all"
+
+    msgi "Additional RPMforge repository"
+    TMP_CHK=`rpm -qa | grep rpmforge-release | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "RPMforge repository not installed. Doing so."
+      # http://wiki.centos.org/AdditionalResources/Repositories/RPMForge
+      run_command "cd /tmp"
+      run_command "wget http://packages.sw.be/rpmforge-release/rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm"
+      run_command "rpm --import http://apt.sw.be/RPM-GPG-KEY.dag.txt"
+      run_command "rpm -i rpmforge-release-0.5.2-2.el6.rf.x86_64.rpm"
+    else
+      msgi "RPMforge repository already installed"
+    fi
+
+    ;;
+  *)
+    msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+    exit 1
+    ;;
+  esac
+
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_setup_yum_repository
+
+
+b_install_usefull_rpm()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  TMP_CHK=`rpm -qa | grep -e "^mutt" -e "^rsync" -e "^lynx" -e "^dialog" -e "^ntp" -e "^subversion" -e "^nmon" -e "^iftop" | wc -l`
+  if [ "$TMP_CHK" -lt 8 ]; then
+    msga "Installing mutt rsync lynx dialog ..."
+    #run_command "yum -y install --nogpgcheck mutt rsync lynx dialog ntp subversion vim-enhanced nmon iftop screen meld fio"
+    run_command "yum -y install mutt rsync lynx dialog ntp subversion vim-enhanced nmon iftop screen meld fio"
+  else
+    msgi "mutt rsync lynx dialog ... already installed. Doing nothing."
+  fi 
+
+  case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+  "CentOS release 4.7 (Final)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "Installing rlwrap"
+      run_command "cd /tmp"
+      run_command "wget ftp://ftp.pbone.net/mirror/download.fedora.redhat.com/pub/fedora/epel/4/i386/rlwrap-0.30-1.el4.i386.rpm"
+      run_command "rpm -i rlwrap-0.30-1.el4.i386.rpm"
+    else
+      msgi "rlwrap is already installed"
+    fi
+    ;;
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "Installing rlwrap"
+      run_command "cd /tmp"
+      run_command "wget http://dl.fedoraproject.org/pub/epel/5/x86_64/rlwrap-0.42-1.el5.x86_64.rpm"
+      run_command "rpm -i rlwrap-0.42-1.el5.x86_64.rpm"
+    else
+      msgi "rlwrap is already installed"
+    fi
+    ;;
+
+
+  "Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "Installing rlwrap"
+      run_command "cd /tmp"
+      run_command "wget http://dl.fedoraproject.org/pub/epel/5/i386/rlwrap-0.42-1.el5.i386.rpm"
+      run_command "rpm -i rlwrap-0.42-1.el5.i386.rpm"
+    else
+      msgi "rlwrap is already installed"
+    fi
+    ;;
+
+  "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    TMP_CHK=`rpm -qa | grep rlwrap | wc -l`
+    if [ "$TMP_CHK" -lt 1 ]; then
+      msgi "Installing rlwrap"
+      run_command "cd /tmp"
+      run_command "wget http://dl.fedoraproject.org/pub/epel/6/x86_64/rlwrap-0.37-1.el6.x86_64.rpm"
+      run_command "rpm -i rlwrap-0.37-1.el6.x86_64.rpm"
+    else
+      msgi "rlwrap is already installed"
+    fi
+    ;;
+  *)
+    msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+    exit 1
+    ;;
+  esac
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_install_usefull_rpm
+
+b_set_uniq_hostname()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgi "Make sure we are using static IP"
+  TMP_CHK=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i "^IPADDR" | wc -l`
+  if [ $TMP_CHK -ne 1 ]; then
+    msge "Host not using static IP. Nothing to do."
+    return 0
+  else
+    msgi "OK. Host using static IP."
+  fi
+
+  msgi "Get the IP"
+  check_file "/etc/sysconfig/network-scripts/ifcfg-eth0"
+  V_IP=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i IPADDR | awk -F"=" '{print $2}'`
+  msgd "V_IP: $V_IP"
+  check_variable $V_IP
+
+  V_HOSTNAME=`uname -n`
+  msgd "V_HOSTNAME: $V_HOSTNAME"
+  msgi "Current hostname: $V_HOSTNAME"
+  read -p "Do you want to change the hostname? (y/any)" V_ANSWER
+  if [ ! "$V_ANSWER" = "y" ]; then
+    msgi "No changes to hostname. Just basic network checks."
+
+    msgi "Check if the host is pingable by hostname"
+    run_command_e "ping -c 2 ${V_HOSTNAME} > /dev/null"
+
+    msgi "Check if the host is pingable by IP"
+    run_command_e "ping -c 2 ${V_IP} > /dev/null"
+
+    return 0
+  fi
+
+  msgw "Ask for new name"
+  read -p "[wait] Please provide the new name (without the domain, domain ${V_DOMAIN} will be automatically added): " V_NEW_NAME
+  msgd "V_NEW_NAME: $V_NEW_NAME"
+
+  msgi "Decide whether to add line to /etc/hosts"  
+  TMP_CHK=`cat /etc/hosts | grep $V_NEW_NAME | wc -l`
+  if [ $TMP_CHK -eq 0 ]; then
+    msgi "No line found in /etc/hosts about this host. Adding it."
+    cp /etc/hosts /var/tmp/hosts.`date -I`
+    echo "${V_IP} ${V_NEW_NAME}.${V_DOMAIN} $V_NEW_NAME" >> /etc/hosts
+    run_command_d "cat /etc/hosts"
+  else
+    msgi "Line with this IP already found in /etc/hosts. Doing nothing."
+  fi
+
+  msgi "Changes to /etc/sysconfig/network"
+  TMP_CHK=`cat /etc/sysconfig/network | grep ${V_NEW_NAME}.${V_DOMAIN} | wc -l`
+  if [ $TMP_CHK -eq 0 ]; then
+    msgi "No line found in /etc/sysconfig/network about this host. Adding it."
+    cp /etc/sysconfig/network /var/tmp/network.`date -I`
+    cat /etc/sysconfig/network | grep -v -i "HOSTNAME" > /tmp/linux_setup.network
+    echo "HOSTNAME=${V_NEW_NAME}.${V_DOMAIN}" >> /tmp/linux_setup.network
+    cp /tmp/linux_setup.network /etc/sysconfig/network
+    run_command_d "cat /etc/sysconfig/network"
+
+    msga "It is advisable to reboot the host now to refresh the hostname"
+    USER_ANSWER=''
+    EXIT_WHILE=''
+    while [ ! "$EXIT_WHILE" ]
+    do
+      read -p "[wait] Do you want to reboot now? (yes/no)" USER_ANSWER
+      if [ "$USER_ANSWER" = "yes" ]; then
+        msgi "Rebooting NOW."
+        run_command "reboot"
+        run_command "exit 0"
+        EXIT_WHILE=1
+      fi
+      if [ "$USER_ANSWER" = "no" ]; then
+        msgi "Doing nothing."
+        EXIT_WHILE=1
+      fi
+    done
+
+  else
+    msgi "Line with this hostname already found in /etc/sysconfig/network. Doing nothing."
+  fi
+
+ 
+  msgb "${FUNCNAME[0]} Finished."
+} #b_set_uniq_hostname
+
+b_time_synchro()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+  "CentOS release 4.7 (Final)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    run_command "chkconfig ntpd on"
+    run_command "ntpdate pool.ntp.org"
+    run_command "/etc/init.d/ntpd start"
+    ;;
+  "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686")
+    msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+    run_command "chkconfig ntpd on"
+    run_command "/etc/init.d/ntpd start"
+    ;;
+  *)
+    msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+    exit 1
+    ;;
+  esac
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_time_synchro
+
+b_install_vmware_tools()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  if [ -f /usr/bin/vmware-uninstall-tools.pl ]; then
+    msgi "Looks like the vmware tools installed by the VMPlayer are not supported under ESX. Do you want to uninstall them?:"
+    run_command "vmware-uninstall-tools.pl"
+  fi #-f /usr/bin/vmware-uninstall-tools.pl
+
+  TMP_CHK=`rpm -qa | grep vmware-tools-esx | wc -l`
+  if [ "$TMP_CHK" -lt 1 ]; then
+    msgi "Installing vmware-tools-esx."
+
+    run_command "rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-DSA-KEY.pub"
+    run_command "rpm --import http://packages.vmware.com/tools/keys/VMWARE-PACKAGING-GPG-RSA-KEY.pub"
+
+    case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+    "CentOS release 4.7 (Final)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+      msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+      check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4"
+      run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel4 /etc/yum.repos.d/vmware-tools.repo"
+      ;;
+    "CentOS release 5.7 (Final)_x86_64"|"Red Hat Enterprise Linux Server release 5.7 (Tikanga)_x86_64")
+      msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+      check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.CentOS_5.7_x86_64"
+      run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.CentOS_5.7_x86_64 /etc/yum.repos.d/vmware-tools.repo"
+      ;;
+    "Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686")
+      msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+      check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.CentOS_5.8_x86_64"
+      run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.CentOS_5.8_x86_64 /etc/yum.repos.d/vmware-tools.repo"
+      ;;
+    "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64")
+      msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+      check_file "$SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel6"
+      run_command "cp $SCRIPTO_DIR/sup_files/vmware-tools.repo.rhel6 /etc/yum.repos.d/vmware-tools.repo"
+      ;;
+    *)
+      msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+      exit 1
+      ;;
+    esac
+
+    run_command "yum -y install vmware-tools-esx"
+  else
+    msgi "vmware-tools-esx is already installed. Doing nothing."
+  fi #"$TMP_CHK" -lt 1
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_install_vmware_tools
+
+b_scripto_for_oracle()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  TMP_CHK=`cat /etc/passwd | grep -i "^oracle:" | wc -l`
+  if [ $TMP_CHK -ne 1 ]; then
+    msge "User oracle does not exists. Nothing to do."
+    return 0 
+  fi
+
+  run_command_e "which svn"
+
+  msgd "Determine the oracle home directory"
+  V_ORACLE_USER_HOME=`cat /etc/passwd | grep -i "^oracle:" | awk -F":" '{print $6}'`
+  msgd "V_ORACLE_USER_HOME: $V_ORACLE_USER_HOME"
+
+  msgd "Determine if the ${V_ORACLE_USER_HOME}/scripto dir already exists"
+  if [ -d ${V_ORACLE_USER_HOME}/scripto ]; then
+    msgi "Directory ${V_ORACLE_USER_HOME}/scripto already exists. Nothing to do."
+    return 0 
+  fi
+
+  msgi "Downloading scripto for oracle"
+  su - oracle -c "svn checkout https://oracleinfrastructure.googlecode.com/svn/trunk/scripto scripto"
+  su - oracle -c "ln -s scripto/bash/menu.sh ."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_scripto_for_oracle
+
+b_copy_auth_keys()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  check_file $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO 
+
+
+  msgi "For user root"
+  msgd "Check if .ssh directory exists"
+  if [ -d $HOME/.ssh ]; then
+    msgd "$HOME/.ssh exists."
+  else
+    msgd "$HOME/.ssh does NOT exists."
+    run_command "mkdir $HOME/.ssh"
+    run_command "chmod 700 $HOME/.ssh"
+  fi
+
+  msgd "Check if the key is not already there"
+  if [ -f $HOME/.ssh/authorized_keys ]; then
+    msgd "$HOME/.ssh/authorized_keys exists."
+    msgd "Check if the key is already present."
+    TMP_CHK=`grep -f $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO $HOME/.ssh/authorized_keys | wc -l`
+    if [ "$TMP_CHK" -ge 1 ]; then
+      msgi "Key already present in authorized_keys. Doing nothing."
+    else
+      msgi "Key not found in authorized_keys. Adding one."
+      run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $HOME/.ssh/authorized_keys"
+    fi
+    
+  else
+    msgd "$HOME/.ssh/authorized_keys does NOT exists. Simply adding the key."
+    run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $HOME/.ssh/authorized_keys"
+  fi
+
+  msgi "For user oracle"
+  msgd "Determine the oracle home directory"
+  V_ORACLE_USER_HOME=`cat /etc/passwd | grep -i "^oracle:" | awk -F":" '{print $6}'`
+  msgd "V_ORACLE_USER_HOME: $V_ORACLE_USER_HOME"
+
+  msgd "Check if .ssh directory exists"
+  if [ -d $V_ORACLE_USER_HOME/.ssh ]; then
+    msgd "$V_ORACLE_USER_HOME/.ssh exists."
+  else
+    msgd "$V_ORACLE_USER_HOME/.ssh does NOT exists."
+    su - oracle -c "mkdir $V_ORACLE_USER_HOME/.ssh"
+    su - oracle -c "chmod 700 $V_ORACLE_USER_HOME/.ssh"
+  fi
+
+  msgd "Check if the key is not already there"
+  if [ -f $V_ORACLE_USER_HOME/.ssh/authorized_keys ]; then
+    msgd "$V_ORACLE_USER_HOME/.ssh/authorized_keys exists."
+    msgd "Check if the key is already present."
+    TMP_CHK=`grep -f $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO $V_ORACLE_USER_HOME/.ssh/authorized_keys | wc -l`
+    if [ "$TMP_CHK" -ge 1 ]; then
+      msgi "Key already present in authorized_keys. Doing nothing."
+    else
+      msgi "Key not found in authorized_keys. Adding one."
+      run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $V_ORACLE_USER_HOME/.ssh/authorized_keys"
+    fi
+    
+  else
+    msgd "$HOME/.ssh/authorized_keys does NOT exists. Simply adding the key."
+    run_command "cat $SCRIPTO_DIR/sup_files/id_dsa.pub.RBO >> $V_ORACLE_USER_HOME/.ssh/authorized_keys"
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_copy_auth_keys
+
+b_disable_SE_firewall()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgi "Disabling SE Linux"
+  check_file "/etc/selinux/config"
+  TMP_CHK=`cat /etc/selinux/config | grep -i "SELINUX=disabled" | wc -l `
+  if [ $TMP_CHK -eq 1 ]; then
+    msgi "SE Linux already disabled. OK. Doing nothing."
+  else
+    msgi "SE Linux not disabled. Changing to disabled."
+    cp /etc/selinux/config /var/tmp/config.`date -I`
+    cat /etc/selinux/config | grep -v -i "^SELINUX=" > /tmp/linux_setup.config.tmp
+    echo "SELINUX=disabled" >> /tmp/linux_setup.config.tmp
+    cp /tmp/linux_setup.config.tmp /etc/selinux/config
+    run_command_d "cat /etc/selinux/config"
+  fi
+
+  msgi "Disabling firewall (iptables)"
+  TMP_CHK=`service iptables status | grep "Firewall is stopped" | wc -l`
+  msgd "TMP_CHK: $TMP_CHK"
+  if [ $TMP_CHK -ne 1 ]; then
+    msga "Stopping iptables."
+    run_command "service iptables stop"
+  else
+    msgi "Iptables not running. Doing nothing."
+  fi
+
+  msgi "Disabling iptables from autostart"
+  TMP_CHK=`chkconfig --list | grep iptables | grep -e "3:off" -e "4:off" -e "5:off" | wc -l`
+  msgd "TMP_CHK: $TMP_CHK"
+  if [ $TMP_CHK -ne 1 ]; then
+    msga "Disabling iptables from autostart"
+    run_command "chkconfig iptables off"
+  else
+    msgi "Iptables not in autostart. Doing nothing."
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_disable_SE_firewall
+
+b_configure_static_ip()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  check_file "/etc/sysconfig/network-scripts/ifcfg-eth0"
+
+  msgd "Check if you are manually messing with /etc/resolv.conf"
+  TMP_CHK=`cat /etc/rc.local | grep resolv.conf | wc -l`
+  if [ $TMP_CHK -gt 0 ]; then
+    msge "You are messing with /etc/resolv.conf in /etc/rc.local !!!"
+    run_command "cat /etc/rc.local"
+    msge "Fix this! Exiting."
+    exit 1
+  fi
+
+  V_CURR_IP=`cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i IPADDR`
+  msgi "Currently set in ifcfg-eth0: $V_CURR_IP"
+
+  read -p "Do you want to set the static IP? (y/any)" V_ANSWER
+  if [ ! "$V_ANSWER" = "y" ]; then
+    msgi "No changes to ip. Nothing to do."
+    return 0
+  fi
+
+  if [ -f /etc/sysconfig/network-scripts/ifcfg-eth0.bak ]; then
+    msgd "This is usually trash"
+    run_command "mv /etc/sysconfig/network-scripts/ifcfg-eth0.bak /var/tmp/ifcfg-eth0.bak.`date -I`"
+  fi
+  if [ -f /etc/sysconfig/network-scripts/ifcfg-eth1.bak ]; then
+    msgd "This is usually trash"
+    run_command "mv /etc/sysconfig/network-scripts/ifcfg-eth1.bak /var/tmp/ifcfg-eth1.bak.`date -I`"
+  fi
+
+  msgd "Get a uniq HWADDR info from current ifcfg-eth0" 
+  run_command "cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep -i -e "HWADDR" -e "UUID" > /tmp/linux_setup.HWADDR.tmp"
+  run_command_d "cat /tmp/linux_setup.HWADDR.tmp"
+  
+  read -p "[wait] Please provide the desired IP: " V_NEW_IP
+  msgd "V_NEW_IP: $V_NEW_IP"
+
+  msga "Construct the new ifcfg-eth0"
+  check_file "$SCRIPTO_DIR/sup_files/ifcfg-eth0.template"
+  run_command "cp /etc/sysconfig/network-scripts/ifcfg-eth0 /var/tmp/ifcfg-eth0.$V_UNIQ"
+  run_command "cp /tmp/linux_setup.HWADDR.tmp /etc/sysconfig/network-scripts/ifcfg-eth0"
+  run_command "cat $SCRIPTO_DIR/sup_files/ifcfg-eth0.template >> /etc/sysconfig/network-scripts/ifcfg-eth0"
+  run_command "echo IPADDR=${V_NEW_IP} >> /etc/sysconfig/network-scripts/ifcfg-eth0"
+ 
+  msga "Construct the new /etc/resolv.conf"
+  run_command "mv /etc/resolv.conf /var/tmp/resolv.conf.$V_UNIQ"
+  run_command "echo 'search $V_DOMAIN' > /etc/resolv.conf"
+  run_command "echo 'nameserver 192.168.1.10' >> /etc/resolv.conf"
+  
+  msga "It is advisable to reboot the host now to refresh the hostname"
+  USER_ANSWER=''
+  EXIT_WHILE=''
+  while [ ! "$EXIT_WHILE" ]
+  do
+    read -p "[wait] Do you want to reboot now? (yes/no)" USER_ANSWER
+    if [ "$USER_ANSWER" = "yes" ]; then
+      msgi "Rebooting NOW."
+      run_command "reboot"
+      run_command "exit 0"
+      EXIT_WHILE=1
+    fi
+    if [ "$USER_ANSWER" = "no" ]; then
+      msgi "Doing nothing."
+      EXIT_WHILE=1
+    fi
+  done
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_configure_static_ip
+
+b_clean_up()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # Clean up old KASZTELAN nfs mount from fstab
+  TMP_CHK=`cat /etc/fstab | grep -v "^#" | grep -i KASZTELAN | wc -l`
+  if [ $TMP_CHK -ge 1 ]; then
+    msga "Clean up old KASZTELAN nfs mount from fstab"
+    TMP_LINE=`cat /etc/fstab | grep -v "^#" | grep -i KASZTELAN `
+    cp /etc/fstab /var/tmp/fstab.$V_UNIQ
+    cat /etc/fstab | grep -v "KASZTELAN" > /tmp/linux_setup.kasztelan.tmp
+    cp /tmp/linux_setup.kasztelan.tmp /etc/fstab
+    echo "#${TMP_LINE}" >> /etc/fstab
+  else
+    msgi "No KASZTELAN nfs mount found in fstab. Doing nothing"
+  fi
+
+  # Clean old repositories
+  if [ -f /etc/yum.repos.d/CentOS-Base.repo ]; then
+    msga "Clean old repositories"
+    run_command "mv /etc/yum.repos.d/CentOS-Base.repo /var/tmp/CentOS-Base.repo.$V_UNIQ"
+  fi 
+  if [ -f /etc/yum.repos.d/CentOS-Media.repo ]; then
+    msga "Clean old repositories"
+    run_command "mv /etc/yum.repos.d/CentOS-Media.repo /var/tmp/CentOS-Media.repo.$V_UNIQ"
+  fi 
+
+  # Clean up eth0 backups
+  TMP_CHK=`ls /etc/sysconfig/network-scripts/ifcfg-eth0.* 2> /dev/null | wc -l`
+  if [ $TMP_CHK -ge 1 ]; then
+    msga "Clean up eth0 backups"
+    run_command "mv /etc/sysconfig/network-scripts/ifcfg-eth0.* /var/tmp"
+    run_command "rm -f /etc/sysconfig/network-scripts/ifcfg-eth0.*" 
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_clean_up
+
+b_disable_IP6()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgd "Checking if IPv6 works"
+  eval ping6 -c 2 ::1
+  if [ $? -ne 0 ]; then
+    msgi "IPv6 does not work. OK. Nothing to do."
+    return 0
+  else
+    msgi "IPv6 seems to work fine. Disabling it."
+
+    case "${V_RHEL_RELEASE}_${V_RHEL_ARCH}" in
+    "Red Hat Enterprise Linux Server release 6.3 (Santiago)_x86_64"|"Red Hat Enterprise Linux Server release 5.8 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.10 (Tikanga)_x86_64"|"Red Hat Enterprise Linux Server release 5.11 (Tikanga)_i686"|"Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+      msgi "Doing for: ${V_RHEL_RELEASE}_${V_RHEL_ARCH}"
+      run_command "cp /etc/sysconfig/network /etc/sysconfig/network.$V_UNIQ"
+      run_command "cat /etc/sysconfig/network | grep -v NETWORKING_IPV6 > /tmp/network.tmp"
+      run_command "cp /tmp/network.tmp /etc/sysconfig/network"
+      run_command "echo 'NETWORKING_IPV6=no' >> /etc/sysconfig/network"
+      run_command "echo 'net.ipv6.conf.all.disable_ipv6 = 1' >> /etc/sysctl.conf"
+      run_command "service ip6tables save"
+      run_command "service ip6tables stop"
+      run_command "chkconfig ip6tables off"
+
+      ;;
+    "Red Hat Enterprise Linux AS release 4 (Nahant Update 9)_i686")
+      run_command "echo 'alias net-pf-10 off' >> /etc/modprobe.conf"   
+   
+
+      ;;
+    *)
+      msge "Unknown OS: ${V_RHEL_RELEASE}_${V_RHEL_ARCH} Exiting."
+      exit 1
+      ;;
+    esac
+
+    msga "It is required to reboot the host now to make the setting work."
+    USER_ANSWER=''
+    EXIT_WHILE=''
+    while [ ! "$EXIT_WHILE" ]
+    do
+      read -p "[wait] Do you want to reboot now? (yes/no)" USER_ANSWER
+      if [ "$USER_ANSWER" = "yes" ]; then
+        msgi "Rebooting NOW."
+        run_command "reboot"
+        run_command "exit 0"
+        EXIT_WHILE=1
+      fi
+      if [ "$USER_ANSWER" = "no" ]; then
+        msgi "Doing nothing."
+        EXIT_WHILE=1
+      fi
+    done
+
+
+  fi #eval ping6 -c 4 ::1
+
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_disable_IP6
+
+# 7 lines to yank
+b_template()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_template
+
+# Execution of blocks
+# If parameter 'block_name' was provided I execute only specified block
+SELECT_BLOCK=$1
+SCRIPTO_DIR=`pwd`
+V_UNIQ=`date '+%Y-%m-%d--%H:%M:%S'`
+
+# Global variables
+msgi "Determining the OS"
+check_file "/etc/redhat-release"
+V_RHEL_RELEASE=`cat /etc/redhat-release`
+msgd "V_RHEL_RELEASE: $V_RHEL_RELEASE"
+V_RHEL_ARCH=`uname -p`
+msgd "V_RHEL_ARCH: $V_RHEL_ARCH"
+
+V_DOMAIN=remik.org
+LANG=en_US.utf8
+
+case $SELECT_BLOCK in
+  "b_setup_yum_repository")
+    b_setup_yum_repository
+    ;;
+  "b_install_usefull_rpm")
+    b_install_usefull_rpm 
+    ;;
+  "b_set_uniq_hostname")
+    b_set_uniq_hostname
+    ;;
+  "b_time_synchro")
+    b_time_synchro
+    ;;
+  "b_scripto_for_oracle")
+    b_scripto_for_oracle
+    ;;
+  "b_copy_auth_keys")
+    b_copy_auth_keys
+    ;;
+  "b_disable_SE_firewall")
+    b_disable_SE_firewall
+    ;;
+  "b_install_vmware_tools")
+    b_install_vmware_tools
+    ;;
+  "b_configure_static_ip")
+    b_configure_static_ip
+    ;;
+  "b_clean_up")
+    b_clean_up
+    ;;
+  "b_disable_IP6")
+    b_disable_IP6
+    ;;
+  "ALL")
+    b_clean_up
+    b_copy_auth_keys
+    b_configure_static_ip
+    b_setup_yum_repository
+    b_install_usefull_rpm
+    b_set_uniq_hostname
+    b_time_synchro
+    b_scripto_for_oracle
+    b_disable_SE_firewall
+    b_disable_IP6
+    b_install_vmware_tools
+    ;; 
+  *)
+    echo "Please provide the block that You want to run."
+    echo "Available blocks: "
+    echo " b_clean_up"
+    echo " b_copy_auth_keys"
+    echo " b_configure_static_ip"
+    echo " b_setup_yum_repository"
+    echo " b_install_usefull_rpm"
+    echo " b_set_uniq_hostname"
+    echo " b_time_synchro"
+    echo " b_scripto_for_oracle"
+    echo " b_disable_SE_firewall"
+    echo " b_disable_IP6"
+    echo " b_install_vmware_tools"
+    echo ""
+    echo "Available sets of blocks:"
+    echo " ALL"
+
+    exit 1
+    ;;
+esac
+
+msgi "Done."
