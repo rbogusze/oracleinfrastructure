@@ -42,21 +42,6 @@ INFO_MODE=DEBUG
 
 msgi "Hellow World"
 
-msgd "Check if file with defaults exists, if not create one."
-if [ -f ./restore_defaults.txt ]; then
-  msgd "File with defaults exists, sourcing that."
-  . ./restore_defaults.txt
-else
-  msgi "FIRST time execution, creating file with defaults."
-  cat > ./restore_defaults.txt << EOF
-V_CREATE_KEYSPACE_IF_NOT_EXISTS=yes
-EOF
-  msgi "Please review the file ./restore_defaults.txt contents and check if the defaults are valid, then run the script again"
-  msgi "exiting"
-  exit 0
-fi
-check_file "./restore_defaults.txt"
-
 # Validate Input/Environment
 # --------------------------
     # Great sample getopt implementation by Cosimo Streppone
