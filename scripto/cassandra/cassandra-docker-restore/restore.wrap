@@ -44,17 +44,28 @@ f_cqlsh_sanity_check()
   msgd "check if I can properly login to cqlsh"
   msgd "V_DOCKER: $V_DOCKER"
   msgd "V_CQLSHRC: $V_CQLSHRC"
-  msgd "Construct docker executable command based of whether V_CQLSHRC was set"
-  if [ -z $V_CQLSHRC ]; then
-    msgd "No V_CQLSHRC set"
-    E_CQLSH="docker exec $V_DOCKER cqlsh"
-  else
-    msgd "V_CQLSHRC set, including that in E_CQLSH"
-    E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
-  fi
   msgd "E_CQLSH: $E_CQLSH"
 
-  $E_CQLSH -e "desc keyspaces;"
+  V_TEST_RAW=`$E_CQLSH -e "desc keyspaces;"` 
+  msgd "V_TEST_RAW: $V_TEST_RAW"
+  V_TEST=`echo $V_TEST_RAW | grep system | wc -l`
+  msgd "V_TEST: $V_TEST"
+  # when it fails it goes like:
+  # Connection error: ('Unable to connect to any servers', {'127.0.0.1': error(111, "Tried connecting to [('127.0.0.1', 9042)]. Last error: Connection refused")})
+  # when it works it goes like
+  # system_auth    remik1  remik4              system_traces system_schema  system  system_distributed
+
+  if [ "$V_TEST" -gt 0 ]; then
+    msgd "Connection works"
+  else
+    msge "Connection does not work."
+    msge "$V_TEST_RAW"
+    msge "maybe you need to provide --cqlshrc parameter which point to file in docker with credentials. Exiting."
+    exit 1
+  fi
+
+
+#WIP
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_cqlsh_sanity_check
@@ -144,6 +155,16 @@ msgd "V_BACKUP_FILE: $V_BACKUP_FILE"
 msgd "V_KEYSPACE: $V_KEYSPACE"
 msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
 msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
+
+msgd "Construct docker executable command based of whether V_CQLSHRC was set"
+if [ -z $V_CQLSHRC ]; then
+  msgd "No V_CQLSHRC set"
+  E_CQLSH="docker exec $V_DOCKER cqlsh"
+else
+  msgd "V_CQLSHRC set, including that in E_CQLSH"
+  E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
+fi
+msgd "E_CQLSH: $E_CQLSH"
 
 f_cqlsh_sanity_check
 exit 0
