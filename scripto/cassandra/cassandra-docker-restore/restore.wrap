@@ -129,14 +129,22 @@ f_load_table()
 {
   msgb "${FUNCNAME[0]} Beginning."
 
-  # using following variables
+  # using following variables passed as parameters
   V_KEYSPACE_CHECK=$1
   msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
   check_parameter $V_KEYSPACE_CHECK
   V_TABLE_CHECK=$2
   msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
   check_parameter $V_TABLE_CHECK
+ 
+  # using folowing global variables
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES" 
+  check_parameter $V_BACKUP_FILES
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  check_parameter $V_RESTORE_TEMP_DIR
 
+  f_extract_backup_files
+#WIP
 exit 0
   msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
   msgd "Keyspace exists, table does not. Creating table and loading data"
@@ -146,6 +154,27 @@ exit 0
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_table
+
+f_extract_backup_files()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  # using folowing global variables
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES" 
+  check_parameter $V_BACKUP_FILES
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  check_parameter $V_RESTORE_TEMP_DIR
+
+  msgd "Check if backups are already extracted on temp dir "
+
+  msgd "Check if temp dir is writable"
+
+  msgd "Check if backup files exist and are reachable from within docker"
+  $E_DOCKER pwd
+  
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_extract_backup_files
+
 
 
 f_template()
@@ -161,22 +190,23 @@ msgi "Hellow World"
 
 # Validate Input/Environment
 # --------------------------
-    # Great sample getopt implementation by Cosimo Streppone
-    # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-    SHORT='h:f:d:r:k:t:i:j:'
-    LONG='help,backup_file:,docker:,cqlshrc:,keyspace:,table:,ignore_keyspace_exists:,ignore_table_exists:'
-    OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
+# Great sample getopt implementation by Cosimo Streppone
+# https://gist.github.com/cosimo/3760587#file-parse-options-sh
+SHORT='h:f:s:d:r:k:t:i:j:'
+LONG='help,backup_files:,restore_temp_dir:,docker:,cqlshrc:,keyspace:,table:,ignore_keyspace_exists:,ignore_table_exists:'
+OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
-    if [ $? -gt 0 ]; then
-        # Exit early if argument parsing failed
-        printf "Error parsing command arguments\n" >&2
-        exit 1
-    fi
-    eval set -- "$OPTS"
-    while true; do
-        case "$1" in
+if [ $? -gt 0 ]; then
+    # Exit early if argument parsing failed
+    printf "Error parsing command arguments\n" >&2
+    exit 1
+fi
+eval set -- "$OPTS"
+while true; do
+    case "$1" in
             -h|--help) usage;;
-            -f|--backup_file) V_BACKUP_FILE="$2"; shift 2;;
+            -f|--backup_files) V_BACKUP_FILES="$2"; shift 2;;
+            -s|--restore_temp_dir) V_RESTORE_TEMP_DIR="$2"; shift 2;;
             -d|--docker) V_DOCKER="$2"; shift 2;;
             -r|--cqlshrc) V_CQLSHRC="$2"; shift 2;;
             -k|--keyspace) V_KEYSPACE="$2"; shift 2;;
@@ -185,20 +215,20 @@ msgi "Hellow World"
             -j|--ignore_table_exists) V_IGNORE_TABLE_EXISTS="$2"; shift 2;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
-        esac
-    done
+    esac
+done
 
 # # # Sanity checks
 msgd "V_DOCKER: $V_DOCKER"
 check_parameter $V_DOCKER
 msgd "V_CQLSHRC: $V_CQLSHRC"
 
-msgd "V_BACKUP_FILE: $V_BACKUP_FILE"
+msgd "V_BACKUP_FILES: $V_BACKUP_FILES"
 msgd "V_KEYSPACE: $V_KEYSPACE"
 msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
 msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
 
-msgd "Construct docker executable command based of whether V_CQLSHRC was set"
+msgd "Construct docker cqlsh executable command based of whether V_CQLSHRC was set"
 if [ -z $V_CQLSHRC ]; then
   msgd "No V_CQLSHRC set"
   E_CQLSH="docker exec $V_DOCKER cqlsh"
@@ -207,6 +237,15 @@ else
   E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
 fi
 msgd "E_CQLSH: $E_CQLSH"
+
+msgd "Construct docker sh execution command"
+E_DOCKER="docker exec $V_DOCKER"
+msgd "E_DOCKER: $E_DOCKER"
+
+#WIP testing
+f_load_table $V_KEYSPACE $V_TABLE
+exit 0
+
 
 f_cqlsh_sanity_check
 
