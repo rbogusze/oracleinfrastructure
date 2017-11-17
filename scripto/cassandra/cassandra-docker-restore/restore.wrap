@@ -229,12 +229,13 @@ if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
     msgd "Checking if table already exists"
     f_check_if_table_exists $V_KEYSPACE $V_TABLE
 
-#WIP
-exit 0
     msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
     if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
       msgd "Keyspace exists, table does not. Creating table and loading data"
       f_load_table $V_KEYSPACE $V_TABLE
+#WIP
+msgd "ala ma kota"
+exit 0
     elif [ "$V_CHECK_IF_TABLE_EXISTS" = "yes" ]; then
       msgd "Keyspace exists, table exists. Deciding what to do based on V_IGNORE_TABLE_EXISTS value"
       if [ "$V_IGNORE_TABLE_EXISTS" = "no" ]; then
