@@ -169,16 +169,44 @@ f_extract_backup_files()
   msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
 
   msgd "Check if backups are already extracted on temp dir "
+  V_TEMP=`$E_DOCKER ls -d $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG 2>&1`
+  msgd "V_TEMP: $V_TEMP"
+  V_TEMP_C=`echo $V_TEMP | grep "No such file or directory" | wc -l`
+  msgd "V_TEMP_C: $V_TEMP_C"
+  if [ "$V_TEMP_C" -gt 0 ]; then
+    msgd "No extraction was taking place. Will do that now"
+    
+    msgd "Check if temp dir is writable"
+    V_TEMP=`$E_DOCKER mkdir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG 2>&1`
+    msgd "V_TEMP: $V_TEMP"
+    V_TEMP_C=`echo $V_TEMP | grep -v '^ *$' | wc -l`
+    msgd "V_TEMP_C: $V_TEMP_C"
+    if [ "$V_TEMP_C" -gt 0 ]; then
+      msge "Unable to create $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG dir, exiting."
+      exit 1
+    fi #Check if temp dir is writable
+
+    msgd "Created new empty directory, now extracting backup files"
+    msgd "Looping through the backup files"
+
    
+### REMOVE ME ###
+    $E_DOCKER rm -Rf $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG
+### REMOVE ME ###
+  else
+    msgd "Extract dir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG is already there, doing nothing."
+    
+  fi #Check if backups are already extracted on temp dir
+    
 
 
 
-  msgd "Check if temp dir is writable"
+#WIP
+exit 0
 
   msgd "Check if backup files exist and are reachable from within docker"
   $E_DOCKER pwd
   
-#WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_extract_backup_files
 
