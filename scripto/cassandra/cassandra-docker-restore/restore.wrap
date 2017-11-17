@@ -186,13 +186,17 @@ f_extract_backup_files()
       exit 1
     fi #Check if temp dir is writable
 
-    msgd "Created new empty directory, now extracting backup files"
+    msgd "Created new empty directory, now extracting backup files each in ints own dir"
     msgd "Looping through the backup files"
-
+    CURRENT=1
+    for i in `echo $V_BACKUP_FILES | sed 's/,/\n/g'`
+    do
+      msgd "Extracting: $i"
+      run_command_e "$E_DOCKER mkdir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
+      run_command_e "$E_DOCKER tar xzf $i -C $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
+      CURRENT=`expr ${CURRENT} + 1`
+    done
    
-### REMOVE ME ###
-    $E_DOCKER rm -Rf $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG
-### REMOVE ME ###
   else
     msgd "Extract dir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG is already there, doing nothing."
     
