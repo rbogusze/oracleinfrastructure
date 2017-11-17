@@ -155,8 +155,14 @@ f_load_table()
     msge "Could not find backup for specified ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}. Check restore location in docker $V_DOCKER under $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG"
   fi
 
+
   msgd "Looping through restore directories for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}"
-  
+  while read LINE
+  do
+    msgd "$LINE"
+    V_RESTORE_DIR=`dirname $LINE`
+    msgd "V_RESTORE_DIR: $V_RESTORE_DIR"
+  done < $F_TMP
 
 
 #WIP
@@ -318,6 +324,21 @@ msgd "E_DOCKER: $E_DOCKER"
 msgd "Extract backup tag"
 V_BACKUP_TAG=`echo $V_BACKUP_FILES | awk -F"," '{print $1}' | awk -F"/" '{print $NF}' | awk -F"." '{print $1}'`
 msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+
+msgd "Construct sstableloader executable"
+$E_DOCKER cat $V_CQLSHRC > $F_TMP
+run_command_d "cat $F_TMP"
+V_USERNAME=`cat $F_TMP | grep 'username=' | awk -F"=" '{print $2}'`
+msgd "V_USERNAME: $V_USERNAME"
+V_PASSWORD=`cat $F_TMP | grep 'password=' | awk -F"=" '{print $2}'`
+msgd "V_PASSWORD: $V_PASSWORD"
+V_HOSTNAME=`cat $F_TMP | grep 'hostname=' | awk -F"=" '{print $2}'`
+msgd "V_HOSTNAME: $V_HOSTNAME"
+V_PORT=`cat $F_TMP | grep 'port=' | awk -F"=" '{print $2}'`
+msgd "V_PORT: $V_PORT"
+E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -p $V_PORT -u $V_USERNAME -pw $V_PASSWORD"
+msgd "E_SSTABLELOADER: $E_SSTABLELOADER"
+
 
 #WIP testing
 #f_extract_backup_files
