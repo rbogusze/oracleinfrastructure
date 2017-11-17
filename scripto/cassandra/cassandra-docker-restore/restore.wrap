@@ -148,6 +148,14 @@ f_load_table()
   msgd "Assuming that table structure already exists. Just loading data from all backups provided."
   run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
   run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}/ | grep schema.cql | tee $F_TMP"
+
+  V_TEMP_COUNT=`cat $F_TMP | wc -l`
+  msgd "V_TEMP_COUNT: $V_TEMP_COUNT"
+  if [ "$V_TEMP_COUNT" -lt 1 ]; then
+    msge "Could not find backup for specified ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}. Check restore location in docker $V_DOCKER under $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG"
+  fi
+
+  msgd "Looping through restore directories for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}"
   
 
 
