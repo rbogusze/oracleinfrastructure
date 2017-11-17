@@ -37,10 +37,12 @@ INFO_MODE=DEBUG
         exit 0
   }
 
-
+# $1 - keyspace name
 f_check_if_keyspace_exists()
 {
   msgb "${FUNCNAME[0]} Beginning."
+
+#WIP
   
   V_CHECK_IF_KEYSPACE_EXISTS=yes
   msgb "${FUNCNAME[0]} Finished."
