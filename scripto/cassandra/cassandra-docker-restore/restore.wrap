@@ -146,11 +146,14 @@ f_load_table()
   f_extract_backup_files
 #WIP
 exit 0
+
+
   msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
   msgd "Keyspace exists, table does not. Creating table and loading data"
   msgd "Somehow you need to create table once (using script from first backup file) then load data from all the backup files, if they exist"
   msgd "Or if V_IGNORE_TABLE_EXISTS is yes just load the data from all the backups"
   msgd "Table Restore Done."
+# structure created with f_create_table_structure
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_table
@@ -202,17 +205,18 @@ f_extract_backup_files()
     
   fi #Check if backups are already extracted on temp dir
     
-
-
-
-#WIP
-exit 0
-
-  msgd "Check if backup files exist and are reachable from within docker"
-  $E_DOCKER pwd
-  
   msgb "${FUNCNAME[0]} Finished."
 } #f_extract_backup_files
+
+# This assumes that I have already backup extracted and now just need to create table structure
+f_create_table_structure()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+#WIP
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_create_table_structure
 
 
 
@@ -320,6 +324,7 @@ if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
     msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
     if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
       msgd "Keyspace exists, table does not. Creating table and loading data"
+      f_create_table_structure $V_KEYSPACE $V_TABLE
       f_load_table $V_KEYSPACE $V_TABLE
 #WIP
 msgd "ala ma kota"
@@ -348,7 +353,7 @@ exit 0
   fi #  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
 
 elif [ "$V_KEYSPACE" ] && [ -z "$V_TABLE" ]; then
-  msgd "Only keyspace provided, so I am about to restore keyspace" 
+  msgd "Only keyspace provided, so I am about to restore whole one keyspace or all keyspaces" 
 else
   msge "Provide keyspace"
 fi
@@ -356,7 +361,5 @@ fi
 
 
 msgd "Check if sstableloader exists in docker"
-
-
 
 
