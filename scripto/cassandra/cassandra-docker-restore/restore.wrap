@@ -13,6 +13,8 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
+F_TMP=/tmp/restore.tmp
+
 # Functions
 # ---------
 
@@ -144,9 +146,12 @@ f_load_table()
   check_parameter $V_RESTORE_TEMP_DIR
 
   msgd "Assuming that table structure already exists. Just loading data from all backups provided."
+  run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
+  run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}/ | grep schema.cql | tee $F_TMP"
+  
+
+
 #WIP
-
-
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_table
 
@@ -220,7 +225,7 @@ f_create_table_structure()
 
   msgd "Checking for table sctructure script in restore directory"
   run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
-  V_TABLE_SCHEMA=`$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1 | grep /${V_KEYSPACE_CHECK}/ | grep schema.cql` 
+  V_TABLE_SCHEMA=`$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1 | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}/ | grep schema.cql` 
   msgd "V_TABLE_SCHEMA: $V_TABLE_SCHEMA"
   V_TMP=`echo $V_TABLE_SCHEMA | grep -v '^ *$' | wc -l`
   msgd "V_TMP: $V_TMP"
