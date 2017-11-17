@@ -128,6 +128,16 @@ f_check_if_table_exists()
 f_load_table()
 {
   msgb "${FUNCNAME[0]} Beginning."
+
+  # using following variables
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  V_TABLE_CHECK=$2
+  msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
+  check_parameter $V_TABLE_CHECK
+
+exit 0
   msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
   msgd "Keyspace exists, table does not. Creating table and loading data"
   msgd "Somehow you need to create table once (using script from first backup file) then load data from all the backup files, if they exist"
