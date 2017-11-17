@@ -82,13 +82,12 @@ f_check_if_keyspace_exists()
   msgd "V_TEST_RAW: $V_TEST_RAW"
   V_TEST=`echo $V_TEST_RAW | grep $V_KEYSPACE_CHECK | wc -l`
   msgd "V_TEST: $V_TEST"
-#WIP
 
   if [ "$V_TEST" -gt 0 ]; then
     msgd "Keyspace $V_KEYSPACE_CHECK exists."
     V_CHECK_IF_KEYSPACE_EXISTS=yes
   else
-    msge "Keyspace $V_KEYSPACE_CHECK does NOT exists."
+    msgd "Keyspace $V_KEYSPACE_CHECK does NOT exists."
     V_CHECK_IF_KEYSPACE_EXISTS=no
   fi
   msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
@@ -99,8 +98,30 @@ f_check_if_keyspace_exists()
 f_check_if_table_exists()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  V_TABLE_CHECK=$2
+  msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
+  check_parameter $V_TABLE_CHECK
 
-  V_CHECK_IF_TABLE_EXISTS=yes
+  V_TEST_QUERY="select keyspace_name, table_name from system_schema.tables where keyspace_name='$V_KEYSPACE_CHECK' and table_name='$V_TABLE_CHECK';"
+
+  msgd "V_TEST_QUERY: $V_TEST_QUERY"
+  V_TEST_RAW=`$E_CQLSH -e "$V_TEST_QUERY"` 
+  msgd "V_TEST_RAW: $V_TEST_RAW"
+  V_TEST=`echo $V_TEST_RAW | grep $V_KEYSPACE_CHECK | grep $V_TABLE_CHECK | wc -l`
+  msgd "V_TEST: $V_TEST"
+
+  if [ "$V_TEST" -gt 0 ]; then
+    msgd "Table ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} exists."
+    V_CHECK_IF_TABLE_EXISTS=yes
+  else
+    msgd "Table ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} does NOT exists."
+    V_CHECK_IF_TABLE_EXISTS=no
+  fi
+  msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
+
   msgb "${FUNCNAME[0]} Finished."
 } #f_check_if_table_exists
 
@@ -200,8 +221,6 @@ if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
   msgd "Both keyspace and table is provided, so I am about to restore a table"
   f_check_if_keyspace_exists $V_KEYSPACE
 
-#WIP
-exit 0
   msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
   if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
     msge "You want to restore a table in a keyspace but the keyspace does not exists. Exiting."
@@ -209,6 +228,9 @@ exit 0
     msgd "Keyspace exists. Continuing."
     msgd "Checking if table already exists"
     f_check_if_table_exists $V_KEYSPACE $V_TABLE
+
+#WIP
+exit 0
     msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
     if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
       msgd "Keyspace exists, table does not. Creating table and loading data"
