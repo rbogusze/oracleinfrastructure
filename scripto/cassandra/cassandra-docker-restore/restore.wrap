@@ -164,14 +164,21 @@ f_extract_backup_files()
   msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
   check_parameter $V_RESTORE_TEMP_DIR
 
+  msgd "Extract backup tag"
+  V_BACKUP_TAG=`echo $V_BACKUP_FILES | awk -F"," '{print $1}' | awk -F"/" '{print $NF}' | awk -F"." '{print $1}'`
+  msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+
   msgd "Check if backups are already extracted on temp dir "
+   
+
+
 
   msgd "Check if temp dir is writable"
 
   msgd "Check if backup files exist and are reachable from within docker"
   $E_DOCKER pwd
   
-
+#WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_extract_backup_files
 
