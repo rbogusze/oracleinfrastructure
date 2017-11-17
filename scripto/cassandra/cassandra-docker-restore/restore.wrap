@@ -143,16 +143,9 @@ f_load_table()
   msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
   check_parameter $V_RESTORE_TEMP_DIR
 
+  msgd "Assuming that table structure already exists. Just loading data from all backups provided."
 #WIP
-exit 0
 
-
-  msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
-  msgd "Keyspace exists, table does not. Creating table and loading data"
-  msgd "Somehow you need to create table once (using script from first backup file) then load data from all the backup files, if they exist"
-  msgd "Or if V_IGNORE_TABLE_EXISTS is yes just load the data from all the backups"
-  msgd "Table Restore Done."
-# structure created with f_create_table_structure
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_table
@@ -315,8 +308,8 @@ msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
 
 #WIP testing
 #f_extract_backup_files
-f_create_table_structure $V_KEYSPACE $V_TABLE
-#f_load_table $V_KEYSPACE $V_TABLE
+#f_create_table_structure $V_KEYSPACE $V_TABLE
+f_load_table $V_KEYSPACE $V_TABLE
 exit 0
 
 
