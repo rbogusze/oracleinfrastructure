@@ -162,6 +162,7 @@ f_load_table()
     msgd "$LINE"
     V_RESTORE_DIR=`dirname $LINE`
     msgd "V_RESTORE_DIR: $V_RESTORE_DIR"
+    run_command_e "$E_DOCKER $E_SSTABLELOADER $V_RESTORE_DIR"
   done < $F_TMP
 
 
