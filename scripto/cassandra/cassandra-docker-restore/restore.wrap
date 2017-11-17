@@ -64,9 +64,6 @@ f_cqlsh_sanity_check()
     exit 1
   fi
 
-
-#WIP
-
   msgb "${FUNCNAME[0]} Finished."
 } #f_cqlsh_sanity_check
 
@@ -78,10 +75,24 @@ f_check_if_keyspace_exists()
   V_KEYSPACE_CHECK=$1
   msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
 
- 
+
+  V_TEST_QUERY="select keyspace_name from system_schema.keyspaces where keyspace_name = '$V_KEYSPACE_CHECK' ;" 
+  msgd "V_TEST_QUERY: $V_TEST_QUERY"
+  V_TEST_RAW=`$E_CQLSH -e "$V_TEST_QUERY"` 
+  msgd "V_TEST_RAW: $V_TEST_RAW"
+  V_TEST=`echo $V_TEST_RAW | grep $V_KEYSPACE_CHECK | wc -l`
+  msgd "V_TEST: $V_TEST"
 #WIP
+
+  if [ "$V_TEST" -gt 0 ]; then
+    msgd "Keyspace $V_KEYSPACE_CHECK exists."
+    V_CHECK_IF_KEYSPACE_EXISTS=yes
+  else
+    msge "Keyspace $V_KEYSPACE_CHECK does NOT exists."
+    V_CHECK_IF_KEYSPACE_EXISTS=no
+  fi
+  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
   
-  V_CHECK_IF_KEYSPACE_EXISTS=yes
   msgb "${FUNCNAME[0]} Finished."
 } #f_check_if_keyspace_exists
 
@@ -167,7 +178,6 @@ fi
 msgd "E_CQLSH: $E_CQLSH"
 
 f_cqlsh_sanity_check
-exit 0
 
 # # #
 msgd "Set some defaults if they were not set explicitly"
