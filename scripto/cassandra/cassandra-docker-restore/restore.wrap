@@ -37,11 +37,37 @@ INFO_MODE=DEBUG
         exit 0
   }
 
+# cqlsh sanity check
+f_cqlsh_sanity_check()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgd "check if I can properly login to cqlsh"
+  msgd "V_DOCKER: $V_DOCKER"
+  msgd "V_CQLSHRC: $V_CQLSHRC"
+  msgd "Construct docker executable command based of whether V_CQLSHRC was set"
+  if [ -z $V_CQLSHRC ]; then
+    msgd "No V_CQLSHRC set"
+    E_CQLSH="docker exec $V_DOCKER cqlsh"
+  else
+    msgd "V_CQLSHRC set, including that in E_CQLSH"
+    E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
+  fi
+  msgd "E_CQLSH: $E_CQLSH"
+
+  $E_CQLSH -e "desc keyspaces;"
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_cqlsh_sanity_check
+
+
 # $1 - keyspace name
 f_check_if_keyspace_exists()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
 
+ 
 #WIP
   
   V_CHECK_IF_KEYSPACE_EXISTS=yes
@@ -84,8 +110,8 @@ msgi "Hellow World"
 # --------------------------
     # Great sample getopt implementation by Cosimo Streppone
     # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-    SHORT='h:f:k:t:i:j:'
-    LONG='help,backup_file:,keyspace:,table:,ignore_keyspace_exists:,ignore_table_exists:'
+    SHORT='h:f:d:r:k:t:i:j:'
+    LONG='help,backup_file:,docker:,cqlshrc:,keyspace:,table:,ignore_keyspace_exists:,ignore_table_exists:'
     OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
     if [ $? -gt 0 ]; then
@@ -98,6 +124,8 @@ msgi "Hellow World"
         case "$1" in
             -h|--help) usage;;
             -f|--backup_file) V_BACKUP_FILE="$2"; shift 2;;
+            -d|--docker) V_DOCKER="$2"; shift 2;;
+            -r|--cqlshrc) V_CQLSHRC="$2"; shift 2;;
             -k|--keyspace) V_KEYSPACE="$2"; shift 2;;
             -t|--table) V_TABLE="$2"; shift 2;;
             -i|--ignore_keyspace_exists) V_IGNORE_KEYSPACE_EXISTS="$2"; shift 2;;
@@ -107,10 +135,18 @@ msgi "Hellow World"
         esac
     done
 
+# # # Sanity checks
+msgd "V_DOCKER: $V_DOCKER"
+check_parameter $V_DOCKER
+msgd "V_CQLSHRC: $V_CQLSHRC"
+
 msgd "V_BACKUP_FILE: $V_BACKUP_FILE"
 msgd "V_KEYSPACE: $V_KEYSPACE"
 msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
 msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
+
+f_cqlsh_sanity_check
+exit 0
 
 # # #
 msgd "Set some defaults if they were not set explicitly"
@@ -126,11 +162,15 @@ fi
 msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
 msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
 
+# # # Actual execution
 # # # restore a table
 msgd "Check what should I do"
 if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
   msgd "Both keyspace and table is provided, so I am about to restore a table"
   f_check_if_keyspace_exists $V_KEYSPACE
+
+#WIP
+exit 0
   msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
   if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
     msge "You want to restore a table in a keyspace but the keyspace does not exists. Exiting."
