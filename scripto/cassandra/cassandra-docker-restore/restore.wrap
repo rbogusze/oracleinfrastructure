@@ -143,7 +143,6 @@ f_load_table()
   msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
   check_parameter $V_RESTORE_TEMP_DIR
 
-  f_extract_backup_files
 #WIP
 exit 0
 
@@ -166,10 +165,9 @@ f_extract_backup_files()
   check_parameter $V_BACKUP_FILES
   msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
   check_parameter $V_RESTORE_TEMP_DIR
-
-  msgd "Extract backup tag"
-  V_BACKUP_TAG=`echo $V_BACKUP_FILES | awk -F"," '{print $1}' | awk -F"/" '{print $NF}' | awk -F"." '{print $1}'`
   msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+  check_parameter $V_BACKUP_TAG
+
 
   msgd "Check if backups are already extracted on temp dir "
   V_TEMP=`$E_DOCKER ls -d $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG 2>&1`
@@ -213,6 +211,23 @@ f_create_table_structure()
 {
   msgb "${FUNCNAME[0]} Beginning."
 
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  V_TABLE_CHECK=$2
+  msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
+  check_parameter $V_TABLE_CHECK
+
+  # using folowing global variables
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES" 
+  check_parameter $V_BACKUP_FILES
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  check_parameter $V_RESTORE_TEMP_DIR
+
+  msgd "Checking for table sctructure script in restore directory"
+  run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
+  
 #WIP
 
   msgb "${FUNCNAME[0]} Finished."
@@ -285,12 +300,18 @@ msgd "Construct docker sh execution command"
 E_DOCKER="docker exec $V_DOCKER"
 msgd "E_DOCKER: $E_DOCKER"
 
+msgd "Extract backup tag"
+V_BACKUP_TAG=`echo $V_BACKUP_FILES | awk -F"," '{print $1}' | awk -F"/" '{print $NF}' | awk -F"." '{print $1}'`
+msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+
 #WIP testing
-f_load_table $V_KEYSPACE $V_TABLE
+f_create_table_structure $V_KEYSPACE $V_TABLE
+#f_load_table $V_KEYSPACE $V_TABLE
 exit 0
 
 
 f_cqlsh_sanity_check
+f_extract_backup_files
 
 # # #
 msgd "Set some defaults if they were not set explicitly"
