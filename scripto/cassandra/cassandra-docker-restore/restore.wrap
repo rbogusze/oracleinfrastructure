@@ -232,7 +232,7 @@ f_create_table_structure()
   msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
   check_parameter $V_TABLE_CHECK
 
-  # using folowing global variables
+  # using global variables
   msgd "V_BACKUP_FILES: $V_BACKUP_FILES" 
   check_parameter $V_BACKUP_FILES
   msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
@@ -259,14 +259,20 @@ f_restore_keyspace()
 {
   msgb "${FUNCNAME[0]} Beginning."
 
-  f_check_if_keyspace_exists $V_KEYSPACE
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  # using global variables
+
+  f_check_if_keyspace_exists $V_KEYSPACE_CHECK
   msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
   if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
     msgd "Keyspace does NOT exists. That is expected. Continuing with the restore."
-    f_create_keyspace $V_KEYSPACE
-    f_load_keyspace $V_KEYSPACE
+    f_create_keyspace $V_KEYSPACE_CHECK
+    f_load_keyspace $V_KEYSPACE_CHECK
   elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
-    msgi "Keyspace already exists. Exiting. Drop keyspace first if you want to perform a restore."
+    msgi "Keyspace already exists. Doing nothing. Drop keyspace first if you want to perform a restore."
   fi #if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
 
   msgb "${FUNCNAME[0]} Finished."
@@ -275,13 +281,30 @@ f_restore_keyspace()
 f_create_keyspace()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  msgd "Just create empty keyspace"
 
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  # using global variables
+
+
+exit 0
+# WIP
   msgb "${FUNCNAME[0]} Finished."
 } #
 
 f_load_keyspace()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  msgd "Load all the tables you can find in a backup to specified keyspace"
+
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  # using global variables
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_keyspace
@@ -463,7 +486,7 @@ elif [ "$V_KEYSPACE" ] && [ -z "$V_TABLE" ]; then
     while read T_KEYSPACE
     do
       msgi "Restoring all keyspaces from backup. Now: $T_KEYSPACE"
-      f_restore_keyspace $V_KEYSPACE
+      f_restore_keyspace $T_KEYSPACE
     done < $F_TMP_K
   else
     msgd "One keyspace should be restored."
