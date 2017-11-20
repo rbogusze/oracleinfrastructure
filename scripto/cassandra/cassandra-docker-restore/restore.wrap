@@ -327,7 +327,6 @@ f_load_keyspace()
     f_load_table $V_KEYSPACE_CHECK $T_TABLE_KF
   done < $F_TMP_KF
 
-#WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_keyspace
 
