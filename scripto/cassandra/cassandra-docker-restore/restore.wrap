@@ -365,7 +365,7 @@ msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
 
 # # # Actual execution
 msgd "Actual execution"
-msgd "Extract backup files if not done already"
+msgi "Extract backup files if not done already"
 f_extract_backup_files
 
 # # # restore a table
@@ -414,9 +414,20 @@ if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
 
 elif [ "$V_KEYSPACE" ] && [ -z "$V_TABLE" ]; then
   msgd "Only keyspace provided, so I am about to restore whole one keyspace or all keyspaces" 
+  msgd "V_KEYSPACE: $V_KEYSPACE"
+
+  f_check_if_keyspace_exists $V_KEYSPACE
+  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
+  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+    msgd "Keyspace does NOT exists. That is expected. Continuing with the restore."
+  elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
+    msge "Keyspace already exists. Exiting. Drop keyspace first if you want to perform a restore."
+    exit 1
+  fi #if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+
 else
-  msge "Provide keyspace"
-fi
+  msge "Provide keyspace name to restore keyspace or keyspace and table to restore table. Exiting."
+fi # if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
 
 
 
