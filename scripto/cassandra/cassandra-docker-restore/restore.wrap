@@ -439,12 +439,10 @@ elif [ "$V_KEYSPACE" ] && [ -z "$V_TABLE" ]; then
   msgd "Checking if we are about to restore all keyspaces"
   if [ "$V_KEYSPACE" = "_all_" ]; then
     msgd "All keyspaces should be restored. Looping through what I can find in backup."
-
-    # magic to put everything in $F_TMP_K
     F_TMP_K=/tmp/restore.keyspaces.tmp
+    $E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG 2>&1 | grep -v -E "*.cql|^system$|^system_auth$|^system_distributed$|^system_schema$|^system_traces$" > $F_TMP_K
+
     run_command_d "cat $F_TMP_K"
-exit 0
-#WIP
     while read T_KEYSPACE
     do
       msgi "Restoring all keyspaces from backup. Now: $T_KEYSPACE"
