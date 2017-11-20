@@ -319,8 +319,21 @@ f_load_keyspace()
   msgd "E_DOCKER: $E_DOCKER"
 
   F_TMP_KF=/tmp/restore.wrap.kf
-  run_command_e "$E_DOCKER ls -1 $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK > $F_TMP_KF"
+
+  msgd "Checking if there are any datafiles in backup to import"
+  $E_DOCKER ls -1 $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK > $F_TMP_KF 2>&1
+  V_TEMP_C=`cat $F_TMP_KF | grep "No such file or directory" | wc -l`
+  msgd "V_TEMP_C: $V_TEMP_C"
+  if [ "$V_TEMP_C" -eq 1 ]; then
+    msgi "There are no files that contain table data for keyspace $V_KEYSPACE_CHECK. That can happen, and means the keyspace was empty. Doing nothing."
+    return 0 
+  fi
   run_command_d "cat $F_TMP_KF"
+
+  run_command_e "$E_DOCKER ls -1 $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK > $F_TMP_KF 2>&1"
+  run_command_d "cat $F_TMP_KF"
+
+
   while read T_TABLE_KF
   do
     msgi "Restoring all tables from keyspace $V_KEYSPACE_CHECK. Now: $T_TABLE_KF"
