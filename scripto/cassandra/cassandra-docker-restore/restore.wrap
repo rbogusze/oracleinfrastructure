@@ -255,6 +255,26 @@ f_create_table_structure()
   msgb "${FUNCNAME[0]} Finished."
 } #f_create_table_structure
 
+f_restore_keyspace()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  f_check_if_keyspace_exists $V_KEYSPACE
+  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
+  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+    msgd "Keyspace does NOT exists. That is expected. Continuing with the restore."
+    f_create_keyspace $V_KEYSPACE
+    f_load_keyspace $V_KEYSPACE
+  elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
+    msge "Keyspace already exists. Exiting. Drop keyspace first if you want to perform a restore."
+    exit 1
+  fi #if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_restore_keyspace
+
+
+
 
 
 f_template()
@@ -416,14 +436,24 @@ elif [ "$V_KEYSPACE" ] && [ -z "$V_TABLE" ]; then
   msgd "Only keyspace provided, so I am about to restore whole one keyspace or all keyspaces" 
   msgd "V_KEYSPACE: $V_KEYSPACE"
 
-  f_check_if_keyspace_exists $V_KEYSPACE
-  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
-  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
-    msgd "Keyspace does NOT exists. That is expected. Continuing with the restore."
-  elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
-    msge "Keyspace already exists. Exiting. Drop keyspace first if you want to perform a restore."
-    exit 1
-  fi #if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+  msgd "Checking if we are about to restore all keyspaces"
+  if [ "$V_KEYSPACE" = "_all_" ]; then
+    msgd "All keyspaces should be restored. Looping through what I can find in backup."
+
+    # magic to put everything in $F_TMP_K
+    F_TMP_K=/tmp/restore.keyspaces.tmp
+    run_command_d "cat $F_TMP_K"
+exit 0
+#WIP
+    while read T_KEYSPACE
+    do
+      msgi "Restoring all keyspaces from backup. Now: $T_KEYSPACE"
+      f_restore_keyspace $V_KEYSPACE
+    done < $F_TMP_K
+  else
+    msgd "One keyspace should be restored."
+    f_restore_keyspace $V_KEYSPACE
+  fi # if [ "$V_KEYSPACE" = "_all_" ]; then 
 
 else
   msge "Provide keyspace name to restore keyspace or keyspace and table to restore table. Exiting."
