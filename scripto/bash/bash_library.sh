@@ -186,7 +186,7 @@ msga()
 # [block] in magenta
 msgb()
 {
-  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+  if [ "$INFO_MODE" = "DEBUG" ] ; then
     echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
     echo -e -n '\E[35m'
     echo -n "[block] "
