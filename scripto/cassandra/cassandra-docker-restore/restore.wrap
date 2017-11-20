@@ -11,7 +11,7 @@ else
 fi
 
 INFO_MODE=DEBUG
-INFO_MODE=INFO
+#INFO_MODE=INFO
 
 F_TMP=/tmp/restore.tmp
 
@@ -165,7 +165,8 @@ f_load_table()
     run_command_e "$E_DOCKER $E_SSTABLELOADER $V_RESTORE_DIR"
   done < $F_TMP
 
-  msgi "Done."
+  echo 
+  msgi "Done for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}."
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_table
@@ -525,5 +526,5 @@ fi # if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
 
 
 msgd "Check if sstableloader exists in docker"
-
+msgi "Done."
 
