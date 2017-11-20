@@ -288,10 +288,18 @@ f_create_keyspace()
   msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
   check_parameter $V_KEYSPACE_CHECK
   # using global variables
+  msgd "E_DOCKER: $E_DOCKER"
+  msgd "E_CQLSH: $E_CQLSH"
+  
+  msgd "Get create keyspace command"
+  F_TMP_CK=/tmp/restore.wrap.ck
+  run_command_e "$E_DOCKER cat $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK.cql > $F_TMP_CK"
+  run_command_d "cat $F_TMP_CK"
+  V_CK=`cat $F_TMP_CK | grep "^CREATE KEYSPACE"`
+  msgd "V_CK: $V_CK"
 
-
-exit 0
-# WIP
+  run_command_e "$E_CQLSH -e \"$V_CK\""
+  
   msgb "${FUNCNAME[0]} Finished."
 } #
 
@@ -402,10 +410,11 @@ msgd "E_SSTABLELOADER: $E_SSTABLELOADER"
 
 
 #testing
+f_restore_keyspace "remik4"
+exit 0
 #f_extract_backup_files
 #f_create_table_structure $V_KEYSPACE $V_TABLE
 #f_load_table $V_KEYSPACE $V_TABLE
-#exit 0
 #f_cqlsh_sanity_check
 #f_extract_backup_files
 
