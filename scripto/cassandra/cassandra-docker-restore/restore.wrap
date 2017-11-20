@@ -145,6 +145,7 @@ f_load_table()
   msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
   check_parameter $V_RESTORE_TEMP_DIR
 
+
   msgd "Assuming that table structure already exists. Just loading data from all backups provided."
   run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
   run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}/ | grep schema.cql | tee $F_TMP"
@@ -155,7 +156,6 @@ f_load_table()
     msge "Could not find backup for specified ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}. Check restore location in docker $V_DOCKER under $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG"
   fi
 
-
   msgd "Looping through restore directories for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}"
   while read LINE
   do
@@ -165,8 +165,8 @@ f_load_table()
     run_command_e "$E_DOCKER $E_SSTABLELOADER $V_RESTORE_DIR"
   done < $F_TMP
 
+  msgi "Done."
 
-#WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_table
 
@@ -341,15 +341,13 @@ E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -p $V_PORT -u $V_USERNAME -pw $
 msgd "E_SSTABLELOADER: $E_SSTABLELOADER"
 
 
-#WIP testing
+#testing
 #f_extract_backup_files
 #f_create_table_structure $V_KEYSPACE $V_TABLE
-f_load_table $V_KEYSPACE $V_TABLE
-exit 0
-
-
-f_cqlsh_sanity_check
-f_extract_backup_files
+#f_load_table $V_KEYSPACE $V_TABLE
+#exit 0
+#f_cqlsh_sanity_check
+#f_extract_backup_files
 
 # # #
 msgd "Set some defaults if they were not set explicitly"
@@ -366,6 +364,10 @@ msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
 msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
 
 # # # Actual execution
+msgd "Actual execution"
+msgd "Extract backup files if not done already"
+f_extract_backup_files
+
 # # # restore a table
 msgd "Check what should I do"
 if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
@@ -373,6 +375,8 @@ if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
   f_check_if_keyspace_exists $V_KEYSPACE
 
   msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
+
+  msgi "Please note, in table restore mode the value of --ignore_keyspace_exists is ignored if provided, as the assumption is the keyspace should be there."
   if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
     msge "You want to restore a table in a keyspace but the keyspace does not exists. Exiting."
   elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
@@ -385,9 +389,6 @@ if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
       msgd "Keyspace exists, table does not. Creating table and loading data"
       f_create_table_structure $V_KEYSPACE $V_TABLE
       f_load_table $V_KEYSPACE $V_TABLE
-#WIP
-msgd "ala ma kota"
-exit 0
     elif [ "$V_CHECK_IF_TABLE_EXISTS" = "yes" ]; then
       msgd "Keyspace exists, table exists. Deciding what to do based on V_IGNORE_TABLE_EXISTS value"
       if [ "$V_IGNORE_TABLE_EXISTS" = "no" ]; then
