@@ -266,12 +266,29 @@ f_restore_keyspace()
     f_create_keyspace $V_KEYSPACE
     f_load_keyspace $V_KEYSPACE
   elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
-    msge "Keyspace already exists. Exiting. Drop keyspace first if you want to perform a restore."
-    exit 1
+    msgi "Keyspace already exists. Exiting. Drop keyspace first if you want to perform a restore."
   fi #if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_restore_keyspace
+
+f_create_keyspace()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #
+
+f_load_keyspace()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_load_keyspace
+
+
+
+
 
 
 
