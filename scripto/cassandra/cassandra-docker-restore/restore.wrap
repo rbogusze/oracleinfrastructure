@@ -11,7 +11,7 @@ else
 fi
 
 INFO_MODE=DEBUG
-#INFO_MODE=INFO
+INFO_MODE=INFO
 
 F_TMP=/tmp/restore.tmp
 
@@ -272,7 +272,7 @@ f_restore_keyspace()
     f_create_keyspace $V_KEYSPACE_CHECK
     f_load_keyspace $V_KEYSPACE_CHECK
   elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
-    msgi "Keyspace already exists. Doing nothing. Drop keyspace first if you want to perform a restore."
+    msgi "Keyspace $V_KEYSPACE_CHECK already exists. Doing nothing. Drop it first if you want to perform a restore from specified backup."
   fi #if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
 
   msgb "${FUNCNAME[0]} Finished."
@@ -313,7 +313,21 @@ f_load_keyspace()
   msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
   check_parameter $V_KEYSPACE_CHECK
   # using global variables
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+  msgd "E_DOCKER: $E_DOCKER"
 
+  F_TMP_KF=/tmp/restore.wrap.kf
+  run_command_e "$E_DOCKER ls -1 $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK > $F_TMP_KF"
+  run_command_d "cat $F_TMP_KF"
+  while read T_TABLE_KF
+  do
+    msgi "Restoring all tables from keyspace $V_KEYSPACE_CHECK. Now: $T_TABLE_KF"
+    f_create_table_structure $V_KEYSPACE_CHECK $T_TABLE_KF
+    f_load_table $V_KEYSPACE_CHECK $T_TABLE_KF
+  done < $F_TMP_KF
+
+#WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_load_keyspace
 
@@ -410,8 +424,11 @@ msgd "E_SSTABLELOADER: $E_SSTABLELOADER"
 
 
 #testing
-f_restore_keyspace "remik4"
-exit 0
+#f_restore_keyspace "remik4"
+#f_create_keyspace "remik4"
+#f_load_keyspace "remik4"
+#exit 0
+#f_restore_keyspace "remik4"
 #f_extract_backup_files
 #f_create_table_structure $V_KEYSPACE $V_TABLE
 #f_load_table $V_KEYSPACE $V_TABLE
