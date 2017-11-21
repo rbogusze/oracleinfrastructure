@@ -1,6 +1,6 @@
 [authentication]
-username=backup
-password=ala_ma_kota
+username=cassandra
+password=cassandra
 
 [connection]
 hostname=172.27.0.11

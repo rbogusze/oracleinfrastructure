@@ -39,9 +39,13 @@ if [ -f $BACKUP_LOCATION/$SNAPSHOT_LABEL.tgz ]; then
     exit 1
 fi
 
+#WIP
+$CQLSH --cqlshrc=$cqlshrc -e "desc keyspaces;"
+
 mkdir -p $BACKUP_LOCATION/$SNAPSHOT_LABEL
 
 for SCH_NAME in $($CQLSH --cqlshrc=$cqlshrc -e "desc keyspaces;" | sed 's/\s\+/\n/g' | sed '/^$/d'); do $CQLSH --cqlshrc=$cqlshrc -e "desc keyspace $SCH_NAME;" > $BACKUP_LOCATION/$SNAPSHOT_LABEL/$SCH_NAME.cql; done
+
 
 docker exec cassandra_$node nodetool snapshot -t $SNAPSHOT_LABEL
 
