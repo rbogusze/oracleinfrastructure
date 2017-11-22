@@ -77,10 +77,10 @@ f_check_if_keyspace_exists()
   V_KEYSPACE_CHECK=$1
   msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
 
+  msgd "Q_KEYSPACE_EXISTS: $Q_KEYSPACE_EXISTS"
+  check_parameter $Q_KEYSPACE_EXISTS
 
-  V_TEST_QUERY="select keyspace_name from system_schema.keyspaces where keyspace_name = '$V_KEYSPACE_CHECK' ;" 
-  msgd "V_TEST_QUERY: $V_TEST_QUERY"
-  V_TEST_RAW=`$E_CQLSH -e "$V_TEST_QUERY"` 
+  V_TEST_RAW=`$E_CQLSH -e "$Q_KEYSPACE_EXISTS = '$V_KEYSPACE_CHECK';"` 
   if [ $? -ne 0 ]; then
     msge "Unable to execute query. Exiting."
     exit 1
@@ -112,10 +112,16 @@ f_check_if_table_exists()
   msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
   check_parameter $V_TABLE_CHECK
 
-  V_TEST_QUERY="select keyspace_name, table_name from system_schema.tables where keyspace_name='$V_KEYSPACE_CHECK' and table_name='$V_TABLE_CHECK';"
+  msgd "Q_TABLE_EXISTS: $Q_TABLE_EXISTS"
+  check_parameter $Q_TABLE_EXISTS
 
-  msgd "V_TEST_QUERY: $V_TEST_QUERY"
-  V_TEST_RAW=`$E_CQLSH -e "$V_TEST_QUERY"` 
+  V_TEST_RAW=`$E_CQLSH -e "$Q_TABLE_EXISTS ='$V_KEYSPACE_CHECK' and table_name='$V_TABLE_CHECK'; "` 
+#WIP add and table_name= as parameter
+  if [ $? -ne 0 ]; then
+    msge "Unable to execute query. Exiting."
+    exit 1
+  fi
+
   msgd "V_TEST_RAW: $V_TEST_RAW"
   V_TEST=`echo $V_TEST_RAW | grep $V_KEYSPACE_CHECK | grep $V_TABLE_CHECK | wc -l`
   msgd "V_TEST: $V_TEST"
@@ -380,15 +386,22 @@ f_determine_cassandra_version()
   case $V_CASSANDRA_VERSION in
   "2.1")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
+    Q_KEYSPACE_EXISTS="select keyspace_name from system.schema_keyspaces where keyspace_name" 
+    Q_TABLE_EXISTS="select keyspace_name, columnfamily_name from system.schema_columnfamilies where keyspace_name"
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
+    Q_KEYSPACE_EXISTS="select keyspace_name from system_schema.keyspaces where keyspace_name" 
+    Q_TABLE_EXISTS="select keyspace_name, table_name from system_schema.tables where keyspace_name"
     ;;
   *)
     echo "Unknown cassandra version!!! Exiting."
     exit 1
     ;;
   esac
+
+  msgd "Setting following variables as dependent on cassandra version"
+  msgd "Q_KEYSPACE_EXISTS: $Q_KEYSPACE_EXISTS"
 #WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_determine_cassandra_version
@@ -513,8 +526,6 @@ msgd "Actual execution"
 msgi "Extract backup files if not done already"
 f_extract_backup_files
 f_determine_cassandra_version
-
-exit 0
 
 # # # restore a table
 msgd "Check what should I do"
