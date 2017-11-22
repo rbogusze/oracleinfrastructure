@@ -367,6 +367,33 @@ f_load_keyspace()
 
 
 
+f_determine_cassandra_version()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+ 
+  F_TMP_DV=/tmp/restore.wrap.tmp.dw
+  run_command_e "$E_DOCKER nodetool version > $F_TMP_DV 2>&1"
+  run_command_d "cat $F_TMP_DV"
+  V_CASSANDRA_VERSION=`cat $F_TMP_DV | awk '{print $2}' | awk -F"." '{print $1"."$2}'`
+  msgd "V_CASSANDRA_VERSION: $V_CASSANDRA_VERSION"
+
+  case $V_CASSANDRA_VERSION in
+  "2.1")
+    msgd "Cassandra version $V_CASSANDRA_VERSION"
+    ;;
+  "3.0")
+    msgd "Cassandra version $V_CASSANDRA_VERSION"
+    ;;
+  *)
+    echo "Unknown cassandra version!!! Exiting."
+    exit 1
+    ;;
+  esac
+#WIP
+  msgb "${FUNCNAME[0]} Finished."
+} #f_determine_cassandra_version
+
+
 
 
 
@@ -485,6 +512,9 @@ msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
 msgd "Actual execution"
 msgi "Extract backup files if not done already"
 f_extract_backup_files
+f_determine_cassandra_version
+
+exit 0
 
 # # # restore a table
 msgd "Check what should I do"
