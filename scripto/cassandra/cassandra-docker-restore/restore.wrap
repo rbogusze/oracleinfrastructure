@@ -11,7 +11,7 @@ else
 fi
 
 INFO_MODE=DEBUG
-INFO_MODE=INFO
+#INFO_MODE=INFO
 
 F_TMP=/tmp/restore.tmp
 
@@ -200,6 +200,9 @@ f_extract_backup_files()
     if [ "$V_TEMP_C" -gt 0 ]; then
       msge "Unable to create $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG dir, exiting."
       exit 1
+    else
+      msgd "I confirmed that I can create directory, removing that as I am not sure yet if I can extract backup files and on next run I only check if this directory exists as a proof that backup is already extracted."
+      run_command_e "$E_DOCKER rmdir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG"
     fi #Check if temp dir is writable
 
     msgd "Created new empty directory, now extracting backup files each in ints own dir"
@@ -207,10 +210,20 @@ f_extract_backup_files()
     CURRENT=1
     for i in `echo $V_BACKUP_FILES | sed 's/,/\n/g'`
     do
-      msgd "Extracting: $i"
-      run_command_e "$E_DOCKER mkdir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
-      run_command_e "$E_DOCKER tar xzf $i -C $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
-      CURRENT=`expr ${CURRENT} + 1`
+      msgd "Check if back file is reachable"
+      V_TEMP=`$E_DOCKER ls $i 2>&1`
+      msgd "V_TEMP: $V_TEMP"
+      V_TEMP_C=`echo $V_TEMP | grep "No such file or directory" | wc -l`
+      msgd "V_TEMP_C: $V_TEMP_C"
+      if [ "$V_TEMP_C" -ge 1 ]; then
+        msge "Backup file provided: $i is not reachable on docker. Please make sure that the full path provided is relative to the docker. Exiting."
+        exit 1
+      else
+        msgd "Extracting: $i"
+        run_command_e "$E_DOCKER mkdir -p $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
+        run_command_e "$E_DOCKER tar xzf $i -C $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
+        CURRENT=`expr ${CURRENT} + 1`
+      fi
     done
    
   else
