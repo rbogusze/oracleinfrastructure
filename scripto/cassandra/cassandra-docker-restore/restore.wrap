@@ -81,6 +81,11 @@ f_check_if_keyspace_exists()
   V_TEST_QUERY="select keyspace_name from system_schema.keyspaces where keyspace_name = '$V_KEYSPACE_CHECK' ;" 
   msgd "V_TEST_QUERY: $V_TEST_QUERY"
   V_TEST_RAW=`$E_CQLSH -e "$V_TEST_QUERY"` 
+  if [ $? -ne 0 ]; then
+    msge "Unable to execute query. Exiting."
+    exit 1
+  fi
+
   msgd "V_TEST_RAW: $V_TEST_RAW"
   V_TEST=`echo $V_TEST_RAW | grep $V_KEYSPACE_CHECK | wc -l`
   msgd "V_TEST: $V_TEST"
