@@ -483,7 +483,7 @@ while true; do
             -d|--docker) V_DOCKER="$2"; shift 2;;
             -r|--cqlshrc) V_CQLSHRC="$2"; shift 2;;
             -k|--keyspace) V_KEYSPACE="$2"; shift 2;;
-            -t|--table) V_TABLE="$2"; shift 2;;
+            -t|--table) V_TABLES="$2"; shift 2;;
             -i|--ignore_keyspace_exists) V_IGNORE_KEYSPACE_EXISTS="$2"; shift 2;;
             -j|--ignore_table_exists) V_IGNORE_TABLE_EXISTS="$2"; shift 2;;
             --) shift; break;;
@@ -576,7 +576,7 @@ f_determine_cassandra_version
 
 # # # restore a table
 msgd "Check what should I do"
-if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
+if [ "$V_KEYSPACE" ] && [ "$V_TABLES" ]; then
   msgd "Both keyspace and table is provided, so I am about to restore a table"
   f_check_if_keyspace_exists $V_KEYSPACE
 
@@ -588,32 +588,38 @@ if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
   elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
     msgd "Keyspace exists. Continuing."
     msgd "Checking if table already exists"
-    f_check_if_table_exists $V_KEYSPACE $V_TABLE
 
-    msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
-    if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
-      msgd "Keyspace exists, table does not. Creating table and loading data"
-      f_create_table_structure $V_KEYSPACE $V_TABLE
-      f_load_table $V_KEYSPACE $V_TABLE
-    elif [ "$V_CHECK_IF_TABLE_EXISTS" = "yes" ]; then
-      msgd "Keyspace exists, table exists. Deciding what to do based on V_IGNORE_TABLE_EXISTS value"
-      if [ "$V_IGNORE_TABLE_EXISTS" = "no" ]; then
-        msge "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
-        msge "There was no parameter set to ignore it (use '--ignore_table_exists yes' to force loading data anyway) "
-        msge "Exiting."
-        exit 1
-      elif [ "$V_IGNORE_TABLE_EXISTS" = "yes" ]; then
-        msgd "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
-        msgd "There WAS parameter set to ignore it, loading data anyway) "
+    msgd "Looping through all the tables provided"
+    for V_TABLE in `echo $V_TABLES | sed 's/,/\n/g'`
+    do
+      msgd "Actions for keyspace: $V_KEYSPACE table: $V_TABLE"
+      f_check_if_table_exists $V_KEYSPACE $V_TABLE
+
+      msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
+      if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
+        msgd "Keyspace exists, table does not. Creating table and loading data"
+        f_create_table_structure $V_KEYSPACE $V_TABLE
         f_load_table $V_KEYSPACE $V_TABLE
+      elif [ "$V_CHECK_IF_TABLE_EXISTS" = "yes" ]; then
+        msgd "Keyspace exists, table exists. Deciding what to do based on V_IGNORE_TABLE_EXISTS value"
+        if [ "$V_IGNORE_TABLE_EXISTS" = "no" ]; then
+          msge "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
+          msge "There was no parameter set to ignore it (use '--ignore_table_exists yes' to force loading data anyway) "
+          msge "Exiting."
+          exit 1
+        elif [ "$V_IGNORE_TABLE_EXISTS" = "yes" ]; then
+          msgd "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
+          msgd "There WAS parameter set to ignore it, loading data anyway) "
+          f_load_table $V_KEYSPACE $V_TABLE
+        else
+          msge "Unknown value of V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS. Exiting"
+          exit 1 
+        fi
       else
-        msge "Unknown value of V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS. Exiting"
-        exit 1 
-      fi
-    else
-      msge "Unknown value of V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS. Exiting"
-      exit 1
-    fi
+        msge "Unknown value of V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS. Exiting"
+        exit 1
+      fi #if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
+    done
   else
     msge "Unknown value of V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS. Exiting"
   fi #  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
