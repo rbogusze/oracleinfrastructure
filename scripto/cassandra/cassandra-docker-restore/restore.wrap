@@ -493,9 +493,10 @@ V_HOSTNAME=`cat $F_TMP | grep 'hostname=' | awk -F"=" '{print $2}'`
 msgd "V_HOSTNAME: $V_HOSTNAME"
 V_PORT=`cat $F_TMP | grep 'port=' | awk -F"=" '{print $2}'`
 msgd "V_PORT: $V_PORT"
-E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -p $V_PORT -u $V_USERNAME -pw $V_PASSWORD"
+#E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -p $V_PORT -u $V_USERNAME -pw $V_PASSWORD"
+E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -u $V_USERNAME -pw $V_PASSWORD"
 msgd "E_SSTABLELOADER: $E_SSTABLELOADER"
-
+msgi "Note, for lack of other idea I disable explicit port"
 
 #testing
 #f_restore_keyspace "remik4"
