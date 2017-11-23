@@ -283,9 +283,6 @@ f_create_table_structure()
     run_command_e "docker cp $F_TMP_TSE $V_DOCKER:$F_TMP_TSE"
     V_TABLE_SCHEMA=$F_TMP_TSE
     msgd "V_TABLE_SCHEMA: $V_TABLE_SCHEMA"
-
-#WIP
-exit 0
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
