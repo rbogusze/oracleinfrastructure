@@ -168,6 +168,8 @@ f_load_table()
   elif [ "$V_TEMP_COUNT" -ne $V_BACKUP_COUNT ]; then
     msge "That is strange. I have different number of backup directories I can load from: $V_TEMP_COUNT than number of backup files provided: $V_BACKUP_COUNT. Exiting."
     exit 1
+  else
+    msgd "Expected number of backup directories I can load from: $V_TEMP_COUNT equal to the number of backup files provided: $V_BACKUP_COUNT. Continuing."
   fi
 
   msgd "Looping through restore directories for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}"
