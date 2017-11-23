@@ -282,8 +282,13 @@ f_create_table_structure()
     F_TMP_TS=/tmp/restore.tmp.ts
     run_command_e "$E_DOCKER cat $V_DESC_KEYSPACE > $F_TMP_TS"
     F_TMP_TSE=/tmp/restore.tmp.ts.cql
-    run_command_e "cat $F_TMP_TS | sed -n '/^CREATE TABLE ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} (/,/;/p' > $F_TMP_TSE"
+    run_command_e "cat $F_TMP_TS | sed -n '/^CREATE TABLE ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} (/,/CREATE TABLE/p' > $F_TMP_TSE"
     run_command_d "cat $F_TMP_TSE"
+    msgd "Remove last line from the screate table script as it contains next 'CREATE TABLE'"
+    run_command_e "head -n -1 $F_TMP_TSE > ${F_TMP_TSE}.1"
+    run_command_e "mv ${F_TMP_TSE}.1 ${F_TMP_TSE}"
+    run_command_d "cat $F_TMP_TSE"
+
     msgd "Now I need to copy that file to docker"
     run_command_e "docker cp $F_TMP_TSE $V_DOCKER:$F_TMP_TSE"
     V_TABLE_SCHEMA=$F_TMP_TSE
