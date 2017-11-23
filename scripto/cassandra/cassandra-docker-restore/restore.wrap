@@ -277,12 +277,15 @@ f_create_table_structure()
     F_TMP_TS=/tmp/restore.tmp.ts
     run_command_e "$E_DOCKER cat $V_DESC_KEYSPACE > $F_TMP_TS"
     F_TMP_TSE=/tmp/restore.tmp.ts.cql
-    run_command_e "cat $F_TMP_TS | sed -n '/^CREATE TABLE ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}/,/;/p' > $F_TMP_TSE"
+    run_command_e "cat $F_TMP_TS | sed -n '/^CREATE TABLE ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} (/,/;/p' > $F_TMP_TSE"
     run_command_d "cat $F_TMP_TSE"
     msgd "Now I need to copy that file to docker"
     run_command_e "docker cp $F_TMP_TSE $V_DOCKER:$F_TMP_TSE"
     V_TABLE_SCHEMA=$F_TMP_TSE
     msgd "V_TABLE_SCHEMA: $V_TABLE_SCHEMA"
+
+#WIP
+exit 0
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
@@ -556,9 +559,9 @@ msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
 
 # # # Actual execution
 # test
-f_determine_cassandra_version
-f_create_table_structure $V_KEYSPACE $V_TABLE
-exit 0
+#f_determine_cassandra_version
+#f_create_table_structure $V_KEYSPACE $V_TABLE
+#exit 0
 
 msgd "Actual execution"
 msgi "Extract backup files if not done already"
