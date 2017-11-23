@@ -117,7 +117,6 @@ f_check_if_table_exists()
   T_BUILD_QUERY="$Q_TABLE_EXISTS ='$V_KEYSPACE_CHECK' $Q_TABLE_EXISTS_AND ='$V_TABLE_CHECK';"
   msgd "T_BUILD_QUERY: $T_BUILD_QUERY"
   V_TEST_RAW=`$E_CQLSH -e "$T_BUILD_QUERY"` 
-#WIP add and table_name= as parameter
   if [ $? -ne 0 ]; then
     msge "Unable to execute query. Exiting."
     exit 1
@@ -160,7 +159,7 @@ f_load_table()
 
   msgd "Assuming that table structure already exists. Just loading data from all backups provided."
   run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
-  run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}/ | grep schema.cql | tee $F_TMP"
+  run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG -type d | grep /${V_KEYSPACE_CHECK} | grep /${V_TABLE_CHECK} | tee $F_TMP"
 
   V_TEMP_COUNT=`cat $F_TMP | wc -l`
   msgd "V_TEMP_COUNT: $V_TEMP_COUNT"
@@ -169,10 +168,8 @@ f_load_table()
   fi
 
   msgd "Looping through restore directories for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}"
-  while read LINE
+  while read V_RESTORE_DIR
   do
-    msgd "$LINE"
-    V_RESTORE_DIR=`dirname $LINE`
     msgd "V_RESTORE_DIR: $V_RESTORE_DIR"
     run_command_e "$E_DOCKER $E_SSTABLELOADER $V_RESTORE_DIR"
     echo 
@@ -406,7 +403,8 @@ f_determine_cassandra_version()
   msgd "Setting following variables as dependent on cassandra version"
   msgd "Q_KEYSPACE_EXISTS: $Q_KEYSPACE_EXISTS"
   msgd "Q_TABLE_EXISTS: $Q_TABLE_EXISTS"
-#WIP
+  msgd "Q_TABLE_EXISTS_AND: $Q_TABLE_EXISTS_AND"
+
   msgb "${FUNCNAME[0]} Finished."
 } #f_determine_cassandra_version
 
