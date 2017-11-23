@@ -18,6 +18,7 @@ services:
         - /var/lib/container_data/cassandra/node_B1/commitlog:/var/lib/cassandra/commitlog
         - /var/lib/container_data/cassandra/node_B1/log:/var/log/cassandra
         - /root/scripto/docker/test_poc/cqlshrc:/root/.cassandra:ro
+        - /var/lib/container_data/backup:/var/lib/cassandra/backup
     environment:
       EXTERNAL_CONFIGURATION: "true"
   cassandra_node_B2:
@@ -38,6 +39,7 @@ services:
         - /var/lib/container_data/cassandra/node_B2/commitlog:/var/lib/cassandra/commitlog
         - /var/lib/container_data/cassandra/node_B2/log:/var/log/cassandra
         - /root/scripto/docker/test_poc/cqlshrc:/root/.cassandra:ro
+        - /var/lib/container_data/backup:/var/lib/cassandra/backup
     environment:
       EXTERNAL_CONFIGURATION: "true"
   cassandra_node_B3:
@@ -58,6 +60,7 @@ services:
         - /var/lib/container_data/cassandra/node_B3/commitlog:/var/lib/cassandra/commitlog
         - /var/lib/container_data/cassandra/node_B3/log:/var/log/cassandra
         - /root/scripto/docker/test_poc/cqlshrc:/root/.cassandra:ro
+        - /var/lib/container_data/backup:/var/lib/cassandra/backup
     environment:
       EXTERNAL_CONFIGURATION: "true"
 networks:
