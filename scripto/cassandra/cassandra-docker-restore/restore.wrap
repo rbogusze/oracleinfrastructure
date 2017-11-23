@@ -159,7 +159,7 @@ f_load_table()
 
   msgd "Assuming that table structure already exists. Just loading data from all backups provided."
   run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
-  run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG -type d | grep /${V_KEYSPACE_CHECK} | grep /${V_TABLE_CHECK} | tee $F_TMP"
+  run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG -type d | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}$ | tee $F_TMP"
 
   V_TEMP_COUNT=`cat $F_TMP | wc -l`
   msgd "V_TEMP_COUNT: $V_TEMP_COUNT"
