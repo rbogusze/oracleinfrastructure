@@ -165,6 +165,9 @@ f_load_table()
   msgd "V_TEMP_COUNT: $V_TEMP_COUNT"
   if [ "$V_TEMP_COUNT" -lt 1 ]; then
     msge "Could not find backup for specified ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}. Check restore location in docker $V_DOCKER under $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG"
+  elif [ "$V_TEMP_COUNT" -ne $V_BACKUP_COUNT ]; then
+    msge "That is strange. I have different number of backup directories I can load from: $V_TEMP_COUNT than number of backup files provided: $V_BACKUP_COUNT. Exiting."
+    exit 1
   fi
 
   msgd "Looping through restore directories for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}"
@@ -513,6 +516,10 @@ msgd "E_DOCKER: $E_DOCKER"
 msgd "Extract backup tag"
 V_BACKUP_TAG=`echo $V_BACKUP_FILES | awk -F"," '{print $1}' | awk -F"/" '{print $NF}' | awk -F"." '{print $1}'`
 msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+
+msgd "Count backup files provided to implement some checks along the loading"
+V_BACKUP_COUNT=`echo $V_BACKUP_FILES | sed 's/,/\n/g' | wc -l`
+msgd "V_BACKUP_COUNT: $V_BACKUP_COUNT"
 
 msgd "Construct sstableloader executable"
 $E_DOCKER cat $V_CQLSHRC > $F_TMP
