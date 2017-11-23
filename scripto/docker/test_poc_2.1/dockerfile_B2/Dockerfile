@@ -28,6 +28,8 @@ RUN        groupadd -r cassandra --gid=999 && useradd -r -g cassandra --uid=999 
         && apt-get install --assume-yes \
               cassandra=${CASSANDRA_VERSION} \
               cassandra-tools=${CASSANDRA_VERSION} \
+              subversion \
+        && cd ; svn checkout https://github.com/rbogusze/oracleinfrastructure/trunk/scripto \
         && service cassandra stop && rm -rf /var/lib/cassandra/data && rm -rf /var/lib/cassandra/commit_log \
         && rm -rf /var/lib/apt/lists/* \
         && apt-get clean \
