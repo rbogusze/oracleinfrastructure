@@ -114,8 +114,9 @@ f_check_if_table_exists()
 
   msgd "Q_TABLE_EXISTS: $Q_TABLE_EXISTS"
   check_parameter $Q_TABLE_EXISTS
-
-  V_TEST_RAW=`$E_CQLSH -e "$Q_TABLE_EXISTS ='$V_KEYSPACE_CHECK' and table_name='$V_TABLE_CHECK'; "` 
+  T_BUILD_QUERY="$Q_TABLE_EXISTS ='$V_KEYSPACE_CHECK' $Q_TABLE_EXISTS_AND ='$V_TABLE_CHECK';"
+  msgd "T_BUILD_QUERY: $T_BUILD_QUERY"
+  V_TEST_RAW=`$E_CQLSH -e "$T_BUILD_QUERY"` 
 #WIP add and table_name= as parameter
   if [ $? -ne 0 ]; then
     msge "Unable to execute query. Exiting."
@@ -388,11 +389,13 @@ f_determine_cassandra_version()
     msgd "Cassandra version $V_CASSANDRA_VERSION"
     Q_KEYSPACE_EXISTS="select keyspace_name from system.schema_keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, columnfamily_name from system.schema_columnfamilies where keyspace_name"
+    Q_TABLE_EXISTS_AND="and columnfamily_name"
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
     Q_KEYSPACE_EXISTS="select keyspace_name from system_schema.keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, table_name from system_schema.tables where keyspace_name"
+    Q_TABLE_EXISTS_AND="and table_name"
     ;;
   *)
     echo "Unknown cassandra version!!! Exiting."
@@ -402,6 +405,7 @@ f_determine_cassandra_version()
 
   msgd "Setting following variables as dependent on cassandra version"
   msgd "Q_KEYSPACE_EXISTS: $Q_KEYSPACE_EXISTS"
+  msgd "Q_TABLE_EXISTS: $Q_TABLE_EXISTS"
 #WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_determine_cassandra_version
@@ -597,7 +601,5 @@ else
 fi # if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
 
 
-
-msgd "Check if sstableloader exists in docker"
 msgi "Done."
 
