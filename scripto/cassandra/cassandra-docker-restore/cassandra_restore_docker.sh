@@ -10,26 +10,19 @@ F_TMP=/tmp/restore.tmp
 # Functions
 # ---------
 
-  function usage() {
-        printf "Usage: $0 -h\n"
-        printf "       $0 -f <snapshot file> [-n <node address>] [-k <new ks name>] [-d <new dc name>] [-r <new rf>] [-y <cassandra.yaml file>]\n"
-        printf "    -h,--help                          Print usage and exit\n"
-        printf "    -v,--version                       Print version information and exit\n"
-        printf "    -f,--file <snapshot file>          REQUIRED: The snapshot file name (created using the\n"
-        printf "                                       getSnapshot utility\n"
-        printf "    -n,--node <node address>           Destination Cassandra node IP (defaults to the local\n"
-        printf "                                       Cassandra IP if run on a Cassandra node, otherwise\n"
-        printf "                                       required in order to connect to Cassandra.  Will take\n"
-        printf "                                       precedence if provided and run on a Cassandra node\n"
-        printf "    -k,--keyspace <new ks name>        Override the destination keyspace name (defaults to\n"
-        printf "                                       the source keyspace name)\n"
-        printf "    -d,--datacenter <new dc name>      Override the destination datacenter name (defaults\n"
-        printf "                                       to the sourcen datacenter name)\n"
-        printf "    -r,--replication <new rf>          Override the destination replication factor (defaults\n"
-        printf "                                       to source replication factor)\n"
-        printf "    -y,--yaml <cassandra.yaml file>    Alternate cassandra.yaml file\n"
-        exit 0
-  }
+function usage() {
+  printf "Usage: $0 -h\n"
+  printf "       $0 \n"
+  printf "    -h,--help                 Print usage and exit\n"
+  printf "    -f|--backup_files         Backup file names, full path from docker's point of view. Seperated with colon(,)"
+  printf "    -s|--restore_temp_dir     Dir where backup will be extracted in docker"
+  printf "    -d|--docker               Docker name"
+  printf "    -r|--cqlshrc              cqlshrc file location that contains username, password, hostname"
+  printf "    -k|--keyspace             Keyspace name to restore, if you want to restore all keyspaces specify '_all_'"
+  printf "    -t|--table                Table to restore, multiple can be provided separated with colon(,)"
+  printf "    -j|--ignore_table_exists  In table restore mode ignore the fact that table already exists and load data anyway"
+  exit 0
+}
 
 # Basic functions
 check_parameter()
