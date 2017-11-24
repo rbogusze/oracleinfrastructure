@@ -2,6 +2,9 @@
 #$Id: _base_script_block.wrap,v 1.1 2012-05-07 13:47:27 remik Exp $
 #
 
+echo "moved to bitbucket.xxx/dba/scripts"
+exit 0
+
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
   echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
