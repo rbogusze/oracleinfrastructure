@@ -14,13 +14,13 @@ function usage() {
   printf "Usage: $0 -h\n"
   printf "       $0 \n"
   printf "    -h,--help                 Print usage and exit\n"
-  printf "    -f|--backup_files         Backup file names, full path from docker's point of view. Seperated with colon(,)"
-  printf "    -s|--restore_temp_dir     Dir where backup will be extracted in docker"
-  printf "    -d|--docker               Docker name"
-  printf "    -r|--cqlshrc              cqlshrc file location that contains username, password, hostname"
-  printf "    -k|--keyspace             Keyspace name to restore, if you want to restore all keyspaces specify '_all_'"
-  printf "    -t|--table                Table to restore, multiple can be provided separated with colon(,)"
-  printf "    -j|--ignore_table_exists  In table restore mode ignore the fact that table already exists and load data anyway"
+  printf "    -f|--backup_files         Backup file names, full path from docker's point of view. Seperated with colon(,)\n"
+  printf "    -s|--restore_temp_dir     Dir where backup will be extracted in docker\n"
+  printf "    -d|--docker               Docker name\n"
+  printf "    -r|--cqlshrc              cqlshrc file location that contains username, password, hostname\n"
+  printf "    -k|--keyspace             Keyspace name to restore, if you want to restore all keyspaces specify '_all_'\n"
+  printf "    -t|--table                Table to restore, multiple can be provided separated with colon(,)\n"
+  printf "    -j|--ignore_table_exists  In table restore mode ignore the fact that table already exists and load data anyway\n"
   exit 0
 }
 
@@ -32,6 +32,12 @@ check_parameter()
     exit 1
   fi
 }
+
+msg()
+{
+  echo "| `/bin/date '+%Y%m%d %H:%M:%S'` $1"
+}
+
 
 msgb()
 {
@@ -533,10 +539,6 @@ f_determine_cassandra_version()
 } #f_determine_cassandra_version
 
 
-
-
-
-
 f_template()
 {
   msgb "${FUNCNAME[0]} Beginning."
@@ -544,12 +546,14 @@ f_template()
   msgb "${FUNCNAME[0]} Finished."
 } #b_template
 
-
-
-msgi "Hellow World"
-
 # Validate Input/Environment
 # --------------------------
+
+if [ -z "$1" ]; then
+  ./cassandra_restore_docker.sh --help
+  exit 1 
+fi
+
 # Great sample getopt implementation by Cosimo Streppone
 # https://gist.github.com/cosimo/3760587#file-parse-options-sh
 SHORT='h:f:s:d:r:k:t:i:j:'
@@ -577,6 +581,21 @@ while true; do
             *) printf "Error processing command arguments\n" >&2; exit 1;;
     esac
 done
+
+msgd "Checking if required parameters are set"
+if [ -z $V_BACKUP_FILES ] || [ -z $V_RESTORE_TEMP_DIR ] || [ -z $V_DOCKER ] || [ -z $V_CQLSHRC ] || [ -z $V_KEYSPACE ] ; then
+  msge "Required parameter not set. Please provide at least the following parameters:"
+  printf "    -f|--backup_files         Backup file names, full path from docker's point of view. Seperated with colon(,)\n"
+  printf "    -s|--restore_temp_dir     Dir where backup will be extracted in docker\n"
+  printf "    -d|--docker               Docker name\n"
+  printf "    -r|--cqlshrc              cqlshrc file location that contains username, password, hostname\n"
+  printf "If you want to restore a keyspace additionally provide:\n"
+  printf "    -k|--keyspace             Keyspace name to restore, if you want to restore all keyspaces specify '_all_'\n"
+  printf "If you want to restore a table additionally provide:\n"
+  printf "    -k|--keyspace             Keyspace name'\n"
+  printf "    -t|--table                Table to restore, multiple can be provided separated with colon(,)\n"
+  exit 1
+fi
 
 # # # Sanity checks
 msgd "V_DOCKER: $V_DOCKER"
@@ -615,10 +634,13 @@ $E_DOCKER cat $V_CQLSHRC > $F_TMP
 run_command_d "cat $F_TMP"
 V_USERNAME=`cat $F_TMP | grep 'username=' | awk -F"=" '{print $2}'`
 msgd "V_USERNAME: $V_USERNAME"
+check_parameter $V_USERNAME
 V_PASSWORD=`cat $F_TMP | grep 'password=' | awk -F"=" '{print $2}'`
 msgd "V_PASSWORD: $V_PASSWORD"
+check_parameter $V_PASSWORD
 V_HOSTNAME=`cat $F_TMP | grep 'hostname=' | awk -F"=" '{print $2}'`
 msgd "V_HOSTNAME: $V_HOSTNAME"
+check_parameter $V_HOSTNAME
 V_PORT=`cat $F_TMP | grep 'port=' | awk -F"=" '{print $2}'`
 msgd "V_PORT: $V_PORT"
 #E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -p $V_PORT -u $V_USERNAME -pw $V_PASSWORD"
