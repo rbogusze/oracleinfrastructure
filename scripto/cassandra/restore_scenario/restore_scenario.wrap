@@ -126,24 +126,28 @@ f_determine_cassandra_version()
   msgb "${FUNCNAME[0]} Finished."
 } #f_determine_cassandra_version
 
-f_create_phase()
+f_execute_file()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  V_FILE_TO_EXECUTE=$1
+  check_parameter $V_FILE_TO_EXECUTE
+  check_file $V_FILE_TO_EXECUTE
+
   msgd "Using global variables"
-  msgd "V_CREATE_PHASE_FILE: $V_CREATE_PHASE_FILE"
   msgd "V_DOCKER: $V_DOCKER"
 
-  check_parameter $V_CREATE_PHASE_FILE
-  check_parameter $V_CREATE_PHASE_FILE
+  run_command_d "cat $V_FILE_TO_EXECUTE"
 
   msgd "Copy file to docker"
-  run_command_e "docker cp $V_CREATE_PHASE_FILE $V_DOCKER:/tmp"
-
+  run_command_e "docker cp $V_FILE_TO_EXECUTE $V_DOCKER:/tmp"
+  
   msgd "Executing script"
-  run_command_e "$E_CQLSH -f /tmp/$V_CREATE_PHASE_FILE"
+  run_command_e "$E_CQLSH -f /tmp/$V_FILE_TO_EXECUTE"
 
   msgb "${FUNCNAME[0]} Finished."
-} #f_create_phase
+} #f_execute_file
+
+
 
 
 f_check_phase()
@@ -229,6 +233,9 @@ f_restore_phase()
 {
   msgb "${FUNCNAME[0]} Beginning."
 
+  #WIP temp
+  V_BACKUP_FILES="/var/lib/container_data/backup/cassandra_node_A1/20171201_142631.tgz,/var/lib/container_data/backup/cassandra_node_A2/20171201_142638.tgz,/var/lib/container_data/backup/cassandra_node_A3/20171201_142646.tgz"
+
   msgb "${FUNCNAME[0]} Finished."
 } #f_restore_phase
 
@@ -282,12 +289,11 @@ msgd "Actual execution"
 f_cqlsh_sanity_check
 f_determine_cassandra_version
 
-#f_create_phase
+#f_execute_file $V_CREATE_PHASE_FILE 
 #f_check_phase $F_TMP.check_before
-
-f_backup_phase
+#f_backup_phase
+f_execute_file $V_DESTROY_PHASE_FILE
 exit 0
-f_destroy_phase
 f_restore_phase
 f_check_phase $F_TMP.check_after
 f_compare_checks $F_TMP.check_before $F_TMP.check_after
