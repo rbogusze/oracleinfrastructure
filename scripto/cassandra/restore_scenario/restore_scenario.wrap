@@ -222,19 +222,24 @@ f_backup_phase()
   msgb "${FUNCNAME[0]} Finished."
 } #f_backup_phase
 
-f_destroy_phase()
-{
-  msgb "${FUNCNAME[0]} Beginning."
-
-  msgb "${FUNCNAME[0]} Finished."
-} #f_destroy_phase
-
 f_restore_phase()
 {
   msgb "${FUNCNAME[0]} Beginning."
 
+  msgd "Using global variables"
+  msgd "V_DOCKER: $V_DOCKER"
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES"
+
   #WIP temp
   V_BACKUP_FILES="/var/lib/container_data/backup/cassandra_node_A1/20171201_142631.tgz,/var/lib/container_data/backup/cassandra_node_A2/20171201_142638.tgz,/var/lib/container_data/backup/cassandra_node_A3/20171201_142646.tgz"
+
+  msgd "Converting backup path to relative from the point of a docker"
+  V_BACKUP_FILES_DOCKER=`echo $V_BACKUP_FILES | sed 's/container_data/cassandra/g'`
+
+  run_command_e "~/scripts/cassandra_restore_docker.sh --docker $V_DOCKER --cqlshrc $V_CQLSHRC --keyspace _all_ --backup_files $V_BACKUP_FILES_DOCKER --restore_temp_dir /tmp"
+
+  
+# WIP
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_restore_phase
@@ -242,6 +247,11 @@ f_restore_phase()
 f_compare_checks()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  F_BEFORE=$1
+  F_AFTER=$2
+
+  msgd "If there are no differences, then it is good."
+  diff $F_BEFORE $F_AFTER
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_compare_checks
@@ -292,10 +302,9 @@ f_determine_cassandra_version
 #f_execute_file $V_CREATE_PHASE_FILE 
 #f_check_phase $F_TMP.check_before
 #f_backup_phase
-f_execute_file $V_DESTROY_PHASE_FILE
-exit 0
-f_restore_phase
-f_check_phase $F_TMP.check_after
+#f_execute_file $V_DESTROY_PHASE_FILE
+#f_restore_phase
+#f_check_phase $F_TMP.check_after
 f_compare_checks $F_TMP.check_before $F_TMP.check_after
 
 
