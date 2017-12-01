@@ -24,12 +24,17 @@ F_TMP=/tmp/restore_scenario.tmp
 f_cqlsh_sanity_check()
 {
   msgb "${FUNCNAME[0]} Beginning."
+
+  msgd "Picking one docker to execute commands"
+  V_DOCKER=`echo $V_DOCKER_LIST | awk -F"," '{print $1}'`
+
   msgd "check if I can properly login to cqlsh"
   msgd "V_DOCKER: $V_DOCKER"
   msgd "V_CQLSHRC: $V_CQLSHRC"
   msgd "E_CQLSH: $E_CQLSH"
 
   check_parameter $V_DOCKER
+  check_parameter $E_CQLSH
 
   V_TEST_RAW=`$E_CQLSH -e "desc keyspaces;"` 
   msgd "V_TEST_RAW: $V_TEST_RAW"
