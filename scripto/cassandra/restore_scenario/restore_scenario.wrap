@@ -33,6 +33,16 @@ f_cqlsh_sanity_check()
   msgd "V_CQLSHRC: $V_CQLSHRC"
   msgd "E_CQLSH: $E_CQLSH"
 
+  msgd "Construct docker cqlsh executable command based of whether V_CQLSHRC was set"
+  if [ -z $V_CQLSHRC ]; then
+    msgd "No V_CQLSHRC set"
+    E_CQLSH="docker exec $V_DOCKER cqlsh"
+  else
+    msgd "V_CQLSHRC set, including that in E_CQLSH"
+    E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
+  fi
+  msgd "E_CQLSH: $E_CQLSH"
+
   check_parameter $V_DOCKER
   check_parameter $E_CQLSH
 
@@ -116,6 +126,10 @@ f_determine_cassandra_version()
 f_create_phase()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  msgd "Using global variables"
+  msgd "V_CREATE_PHASE_FILE: $V_CREATE_PHASE_FILE"
+
+  check_parameter $V_CREATE_PHASE_FILE
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_create_phase
@@ -199,7 +213,7 @@ msgd "Actual execution"
 
 f_cqlsh_sanity_check
 
-f_create_phase $V_CREATE_PHASE_FILE
+f_create_phase
 f_check_phase
 f_backup_phase
 f_destroy_phase
