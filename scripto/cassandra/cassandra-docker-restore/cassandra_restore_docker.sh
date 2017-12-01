@@ -1,0 +1,763 @@
+#!/bin/bash
+#'$Id$'
+#
+
+INFO_MODE=DEBUG
+##INFO_MODE=INFO
+
+F_TMP=/tmp/restore.tmp
+
+# Functions
+# ---------
+
+function usage() {
+  printf "Usage: $0 -h\n"
+  printf "       $0 \n"
+  printf "    -h|--help                 Print usage and exit\n"
+  printf "    -f|--backup_files         Backup file names, full path from docker's point of view. Seperated with colon(,)\n"
+  printf "    -s|--restore_temp_dir     Dir where backup will be extracted in docker\n"
+  printf "    -d|--docker               Docker name\n"
+  printf "    -r|--cqlshrc              cqlshrc file location that contains username, password, hostname\n"
+  printf "    -k|--keyspace             Keyspace name to restore, if you want to restore all keyspaces specify '_all_'\n"
+  printf "    -t|--table                Table to restore, multiple can be provided separated with colon(,)\n"
+  printf "    -j|--ignore_table_exists  In table restore mode ignore the fact that table already exists and load data anyway\n"
+  exit 0
+}
+
+# Basic functions
+check_parameter()
+{
+  if [ -z "$1" ]; then
+    msge "[ check_variable ] Provided variable ${2} is empty. Exiting. "
+    exit 1
+  fi
+}
+
+msg()
+{
+  echo "| `/bin/date '+%Y%m%d %H:%M:%S'` $1"
+}
+
+
+msgb()
+{
+  if [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[35m'
+    echo -n "[block] "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# [debug] in green
+msgd()
+{
+  if [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[32m'
+    echo -n "[debug]    "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# [error] in red, and beep
+msge()
+{
+  if [ "$INFO_MODE" = "ERROR" ] || [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[31m\07'
+    echo -n "[error]  "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# [info] in green
+msgi()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[32m'
+    echo -n "[info]     "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
+# run command only when INFO_MODE=debug
+run_command_d()
+{
+  if [ -n "$INFO_MODE" ]; then
+    if [ "$INFO_MODE" = "DEBUG" ] ; then
+      msg "\"$1\""
+      eval $1
+    fi
+  fi
+  return 0
+} #run_command_d
+
+# Runs the command provided as parameter.
+# Does exit if the command fails.
+# Sends error message if the command fails.
+run_command_e()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    msg "\"$1\""
+  fi
+
+  # Determining if we are running in a debug mode. If so wait for any key before eval
+  if [ -n "$DEBUG_MODE" ]; then
+    if [ "$DEBUG_MODE" -eq "1" ] ; then
+      echo "[debug wait] Press any key if ready to run the printed command"
+      read
+    fi
+  fi
+
+  eval $1
+  if [ $? -ne 0 ]; then
+    msge "[critical] An error occured during: \"$1\". Exiting NOW." 
+    exit 1
+  fi
+  return 0
+} #run_command_e
+
+
+
+
+# Specific functions
+# cqlsh sanity check
+f_cqlsh_sanity_check()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgd "check if I can properly login to cqlsh"
+  msgd "V_DOCKER: $V_DOCKER"
+  msgd "V_CQLSHRC: $V_CQLSHRC"
+  msgd "E_CQLSH: $E_CQLSH"
+
+  V_TEST_RAW=`$E_CQLSH -e "desc keyspaces;"` 
+  msgd "V_TEST_RAW: $V_TEST_RAW"
+  V_TEST=`echo $V_TEST_RAW | grep system | wc -l`
+  msgd "V_TEST: $V_TEST"
+  # when it fails it goes like:
+  # Connection error: ('Unable to connect to any servers', {'127.0.0.1': error(111, "Tried connecting to [('127.0.0.1', 9042)]. Last error: Connection refused")})
+  # when it works it goes like
+  # system_auth    remik1  remik4              system_traces system_schema  system  system_distributed
+
+  if [ "$V_TEST" -gt 0 ]; then
+    msgd "Connection works"
+  else
+    msge "Connection does not work."
+    msge "$V_TEST_RAW"
+    msge "maybe you need to provide --cqlshrc parameter which point to file in docker with credentials. Exiting."
+    exit 1
+  fi
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_cqlsh_sanity_check
+
+
+# $1 - keyspace name
+f_check_if_keyspace_exists()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+
+  msgd "Q_KEYSPACE_EXISTS: $Q_KEYSPACE_EXISTS"
+  check_parameter $Q_KEYSPACE_EXISTS
+
+  V_TEST_RAW=`$E_CQLSH -e "$Q_KEYSPACE_EXISTS = '$V_KEYSPACE_CHECK';"` 
+  if [ $? -ne 0 ]; then
+    msge "Unable to execute query. Exiting."
+    exit 1
+  fi
+
+  msgd "V_TEST_RAW: $V_TEST_RAW"
+  V_TEST=`echo $V_TEST_RAW | grep $V_KEYSPACE_CHECK | wc -l`
+  msgd "V_TEST: $V_TEST"
+
+  if [ "$V_TEST" -gt 0 ]; then
+    msgd "Keyspace $V_KEYSPACE_CHECK exists."
+    V_CHECK_IF_KEYSPACE_EXISTS=yes
+  else
+    msgd "Keyspace $V_KEYSPACE_CHECK does NOT exists."
+    V_CHECK_IF_KEYSPACE_EXISTS=no
+  fi
+  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
+  
+  msgb "${FUNCNAME[0]} Finished."
+} #f_check_if_keyspace_exists
+
+f_check_if_table_exists()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  V_TABLE_CHECK=$2
+  msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
+  check_parameter $V_TABLE_CHECK
+
+  msgd "Q_TABLE_EXISTS: $Q_TABLE_EXISTS"
+  check_parameter $Q_TABLE_EXISTS
+  T_BUILD_QUERY="$Q_TABLE_EXISTS ='$V_KEYSPACE_CHECK' $Q_TABLE_EXISTS_AND ='$V_TABLE_CHECK';"
+  msgd "T_BUILD_QUERY: $T_BUILD_QUERY"
+  V_TEST_RAW=`$E_CQLSH -e "$T_BUILD_QUERY"` 
+  if [ $? -ne 0 ]; then
+    msge "Unable to execute query. Exiting."
+    exit 1
+  fi
+
+  msgd "V_TEST_RAW: $V_TEST_RAW"
+  V_TEST=`echo $V_TEST_RAW | grep $V_KEYSPACE_CHECK | grep $V_TABLE_CHECK | wc -l`
+  msgd "V_TEST: $V_TEST"
+
+  if [ "$V_TEST" -gt 0 ]; then
+    msgd "Table ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} exists."
+    V_CHECK_IF_TABLE_EXISTS=yes
+  else
+    msgd "Table ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} does NOT exists."
+    V_CHECK_IF_TABLE_EXISTS=no
+  fi
+  msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_check_if_table_exists
+
+f_load_table()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # using following variables passed as parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  V_TABLE_CHECK=$2
+  msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
+  check_parameter $V_TABLE_CHECK
+ 
+  # using folowing global variables
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES" 
+  check_parameter $V_BACKUP_FILES
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  check_parameter $V_RESTORE_TEMP_DIR
+
+
+  msgd "Assuming that table structure already exists. Just loading data from all backups provided."
+  run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
+  run_command_e "$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG -type d | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}$ | tee $F_TMP"
+
+  V_TEMP_COUNT=`cat $F_TMP | wc -l`
+  msgd "V_TEMP_COUNT: $V_TEMP_COUNT"
+  if [ "$V_TEMP_COUNT" -lt 1 ]; then
+    msge "Could not find backup for specified ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}. Check restore location in docker $V_DOCKER under $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG"
+  elif [ "$V_TEMP_COUNT" -ne $V_BACKUP_COUNT ]; then
+    msge "That is strange. I have different number of backup directories I can load from: $V_TEMP_COUNT than number of backup files provided: $V_BACKUP_COUNT. Exiting."
+    exit 1
+  else
+    msgd "Expected number of backup directories I can load from: $V_TEMP_COUNT equal to the number of backup files provided: $V_BACKUP_COUNT. Continuing."
+  fi
+
+  msgd "Looping through restore directories for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}"
+  while read V_RESTORE_DIR
+  do
+    msgd "V_RESTORE_DIR: $V_RESTORE_DIR"
+    run_command_e "$E_DOCKER $E_SSTABLELOADER $V_RESTORE_DIR"
+    echo 
+  done < $F_TMP
+
+  echo 
+  msgi "Done for ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK}."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_load_table
+
+f_extract_backup_files()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  # using folowing global variables
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES" 
+  check_parameter $V_BACKUP_FILES
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  check_parameter $V_RESTORE_TEMP_DIR
+  msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+  check_parameter $V_BACKUP_TAG
+
+
+  msgd "Check if backups are already extracted on temp dir "
+  V_TEMP=`$E_DOCKER ls -d $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG 2>&1`
+  msgd "V_TEMP: $V_TEMP"
+  V_TEMP_C=`echo $V_TEMP | grep "No such file or directory" | wc -l`
+  msgd "V_TEMP_C: $V_TEMP_C"
+  if [ "$V_TEMP_C" -gt 0 ]; then
+    msgd "No extraction was taking place. Will do that now"
+    
+    msgd "Check if temp dir is writable"
+    V_TEMP=`$E_DOCKER mkdir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG 2>&1`
+    msgd "V_TEMP: $V_TEMP"
+    V_TEMP_C=`echo $V_TEMP | grep -v '^ *$' | wc -l`
+    msgd "V_TEMP_C: $V_TEMP_C"
+    if [ "$V_TEMP_C" -gt 0 ]; then
+      msge "Unable to create $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG dir, exiting."
+      exit 1
+    else
+      msgd "I confirmed that I can create directory, removing that as I am not sure yet if I can extract backup files and on next run I only check if this directory exists as a proof that backup is already extracted."
+      run_command_e "$E_DOCKER rmdir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG"
+    fi #Check if temp dir is writable
+
+    msgd "Created new empty directory, now extracting backup files each in ints own dir"
+    msgd "Looping through the backup files"
+    CURRENT=1
+    for i in `echo $V_BACKUP_FILES | sed 's/,/\n/g'`
+    do
+      msgd "Check if back file is reachable"
+      V_TEMP=`$E_DOCKER ls $i 2>&1`
+      msgd "V_TEMP: $V_TEMP"
+      V_TEMP_C=`echo $V_TEMP | grep "No such file or directory" | wc -l`
+      msgd "V_TEMP_C: $V_TEMP_C"
+      if [ "$V_TEMP_C" -ge 1 ]; then
+        msge "Backup file provided: $i is not reachable on docker. Please make sure that the full path provided is relative to the docker. Exiting."
+        exit 1
+      else
+        msgd "Extracting: $i"
+        run_command_e "$E_DOCKER mkdir -p $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
+        run_command_e "$E_DOCKER tar xzf $i -C $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/$CURRENT"
+        CURRENT=`expr ${CURRENT} + 1`
+      fi
+    done
+   
+  else
+    msgd "Extract dir $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG is already there, doing nothing."
+    
+  fi #Check if backups are already extracted on temp dir
+    
+  msgb "${FUNCNAME[0]} Finished."
+} #f_extract_backup_files
+
+# This assumes that I have already backup extracted and now just need to create table structure
+f_create_table_structure()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  V_TABLE_CHECK=$2
+  msgd "V_TABLE_CHECK: $V_TABLE_CHECK"
+  check_parameter $V_TABLE_CHECK
+
+  # using global variables
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES" 
+  check_parameter $V_BACKUP_FILES
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  check_parameter $V_RESTORE_TEMP_DIR
+
+  # figuring out schema creation script based on Cassandra version
+
+  msgd "V_CASSANDRA_VERSION: $V_CASSANDRA_VERSION"
+
+  case $V_CASSANDRA_VERSION in
+  "2.1")
+    msgd "Cassandra version $V_CASSANDRA_VERSION"
+    msgd "Checking for table sctructure script created as part of the backup"
+    run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
+    V_DESC_KEYSPACE=`$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1 | grep /${V_KEYSPACE_CHECK}.cql ` 
+    msgd "V_DESC_KEYSPACE: $V_DESC_KEYSPACE"
+    # ok, I have a file where the whole keyspace was described, now I have to get out of it only table definition
+    F_TMP_TS=/tmp/restore.tmp.ts
+    run_command_e "$E_DOCKER cat $V_DESC_KEYSPACE > $F_TMP_TS"
+    F_TMP_TSE=/tmp/restore.tmp.ts.cql
+    run_command_e "cat $F_TMP_TS | sed -n '/^CREATE TABLE ${V_KEYSPACE_CHECK}.${V_TABLE_CHECK} (/,/CREATE TABLE/p' > $F_TMP_TSE"
+    run_command_d "cat $F_TMP_TSE"
+    msgd "Remove last line from the screate table script as it contains next 'CREATE TABLE'"
+    run_command_e "head -n -1 $F_TMP_TSE > ${F_TMP_TSE}.1"
+    run_command_e "mv ${F_TMP_TSE}.1 ${F_TMP_TSE}"
+    run_command_d "cat $F_TMP_TSE"
+
+    msgd "Now I need to copy that file to docker"
+    run_command_e "docker cp $F_TMP_TSE $V_DOCKER:$F_TMP_TSE"
+    V_TABLE_SCHEMA=$F_TMP_TSE
+    msgd "V_TABLE_SCHEMA: $V_TABLE_SCHEMA"
+    ;;
+  "3.0")
+    msgd "Cassandra version $V_CASSANDRA_VERSION"
+    msgd "Checking for native table sctructure script in restore directory"
+    run_command_e "$E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1"
+    V_TABLE_SCHEMA=`$E_DOCKER find $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1 | grep /${V_KEYSPACE_CHECK}/ | grep /${V_TABLE_CHECK}/ | grep schema.cql` 
+    msgd "V_TABLE_SCHEMA: $V_TABLE_SCHEMA"
+    V_TMP=`echo $V_TABLE_SCHEMA | grep -v '^ *$' | wc -l`
+    msgd "V_TMP: $V_TMP"
+    if [ "$V_TMP" -ne 1 ]; then
+      msge "More than 1 or no schema.cql scripts found. This is not expected. Exiting."
+      exit 1
+    fi
+
+    ;;
+  *)
+    echo "Unknown cassandra version!!! Exiting."
+    exit 1
+    ;;
+  esac
+
+  msgd "Executing schema creation script"
+  msgd "E_CQLSH: $E_CQLSH" 
+  run_command_e "$E_CQLSH -f $V_TABLE_SCHEMA"
+  
+  msgb "${FUNCNAME[0]} Finished."
+} #f_create_table_structure
+
+f_restore_keyspace()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  # using global variables
+
+  f_check_if_keyspace_exists $V_KEYSPACE_CHECK
+  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
+  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+    msgd "Keyspace does NOT exists. That is expected. Continuing with the restore."
+    f_create_keyspace $V_KEYSPACE_CHECK
+    f_load_keyspace $V_KEYSPACE_CHECK
+  elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
+    msgi "Keyspace $V_KEYSPACE_CHECK already exists. Doing nothing. Drop it first if you want to perform a restore from specified backup."
+  fi #if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_restore_keyspace
+
+f_create_keyspace()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgd "Just create empty keyspace"
+
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  # using global variables
+  msgd "E_DOCKER: $E_DOCKER"
+  msgd "E_CQLSH: $E_CQLSH"
+  
+  msgd "Get create keyspace command"
+  F_TMP_CK=/tmp/restore.wrap.ck
+  run_command_e "$E_DOCKER cat $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK.cql > $F_TMP_CK"
+  run_command_d "cat $F_TMP_CK"
+  V_CK=`cat $F_TMP_CK | grep "^CREATE KEYSPACE"`
+  msgd "V_CK: $V_CK"
+
+  run_command_e "$E_CQLSH -e \"$V_CK\""
+  
+  msgb "${FUNCNAME[0]} Finished."
+} #
+
+f_load_keyspace()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  msgd "Load all the tables you can find in a backup to specified keyspace"
+
+  # using passed parameters
+  V_KEYSPACE_CHECK=$1
+  msgd "V_KEYSPACE_CHECK: $V_KEYSPACE_CHECK"
+  check_parameter $V_KEYSPACE_CHECK
+  # using global variables
+  msgd "V_RESTORE_TEMP_DIR: $V_RESTORE_TEMP_DIR"
+  msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+  msgd "E_DOCKER: $E_DOCKER"
+
+  F_TMP_KF=/tmp/restore.wrap.kf
+
+  msgd "Checking if there are any datafiles in backup to import"
+  $E_DOCKER ls -1 $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK > $F_TMP_KF 2>&1
+  V_TEMP_C=`cat $F_TMP_KF | grep "No such file or directory" | wc -l`
+  msgd "V_TEMP_C: $V_TEMP_C"
+  if [ "$V_TEMP_C" -eq 1 ]; then
+    msgi "There are no files that contain table data for keyspace $V_KEYSPACE_CHECK. That can happen, and means the keyspace was empty. Doing nothing."
+    return 0 
+  fi
+  run_command_d "cat $F_TMP_KF"
+
+  run_command_e "$E_DOCKER ls -1 $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG/$V_KEYSPACE_CHECK > $F_TMP_KF 2>&1"
+  run_command_d "cat $F_TMP_KF"
+
+
+  while read T_TABLE_KF
+  do
+    msgi "Restoring all tables from keyspace $V_KEYSPACE_CHECK. Now: $T_TABLE_KF"
+    f_create_table_structure $V_KEYSPACE_CHECK $T_TABLE_KF
+    f_load_table $V_KEYSPACE_CHECK $T_TABLE_KF
+  done < $F_TMP_KF
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_load_keyspace
+
+
+
+
+
+f_determine_cassandra_version()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+ 
+  F_TMP_DV=/tmp/restore.wrap.tmp.dw
+  run_command_e "$E_DOCKER nodetool version > $F_TMP_DV 2>&1"
+  run_command_d "cat $F_TMP_DV"
+  V_CASSANDRA_VERSION=`cat $F_TMP_DV | awk '{print $2}' | awk -F"." '{print $1"."$2}'`
+  msgd "V_CASSANDRA_VERSION: $V_CASSANDRA_VERSION"
+
+  case $V_CASSANDRA_VERSION in
+  "2.1")
+    msgd "Cassandra version $V_CASSANDRA_VERSION"
+    Q_KEYSPACE_EXISTS="select keyspace_name from system.schema_keyspaces where keyspace_name" 
+    Q_TABLE_EXISTS="select keyspace_name, columnfamily_name from system.schema_columnfamilies where keyspace_name"
+    Q_TABLE_EXISTS_AND="and columnfamily_name"
+    ;;
+  "3.0")
+    msgd "Cassandra version $V_CASSANDRA_VERSION"
+    Q_KEYSPACE_EXISTS="select keyspace_name from system_schema.keyspaces where keyspace_name" 
+    Q_TABLE_EXISTS="select keyspace_name, table_name from system_schema.tables where keyspace_name"
+    Q_TABLE_EXISTS_AND="and table_name"
+    ;;
+  *)
+    echo "Unknown cassandra version!!! Exiting."
+    exit 1
+    ;;
+  esac
+
+  msgd "Setting following variables as dependent on cassandra version"
+  msgd "Q_KEYSPACE_EXISTS: $Q_KEYSPACE_EXISTS"
+  msgd "Q_TABLE_EXISTS: $Q_TABLE_EXISTS"
+  msgd "Q_TABLE_EXISTS_AND: $Q_TABLE_EXISTS_AND"
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_determine_cassandra_version
+
+
+f_template()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+
+  msgb "${FUNCNAME[0]} Finished."
+} #b_template
+
+# Validate Input/Environment
+# --------------------------
+
+if [ -z "$1" ]; then
+  ./cassandra_restore_docker.sh --help
+  exit 1 
+fi
+
+# Great sample getopt implementation by Cosimo Streppone
+# https://gist.github.com/cosimo/3760587#file-parse-options-sh
+SHORT='hf:s:d:r:k:t:i:j:'
+LONG='help,backup_files:,restore_temp_dir:,docker:,cqlshrc:,keyspace:,table:,ignore_keyspace_exists:,ignore_table_exists:'
+OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
+
+if [ $? -gt 0 ]; then
+    # Exit early if argument parsing failed
+    printf "Error parsing command arguments\n" >&2
+    exit 1
+fi
+eval set -- "$OPTS"
+while true; do
+    case "$1" in
+            -h|--help) usage;;
+            -f|--backup_files) V_BACKUP_FILES="$2"; shift 2;;
+            -s|--restore_temp_dir) V_RESTORE_TEMP_DIR="$2"; shift 2;;
+            -d|--docker) V_DOCKER="$2"; shift 2;;
+            -r|--cqlshrc) V_CQLSHRC="$2"; shift 2;;
+            -k|--keyspace) V_KEYSPACE="$2"; shift 2;;
+            -t|--table) V_TABLES="$2"; shift 2;;
+            -i|--ignore_keyspace_exists) V_IGNORE_KEYSPACE_EXISTS="$2"; shift 2;;
+            -j|--ignore_table_exists) V_IGNORE_TABLE_EXISTS="$2"; shift 2;;
+            --) shift; break;;
+            *) printf "Error processing command arguments\n" >&2; exit 1;;
+    esac
+done
+
+msgd "Checking if required parameters are set"
+if [ -z $V_BACKUP_FILES ] || [ -z $V_RESTORE_TEMP_DIR ] || [ -z $V_DOCKER ] || [ -z $V_CQLSHRC ] || [ -z $V_KEYSPACE ] ; then
+  msge "Required parameter not set. Please provide at least the following parameters:"
+  printf "    -f|--backup_files         Backup file names, full path from docker's point of view. Seperated with colon(,)\n"
+  printf "    -s|--restore_temp_dir     Dir where backup will be extracted in docker\n"
+  printf "    -d|--docker               Docker name\n"
+  printf "    -r|--cqlshrc              cqlshrc file location that contains username, password, hostname\n"
+  printf "If you want to restore a keyspace additionally provide:\n"
+  printf "    -k|--keyspace             Keyspace name to restore, if you want to restore all keyspaces specify '_all_'\n"
+  printf "If you want to restore a table additionally provide:\n"
+  printf "    -k|--keyspace             Keyspace name'\n"
+  printf "    -t|--table                Table to restore, multiple can be provided separated with colon(,)\n"
+  exit 1
+fi
+
+# # # Sanity checks
+msgd "V_DOCKER: $V_DOCKER"
+check_parameter $V_DOCKER
+msgd "V_CQLSHRC: $V_CQLSHRC"
+
+msgd "V_BACKUP_FILES: $V_BACKUP_FILES"
+msgd "V_KEYSPACE: $V_KEYSPACE"
+msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
+msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
+
+msgd "Construct docker cqlsh executable command based of whether V_CQLSHRC was set"
+if [ -z $V_CQLSHRC ]; then
+  msgd "No V_CQLSHRC set"
+  E_CQLSH="docker exec $V_DOCKER cqlsh"
+else
+  msgd "V_CQLSHRC set, including that in E_CQLSH"
+  E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
+fi
+msgd "E_CQLSH: $E_CQLSH"
+
+msgd "Construct docker sh execution command"
+E_DOCKER="docker exec $V_DOCKER"
+msgd "E_DOCKER: $E_DOCKER"
+
+msgd "Extract backup tag"
+V_BACKUP_TAG=`echo $V_BACKUP_FILES | awk -F"," '{print $1}' | awk -F"/" '{print $NF}' | awk -F"." '{print $1}'`
+msgd "V_BACKUP_TAG: $V_BACKUP_TAG"
+
+msgd "Count backup files provided to implement some checks along the loading"
+V_BACKUP_COUNT=`echo $V_BACKUP_FILES | sed 's/,/\n/g' | wc -l`
+msgd "V_BACKUP_COUNT: $V_BACKUP_COUNT"
+
+msgd "Construct sstableloader executable"
+$E_DOCKER cat $V_CQLSHRC > $F_TMP
+run_command_d "cat $F_TMP"
+V_USERNAME=`cat $F_TMP | grep 'username=' | awk -F"=" '{print $2}'`
+msgd "V_USERNAME: $V_USERNAME"
+check_parameter $V_USERNAME
+V_PASSWORD=`cat $F_TMP | grep 'password=' | awk -F"=" '{print $2}'`
+msgd "V_PASSWORD: $V_PASSWORD"
+check_parameter $V_PASSWORD
+V_HOSTNAME=`cat $F_TMP | grep 'hostname=' | awk -F"=" '{print $2}'`
+msgd "V_HOSTNAME: $V_HOSTNAME"
+check_parameter $V_HOSTNAME
+V_PORT=`cat $F_TMP | grep 'port=' | awk -F"=" '{print $2}'`
+msgd "V_PORT: $V_PORT"
+#E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -p $V_PORT -u $V_USERNAME -pw $V_PASSWORD"
+E_SSTABLELOADER="sstableloader -v -d $V_HOSTNAME -u $V_USERNAME -pw $V_PASSWORD"
+msgd "E_SSTABLELOADER: $E_SSTABLELOADER"
+msgi "Note, for lack of other idea I disable explicit port"
+
+#testing
+#f_restore_keyspace "remik4"
+#f_create_keyspace "remik4"
+#f_load_keyspace "remik4"
+#f_restore_keyspace "remik4"
+#f_extract_backup_files
+#f_load_table $V_KEYSPACE $V_TABLE
+#f_cqlsh_sanity_check
+#f_extract_backup_files
+
+# # #
+msgd "Set some defaults if they were not set explicitly"
+if [ -z "$V_IGNORE_KEYSPACE_EXISTS" ]; then
+  msgd "V_IGNORE_KEYSPACE_EXISTS was not set explicitly, setting to no"
+  V_IGNORE_KEYSPACE_EXISTS=no
+fi
+if [ -z "$V_IGNORE_TABLE_EXISTS" ]; then
+  msgd "V_IGNORE_TABLE_EXISTS was not set explicitly, setting to no"
+  V_IGNORE_TABLE_EXISTS=no
+fi
+
+msgd "V_IGNORE_KEYSPACE_EXISTS: $V_IGNORE_KEYSPACE_EXISTS"
+msgd "V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS"
+
+# # # Actual execution
+# test
+#f_determine_cassandra_version
+#f_create_table_structure $V_KEYSPACE $V_TABLE
+#exit 0
+
+msgd "Actual execution"
+msgi "Extract backup files if not done already"
+f_extract_backup_files
+f_determine_cassandra_version
+
+# # # restore a table
+msgd "Check what should I do"
+if [ "$V_KEYSPACE" ] && [ "$V_TABLES" ]; then
+  msgd "Both keyspace and table is provided, so I am about to restore a table"
+  f_check_if_keyspace_exists $V_KEYSPACE
+
+  msgd "V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS"
+
+  msgi "Please note, in table restore mode the value of --ignore_keyspace_exists is ignored if provided, as the assumption is the keyspace should be there."
+  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+    msge "You want to restore a table in a keyspace but the keyspace does not exists. Exiting."
+  elif [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "yes" ]; then
+    msgd "Keyspace exists. Continuing."
+    msgd "Checking if table already exists"
+
+    msgd "Looping through all the tables provided"
+    for V_TABLE in `echo $V_TABLES | sed 's/,/\n/g'`
+    do
+      msgd "Actions for keyspace: $V_KEYSPACE table: $V_TABLE"
+      f_check_if_table_exists $V_KEYSPACE $V_TABLE
+
+      msgd "V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS"
+      if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
+        msgd "Keyspace exists, table does not. Creating table and loading data"
+        f_create_table_structure $V_KEYSPACE $V_TABLE
+        f_load_table $V_KEYSPACE $V_TABLE
+      elif [ "$V_CHECK_IF_TABLE_EXISTS" = "yes" ]; then
+        msgd "Keyspace exists, table exists. Deciding what to do based on V_IGNORE_TABLE_EXISTS value"
+        if [ "$V_IGNORE_TABLE_EXISTS" = "no" ]; then
+          msge "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
+          msge "There was no parameter set to ignore it (use '--ignore_table_exists yes' to force loading data anyway) "
+          msge "Exiting."
+          exit 1
+        elif [ "$V_IGNORE_TABLE_EXISTS" = "yes" ]; then
+          msgd "Table $V_TABLE already exists in the keyspace $V_KEYSPACE."
+          msgd "There WAS parameter set to ignore it, loading data anyway) "
+          f_load_table $V_KEYSPACE $V_TABLE
+        else
+          msge "Unknown value of V_IGNORE_TABLE_EXISTS: $V_IGNORE_TABLE_EXISTS. Exiting"
+          exit 1 
+        fi
+      else
+        msge "Unknown value of V_CHECK_IF_TABLE_EXISTS: $V_CHECK_IF_TABLE_EXISTS. Exiting"
+        exit 1
+      fi #if [ "$V_CHECK_IF_TABLE_EXISTS" = "no" ]; then
+    done
+  else
+    msge "Unknown value of V_CHECK_IF_KEYSPACE_EXISTS: $V_CHECK_IF_KEYSPACE_EXISTS. Exiting"
+  fi #  if [ "$V_CHECK_IF_KEYSPACE_EXISTS" = "no" ]; then
+
+elif [ "$V_KEYSPACE" ] && [ -z "$V_TABLE" ]; then
+  msgd "Only keyspace provided, so I am about to restore whole one keyspace or all keyspaces" 
+  msgd "V_KEYSPACE: $V_KEYSPACE"
+
+  msgd "Checking if we are about to restore all keyspaces"
+  if [ "$V_KEYSPACE" = "_all_" ]; then
+    msgd "All keyspaces should be restored. Looping through what I can find in backup."
+    F_TMP_K=/tmp/restore.keyspaces.tmp
+    $E_DOCKER ls $V_RESTORE_TEMP_DIR/$V_BACKUP_TAG/1/$V_BACKUP_TAG 2>&1 | grep -v -E "*.cql|^system$|^system_auth$|^system_distributed$|^system_schema$|^system_traces$" > $F_TMP_K
+
+    run_command_d "cat $F_TMP_K"
+    while read T_KEYSPACE
+    do
+      msgi "Restoring all keyspaces from backup. Now: $T_KEYSPACE"
+      f_restore_keyspace $T_KEYSPACE
+    done < $F_TMP_K
+  else
+    msgd "One keyspace should be restored."
+    f_restore_keyspace $V_KEYSPACE
+  fi # if [ "$V_KEYSPACE" = "_all_" ]; then 
+
+else
+  msge "Provide keyspace name to restore keyspace or keyspace and table to restore table. Exiting."
+fi # if [ "$V_KEYSPACE" ] && [ "$V_TABLE" ]; then
+
+
+msgi "Done."
+
