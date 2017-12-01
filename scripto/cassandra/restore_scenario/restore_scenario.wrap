@@ -105,6 +105,7 @@ f_determine_cassandra_version()
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
+    Q_KEYSPACE_LIST="select keyspace_name from system_schema.keyspaces;"
     Q_KEYSPACE_EXISTS="select keyspace_name from system_schema.keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, table_name from system_schema.tables where keyspace_name"
     Q_TABLE_EXISTS_AND="and table_name"
@@ -146,7 +147,29 @@ f_create_phase()
 f_check_phase()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  # Using global parameters
+  check_parameter $Q_KEYSPACE_LIST
 
+  F_CHECK_OUTPUT=$1
+  check_parameter $F_CHECK_OUTPUT
+
+  run_command "rm -f $F_CHECK_OUTPUT"
+
+  msgd "Desc of all keyspaces"
+  msgd "  - prepare a list of existing keyspaces"
+  run_command_e "$E_CQLSH -e '$Q_KEYSPACE_LIST' > $F_TMP"
+  run_command_d "cat $F_TMP"
+  run_command_e "cat $F_TMP | grep -v 'keyspace_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP.1" 
+  run_command_d "cat $F_TMP.1"
+  msgd "Loop through all keyspaces and do a describe"
+  while read V_KEYSPACE
+  do
+    msgd "Desc keyspace for: $V_KEYSPACE"
+    run_command_e "$E_CQLSH -e 'desc ${V_KEYSPACE};' >> $F_CHECK_OUTPUT"
+  done < $F_TMP.1
+
+  run_command_d "cat $F_CHECK_OUTPUT"
+# WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_check_phase
 
@@ -218,16 +241,18 @@ done
 # # # Sanity checks
 
 msgd "Actual execution"
-
 f_cqlsh_sanity_check
+f_determine_cassandra_version
 
-f_create_phase
-f_check_phase
+#f_create_phase
+f_check_phase $F_TMP.check_before
+
+exit 0
 f_backup_phase
 f_destroy_phase
 f_restore_phase
-f_check_phase
-f_compare_checks
+f_check_phase $F_TMP.check_after
+f_compare_checks $F_TMP.check_before $F_TMP.check_after
 
 
 msgi "Done."
