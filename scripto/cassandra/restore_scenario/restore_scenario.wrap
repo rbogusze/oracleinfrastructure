@@ -102,6 +102,7 @@ f_determine_cassandra_version()
     Q_KEYSPACE_EXISTS="select keyspace_name from system.schema_keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, columnfamily_name from system.schema_columnfamilies where keyspace_name"
     Q_TABLE_EXISTS_AND="and columnfamily_name"
+    V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker2.sh"
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
@@ -109,6 +110,7 @@ f_determine_cassandra_version()
     Q_KEYSPACE_EXISTS="select keyspace_name from system_schema.keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, table_name from system_schema.tables where keyspace_name"
     Q_TABLE_EXISTS_AND="and table_name"
+    V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker.sh"
     ;;
   *)
     echo "Unknown cassandra version!!! Exiting."
@@ -169,13 +171,49 @@ f_check_phase()
   done < $F_TMP.1
 
   run_command_d "cat $F_CHECK_OUTPUT"
-# WIP
   msgb "${FUNCNAME[0]} Finished."
 } #f_check_phase
 
 f_backup_phase()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  # Using global variables
+  check_parameter $V_BACKUP_SCRIPT
+  msgd "V_BACKUP_SCRIPT: $V_BACKUP_SCRIPT"
+
+  D_BACKUP="/var/lib/container_data/backup"
+  msgd "D_BACKUP: $D_BACKUP"
+  check_directory $D_BACKUP
+
+  msgd "Loop through all the nodes and execute backup script depending on the Cassandra version"
+  echo $V_DOCKER_LIST | tr "," "\n" > $F_TMP.2
+  run_command_d "cat $F_TMP.2"
+  while read LINE
+  do
+    msgi "Running backup for: $LINE"
+    V_NODE_STR=`echo $LINE | sed 's/cassandra_//'`
+    run_command_e "$V_BACKUP_SCRIPT $V_NODE_STR >> /var/log/cassandra/backup_${V_NODE_STR}.log"
+  done < $F_TMP.2
+
+  msgd "Backups should be found under: $D_BACKUP by default"
+  msgd "For the lack of any better idea I just pick the latest backups assuming that they were created during this exercise."
+  echo $V_DOCKER_LIST | tr "," "\n" > $F_TMP.2
+  run_command_d "cat $F_TMP.2"
+  V_BACKUP_FILES=""
+  while read LINE
+  do
+    msgi "Finding backup for: $LINE"
+    check_directory "$D_BACKUP/$LINE"
+    V_TMP=`ls -t $D_BACKUP/$LINE | head -1`
+    msgd "V_TMP: $V_TMP"
+    check_file "$D_BACKUP/$LINE/$V_TMP"
+    V_BACKUP_FILES=${V_BACKUP_FILES},$D_BACKUP/$LINE/$V_TMP
+  done < $F_TMP.2
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES"
+  msgd "remove leading colon"
+  V_TMP=`echo "$V_BACKUP_FILES" | sed 's/^,//'`
+  V_BACKUP_FILES=$V_TMP
+  msgd "V_BACKUP_FILES: $V_BACKUP_FILES"
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_backup_phase
@@ -245,10 +283,10 @@ f_cqlsh_sanity_check
 f_determine_cassandra_version
 
 #f_create_phase
-f_check_phase $F_TMP.check_before
+#f_check_phase $F_TMP.check_before
 
-exit 0
 f_backup_phase
+exit 0
 f_destroy_phase
 f_restore_phase
 f_check_phase $F_TMP.check_after
