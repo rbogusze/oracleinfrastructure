@@ -33,6 +33,7 @@ RUN        groupadd -r cassandra --gid=999 && useradd -r -g cassandra --uid=999 
               nmap \
               less \
               vim \
+              net-tools \
         && cd ; svn checkout https://github.com/rbogusze/oracleinfrastructure/trunk/scripto \
         && service cassandra stop && rm -rf /var/lib/cassandra/data && rm -rf /var/lib/cassandra/commit_log \
         && rm -rf /var/lib/apt/lists/* \
