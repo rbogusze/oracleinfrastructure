@@ -99,6 +99,7 @@ f_determine_cassandra_version()
   case $V_CASSANDRA_VERSION in
   "2.1")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
+    Q_KEYSPACE_LIST="select keyspace_name from system.schema_keyspaces;"
     Q_KEYSPACE_EXISTS="select keyspace_name from system.schema_keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, columnfamily_name from system.schema_columnfamilies where keyspace_name"
     Q_TABLE_EXISTS_AND="and columnfamily_name"
@@ -154,9 +155,11 @@ f_check_phase()
 {
   msgb "${FUNCNAME[0]} Beginning."
   # Using global parameters
+  msgd "Q_KEYSPACE_LIST: $Q_KEYSPACE_LIST"
   check_parameter $Q_KEYSPACE_LIST
 
   F_CHECK_OUTPUT=$1
+  msgd "F_CHECK_OUTPUT: $F_CHECK_OUTPUT"
   check_parameter $F_CHECK_OUTPUT
 
   run_command "rm -f $F_CHECK_OUTPUT"
@@ -174,7 +177,8 @@ f_check_phase()
     run_command_e "$E_CQLSH -e 'desc ${V_KEYSPACE};' >> $F_CHECK_OUTPUT"
   done < $F_TMP.1
 
-  run_command_d "cat $F_CHECK_OUTPUT"
+  # too much output, even for debug
+  #run_command_d "cat $F_CHECK_OUTPUT"
   msgb "${FUNCNAME[0]} Finished."
 } #f_check_phase
 
