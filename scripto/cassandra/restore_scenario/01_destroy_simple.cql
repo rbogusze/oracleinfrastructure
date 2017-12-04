@@ -1,0 +1,1 @@
+drop KEYSPACE remik2;
