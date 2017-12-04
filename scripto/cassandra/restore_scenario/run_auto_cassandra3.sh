@@ -13,9 +13,9 @@ else
 fi
 
 INFO_MODE=DEBUG
-#INFO_MODE=INFO
+INFO_MODE=INFO
 
-V_SLEEP=30
+V_SLEEP=60
 
 run_command_e "cd ~/scripto/docker/test_poc/dockerfile_A"
 run_command_e "docker-compose -f docker_compose.yml down"

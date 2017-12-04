@@ -229,9 +229,7 @@ f_restore_phase()
   msgd "Using global variables"
   msgd "V_DOCKER: $V_DOCKER"
   msgd "V_BACKUP_FILES: $V_BACKUP_FILES"
-
-  #WIP temp
-  V_BACKUP_FILES="/var/lib/container_data/backup/cassandra_node_A1/20171201_142631.tgz,/var/lib/container_data/backup/cassandra_node_A2/20171201_142638.tgz,/var/lib/container_data/backup/cassandra_node_A3/20171201_142646.tgz"
+  check_parameter $V_BACKUP_FILES
 
   msgd "Converting backup path to relative from the point of a docker"
   V_BACKUP_FILES_DOCKER=`echo $V_BACKUP_FILES | sed 's/container_data/cassandra/g'`
@@ -251,7 +249,7 @@ f_compare_checks()
   F_AFTER=$2
 
   msgd "If there are no differences, then it is good."
-  diff $F_BEFORE $F_AFTER
+  run_command_e "diff $F_BEFORE $F_AFTER"
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_compare_checks
@@ -299,7 +297,12 @@ msgd "Actual execution"
 f_cqlsh_sanity_check
 f_determine_cassandra_version
 
+#tmp
+#f_compare_checks $F_TMP.check_before $F_TMP.check_after
+#exit 0
+
 f_execute_file $V_CREATE_PHASE_FILE 
+run_command "sleep 5"
 f_check_phase $F_TMP.check_before
 f_backup_phase
 f_execute_file $V_DESTROY_PHASE_FILE
