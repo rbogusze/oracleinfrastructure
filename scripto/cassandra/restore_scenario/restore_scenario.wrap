@@ -299,12 +299,12 @@ msgd "Actual execution"
 f_cqlsh_sanity_check
 f_determine_cassandra_version
 
-#f_execute_file $V_CREATE_PHASE_FILE 
-#f_check_phase $F_TMP.check_before
-#f_backup_phase
-#f_execute_file $V_DESTROY_PHASE_FILE
-#f_restore_phase
-#f_check_phase $F_TMP.check_after
+f_execute_file $V_CREATE_PHASE_FILE 
+f_check_phase $F_TMP.check_before
+f_backup_phase
+f_execute_file $V_DESTROY_PHASE_FILE
+f_restore_phase
+f_check_phase $F_TMP.check_after
 f_compare_checks $F_TMP.check_before $F_TMP.check_after
 
 
