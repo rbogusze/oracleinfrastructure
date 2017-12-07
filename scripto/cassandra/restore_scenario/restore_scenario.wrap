@@ -183,7 +183,7 @@ f_check_phase()
   do
     msgd "Desc keyspace for: $V_KEYSPACE"
     run_command_e "$E_CQLSH -e 'desc ${V_KEYSPACE};' >> $F_CHECK_OUTPUT"
-  done < $F_TMP.1
+  done < $F_TMP_CP.1
 
   msgd "Counting rows if desired"
   msgd "V_COUNT_ROWS: $V_COUNT_ROWS" 
@@ -191,7 +191,7 @@ f_check_phase()
     msgd "Counting rows"
     echo "| KEYSPACE.TABLENAME | NR_ROWS |" >> $F_CHECK_OUTPUT
     msgd "Loop through all keyspaces and count rows in tables "
-    while read V_KEYSPACE
+    while read V_KEYSPACE <&8
     do
       msgd "Counting rows in tables for keyspace: $V_KEYSPACE"
       check_parameter $Q_TABLE_LIST
@@ -206,15 +206,20 @@ f_check_phase()
       run_command_e "cat $F_TMP_CP.2 | grep -v 'columnfamily_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP_CP.3" 
       run_command_d "cat $F_TMP_CP.3"
       msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
-      while read V_TABLENAME
+      while read V_TABLENAME <&7
       do
         msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
         $E_CQLSH -e "copy $V_KEYSPACE.$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
-        V_NR_ROWS=`cat $F_TMP_CP.4 | grep Processed | awk '{print $2}'`
+        #run_command_d "cat $F_TMP_CP.4"
+        #V_TMP_P=`cat $F_TMP_CP.4 | grep "^Processed"`  # this behaves oddly, there are multiple CR with no NL and awk picks the first line
+        V_TMP_P=`cat $F_TMP_CP.4 | grep 'rows exported'`
+        msgd "V_TMP_P: $V_TMP_P"
+        V_NR_ROWS=`echo $V_TMP_P | awk '{print $1}'`
         msgd "V_NR_ROWS: $V_NR_ROWS"
+
         echo "| $V_KEYSPACE.$V_TABLENAME | $V_NR_ROWS |" >> $F_CHECK_OUTPUT
-      done < $F_TMP_CP.3
-    done < $F_TMP_CP.1
+      done 7< $F_TMP_CP.3
+    done 8< $F_TMP_CP.1
   else
     msgd "Skipping rows count"
   fi  
