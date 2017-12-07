@@ -113,7 +113,7 @@ f_determine_cassandra_version()
     Q_KEYSPACE_EXISTS="select keyspace_name from system_schema.keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, table_name from system_schema.tables where keyspace_name"
     Q_TABLE_EXISTS_AND="and table_name"
-#    Q_TABLE_LIST="WIP"
+    Q_TABLE_LIST="select table_name from system_schema.tables where keyspace_name"
     V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker.sh"
     ;;
   *)
@@ -194,6 +194,7 @@ f_check_phase()
     while read V_KEYSPACE <&8
     do
       msgd "Counting rows in tables for keyspace: $V_KEYSPACE"
+      msgd "Q_TABLE_LIST: $Q_TABLE_LIST"
       check_parameter $Q_TABLE_LIST
     
       # TMP construct a query
@@ -203,7 +204,7 @@ f_check_phase()
       msgd "Q_TABLE_LIST_RUN2: $Q_TABLE_LIST_RUN2"
       $E_CQLSH -e "$Q_TABLE_LIST_RUN2" > $F_TMP_CP.2
       run_command_d "cat $F_TMP_CP.2"
-      run_command_e "cat $F_TMP_CP.2 | grep -v 'columnfamily_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP_CP.3" 
+      run_command_e "cat $F_TMP_CP.2 | grep -v 'columnfamily_name' | grep -v 'table_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP_CP.3" 
       run_command_d "cat $F_TMP_CP.3"
       msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
       while read V_TABLENAME <&7
