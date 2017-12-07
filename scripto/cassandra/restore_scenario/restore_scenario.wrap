@@ -89,6 +89,7 @@ f_cqlsh_sanity_check()
 f_determine_cassandra_version()
 {
   msgb "${FUNCNAME[0]} Beginning."
+  check_parameter $E_DOCKER
  
   F_TMP_DV=/tmp/restore.wrap.tmp.dw
   run_command_e "$E_DOCKER nodetool version > $F_TMP_DV 2>&1"
@@ -273,8 +274,8 @@ msgi "Hellow World"
 # --------------------------
 # Great sample getopt implementation by Cosimo Streppone
 # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-SHORT='hd:r:c:d:'
-LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:'
+SHORT='hd:r:c:d:p:r:'
+LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:'
 OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
 if [ $? -gt 0 ]; then
@@ -290,6 +291,8 @@ while true; do
             -r|--cqlshrc) V_CQLSHRC="$2"; shift 2;;
             -c|--create_phase_file) V_CREATE_PHASE_FILE="$2"; shift 2;;
             -d|--destroy_phase_file) V_DESTROY_PHASE_FILE="$2"; shift 2;;
+            -p|--phase) V_PHASE="$2"; shift 2;;
+            -r|--phase_parameter) V_PHASE_PARAMETER="$2"; shift 2;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
     esac
@@ -297,22 +300,43 @@ done
 
 # # # Sanity checks
 
+if [ -z "$V_PHASE" ]; then
+  msgd "There is no phase parameter provided, executeing all phases"
+  V_PHASE=all
+else
+  msgd "There IS phase parameter provided, executeing just the phase provided."
+fi
+
+msgd "V_PHASE: $V_PHASE"
+msgd "V_PHASE_PARAMETER: $V_PHASE_PARAMETER"
+
 msgd "Actual execution"
 f_cqlsh_sanity_check
 f_determine_cassandra_version
 
-#tmp
-#f_compare_checks $F_TMP.check_before $F_TMP.check_after
-#exit 0
+case $V_PHASE in
+  "all")
 
-f_execute_file $V_CREATE_PHASE_FILE 
-run_command "sleep 5"
-f_check_phase $F_TMP.check_before
-f_backup_phase
-f_execute_file $V_DESTROY_PHASE_FILE
-f_restore_phase
-f_check_phase $F_TMP.check_after
-f_compare_checks $F_TMP.check_before $F_TMP.check_after
+    f_execute_file $V_CREATE_PHASE_FILE 
+    run_command "sleep 5"
+    f_check_phase $F_TMP.check_before
+    f_backup_phase
+    f_execute_file $V_DESTROY_PHASE_FILE
+    f_restore_phase
+    f_check_phase $F_TMP.check_after
+    f_compare_checks $F_TMP.check_before $F_TMP.check_after
+
+    ;;
+  "f_check_phase")
+    msgd "V_PHASE_PARAMETER: $V_PHASE_PARAMETER"
+    check_parameter V_PHASE_PARAMETER
+    f_check_phase $V_PHASE_PARAMETER
+    ;;
+  *)
+    msge "Unknown phase!!! Exiting."
+    exit 1
+    ;;
+esac
 
 
 msgi "Done."
