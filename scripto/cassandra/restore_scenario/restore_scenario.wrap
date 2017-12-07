@@ -104,6 +104,7 @@ f_determine_cassandra_version()
     Q_KEYSPACE_EXISTS="select keyspace_name from system.schema_keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, columnfamily_name from system.schema_columnfamilies where keyspace_name"
     Q_TABLE_EXISTS_AND="and columnfamily_name"
+    Q_TABLE_LIST="select columnfamily_name from system.schema_columnfamilies where keyspace_name" 
     V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker2.sh"
     ;;
   "3.0")
@@ -112,6 +113,7 @@ f_determine_cassandra_version()
     Q_KEYSPACE_EXISTS="select keyspace_name from system_schema.keyspaces where keyspace_name" 
     Q_TABLE_EXISTS="select keyspace_name, table_name from system_schema.tables where keyspace_name"
     Q_TABLE_EXISTS_AND="and table_name"
+#    Q_TABLE_LIST="WIP"
     V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker.sh"
     ;;
   *)
@@ -159,24 +161,63 @@ f_check_phase()
   msgd "Q_KEYSPACE_LIST: $Q_KEYSPACE_LIST"
   check_parameter $Q_KEYSPACE_LIST
 
+  # Local variables
   F_CHECK_OUTPUT=$1
   msgd "F_CHECK_OUTPUT: $F_CHECK_OUTPUT"
   check_parameter $F_CHECK_OUTPUT
+  F_TMP_CP=/tmp/restore_scenario.tmp.check_phase
+  V_COUNT_ROWS="TRUE"
 
+
+  # Actual execution
   run_command "rm -f $F_CHECK_OUTPUT"
 
   msgd "Desc of all keyspaces"
   msgd "  - prepare a list of existing keyspaces"
-  run_command_e "$E_CQLSH -e '$Q_KEYSPACE_LIST' > $F_TMP"
-  run_command_d "cat $F_TMP"
-  run_command_e "cat $F_TMP | grep -v 'keyspace_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP.1" 
-  run_command_d "cat $F_TMP.1"
+  run_command_e "$E_CQLSH -e '$Q_KEYSPACE_LIST' > $F_TMP_CP"
+  run_command_d "cat $F_TMP_CP"
+  run_command_e "cat $F_TMP_CP | grep -v 'keyspace_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP_CP.1" 
+  run_command_d "cat $F_TMP_CP.1"
   msgd "Loop through all keyspaces and do a describe"
   while read V_KEYSPACE
   do
     msgd "Desc keyspace for: $V_KEYSPACE"
     run_command_e "$E_CQLSH -e 'desc ${V_KEYSPACE};' >> $F_CHECK_OUTPUT"
   done < $F_TMP.1
+
+  msgd "Counting rows if desired"
+  msgd "V_COUNT_ROWS: $V_COUNT_ROWS" 
+  if [ "$V_COUNT_ROWS" = "TRUE" ]; then
+    msgd "Counting rows"
+    echo "| KEYSPACE.TABLENAME | NR_ROWS |" >> $F_CHECK_OUTPUT
+    msgd "Loop through all keyspaces and count rows in tables "
+    while read V_KEYSPACE
+    do
+      msgd "Counting rows in tables for keyspace: $V_KEYSPACE"
+      check_parameter $Q_TABLE_LIST
+    
+      # TMP construct a query
+      Q_TABLE_LIST_RUN="$Q_TABLE_LIST = ^${V_KEYSPACE}^;"
+      msgd "Q_TABLE_LIST_RUN: $Q_TABLE_LIST_RUN"
+      Q_TABLE_LIST_RUN2=`echo $Q_TABLE_LIST_RUN | tr "^" "'"`
+      msgd "Q_TABLE_LIST_RUN2: $Q_TABLE_LIST_RUN2"
+      $E_CQLSH -e "$Q_TABLE_LIST_RUN2" > $F_TMP_CP.2
+      run_command_d "cat $F_TMP_CP.2"
+      run_command_e "cat $F_TMP_CP.2 | grep -v 'columnfamily_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP_CP.3" 
+      run_command_d "cat $F_TMP_CP.3"
+      msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
+      while read V_TABLENAME
+      do
+        msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
+        $E_CQLSH -e "copy $V_KEYSPACE.$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
+        V_NR_ROWS=`cat $F_TMP_CP.4 | grep Processed | awk '{print $2}'`
+        msgd "V_NR_ROWS: $V_NR_ROWS"
+        echo "| $V_KEYSPACE.$V_TABLENAME | $V_NR_ROWS |" >> $F_CHECK_OUTPUT
+      done < $F_TMP_CP.3
+    done < $F_TMP_CP.1
+  else
+    msgd "Skipping rows count"
+  fi  
 
   # too much output, even for debug
   #run_command_d "cat $F_CHECK_OUTPUT"
