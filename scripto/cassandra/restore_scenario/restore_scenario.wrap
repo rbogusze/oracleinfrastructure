@@ -15,6 +15,8 @@ fi
 INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
+START_TIME=$(date +'%s')
+
 F_TMP=/tmp/restore_scenario.tmp
 
 # Functions
@@ -209,6 +211,8 @@ f_check_phase()
       msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
       while read V_TABLENAME <&7
       do
+        msgd "WIP Checking if it makes sense to count rows"
+        
         msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
         $E_CQLSH -e "copy $V_KEYSPACE.$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
         #run_command_d "cat $F_TMP_CP.4"
@@ -221,6 +225,7 @@ f_check_phase()
         echo "| $V_KEYSPACE.$V_TABLENAME | $V_NR_ROWS |" >> $F_CHECK_OUTPUT
       done 7< $F_TMP_CP.3
     done 8< $F_TMP_CP.1
+    echo "| Done.   |" >> $F_CHECK_OUTPUT
   else
     msgd "Skipping rows count"
   fi  
@@ -385,6 +390,7 @@ case $V_PHASE in
     ;;
 esac
 
+msgi "Script took $(($(date +'%s') - $START_TIME)) seconds to run."
 
 msgi "Done."
 
