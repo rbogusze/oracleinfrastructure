@@ -184,7 +184,7 @@ f_check_phase()
   while read V_KEYSPACE
   do
     msgd "Desc keyspace for: $V_KEYSPACE"
-    run_command_e "$E_CQLSH -e 'desc ${V_KEYSPACE};' >> $F_CHECK_OUTPUT"
+    run_command_e "$E_CQLSH -e 'desc \"${V_KEYSPACE}\";' >> $F_CHECK_OUTPUT"
   done < $F_TMP_CP.1
 
   msgd "Counting rows if desired"
@@ -214,7 +214,7 @@ f_check_phase()
         msgd "WIP Checking if it makes sense to count rows"
         
         msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
-        $E_CQLSH -e "copy $V_KEYSPACE.$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
+        $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
         #run_command_d "cat $F_TMP_CP.4"
         #V_TMP_P=`cat $F_TMP_CP.4 | grep "^Processed"`  # this behaves oddly, there are multiple CR with no NL and awk picks the first line
         V_TMP_P=`cat $F_TMP_CP.4 | grep 'rows exported'`
@@ -291,7 +291,8 @@ f_restore_phase()
   msgd "Converting backup path to relative from the point of a docker"
   V_BACKUP_FILES_DOCKER=`echo $V_BACKUP_FILES | sed 's/container_data/cassandra/g'`
 
-  run_command_e "~/scripts/cassandra_restore_docker.sh --docker $V_DOCKER --cqlshrc $V_CQLSHRC --keyspace _all_ --backup_files $V_BACKUP_FILES_DOCKER --restore_temp_dir /tmp"
+  run_command_e "cd ~/scripts"
+  run_command_e "./cassandra_restore_docker.sh --docker $V_DOCKER --cqlshrc $V_CQLSHRC --keyspace _all_ --backup_files $V_BACKUP_FILES_DOCKER --restore_temp_dir /tmp"
 
   
 # WIP
