@@ -306,8 +306,11 @@ f_compare_checks()
   F_BEFORE=$1
   F_AFTER=$2
 
+  run_command_e "cat $F_BEFORE | grep -v 'system.compaction_history' | grep -v 'system.sstable_activity' > $F_BEFORE.1 "
+  run_command_e "cat $F_AFTER | grep -v 'system.compaction_history' | grep -v 'system.sstable_activity' > $F_AFTER.1 "
+
   msgd "If there are no differences, then it is good."
-  run_command_e "diff $F_BEFORE $F_AFTER"
+  run_command_e "diff $F_BEFORE.1 $F_AFTER.1"
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_compare_checks
