@@ -237,6 +237,16 @@ f_check_phase()
   run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' > $F_CHECK_OUTPUT"
   msgi "Filtered results under: $F_CHECK_OUTPUT"
 
+  msgi "If master results file is provided I check my results with the master"
+  if [ ! -z "$F_MASTER_RESULTS"]; then
+    msgd "Master file was provided: $F_MASTER_RESULTS. Doing the comparison" 
+    msgd "F_MASTER_RESULTS: $F_MASTER_RESULTS"
+    check_file $F_MASTER_RESULTS
+    run_command_e "diff $F_MASTER_RESULTS $F_CHECK_OUTPUT"
+  else
+    msgd "No master results file was provided. Doing no checking."
+  fi
+
   # too much output, even for debug
   #run_command_d "cat $F_CHECK_OUTPUT"
   msgb "${FUNCNAME[0]} Finished."
@@ -337,8 +347,8 @@ msgi "Hellow World"
 # --------------------------
 # Great sample getopt implementation by Cosimo Streppone
 # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-SHORT='hd:r:c:d:p:r:'
-LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:'
+SHORT='hd:r:c:d:p:r:m:'
+LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:master_results:'
 OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
 if [ $? -gt 0 ]; then
@@ -356,6 +366,7 @@ while true; do
             -d|--destroy_phase_file) V_DESTROY_PHASE_FILE="$2"; shift 2;;
             -p|--phase) V_PHASE="$2"; shift 2;;
             -r|--phase_parameter) V_PHASE_PARAMETER="$2"; shift 2;;
+            -m|--master_results) F_MASTER_RESULTS="$2"; shift 2;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
     esac
