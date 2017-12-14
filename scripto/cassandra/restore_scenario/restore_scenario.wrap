@@ -234,7 +234,7 @@ f_check_phase()
   msgi "Raw results under: ${F_CHECK_OUTPUT}.raw"
   msgd "Filtering out some of the stats, as this is natural that they fluctuate"
   run_command_e "cp $F_CHECK_OUTPUT ${F_CHECK_OUTPUT}.raw"
-  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v 'system.compaction_history' | grep -v 'system.sstable_activity' | grep -v 'system.size_estimates' > $F_CHECK_OUTPUT"
+  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' > $F_CHECK_OUTPUT"
   msgi "Filtered results under: $F_CHECK_OUTPUT"
 
   # too much output, even for debug
