@@ -16,6 +16,7 @@ INFO_MODE=DEBUG
 #INFO_MODE=INFO
 
 START_TIME=$(date +'%s')
+msgi "$0 Start."
 
 F_TMP=/tmp/restore_scenario.tmp
 
@@ -396,5 +397,5 @@ esac
 
 msgi "Script took $(($(date +'%s') - $START_TIME)) seconds to run."
 
-msgi "Done."
+msgi "$0 Done."
 

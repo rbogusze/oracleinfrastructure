@@ -2,5 +2,9 @@ CREATE KEYSPACE remik2 WITH replication = {'class': 'SimpleStrategy', 'replicati
 CREATE TABLE remik2.table1 (     id int PRIMARY KEY,     name text,     temperature double );
 CREATE TABLE remik2.table2 (     id int PRIMARY KEY,     name text,     temperature double );
 INSERT INTO remik2.table1 (id, name, temperature) values (0, 'Ala', 123);
-INSERT INTO remik2.table1 (id, name, temperature) values (0, 'Ala', 123);
+INSERT INTO remik2.table1 (id, name, temperature) values (1, 'Ola', 456);
 CREATE INDEX table1_id_name on remik2.table1 (name);
+CREATE KEYSPACE "10046_spay_ese_customer_care" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}  AND durable_writes = true;
+CREATE TABLE "10046_spay_ese_customer_care".table1 (     id int PRIMARY KEY,     name text,     temperature double );
+INSERT INTO "10046_spay_ese_customer_care".table1 (id, name, temperature) values (9, 'Zosia', 56);
+
