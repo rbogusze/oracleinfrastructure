@@ -21,8 +21,6 @@ mkdir -p $LOG_DIR
 START_TIME=$(date +'%s')
 msgi "$0 Start."
 
-exit 100
-
 
 F_TMP=/tmp/restore_scenario.tmp
 
