@@ -211,6 +211,13 @@ f_check_phase()
       msgd "Q_TABLE_LIST_RUN2: $Q_TABLE_LIST_RUN2"
       $E_CQLSH -e "$Q_TABLE_LIST_RUN2" > $F_TMP_CP.2
       run_command_d "cat $F_TMP_CP.2"
+      V_TMP_C=`cat $F_TMP_CP.2 | grep '(0 rows)' | wc -l`
+      msgd "V_TMP_C: $V_TMP_C"
+      if [ "$V_TMP_C" -eq 1 ]; then
+        msgd "There are no tables in this keyspace. Continuing."
+        continue
+      fi 
+
       run_command_e "cat $F_TMP_CP.2 | grep -v 'columnfamily_name' | grep -v 'table_name' | grep -v '\-\-\-' | grep -v 'rows)' | grep -v '^ *$' > $F_TMP_CP.3" 
       run_command_d "cat $F_TMP_CP.3"
       msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
