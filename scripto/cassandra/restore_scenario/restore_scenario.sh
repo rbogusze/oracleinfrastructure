@@ -275,9 +275,9 @@ f_check_phase()
    
 
   msgi "Raw results under: ${F_CHECK_OUTPUT}.raw"
-  msgd "Filtering out some of the stats, as this is natural that they fluctuate"
+  msgd "Filtering out some of the stats, as this is natural that they fluctuate or it does make sense to count them"
   run_command_e "cp $F_CHECK_OUTPUT ${F_CHECK_OUTPUT}.raw"
-  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' > $F_CHECK_OUTPUT"
+  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' | grep -v '| system.peers' > $F_CHECK_OUTPUT"
   msgi "Filtered results under: $F_CHECK_OUTPUT"
 
   msgi "If master results file is provided I check my results with the master"
