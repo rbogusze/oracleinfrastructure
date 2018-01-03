@@ -113,7 +113,7 @@ f_determine_cassandra_version()
     Q_TABLE_EXISTS_AND="and columnfamily_name"
     Q_TABLE_LIST="select columnfamily_name from system.schema_columnfamilies where keyspace_name" 
     V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker2.sh"
-    Q_INDEX_LIST="DO ME!"
+    Q_INDEX_LIST="select table_name, index_name from system.\"IndexInfo\";"
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
