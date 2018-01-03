@@ -226,18 +226,39 @@ f_check_phase()
       msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
       while read V_TABLENAME <&7
       do
-        msgd "WIP Checking if it makes sense to count rows"
-        
-        msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
-        $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
-        #run_command_d "cat $F_TMP_CP.4"
-        #V_TMP_P=`cat $F_TMP_CP.4 | grep "^Processed"`  # this behaves oddly, there are multiple CR with no NL and awk picks the first line
-        V_TMP_P=`cat $F_TMP_CP.4 | grep 'rows exported'`
-        msgd "V_TMP_P: $V_TMP_P"
-        V_NR_ROWS=`echo $V_TMP_P | awk '{print $1}'`
-        msgd "V_NR_ROWS: $V_NR_ROWS"
+        msgd "Checking if it makes sense to count rows for $V_KEYSPACE.$V_TABLENAME"
 
-        echo "| $V_KEYSPACE.$V_TABLENAME | $V_NR_ROWS |" >> $F_CHECK_OUTPUT
+        msgd "Hardcoding data location directory"
+        V_DATA_LOCATION="/var/lib/cassandra/data"
+        msgd "V_DATA_LOCATION: $V_DATA_LOCATION"
+        msgd "Figure out table directory"
+        V_TABLE_DATA_LOCATION=`$E_DOCKER ls -t $V_DATA_LOCATION/$V_KEYSPACE | grep $V_TABLENAME | head -n 1`
+        msgd "V_TABLE_DATA_LOCATION: $V_TABLE_DATA_LOCATION"
+        F_TMP_DL=/tmp/restore_scenario.tmp.data_location
+        run_command_e "$E_DOCKER ls $V_DATA_LOCATION/$V_KEYSPACE/$V_TABLE_DATA_LOCATION | tee $F_TMP_DL"
+        run_command_d "cat $F_TMP_DL"
+ 
+        V_TMP_COUNT=`cat $F_TMP_DL | wc -l` 
+        msgd "V_TMP_COUNT: $V_TMP_COUNT"
+       
+        if [ $V_TMP_COUNT -ne 0 ]; then
+          msgd "Looks like there are some data for $V_KEYSPACE.$V_TABLENAME. Doing the brutal counting"
+          msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
+          $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
+          #run_command_d "cat $F_TMP_CP.4"
+          #V_TMP_P=`cat $F_TMP_CP.4 | grep "^Processed"`  # this behaves oddly, there are multiple CR with no NL and awk picks the first line
+          V_TMP_P=`cat $F_TMP_CP.4 | grep 'rows exported'`
+          msgd "V_TMP_P: $V_TMP_P"
+          V_NR_ROWS=`echo $V_TMP_P | awk '{print $1}'`
+          msgd "V_NR_ROWS: $V_NR_ROWS"
+          echo "| $V_KEYSPACE.$V_TABLENAME | $V_NR_ROWS |" >> $F_CHECK_OUTPUT
+        else
+          msgd "Looks like there are no data for $V_KEYSPACE.$V_TABLENAME. Skipping the counting"
+          V_NR_ROWS="0"
+          msgd "V_NR_ROWS: $V_NR_ROWS"
+          echo "| $V_KEYSPACE.$V_TABLENAME | $V_NR_ROWS |" >> $F_CHECK_OUTPUT
+        fi 
+
       done 7< $F_TMP_CP.3
     done 8< $F_TMP_CP.1
     echo "| Done.   |" >> $F_CHECK_OUTPUT
@@ -334,8 +355,6 @@ f_restore_phase()
   run_command_e "./cassandra_restore_docker.sh --docker $V_DOCKER --cqlshrc $V_CQLSHRC --keyspace _all_ --backup_files $V_BACKUP_FILES_DOCKER --restore_temp_dir /tmp"
 
   
-# WIP
-
   msgb "${FUNCNAME[0]} Finished."
 } #f_restore_phase
 
