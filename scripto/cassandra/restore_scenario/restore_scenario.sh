@@ -232,7 +232,7 @@ f_check_phase()
         V_DATA_LOCATION="/var/lib/cassandra/data"
         msgd "V_DATA_LOCATION: $V_DATA_LOCATION"
         msgd "Figure out table directory"
-        V_TABLE_DATA_LOCATION=`$E_DOCKER ls -t $V_DATA_LOCATION/$V_KEYSPACE | grep $V_TABLENAME | head -n 1`
+        V_TABLE_DATA_LOCATION=`$E_DOCKER ls -t $V_DATA_LOCATION/$V_KEYSPACE | grep "^${V_TABLENAME}-" | head -n 1`
         msgd "V_TABLE_DATA_LOCATION: $V_TABLE_DATA_LOCATION"
         F_TMP_DL=/tmp/restore_scenario.tmp.data_location
         run_command_e "$E_DOCKER ls $V_DATA_LOCATION/$V_KEYSPACE/$V_TABLE_DATA_LOCATION | tee $F_TMP_DL"
