@@ -113,6 +113,7 @@ f_determine_cassandra_version()
     Q_TABLE_EXISTS_AND="and columnfamily_name"
     Q_TABLE_LIST="select columnfamily_name from system.schema_columnfamilies where keyspace_name" 
     V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker2.sh"
+    Q_INDEX_LIST="DO ME!"
     ;;
   "3.0")
     msgd "Cassandra version $V_CASSANDRA_VERSION"
@@ -122,6 +123,7 @@ f_determine_cassandra_version()
     Q_TABLE_EXISTS_AND="and table_name"
     Q_TABLE_LIST="select table_name from system_schema.tables where keyspace_name"
     V_BACKUP_SCRIPT="~/scripto/docker/test_poc/cassandra_backup_docker.sh"
+    Q_INDEX_LIST="select keyspace_name, table_name, index_name, kind, options from system_schema.indexes;"
     ;;
   *)
     echo "Unknown cassandra version!!! Exiting."
@@ -192,6 +194,7 @@ f_check_phase()
     run_command_e "$E_CQLSH -e 'desc \"${V_KEYSPACE}\";' >> $F_CHECK_OUTPUT"
   done < $F_TMP_CP.1
 
+  echo "Count table rows:" >> $F_CHECK_OUTPUT
   msgd "Counting rows if desired"
   msgd "V_COUNT_ROWS: $V_COUNT_ROWS" 
   if [ "$V_COUNT_ROWS" = "TRUE" ]; then
@@ -241,6 +244,14 @@ f_check_phase()
   else
     msgd "Skipping rows count"
   fi  
+
+  msgd "List indexes"
+  echo "Indexes:" >> $F_CHECK_OUTPUT
+  msgd "Q_INDEX_LIST: $Q_INDEX_LIST"
+  check_parameter $Q_INDEX_LIST
+  run_command_e "$E_CQLSH -e '$Q_INDEX_LIST' >> $F_CHECK_OUTPUT"
+ 
+   
 
   msgi "Raw results under: ${F_CHECK_OUTPUT}.raw"
   msgd "Filtering out some of the stats, as this is natural that they fluctuate"
