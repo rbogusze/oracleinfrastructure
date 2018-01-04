@@ -238,7 +238,7 @@ f_check_phase()
         run_command_e "$E_DOCKER ls $V_DATA_LOCATION/$V_KEYSPACE/$V_TABLE_DATA_LOCATION | tee $F_TMP_DL"
         run_command_d "cat $F_TMP_DL"
  
-        V_TMP_COUNT=`cat $F_TMP_DL | wc -l` 
+        V_TMP_COUNT=`cat $F_TMP_DL | grep -v "backups" | wc -l` 
         msgd "V_TMP_COUNT: $V_TMP_COUNT"
        
         if [ $V_TMP_COUNT -ne 0 ]; then
@@ -277,7 +277,7 @@ f_check_phase()
   msgi "Raw results under: ${F_CHECK_OUTPUT}.raw"
   msgd "Filtering out some of the stats, as this is natural that they fluctuate or it does make sense to count them"
   run_command_e "cp $F_CHECK_OUTPUT ${F_CHECK_OUTPUT}.raw"
-  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' | grep -v '| system.peers' > $F_CHECK_OUTPUT"
+  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' | grep -v '| system.peers' | grep -v '| system_auth.role_permissions' > $F_CHECK_OUTPUT"
   msgi "Filtered results under: $F_CHECK_OUTPUT"
 
   msgi "If master results file is provided I check my results with the master"
