@@ -4,6 +4,9 @@
 # That script is to be used ONLY on test env
 #
 
+echo "Do not use, use junkins pipe instead"
+exit 0
+
 # Load usefull functions
 if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
   echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "

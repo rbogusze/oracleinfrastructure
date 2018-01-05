@@ -100,6 +100,7 @@ f_determine_cassandra_version()
  
   F_TMP_DV=/tmp/restore.wrap.tmp.dw
   run_command_e "$E_DOCKER nodetool version > $F_TMP_DV 2>&1"
+  run_command_e "$E_DOCKER nodetool flush"
   run_command_d "cat $F_TMP_DV"
   V_CASSANDRA_VERSION=`cat $F_TMP_DV | awk '{print $2}' | awk -F"." '{print $1"."$2}'`
   msgd "V_CASSANDRA_VERSION: $V_CASSANDRA_VERSION"
@@ -277,7 +278,7 @@ f_check_phase()
   msgi "Raw results under: ${F_CHECK_OUTPUT}.raw"
   msgd "Filtering out some of the stats, as this is natural that they fluctuate or it does make sense to count them"
   run_command_e "cp $F_CHECK_OUTPUT ${F_CHECK_OUTPUT}.raw"
-  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' | grep -v '| system.peers' | grep -v '| system_auth.role_permissions' > $F_CHECK_OUTPUT"
+  run_command_e "cat ${F_CHECK_OUTPUT}.raw | grep -v '| system.compaction_history' | grep -v '| system.sstable_activity' | grep -v '| system.size_estimates' | grep -v '| system.peers' | grep -v '| system_auth.role_permissions' | grep -v '| system_schema.dropped_columns' > $F_CHECK_OUTPUT"
   msgi "Filtered results under: $F_CHECK_OUTPUT"
 
   msgi "If master results file is provided I check my results with the master"
@@ -429,7 +430,6 @@ f_determine_cassandra_version
 
 case $V_PHASE in
   "all")
-
     f_execute_file $V_CREATE_PHASE_FILE 
     run_command "sleep 5"
     f_check_phase $F_TMP.check_before
@@ -438,11 +438,20 @@ case $V_PHASE in
     f_restore_phase
     f_check_phase $F_TMP.check_after
     f_compare_checks $F_TMP.check_before $F_TMP.check_after
-
+    ;;
+  "f_backup_phase")
+    msgd "V_PHASE: $V_PHASE"
+    check_parameter $V_PHASE
+    f_backup_phase
+    ;;
+  "f_restore_phase")
+    msgd "V_PHASE: $V_PHASE"
+    check_parameter $V_PHASE
+    f_restore_phase
     ;;
   "f_check_phase")
     msgd "V_PHASE_PARAMETER: $V_PHASE_PARAMETER"
-    check_parameter V_PHASE_PARAMETER
+    check_parameter $V_PHASE_PARAMETER
     f_check_phase $V_PHASE_PARAMETER
     ;;
   *)
