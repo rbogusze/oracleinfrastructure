@@ -8,4 +8,9 @@ CREATE MATERIALIZED VIEW remik2.dailyhigh AS SELECT temperature, id, name FROM r
 CREATE KEYSPACE "10046_spay_ese_customer_care" WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}  AND durable_writes = true;
 CREATE TABLE "10046_spay_ese_customer_care".table1 (     id int PRIMARY KEY,     name text,     temperature double );
 INSERT INTO "10046_spay_ese_customer_care".table1 (id, name, temperature) values (9, 'Zosia', 56);
-
+CREATE KEYSPACE remik4 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '3'}  AND durable_writes = true;
+CREATE TABLE remik4.table1 ( id int PRIMARY KEY, name text, temperature double);
+INSERT INTO remik4.table1 (id, name, temperature) values (0, 'Ala', 123);
+INSERT INTO remik4.table1 (id, name, temperature) values (1, 'Ola', 321);
+alter table remik4.table1 drop name;
+INSERT INTO remik4.table1 (id, temperature) values (234234236, 322);

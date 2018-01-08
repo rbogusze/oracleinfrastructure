@@ -227,21 +227,23 @@ f_check_phase()
       msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
       while read V_TABLENAME <&7
       do
-        msgd "Checking if it makes sense to count rows for $V_KEYSPACE.$V_TABLENAME"
-
-        msgd "Hardcoding data location directory"
-        V_DATA_LOCATION="/var/lib/cassandra/data"
-        msgd "V_DATA_LOCATION: $V_DATA_LOCATION"
-        msgd "Figure out table directory"
-        V_TABLE_DATA_LOCATION=`$E_DOCKER ls -t $V_DATA_LOCATION/$V_KEYSPACE | grep "^${V_TABLENAME}-" | head -n 1`
-        msgd "V_TABLE_DATA_LOCATION: $V_TABLE_DATA_LOCATION"
-        F_TMP_DL=/tmp/restore_scenario.tmp.data_location
-        run_command_e "$E_DOCKER ls $V_DATA_LOCATION/$V_KEYSPACE/$V_TABLE_DATA_LOCATION | tee $F_TMP_DL"
-        run_command_d "cat $F_TMP_DL"
- 
-        V_TMP_COUNT=`cat $F_TMP_DL | grep -v "backups" | wc -l` 
+        if [ "$V_SKIP_EMPTY_DIR" = "yes" ]; then
+          msgd "Checking if it makes sense to count rows for $V_KEYSPACE.$V_TABLENAME"
+          msgd "Hardcoding data location directory"
+          V_DATA_LOCATION="/var/lib/cassandra/data"
+          msgd "V_DATA_LOCATION: $V_DATA_LOCATION"
+          msgd "Figure out table directory"
+          V_TABLE_DATA_LOCATION=`$E_DOCKER ls -t $V_DATA_LOCATION/$V_KEYSPACE | grep "^${V_TABLENAME}-" | head -n 1`
+          msgd "V_TABLE_DATA_LOCATION: $V_TABLE_DATA_LOCATION"
+          F_TMP_DL=/tmp/restore_scenario.tmp.data_location
+          run_command_e "$E_DOCKER ls $V_DATA_LOCATION/$V_KEYSPACE/$V_TABLE_DATA_LOCATION | tee $F_TMP_DL"
+          run_command_d "cat $F_TMP_DL"
+          V_TMP_COUNT=`cat $F_TMP_DL | grep -v "backups" | wc -l` 
+        else
+          msgd "Checking if datafile directory is empty disabled. Assuming non 0 number of datafiles."
+          V_TMP_COUNT=1
+        fi
         msgd "V_TMP_COUNT: $V_TMP_COUNT"
-       
         if [ $V_TMP_COUNT -ne 0 ]; then
           msgd "Looks like there are some data for $V_KEYSPACE.$V_TABLENAME. Doing the brutal counting"
           msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
@@ -387,8 +389,8 @@ f_template()
 # --------------------------
 # Great sample getopt implementation by Cosimo Streppone
 # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-SHORT='hd:r:c:d:p:r:m:'
-LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:,master_results:'
+SHORT='hd:r:c:d:p:r:m:s:'
+LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:,master_results:,skip_empty_dir:'
 OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
 if [ $? -gt 0 ]; then
@@ -407,6 +409,7 @@ while true; do
             -p|--phase) V_PHASE="$2"; shift 2;;
             -r|--phase_parameter) V_PHASE_PARAMETER="$2"; shift 2;;
             -m|--master_results) F_MASTER_RESULTS="$2"; shift 2;;
+            -s|--skip_empty_dir) V_SKIP_EMPTY_DIR="$2"; shift 2;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
     esac
@@ -419,6 +422,10 @@ if [ -z "$V_PHASE" ]; then
   V_PHASE=all
 else
   msgd "There IS phase parameter provided, executeing just the phase provided."
+fi
+if [ -z "$V_SKIP_EMPTY_DIR" ]; then
+  msgd "There is no parameter --skip_empty_dir provided, assuming default: $V_SKIP_EMPTY_DIR"
+  V_SKIP_EMPTY_DIR=yes
 fi
 
 msgd "V_PHASE: $V_PHASE"
