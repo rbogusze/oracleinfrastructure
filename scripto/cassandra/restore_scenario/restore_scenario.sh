@@ -227,6 +227,11 @@ f_check_phase()
       msgd "Loop through all the tables in keyspace $V_KEYSPACE" 
       while read V_TABLENAME <&7
       do
+        if [ "$V_KEYSPACE.$V_TABLENAME" = "system.IndexInfo" ]; then
+          msgd "Dirty skipping of counting rows for system.IndexInfo"
+          continue
+        fi
+
         if [ "$V_SKIP_EMPTY_DIR" = "yes" ]; then
           msgd "Checking if it makes sense to count rows for $V_KEYSPACE.$V_TABLENAME"
           msgd "Hardcoding data location directory"
