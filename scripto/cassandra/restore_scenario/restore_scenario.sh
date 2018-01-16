@@ -248,6 +248,12 @@ f_check_phase()
           msgd "Looks like there are some data for $V_KEYSPACE.$V_TABLENAME. Doing the brutal counting"
           msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
           $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
+          if [ $? -ne 0 ]; then
+            msge "An error occured during last command. Exiting NOW."
+            exit 1
+          else
+            msgd "Counting went fine."
+          fi
           #run_command_d "cat $F_TMP_CP.4"
           #V_TMP_P=`cat $F_TMP_CP.4 | grep "^Processed"`  # this behaves oddly, there are multiple CR with no NL and awk picks the first line
           V_TMP_P=`cat $F_TMP_CP.4 | grep 'rows exported'`
