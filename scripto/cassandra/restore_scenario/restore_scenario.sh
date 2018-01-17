@@ -251,6 +251,8 @@ f_check_phase()
         msgd "V_TMP_COUNT: $V_TMP_COUNT"
         if [ $V_TMP_COUNT -ne 0 ]; then
           msgd "Looks like there are some data for $V_KEYSPACE.$V_TABLENAME. Doing the brutal counting"
+          msgd "Sleep for 1sec as I recevive ocassional timeouts"
+          run_command "sleep $V_SLEEP"
           msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
           $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
           if [ $? -ne 0 ]; then
@@ -400,8 +402,8 @@ f_template()
 # --------------------------
 # Great sample getopt implementation by Cosimo Streppone
 # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-SHORT='hd:r:c:d:p:r:m:s:'
-LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:,master_results:,skip_empty_dir:'
+SHORT='hd:r:c:d:p:r:m:s:t:'
+LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:,master_results:,skip_empty_dir:,sleep:'
 OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
 if [ $? -gt 0 ]; then
@@ -421,6 +423,7 @@ while true; do
             -r|--phase_parameter) V_PHASE_PARAMETER="$2"; shift 2;;
             -m|--master_results) F_MASTER_RESULTS="$2"; shift 2;;
             -s|--skip_empty_dir) V_SKIP_EMPTY_DIR="$2"; shift 2;;
+            -t|--sleep) V_SLEEP="$2"; shift 2;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
     esac
@@ -437,6 +440,10 @@ fi
 if [ -z "$V_SKIP_EMPTY_DIR" ]; then
   msgd "There is no parameter --skip_empty_dir provided, assuming default: $V_SKIP_EMPTY_DIR"
   V_SKIP_EMPTY_DIR=yes
+fi
+if [ -z "$V_SLEEP" ]; then
+  V_SLEEP=1
+  msgd "There is no parameter --sleep provided, assuming $V_SLEEP"
 fi
 
 msgd "V_PHASE: $V_PHASE"
