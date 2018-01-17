@@ -251,7 +251,7 @@ f_check_phase()
         msgd "V_TMP_COUNT: $V_TMP_COUNT"
         if [ $V_TMP_COUNT -ne 0 ]; then
           msgd "Looks like there are some data for $V_KEYSPACE.$V_TABLENAME. Doing the brutal counting"
-          msgd "Sleep for 1sec as I recevive ocassional timeouts"
+          msgd "Sleep for $V_SLEEP sec as I recevive ocassional timeouts"
           run_command "sleep $V_SLEEP"
           msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
           $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
