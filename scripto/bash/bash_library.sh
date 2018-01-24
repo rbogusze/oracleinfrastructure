@@ -24,6 +24,15 @@ fi
 # | INFO	| msge, msga, msgb, msgw, msgi |
 # | DEBUG	| msge, msga, msgb, msgw, msgi, msgd |
 
+# Checking if script was run from terminal - then I use colors
+#   or is it run from crontab, where those colors create just weird characters
+if [ -t 0 ]; then
+    V_INTERACTIVE=1
+else
+    V_INTERACTIVE=0
+fi
+
+
 # Usefull Functions
 
 error_log()
@@ -51,7 +60,7 @@ check_directory()
     error_log "[ check_variable ] Provided variable is empty. Exiting. " ${RECIPIENTS}
     exit 1
   fi
-  
+
   # Sanity check. For writable logging directory
   if [ ! -d $1 ]; then
     error_log "Directory ${1} does not exists. Exiting. " ${RECIPIENTS}
@@ -120,9 +129,9 @@ msgd()
 {
   if [ "$INFO_MODE" = "DEBUG" ] ; then
     echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
-    echo -e -n '\E[32m'
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[32m'; fi
     echo -n "[debug]    "
-    echo -e -n '\E[39m\E[49m'
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[39m\E[49m'; fi
     echo "$1"
   fi
 }
@@ -145,9 +154,9 @@ msgi()
 {
   if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
     echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
-    echo -e -n '\E[32m'
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[32m'; fi
     echo -n "[info]     "
-    echo -e -n '\E[39m\E[49m'
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[39m\E[49m'; fi
     echo "$1"
   fi
 }
@@ -193,9 +202,9 @@ msgb()
 {
   if [ "$INFO_MODE" = "DEBUG" ] ; then
     echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
-    echo -e -n '\E[35m'
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[35m'; fi
     echo -n "[block] "
-    echo -e -n '\E[39m\E[49m'
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[39m\E[49m'; fi
     echo "$1"
   fi
 }
