@@ -1,0 +1,2390 @@
+
+WORKLOAD REPOSITORY report for
+
+DB Name         DB Id    Instance     Inst Num Startup Time    Release     RAC
+------------ ----------- ------------ -------- --------------- ----------- ---
+REMIK          291837480 REMIK               1 14-Mar-18 16:37 11.2.0.4.0  NO
+
+Host Name        Platform                         CPUs Cores Sockets Memory(GB)
+---------------- -------------------------------- ---- ----- ------- ----------
+centos9          Linux x86 64-bit                    1     1       1       3.70
+
+              Snap Id      Snap Time      Sessions Curs/Sess
+            --------- ------------------- -------- ---------
+Begin Snap:        18 14-Mar-18 17:14:07        26       1.2
+  End Snap:        19 14-Mar-18 17:28:07        28       1.2
+   Elapsed:               14.01 (mins)
+   DB Time:               14.03 (mins)
+
+Load Profile                    Per Second   Per Transaction  Per Exec  Per Call
+~~~~~~~~~~~~~~~            ---------------   --------------- --------- ---------
+             DB Time(s):               1.0               0.2      0.12      3.71
+              DB CPU(s):               0.9               0.2      0.11      3.29
+      Redo size (bytes):       5,364,318.5       1,119,467.2
+  Logical read (blocks):         771,215.6         160,943.2
+          Block changes:          47,832.5           9,982.1
+ Physical read (blocks):              17.9               3.7
+Physical write (blocks):           4,385.6             915.2
+       Read IO requests:              17.9               3.7
+      Write IO requests:           4,197.2             875.9
+           Read IO (MB):               0.1               0.0
+          Write IO (MB):              34.3               7.2
+             User calls:               0.3               0.1
+           Parses (SQL):               2.0               0.4
+      Hard parses (SQL):               0.1               0.0
+     SQL Work Area (MB):               0.1               0.0
+                 Logons:               0.0               0.0
+         Executes (SQL):               8.1               1.7
+              Rollbacks:               0.0               0.0
+           Transactions:               4.8
+
+Instance Efficiency Percentages (Target 100%)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            Buffer Nowait %:  100.00       Redo NoWait %:  100.00
+            Buffer  Hit   %:  100.00    In-memory Sort %:  100.00
+            Library Hit   %:   98.45        Soft Parse %:   97.19
+         Execute to Parse %:   75.92         Latch Hit %:  100.00
+Parse CPU to Parse Elapsd %:   36.36     % Non-Parse CPU:   99.99
+
+Top 10 Foreground Events by Total Wait Time
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                            Tota    Wait   % DB
+Event                                 Waits Time Avg(ms)   time Wait Class
+------------------------------ ------------ ---- ------- ------ ----------
+DB CPU                                      747.           88.7
+log file switch (checkpoint in           93 32.6     351    3.9 Configurat
+db file sequential read              14,959 12.7       1    1.5 User I/O
+Data file init write                    881  5.3       6     .6 User I/O
+direct path write                     3,939  3.5       1     .4 User I/O
+log file switch completion               88  2.6      30     .3 Configurat
+control file sequential read          3,167  2.3       1     .3 System I/O
+reliable message                      1,909  1.2       1     .1 Other
+Disk file operations I/O                476    1       2     .1 User I/O
+rdbms ipc reply                         150   .6       4     .1 Other
+
+Wait Classes by Total Wait Time
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                        Avg             Avg
+                                        Total Wait     Wait   % DB   Active
+Wait Class                  Waits       Time (sec)     (ms)   time Sessions
+---------------- ---------------- ---------------- -------- ------ --------
+DB CPU                                         747            88.7      0.9
+System I/O                 23,153               80        3    9.5      0.1
+Configuration                 183               35      193    4.2      0.0
+User I/O                   21,487               23        1    2.7      0.0
+Other                       4,704                6        1     .7      0.0
+Concurrency                    65                1       16     .1      0.0
+Commit                         20                0        3     .0      0.0
+Application                     3                0        9     .0      0.0
+Network                       147                0        0     .0      0.0
+
+Host CPU
+~~~~~~~~                  Load Average
+ CPUs Cores Sockets     Begin       End     %User   %System      %WIO     %Idle
+----- ----- ------- --------- --------- --------- --------- --------- ---------
+    1     1       1      0.15      1.21      45.4      11.9       2.5       8.8
+
+Instance CPU
+~~~~~~~~~~~~
+              % of total CPU for Instance:     127.8
+              % of busy  CPU for Instance:     140.2
+  %DB time waiting for CPU - Resource Mgr:       0.0
+
+IO Profile                  Read+Write/Second     Read/Second    Write/Second
+~~~~~~~~~~                  ----------------- --------------- ---------------
+            Total Requests:           4,247.9            29.6         4,218.2
+         Database Requests:           4,215.1            17.9         4,197.2
+        Optimized Requests:               0.0             0.0             0.0
+             Redo Requests:              13.8             0.2            13.5
+                Total (MB):              41.7             0.3            41.4
+             Database (MB):              34.4             0.1            34.3
+      Optimized Total (MB):               0.0             0.0             0.0
+                 Redo (MB):               5.3             0.0             5.3
+         Database (blocks):           4,403.5            17.9         4,385.6
+ Via Buffer Cache (blocks):             291.2            17.4           273.8
+           Direct (blocks):           4,112.3             0.5         4,111.8
+
+Memory Statistics
+~~~~~~~~~~~~~~~~~                       Begin          End
+                                 ------------ ------------
+                  Host Mem (MB):      3,791.5      3,791.5
+                   SGA use (MB):      1,504.0      1,504.0
+                   PGA use (MB):         76.1         88.8
+    % Host Mem used for SGA+PGA:        41.68        42.01
+
+Cache Sizes                       Begin        End
+~~~~~~~~~~~                  ---------- ----------
+               Buffer Cache:       848M       848M  Std Block Size:         8K
+           Shared Pool Size:       278M       278M      Log Buffer:     7,296K
+
+ Shared Pool Statistics        Begin    End
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~  ------  ------
+             Memory Usage %:   39.26   39.71
+    % SQL with executions>1:   87.28   83.73
+  % Memory for SQL w/exec>1:   84.74   79.03
+
+Time Model Statistics                      DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total time in database user-calls (DB Time): 841.8s
+-> Statistics including the word "background" measure background process
+   time, and so do not contribute to the DB time statistic
+-> Ordered by % or DB time desc, Statistic name
+
+Statistic Name                                       Time (s) % of DB Time
+------------------------------------------ ------------------ ------------
+sql execute elapsed time                                841.7        100.0
+DB CPU                                                  747.1         88.7
+PL/SQL execution elapsed time                             0.1           .0
+parse time elapsed                                        0.1           .0
+hard parse elapsed time                                   0.1           .0
+connection management call elapsed time                   0.0           .0
+PL/SQL compilation elapsed time                           0.0           .0
+hard parse (sharing criteria) elapsed time                0.0           .0
+repeated bind elapsed time                                0.0           .0
+DB time                                                 841.8
+background elapsed time                                  95.9
+background cpu time                                       7.9
+                          ------------------------------------------------------
+
+Operating System Statistics                 DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> *TIME statistic values are diffed.
+   All others display actual values.  End Value is displayed if different
+-> ordered by statistic type (CPU Use, Virtual Memory, Hardware Config), Name
+
+Statistic                                  Value        End Value
+------------------------- ---------------------- ----------------
+BUSY_TIME                                 53,857
+IDLE_TIME                                  5,205
+IOWAIT_TIME                                1,489
+SYS_TIME                                   7,057
+USER_TIME                                 26,820
+LOAD                                           0                1
+VM_IN_BYTES                              131,072
+VM_OUT_BYTES                                   0
+PHYSICAL_MEMORY_BYTES              3,975,688,192
+NUM_CPUS                                       1
+NUM_CPU_CORES                                  1
+NUM_CPU_SOCKETS                                1
+GLOBAL_RECEIVE_SIZE_MAX                4,194,304
+GLOBAL_SEND_SIZE_MAX                   1,048,576
+TCP_RECEIVE_SIZE_DEFAULT                  87,380
+TCP_RECEIVE_SIZE_MAX                   6,291,456
+TCP_RECEIVE_SIZE_MIN                       4,096
+TCP_SEND_SIZE_DEFAULT                     16,384
+TCP_SEND_SIZE_MAX                      4,194,304
+TCP_SEND_SIZE_MIN                          4,096
+                          ------------------------------------------------------
+
+Operating System Statistics - Detail        DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+Snap Time           Load    %busy    %user     %sys    %idle  %iowait
+--------------- -------- -------- -------- -------- -------- --------
+14-Mar 17:14:07      0.1      N/A      N/A      N/A      N/A      N/A
+14-Mar 17:28:07      1.2     91.2     45.4     11.9      8.8      2.5
+                          ------------------------------------------------------
+
+Foreground Wait Class                       DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> s  - second, ms - millisecond -    1000th of a second
+-> ordered by wait time desc, waits desc
+-> %Timeouts: value of 0 indicates value was < .5%.  Value of null is truly 0
+-> Captured Time accounts for         96.2%  of Total DB time         841.85 (s)
+-> Total FG Wait Time:                63.08 (s)  DB CPU time:         747.06 (s)
+
+                                                                  Avg
+                                      %Time       Total Wait     wait
+Wait Class                      Waits -outs         Time (s)     (ms)  %DB time
+-------------------- ---------------- ----- ---------------- -------- ---------
+DB CPU                                                   747               88.7
+Configuration                     181     0               35      195       4.2
+User I/O                       21,268     0               23        1       2.7
+Other                           2,702     0                2        1       0.3
+System I/O                      3,614     0                2        1       0.3
+Commit                             20     0                0        3       0.0
+Concurrency                        25     0                0        2       0.0
+Application                         3     0                0        9       0.0
+Network                           137     0                0        0       0.0
+                          ------------------------------------------------------
+
+Foreground Wait Events                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> s  - second, ms - millisecond -    1000th of a second
+-> Only events with Total Wait Time (s) >= .001 are shown
+-> ordered by wait time desc, waits desc (idle events last)
+-> %Timeouts: value of 0 indicates value was < .5%.  Value of null is truly 0
+
+                                                             Avg
+                                        %Time Total Wait    wait    Waits   % DB
+Event                             Waits -outs   Time (s)    (ms)     /txn   time
+-------------------------- ------------ ----- ---------- ------- -------- ------
+log file switch (checkpoin           93     0         33     351      0.0    3.9
+db file sequential read          14,959     0         13       1      3.7    1.5
+Data file init write                881     0          5       6      0.2     .6
+direct path write                 3,939     0          3       1      1.0     .4
+log file switch completion           88     0          3      30      0.0     .3
+control file sequential re        3,167     0          2       1      0.8     .3
+reliable message                  1,909     0          1       1      0.5     .1
+Disk file operations I/O            476     0          1       2      0.1     .1
+rdbms ipc reply                     150     0          1       4      0.0     .1
+enq: CR - block range reus          620     0          1       1      0.2     .1
+db file single write                149     0          0       2      0.0     .0
+control file parallel writ          447     0          0       0      0.1     .0
+log file sync                        20     0          0       3      0.0     .0
+latch: cache buffers chain           25     0          0       2      0.0     .0
+enq: RO - fast object reus            3     0          0       9      0.0     .0
+enq: CF - contention                  2     0          0       8      0.0     .0
+latch: redo allocation                6     0          0       1      0.0     .0
+latch: checkpoint queue la            3     0          0       2      0.0     .0
+latch: object queue header            5     0          0       1      0.0     .0
+BFILE read                          864     0          0       0      0.2     .0
+SQL*Net message from clien          137     0        748    5463      0.0
+jobq slave wait                     360   100        180     501      0.1
+                          ------------------------------------------------------
+
+Background Wait Events                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> ordered by wait time desc, waits desc (idle events last)
+-> Only events with Total Wait Time (s) >= .001 are shown
+-> %Timeouts: value of 0 indicates value was < .5%.  Value of null is truly 0
+
+                                                             Avg
+                                        %Time Total Wait    wait    Waits   % bg
+Event                             Waits -outs   Time (s)    (ms)     /txn   time
+-------------------------- ------------ ----- ---------- ------- -------- ------
+log file parallel write           7,814     0         54       7      1.9   55.9
+db file parallel write            2,185     0         11       5      0.5   11.7
+control file sequential re        6,188     0          8       1      1.5    8.4
+LGWR wait for redo copy           1,749     0          3       1      0.4    2.6
+control file parallel writ        1,816     0          2       1      0.5    2.2
+db file async I/O submit          1,156     0          2       2      0.3    2.1
+log file single write               190     0          1       3      0.0     .7
+buffer busy waits                     1     0          1     634      0.0     .7
+enq: CF - contention                 50     0          1      11      0.0     .6
+os thread startup                    10     0          0      36      0.0     .4
+latch: redo allocation              181     0          0       2      0.0     .4
+log file sequential read            190     0          0       1      0.0     .2
+direct path read                    123     0          0       1      0.0     .2
+direct path write                    81     0          0       1      0.0     .1
+Disk file operations I/O             11     0          0       5      0.0     .1
+latch free                            5     0          0       6      0.0     .0
+db file sequential read               4     0          0       2      0.0     .0
+latch: cache buffers chain           26     0          0       0      0.0     .0
+latch: row cache objects              2     0          0       2      0.0     .0
+latch: cache buffers lru c            4     0          0       1      0.0     .0
+latch: redo writing                   2     0          0       2      0.0     .0
+rdbms ipc message                17,852    23      9,151     513      4.4
+Space Manager: slave idle         1,455    32      4,756    3269      0.4
+DIAG idle wait                    1,680   100      1,681    1001      0.4
+smon timer                          157     0        931    5930      0.0
+shared server idle wait              28   100        840   30011      0.0
+Streams AQ: qmn slave idle           30     0        840   28006      0.0
+Streams AQ: qmn coordinato           60    50        840   14003      0.0
+dispatcher timer                     14   100        840   60012      0.0
+pmon timer                          400    64        839    2097      0.1
+SQL*Net message from clien           13     0          0       0      0.0
+class slave wait                      4     0          0       1      0.0
+                          ------------------------------------------------------
+
+Wait Event Histogram                       DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Units for Total Waits column: K is 1000, M is 1000000, G is 1000000000
+-> % of Waits: value of .0 indicates value was <.05%; value of null is truly 0
+-> % of Waits: column heading of <=1s is truly <1024ms, >1s is truly >=1024ms
+-> Ordered by Event (idle events last)
+
+                                                    % of Waits
+                                 -----------------------------------------------
+                           Total
+Event                      Waits  <1ms  <2ms  <4ms  <8ms <16ms <32ms  <=1s   >1s
+-------------------------- ----- ----- ----- ----- ----- ----- ----- ----- -----
+BFILE closure                  1 100.0
+BFILE get length               1 100.0
+BFILE internal seek            1 100.0
+BFILE open                     1 100.0
+BFILE read                   864 100.0
+Data file init write         881  15.6  27.1  22.4  10.6  12.8  10.8    .8
+Disk file operations I/O     487  73.3  22.4   2.9    .6    .2    .2    .4
+LGWR wait for redo copy     1749  17.1  71.9   6.7   3.7    .7
+SQL*Net message to client    147 100.0
+asynch descriptor resize      13 100.0
+buffer busy waits              1                                     100.0
+control file parallel writ  2264  76.6  12.9   6.0   3.6    .6    .1    .2
+control file sequential re  9355  73.0  16.3   7.0   2.4    .9    .2    .2
+db file async I/O submit    1156  75.3   4.0   7.2   8.5   3.8    .8    .5
+db file parallel write      2185  69.9   9.1   8.3   5.3   4.2   1.4   1.8
+db file sequential read      15K  79.5   2.4  17.0    .6    .3    .1    .0
+db file single write         149    .7  73.2  25.5    .7
+direct path read             123  62.6  25.2   4.9   5.7   1.6
+direct path write           4020  90.5   1.4    .9   1.7   5.0    .5    .1
+enq: CF - contention          52               1.9  23.1  67.3   7.7
+enq: CR - block range reus   620  96.6    .2          .6   1.6    .8    .2
+enq: RO - fast object reus     3  66.7                          33.3
+latch free                     6  33.3        33.3  16.7        16.7
+latch: cache buffers chain    51  66.7  11.8  15.7   5.9
+latch: cache buffers lru c     6  83.3        16.7
+latch: checkpoint queue la     3  33.3  33.3  33.3
+latch: object queue header     5  60.0  20.0  20.0
+latch: redo allocation       187  20.3  61.0   9.1   7.0   2.7
+latch: redo writing            2  50.0              50.0
+latch: row cache objects       2             100.0
+latch: shared pool             1 100.0
+log file parallel write     7814   7.2  17.5  33.9  22.5  14.1   1.4   3.3
+log file sequential read     190  82.1  12.6   2.6   1.6   1.1
+log file single write        190  20.5  26.8  23.2  21.6   7.4    .5
+log file switch (checkpoin    93              11.8  15.1  41.9   2.2  14.0  15.1
+log file switch completion    88              10.2  20.5  34.1  12.5  22.7
+log file sync                 20  45.0        20.0  30.0   5.0
+os thread startup             10                          20.0  20.0  60.0
+rdbms ipc reply              150   4.7  52.7   7.3        35.3
+reliable message            1909  67.8  28.7   3.3    .1          .1
+DIAG idle wait              1681                                     100.0
+SQL*Net message from clien   150  90.7   1.3    .7                      .7   6.7
+Space Manager: slave idle   1457                                  .8  16.6  82.6
+Streams AQ: qmn coordinato    60  50.0                                      50.0
+Streams AQ: qmn slave idle    30                                           100.0
+class slave wait               4  75.0  25.0
+dispatcher timer              14                                           100.0
+jobq slave wait              360                                     100.0
+pmon timer                   400    .5   1.0    .5    .5   1.3   3.0  22.8  70.5
+rdbms ipc message          17.9K  25.1   2.6   2.0    .8   1.7   1.7  53.7  12.4
+shared server idle wait       28                                           100.0
+smon timer                   157                                  .6  15.3  84.1
+                          ------------------------------------------------------
+
+Wait Event Histogram Detail (64 msec to 2 sec)DB/Inst: REMIK/REMIK  Snaps: 18
+-> Units for Total Waits column: K is 1000, M is 1000000, G is 1000000000
+-> Units for % of Total Waits:
+   ms is milliseconds
+   s is 1024 milliseconds (approximately 1 second)
+-> % of Total Waits: total waits for all wait classes, including Idle
+-> % of Total Waits: value of .0 indicates value was <.05%;
+   value of null is truly 0
+-> Ordered by Event (only non-idle events are displayed)
+
+                                                 % of Total Waits
+                                 -----------------------------------------------
+                           Waits
+                           64ms
+Event                      to 2s <32ms <64ms <1/8s <1/4s <1/2s   <1s   <2s  >=2s
+-------------------------- ----- ----- ----- ----- ----- ----- ----- ----- -----
+Data file init write           7  99.2    .8
+Disk file operations I/O       2  99.6    .2                      .2
+buffer busy waits              1                               100.0
+control file parallel writ     4  99.8          .2
+control file sequential re    18  99.8    .1    .1
+db file async I/O submit       6  99.5    .3    .3
+db file parallel write        39  98.2    .4    .6    .3    .2    .2
+db file sequential read        4 100.0    .0    .0
+direct path write              3  99.9    .1
+enq: CR - block range reus     1  99.8                .2
+log file parallel write      259  96.7   1.4   1.8    .1
+log file switch (checkpoin    26  71.0   1.1         2.2   3.2   7.5  14.0   1.1
+log file switch completion    20  77.3   1.1  21.6
+os thread startup              6  40.0  60.0
+                          ------------------------------------------------------
+
+Wait Event Histogram Detail (4 sec to 2 min)DB/Inst: REMIK/REMIK  Snaps: 18-1
+-> Units for Total Waits column: K is 1000, M is 1000000, G is 1000000000
+-> Units for % of Total Waits:
+   s is 1024 milliseconds (approximately 1 second)
+   m is 64*1024 milliseconds (approximately 67 seconds or 1.1 minutes)
+-> % of Total Waits: total waits for all wait classes, including Idle
+-> % of Total Waits: value of .0 indicates value was <.05%;
+   value of null is truly 0
+-> Ordered by Event (only non-idle events are displayed)
+
+                                                 % of Total Waits
+                                 -----------------------------------------------
+                           Waits
+                            4s
+Event                      to 2m   <2s   <4s   <8s  <16s  <32s  < 1m  < 2m  >=2m
+-------------------------- ----- ----- ----- ----- ----- ----- ----- ----- -----
+log file switch (checkpoin     1  98.9   1.1
+                          ------------------------------------------------------
+
+Wait Event Histogram Detail (4 min to 1 hr)DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Service Statistics                         DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> ordered by DB Time
+
+                                                           Physical      Logical
+Service Name                  DB Time (s)   DB CPU (s)    Reads (K)    Reads (K)
+---------------------------- ------------ ------------ ------------ ------------
+SYS$USERS                             842          747           15      648,278
+REMIK                                   0            0            0            0
+REMIKXDB                                0            0            0            0
+SYS$BACKGROUND                          0            0            0            2
+                          ------------------------------------------------------
+
+Service Wait Class Stats                    DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Wait Class info for services in the Service Statistics section.
+-> Total Waits and Time Waited displayed for the following wait
+   classes:  User I/O, Concurrency, Administrative, Network
+-> Time Waited (Wt Time) in seconds
+
+Service Name
+----------------------------------------------------------------
+ User I/O  User I/O  Concurcy  Concurcy     Admin     Admin   Network   Network
+Total Wts   Wt Time Total Wts   Wt Time Total Wts   Wt Time Total Wts   Wt Time
+--------- --------- --------- --------- --------- --------- --------- ---------
+SYS$USERS
+    21266        23        25         0         0         0       137         0
+REMIK
+        0         0         0         0         0         0         0         0
+SYS$BACKGROUND
+      219         0        40         1         0         0         0         0
+                          ------------------------------------------------------
+
+SQL ordered by Elapsed Time                DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Resources reported for PL/SQL code includes the resources used by all SQL
+   statements called by the code.
+-> % Total DB Time is the Elapsed Time of the SQL statement divided
+   into the Total Database Time multiplied by 100
+-> %Total - Elapsed Time  as a percentage of Total DB time
+-> %CPU   - CPU Time      as a percentage of Elapsed Time
+-> %IO    - User I/O Time as a percentage of Elapsed Time
+-> Captured SQL account for    2.2% of Total DB Time (s):             842
+-> Captured PL/SQL account for    0.0% of Total DB Time (s):             842
+
+        Elapsed                  Elapsed Time
+        Time (s)    Executions  per Exec (s)  %Total   %CPU    %IO    SQL Id
+---------------- -------------- ------------- ------ ------ ------ -------------
+            16.9              1         16.86    2.0   24.3    3.3 ayw04tzdvvjyd
+Module: SQL*Plus
+delete test
+
+             1.1              7          0.16     .1    2.2   71.4 gkkj0h6z70q6r
+Module: sqlplus@centos9 (TNS V1-V3)
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+             0.2              1          0.23     .0   89.0    2.0 bcuaanyavwv59
+Module: SQL*Plus
+BEGIN DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT; END;
+
+             0.1              1          0.11     .0   99.3     .0 bunssq950snhf
+insert into wrh$_sga_target_advice (snap_id, dbid, instance_number, SGA_SIZ
+E, SGA_SIZE_FACTOR, ESTD_DB_TIME, ESTD_PHYSICAL_READS) select :snap_id, :dbi
+d, :instance_number, SGA_SIZE, SGA_SIZE_FACTOR, ESTD_DB_TIME, ESTD_PHYSICAL_R
+EADS from v$sga_target_advice
+
+             0.1              1          0.08     .0   44.6   55.8 b3abwkm67yg8r
+Module: DBMS_SCHEDULER
+DECLARE job BINARY_INTEGER := :job; next_date TIMESTAMP WITH TIME ZONE := :myda
+te; broken BOOLEAN := FALSE; job_name VARCHAR2(30) := :job_name; job_subname
+VARCHAR2(30) := :job_subname; job_owner VARCHAR2(30) := :job_owner; job_start
+TIMESTAMP WITH TIME ZONE := :job_start; job_scheduled_start TIMESTAMP WITH TIME
+
+             0.1              5          0.02     .0    3.6     .0 bn4b3vjw2mj3u
+SELECT OBJOID, CLSOID, DECODE(BITAND(FLAGS, 16384), 0, RUNTIME, LET
+IME), (2*PRI + DECODE(BITAND(STATUS, 4), 0, 0, decode(INST, :1
+, -1, 1))), JOBTYPE, SCHLIM, WT, INST, RUNNOW, ENQ_SCHLIM, INST_ID FROM ( s
+elect a.obj# OBJOID, a.class_oid CLSOID, a.next_run_date RUNTIME, a.last
+
+             0.1             28          0.00     .0   95.9     .0 5yv7yvjgjxugg
+select TIME_WAITED_MICRO from V$SYSTEM_EVENT where event = 'Shared IO Pool Memo
+ry'
+
+             0.1            647          0.00     .0  111.4     .0 0kkhhb2w93cx0
+update seg$ set type#=:4,blocks=:5,extents=:6,minexts=:7,maxexts=:8,extsize=:9,e
+xtpct=:10,user#=:11,iniexts=:12,lists=decode(:13, 65535, NULL, :13),groups=decod
+e(:14, 65535, NULL, :14), cachehint=:15, hwmincr=:16, spare1=DECODE(:17,0,NULL,:
+17),scanhint=:18, bitmapranges=:19 where ts#=:1 and file#=:2 and block#=:3
+
+             0.0              1          0.04     .0    5.4     .0 9m82p8p2d7z84
+select OBJOID, CLSOID, RUNTIME, PRI, JOBTYPE, SCHLIM, WT, INST, RUNNOW, ENQ_
+SCHLIM from ( select a.obj# OBJOID, a.class_oid CLSOID, decode(bitand(a.flags
+, 16384), 0, a.next_run_date, a.last_enabled_time) RUNTIME, (2*a.pr
+iority + decode(bitand(a.job_status, 4), 0, 0, decode(a.running_i
+
+             0.0              4          0.01     .0   26.2   15.2 6fzvha8q9xn6t
+Module: SQL*Plus
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+                          ------------------------------------------------------
+
+SQL ordered by CPU Time                    DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Resources reported for PL/SQL code includes the resources used by all SQL
+   statements called by the code.
+-> %Total - CPU Time      as a percentage of Total DB CPU
+-> %CPU   - CPU Time      as a percentage of Elapsed Time
+-> %IO    - User I/O Time as a percentage of Elapsed Time
+-> Captured SQL account for    0.6% of Total CPU Time (s):             747
+-> Captured PL/SQL account for    0.0% of Total CPU Time (s):             747
+
+    CPU                   CPU per           Elapsed
+  Time (s)  Executions    Exec (s) %Total   Time (s)   %CPU    %IO    SQL Id
+---------- ------------ ---------- ------ ---------- ------ ------ -------------
+       4.1            1       4.10    0.5       16.9   24.3    3.3 ayw04tzdvvjyd
+Module: SQL*Plus
+delete test
+
+       0.2            1       0.21    0.0        0.2   89.0    2.0 bcuaanyavwv59
+Module: SQL*Plus
+BEGIN DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT; END;
+
+       0.1            1       0.11    0.0        0.1   99.3     .0 bunssq950snhf
+insert into wrh$_sga_target_advice (snap_id, dbid, instance_number, SGA_SIZ
+E, SGA_SIZE_FACTOR, ESTD_DB_TIME, ESTD_PHYSICAL_READS) select :snap_id, :dbi
+d, :instance_number, SGA_SIZE, SGA_SIZE_FACTOR, ESTD_DB_TIME, ESTD_PHYSICAL_R
+EADS from v$sga_target_advice
+
+       0.1          647       0.00    0.0        0.1  111.4     .0 0kkhhb2w93cx0
+update seg$ set type#=:4,blocks=:5,extents=:6,minexts=:7,maxexts=:8,extsize=:9,e
+xtpct=:10,user#=:11,iniexts=:12,lists=decode(:13, 65535, NULL, :13),groups=decod
+e(:14, 65535, NULL, :14), cachehint=:15, hwmincr=:16, spare1=DECODE(:17,0,NULL,:
+17),scanhint=:18, bitmapranges=:19 where ts#=:1 and file#=:2 and block#=:3
+
+       0.1           28       0.00    0.0        0.1   95.9     .0 5yv7yvjgjxugg
+select TIME_WAITED_MICRO from V$SYSTEM_EVENT where event = 'Shared IO Pool Memo
+ry'
+
+       0.0            1       0.04    0.0        0.1   44.6   55.8 b3abwkm67yg8r
+Module: DBMS_SCHEDULER
+DECLARE job BINARY_INTEGER := :job; next_date TIMESTAMP WITH TIME ZONE := :myda
+te; broken BOOLEAN := FALSE; job_name VARCHAR2(30) := :job_name; job_subname
+VARCHAR2(30) := :job_subname; job_owner VARCHAR2(30) := :job_owner; job_start
+TIMESTAMP WITH TIME ZONE := :job_start; job_scheduled_start TIMESTAMP WITH TIME
+
+       0.0            7       0.00    0.0        1.1    2.2   71.4 gkkj0h6z70q6r
+Module: sqlplus@centos9 (TNS V1-V3)
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+       0.0            1       0.02    0.0        0.0   98.8     .0 5dfmd823r8dsp
+insert into wrh$_memory_resize_ops (snap_id, dbid, instance_number, compone
+nt, oper_type, start_time, end_time, target_size, oper_mode, parameter, initi
+al_size, final_size, status) select snap_id, dbid, instance_num, compo
+nent, oper_type, start_time, max(end_time), target_size, max(oper_mode),
+
+       0.0            1       0.02    0.0        0.0   99.2     .0 gqxh429z885bx
+Module: SQL*Plus
+select segment_name, sum(bytes) BYTES, count(*) EXTENTS from user_extents group
+by segment_name
+
+       0.0            1       0.01    0.0        0.0   98.1     .2 6ajkhukk78nsr
+begin prvt_hdm.auto_execute( :dbid, :inst_num , :end_snap_id ); end;
+
+                          ------------------------------------------------------
+
+SQL ordered by User I/O Wait Time          DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Resources reported for PL/SQL code includes the resources used by all SQL
+   statements called by the code.
+-> %Total - User I/O Time as a percentage of Total User I/O Wait time
+-> %CPU   - CPU Time      as a percentage of Elapsed Time
+-> %IO    - User I/O Time as a percentage of Elapsed Time
+-> Captured SQL account for    6.3% of Total User I/O Wait Time (s):
+-> Captured PL/SQL account for    0.2% of Total User I/O Wait Time (s):
+
+  User I/O                UIO per           Elapsed
+  Time (s)  Executions    Exec (s) %Total   Time (s)   %CPU    %IO    SQL Id
+---------- ------------ ---------- ------ ---------- ------ ------ -------------
+       0.8            7       0.11    3.5        1.1    2.2   71.4 gkkj0h6z70q6r
+Module: sqlplus@centos9 (TNS V1-V3)
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+       0.5            1       0.55    2.4       16.9   24.3    3.3 ayw04tzdvvjyd
+Module: SQL*Plus
+delete test
+
+       0.0            1       0.04    0.2        0.1   44.6   55.8 b3abwkm67yg8r
+Module: DBMS_SCHEDULER
+DECLARE job BINARY_INTEGER := :job; next_date TIMESTAMP WITH TIME ZONE := :myda
+te; broken BOOLEAN := FALSE; job_name VARCHAR2(30) := :job_name; job_subname
+VARCHAR2(30) := :job_subname; job_owner VARCHAR2(30) := :job_owner; job_start
+TIMESTAMP WITH TIME ZONE := :job_start; job_scheduled_start TIMESTAMP WITH TIME
+
+       0.0            5       0.00    0.1        0.0   19.7   92.9 cvn54b7yz0s8u
+select /*+ index(idl_ub1$ i_idl_ub11) +*/ piece#,length,piece from idl_ub1$ wher
+e obj#=:1 and part=:2 and version=:3 order by piece#
+
+       0.0            1       0.01    0.1        0.0   33.7   59.9 0tdm5skk57ukp
+Module: DBMS_SCHEDULER
+SELECT ROWID, ACTSCHAT, RSET_OWNER, RSET_NAME, RSETPROC, SYS_OP_TOSETID(RSETINCR
+RS) FROM RLM$SCHACTLIST FUS WHERE FUS.ROWID = (SELECT MIN(ROWID) KEEP (DENSE_RAN
+K FIRST ORDER BY ACTSCHAT, ROWID) FROM RLM$SCHACTLIST WHERE ACTSCHAT IS NOT NULL
+) FOR UPDATE NOWAIT
+
+       0.0            1       0.01    0.0        0.0   31.4   81.9 3fbwp7qdqxk9v
+INSERT /*+ LEADING(@"SEL$F5BB74E1" "H"@"SEL$2" "A"@"SEL$1") USE_NL(@"SEL$F5BB7
+4E1" "A"@"SEL$1") */ INTO WRH$_ACTIVE_SESSION_HISTORY ( snap_id, dbid, i
+nstance_number, sample_id, sample_time , session_id, session_serial#, session_ty
+pe , flags , user_id , sql_id, sql_child_number, sql_opcode, force_matching_sign
+
+       0.0            1       0.01    0.0        0.0     .0   93.7 0z1031991bd7w
+insert into wrh$_sysmetric_summary (snap_id, dbid, instance_number, beg
+in_time, end_time, intsize, group_id, metric_id, num_interval, maxval, minv
+al, average, standard_deviation, sum_squares) select :snap_id, :dbid, :ins
+tance_number, begtime, endtime, intsize_csec, groupid, metricid, numin
+
+       0.0            9       0.00    0.0        0.0    6.9   80.9 3ktacv9r56b51
+select owner#,name,namespace,remoteowner,linkname,p_timestamp,p_obj#, nvl(proper
+ty,0),subname,type#,d_attrs from dependency$ d, obj$ o where d_obj#=:1 and p_obj
+#=obj#(+) order by order#
+
+       0.0            1       0.01    0.0        0.0   27.4   74.5 6tv1rmxxquh5v
+Module: sqlplus@centos9 (TNS V1-V3)
+select count(*) from reftech.test
+
+       0.0            4       0.00    0.0        0.0   26.2   15.2 6fzvha8q9xn6t
+Module: SQL*Plus
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+                          ------------------------------------------------------
+
+SQL ordered by Gets                        DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Resources reported for PL/SQL code includes the resources used by all SQL
+   statements called by the code.
+-> %Total - Buffer Gets   as a percentage of Total Buffer Gets
+-> %CPU   - CPU Time      as a percentage of Elapsed Time
+-> %IO    - User I/O Time as a percentage of Elapsed Time
+-> Total Buffer Gets:     648,279,220
+-> Captured SQL account for    0.4% of Total
+
+     Buffer                 Gets              Elapsed
+      Gets   Executions   per Exec   %Total   Time (s)  %CPU   %IO    SQL Id
+----------- ----------- ------------ ------ ---------- ----- ----- -------------
+  2,737,013           1  2,737,013.0    0.4       16.9  24.3   3.3 ayw04tzdvvjyd
+Module: SQL*Plus
+delete test
+
+      5,113           1      5,113.0    0.0        0.0  99.2     0 gqxh429z885bx
+Module: SQL*Plus
+select segment_name, sum(bytes) BYTES, count(*) EXTENTS from user_extents group
+by segment_name
+
+      3,239           1      3,239.0    0.0        0.2    89     2 bcuaanyavwv59
+Module: SQL*Plus
+BEGIN DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT; END;
+
+      2,662         647          4.1    0.0        0.1 111.4     0 0kkhhb2w93cx0
+update seg$ set type#=:4,blocks=:5,extents=:6,minexts=:7,maxexts=:8,extsize=:9,e
+xtpct=:10,user#=:11,iniexts=:12,lists=decode(:13, 65535, NULL, :13),groups=decod
+e(:14, 65535, NULL, :14), cachehint=:15, hwmincr=:16, spare1=DECODE(:17,0,NULL,:
+17),scanhint=:18, bitmapranges=:19 where ts#=:1 and file#=:2 and block#=:3
+
+      1,865           1      1,865.0    0.0        0.1  44.6  55.8 b3abwkm67yg8r
+Module: DBMS_SCHEDULER
+DECLARE job BINARY_INTEGER := :job; next_date TIMESTAMP WITH TIME ZONE := :myda
+te; broken BOOLEAN := FALSE; job_name VARCHAR2(30) := :job_name; job_subname
+VARCHAR2(30) := :job_subname; job_owner VARCHAR2(30) := :job_owner; job_start
+TIMESTAMP WITH TIME ZONE := :job_start; job_scheduled_start TIMESTAMP WITH TIME
+
+        839           1        839.0    0.0        0.0  98.1    .2 6ajkhukk78nsr
+begin prvt_hdm.auto_execute( :dbid, :inst_num , :end_snap_id ); end;
+
+        453          71          6.4    0.0        0.0  49.5  18.6 3s58mgk0uy2ws
+insert into wrm$_snapshot_details (snap_id, dbid, instance_number, table_id,
+ begin_time, end_time) values (:snap_id, :dbid, :instance_number, :bind1, :
+bind2, :bind3)
+
+        368         106          3.5    0.0        0.0  14.7     0 cm5vu20fhtnq1
+select /*+ connect_by_filtering */ privilege#,level from sysauth$ connect by gra
+ntee#=prior privilege# and privilege#>0 start with grantee#=:1 and privilege#>0
+
+        357           7         51.0    0.0        1.1   2.2  71.4 gkkj0h6z70q6r
+Module: sqlplus@centos9 (TNS V1-V3)
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+        356           9         39.6    0.0        0.0   2.4  86.3 8swypbbr0m372
+select order#,columns,types from access$ where d_obj#=:1
+
+                          ------------------------------------------------------
+
+SQL ordered by Reads                       DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> %Total - Physical Reads as a percentage of Total Disk Reads
+-> %CPU   - CPU Time      as a percentage of Elapsed Time
+-> %IO    - User I/O Time as a percentage of Elapsed Time
+-> Total Disk Reads:          15,026
+-> Captured SQL account for    0.9% of Total
+
+   Physical              Reads              Elapsed
+      Reads  Executions per Exec   %Total   Time (s)   %CPU    %IO    SQL Id
+----------- ----------- ---------- ------ ---------- ------ ------ -------------
+        108           1      108.0    0.7        0.1   44.6   55.8 b3abwkm67yg8r
+Module: DBMS_SCHEDULER
+DECLARE job BINARY_INTEGER := :job; next_date TIMESTAMP WITH TIME ZONE := :myda
+te; broken BOOLEAN := FALSE; job_name VARCHAR2(30) := :job_name; job_subname
+VARCHAR2(30) := :job_subname; job_owner VARCHAR2(30) := :job_owner; job_start
+TIMESTAMP WITH TIME ZONE := :job_start; job_scheduled_start TIMESTAMP WITH TIME
+
+         66           5       13.2    0.4        0.0   19.7   92.9 cvn54b7yz0s8u
+select /*+ index(idl_ub1$ i_idl_ub11) +*/ piece#,length,piece from idl_ub1$ wher
+e obj#=:1 and part=:2 and version=:3 order by piece#
+
+         17           1       17.0    0.1        0.0   33.7   59.9 0tdm5skk57ukp
+Module: DBMS_SCHEDULER
+SELECT ROWID, ACTSCHAT, RSET_OWNER, RSET_NAME, RSETPROC, SYS_OP_TOSETID(RSETINCR
+RS) FROM RLM$SCHACTLIST FUS WHERE FUS.ROWID = (SELECT MIN(ROWID) KEEP (DENSE_RAN
+K FIRST ORDER BY ACTSCHAT, ROWID) FROM RLM$SCHACTLIST WHERE ACTSCHAT IS NOT NULL
+) FOR UPDATE NOWAIT
+
+         11           9        1.2    0.1        0.0    6.9   80.9 3ktacv9r56b51
+select owner#,name,namespace,remoteowner,linkname,p_timestamp,p_obj#, nvl(proper
+ty,0),subname,type#,d_attrs from dependency$ d, obj$ o where d_obj#=:1 and p_obj
+#=obj#(+) order by order#
+
+          9           9        1.0    0.1        0.0    2.4   86.3 8swypbbr0m372
+select order#,columns,types from access$ where d_obj#=:1
+
+          6           1        6.0    0.0        0.0   57.8   42.3 84qubbrsr0kfn
+insert into wrh$_latch (snap_id, dbid, instance_number, latch_hash, level#, ge
+ts, misses, sleeps, immediate_gets, immediate_misses, spin_gets, sleep1, s
+leep2, sleep3, sleep4, wait_time) select :snap_id, :dbid, :instance_number,
+hash, level#, gets, misses, sleeps, immediate_gets, immediate_misses, spin_ge
+
+          4           1        4.0    0.0        0.0   31.4   81.9 3fbwp7qdqxk9v
+INSERT /*+ LEADING(@"SEL$F5BB74E1" "H"@"SEL$2" "A"@"SEL$1") USE_NL(@"SEL$F5BB7
+4E1" "A"@"SEL$1") */ INTO WRH$_ACTIVE_SESSION_HISTORY ( snap_id, dbid, i
+nstance_number, sample_id, sample_time , session_id, session_serial#, session_ty
+pe , flags , user_id , sql_id, sql_child_number, sql_opcode, force_matching_sign
+
+          4           1        4.0    0.0        0.0   78.0   20.3 48s88ugf199v4
+insert into wrh$_parameter (snap_id, dbid, instance_number, parameter_hash, v
+alue, isdefault, ismodified) select :snap_id, :dbid, :instance_number, h
+ash, substr(value, 1, 512), isdefault, case when ismodified <> 'FALSE'
+or isadjusted <> 'FALSE' then 'MODIFIED' else 'FALSE' end from v$sy
+
+          4           1        4.0    0.0        0.0   70.2   26.4 4dy1xm4nxc0gf
+insert into wrh$_system_event (snap_id, dbid, instance_number, event_id, to
+tal_waits, total_timeouts, time_waited_micro, total_waits_fg, total_timeouts_
+fg, time_waited_micro_fg) select :snap_id, :dbid, :instance_number, event_id
+, total_waits, total_timeouts, time_waited_micro, total_waits_fg, total_ti
+
+          4           1        4.0    0.0        0.0   55.4   50.5 fnk7155mk2jq6
+insert into wrh$_sysmetric_history (snap_id, dbid, instance_number, beg
+in_time, end_time, intsize, group_id, metric_id, value) select :snap_id, :
+dbid, :instance_number, begtime, endtime, intsize_csec, groupid, metri
+cid, value from x$kewmdrmv order by groupid, metricid, begtime
+
+                          ------------------------------------------------------
+
+SQL ordered by Physical Reads (UnOptimized)DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> UnOptimized Read Reqs = Physical Read Reqts - Optimized Read Reqs
+-> %Opt   - Optimized Reads as percentage of SQL Read Requests
+-> %Total - UnOptimized Read Reqs as a percentage of Total UnOptimized Read Reqs
+-> Total Physical Read Requests:          15,026
+-> Captured SQL account for    6.0% of Total
+-> Total UnOptimized Read Requests:          15,026
+-> Captured SQL account for    6.0% of Total
+-> Total Optimized Read Requests:               1
+-> Captured SQL account for    0.0% of Total
+
+UnOptimized   Physical              UnOptimized
+  Read Reqs   Read Reqs Executions Reqs per Exe   %Opt %Total    SQL Id
+----------- ----------- ---------- ------------ ------ ------ -------------
+        572         572          1        572.0    0.0    3.8 ayw04tzdvvjyd
+Module: SQL*Plus
+delete test
+
+        108         108          1        108.0    0.0    0.7 b3abwkm67yg8r
+Module: DBMS_SCHEDULER
+DECLARE job BINARY_INTEGER := :job; next_date TIMESTAMP WITH TIME ZONE := :myda
+te; broken BOOLEAN := FALSE; job_name VARCHAR2(30) := :job_name; job_subname
+VARCHAR2(30) := :job_subname; job_owner VARCHAR2(30) := :job_owner; job_start
+TIMESTAMP WITH TIME ZONE := :job_start; job_scheduled_start TIMESTAMP WITH TIME
+
+        105         105          1        105.0    0.0    0.7 bcuaanyavwv59
+Module: SQL*Plus
+BEGIN DBMS_WORKLOAD_REPOSITORY.CREATE_SNAPSHOT; END;
+
+         84          84          7         12.0    0.0    0.6 gkkj0h6z70q6r
+Module: sqlplus@centos9 (TNS V1-V3)
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+         66          66          5         13.2    0.0    0.4 cvn54b7yz0s8u
+select /*+ index(idl_ub1$ i_idl_ub11) +*/ piece#,length,piece from idl_ub1$ wher
+e obj#=:1 and part=:2 and version=:3 order by piece#
+
+         48          48          4         12.0    0.0    0.3 6fzvha8q9xn6t
+Module: SQL*Plus
+SELECT Total.name "Tablespace Name", TO_CHAR(ROUND(100-(Free_space*100/total_spa
+ce), 2)) TBS_full, round(total_space) "total_space(MB)", round(Free_space) "Free
+_space(MB)" FROM ( select tablespace_name, sum(bytes/1024/1024) Free_Space f
+rom sys.dba_free_space group by tablespace_name ) Free, ( select b.name, su
+
+         35          35          5          7.0    0.0    0.2 bn4b3vjw2mj3u
+SELECT OBJOID, CLSOID, DECODE(BITAND(FLAGS, 16384), 0, RUNTIME, LET
+IME), (2*PRI + DECODE(BITAND(STATUS, 4), 0, 0, decode(INST, :1
+, -1, 1))), JOBTYPE, SCHLIM, WT, INST, RUNNOW, ENQ_SCHLIM, INST_ID FROM ( s
+elect a.obj# OBJOID, a.class_oid CLSOID, a.next_run_date RUNTIME, a.last
+
+         28          28          1         28.0    0.0    0.2 1cq3qr774cu45
+insert into WRH$_IOSTAT_FILETYPE (snap_id, dbid, instance_number, filetyp
+e_id, small_read_megabytes, small_write_megabytes, large_read_megabytes,
+ large_write_megabytes, small_read_reqs, small_write_reqs, small_sync_read_r
+eqs, large_read_reqs, large_write_reqs, small_read_servicetime, small_wr
+
+         17          17          1         17.0    0.0    0.1 0tdm5skk57ukp
+Module: DBMS_SCHEDULER
+SELECT ROWID, ACTSCHAT, RSET_OWNER, RSET_NAME, RSETPROC, SYS_OP_TOSETID(RSETINCR
+RS) FROM RLM$SCHACTLIST FUS WHERE FUS.ROWID = (SELECT MIN(ROWID) KEEP (DENSE_RAN
+K FIRST ORDER BY ACTSCHAT, ROWID) FROM RLM$SCHACTLIST WHERE ACTSCHAT IS NOT NULL
+) FOR UPDATE NOWAIT
+
+         11          11          9          1.2    0.0    0.1 3ktacv9r56b51
+select owner#,name,namespace,remoteowner,linkname,p_timestamp,p_obj#, nvl(proper
+ty,0),subname,type#,d_attrs from dependency$ d, obj$ o where d_obj#=:1 and p_obj
+#=obj#(+) order by order#
+
+                          ------------------------------------------------------
+
+SQL ordered by Executions                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> %CPU   - CPU Time      as a percentage of Elapsed Time
+-> %IO    - User I/O Time as a percentage of Elapsed Time
+-> Total Executions:           6,798
+-> Captured SQL account for   29.3% of Total
+
+                                              Elapsed
+ Executions   Rows Processed  Rows per Exec   Time (s)  %CPU   %IO    SQL Id
+------------ --------------- -------------- ---------- ----- ----- -------------
+         647             647            1.0        0.1 111.4     0 0kkhhb2w93cx0
+update seg$ set type#=:4,blocks=:5,extents=:6,minexts=:7,maxexts=:8,extsize=:9,e
+xtpct=:10,user#=:11,iniexts=:12,lists=decode(:13, 65535, NULL, :13),groups=decod
+e(:14, 65535, NULL, :14), cachehint=:15, hwmincr=:16, spare1=DECODE(:17,0,NULL,:
+17),scanhint=:18, bitmapranges=:19 where ts#=:1 and file#=:2 and block#=:3
+
+         170             170            1.0        0.0 105.9     0 86708bvah4akq
+select name from undo$ where file#=:1 and block#=:2 and ts#=:3 and status$
+ != 1
+
+         168               2            0.0        0.0  60.1     0 5ms6rbzdnq16t
+select job, nvl2(last_date, 1, 0) from sys.job$ where (((:1 <= next_date) and (n
+ext_date <= :2)) or ((last_date is null) and (next_date < :3))) and (field1
+= :4 or (field1 = 0 and 'Y' = :5)) and (this_date is null) and ((dbms_logstdby.d
+b_is_logstdby = 0 and job < 1000000000) or (dbms_logstdby.db_is_logstdby = 1 an
+
+         159             159            1.0        0.0  95.8     0 6xvp6nxs4a9n4
+select nvl(sum(space),0) from recyclebin$ where ts# = :1
+
+         159               0            0.0        0.0  66.5     0 csnp95dz2r8ss
+select file#, block# from recyclebin$ where ts# = :1 and file# != 0 and bloc
+k# != 0 and space = 0
+
+         106             185            1.7        0.0  14.7     0 cm5vu20fhtnq1
+select /*+ connect_by_filtering */ privilege#,level from sysauth$ connect by gra
+ntee#=prior privilege# and privilege#>0 start with grantee#=:1 and privilege#>0
+
+          83              81            1.0        0.0  62.7  16.6 g00cj285jmgsw
+update sys.mon_mods$ set inserts = inserts + :ins, updates = updates + :upd, del
+etes = deletes + :del, flags = (decode(bitand(flags, :flag), :flag, flags, flags
+ + :flag)), drop_segments = drop_segments + :dropseg, timestamp = :time where ob
+j# = :objn
+
+          71              71            1.0        0.0  49.5  18.6 3s58mgk0uy2ws
+insert into wrm$_snapshot_details (snap_id, dbid, instance_number, table_id,
+ begin_time, end_time) values (:snap_id, :dbid, :instance_number, :bind1, :
+bind2, :bind3)
+
+          51              43            0.8        0.0    19     0 3nkd3g3ju5ph1
+select obj#,type#,ctime,mtime,stime, status, dataobj#, flags, oid$, spare1, spar
+e2 from obj$ where owner#=:1 and name=:2 and namespace=:3 and remoteowner is nul
+l and linkname is null and subname is null
+
+          28               0            0.0        0.1  95.9     0 5yv7yvjgjxugg
+select TIME_WAITED_MICRO from V$SYSTEM_EVENT where event = 'Shared IO Pool Memo
+ry'
+
+                          ------------------------------------------------------
+
+SQL ordered by Parse Calls                 DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Parse Calls:           1,637
+-> Captured SQL account for   63.3% of Total
+
+                            % Total
+ Parse Calls  Executions     Parses    SQL Id
+------------ ------------ --------- -------------
+         170          170     10.38 86708bvah4akq
+select name from undo$ where file#=:1 and block#=:2 and ts#=:3 and status$
+ != 1
+
+         159          159      9.71 6xvp6nxs4a9n4
+select nvl(sum(space),0) from recyclebin$ where ts# = :1
+
+         159          159      9.71 csnp95dz2r8ss
+select file#, block# from recyclebin$ where ts# = :1 and file# != 0 and bloc
+k# != 0 and space = 0
+
+         106          106      6.48 cm5vu20fhtnq1
+select /*+ connect_by_filtering */ privilege#,level from sysauth$ connect by gra
+ntee#=prior privilege# and privilege#>0 start with grantee#=:1 and privilege#>0
+
+          83           83      5.07 g00cj285jmgsw
+update sys.mon_mods$ set inserts = inserts + :ins, updates = updates + :upd, del
+etes = deletes + :del, flags = (decode(bitand(flags, :flag), :flag, flags, flags
+ + :flag)), drop_segments = drop_segments + :dropseg, timestamp = :time where ob
+j# = :objn
+
+          71           71      4.34 3s58mgk0uy2ws
+insert into wrm$_snapshot_details (snap_id, dbid, instance_number, table_id,
+ begin_time, end_time) values (:snap_id, :dbid, :instance_number, :bind1, :
+bind2, :bind3)
+
+          28           28      1.71 9babjv8yq8ru3
+Module: SQL*Plus
+BEGIN DBMS_OUTPUT.GET_LINES(:LINES, :NUMLINES); END;
+
+          18           18      1.10 bcv9qynmu1nv9
+Module: sqlplus@centos9 (TNS V1-V3)
+select sys.dbms_standard.dictionary_obj_type from dual
+
+          14           14      0.86 12kw3xcxv1qpg
+Module: sqlplus@centos9 (TNS V1-V3)
+select sys.dbms_standard.sysevent from dual
+
+          14           14      0.86 4a3ccstvk0ssw
+Module: sqlplus@centos9 (TNS V1-V3)
+select sys.dbms_standard.dictionary_obj_name from dual
+
+                          ------------------------------------------------------
+
+SQL ordered by Sharable Memory             DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+SQL ordered by Version Count               DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Key Instance Activity Stats                DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Ordered by statistic name
+
+Statistic                                     Total     per Second     per Trans
+-------------------------------- ------------------ -------------- -------------
+db block changes                         40,207,709       47,832.5       9,982.1
+execute count                                 6,798            8.1           1.7
+logons cumulative                                16            0.0           0.0
+opened cursors cumulative                    10,494           12.5           2.6
+parse count (total)                           1,637            2.0           0.4
+parse time elapsed                               11            0.0           0.0
+physical reads                               15,026           17.9           3.7
+physical writes                           3,686,536        4,385.6         915.2
+redo size                             4,509,213,924    5,364,318.5   1,119,467.2
+session cursor cache hits                    10,010           11.9           2.5
+session logical reads                   648,279,220      771,215.6     160,943.2
+user calls                                      227            0.3           0.1
+user commits                                  4,028            4.8           1.0
+workarea executions - optimal                   348            0.4           0.1
+                          ------------------------------------------------------
+
+Other Instance Activity Stats              DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Ordered by statistic name
+
+Statistic                                     Total     per Second     per Trans
+-------------------------------- ------------------ -------------- -------------
+Batched IO (bound) vector count                   0            0.0           0.0
+Batched IO (full) vector count                    0            0.0           0.0
+Batched IO block miss count                       0            0.0           0.0
+Batched IO buffer defrag count                    0            0.0           0.0
+Batched IO double miss count                      0            0.0           0.0
+Batched IO same unit count                        0            0.0           0.0
+Batched IO single block count                     0            0.0           0.0
+Batched IO vector block count                     0            0.0           0.0
+Batched IO vector read count                      0            0.0           0.0
+Block Cleanout Optim referenced               2,907            3.5           0.7
+CCursor + sql area evicted                        1            0.0           0.0
+CPU used by this session                     74,742           88.9          18.6
+CPU used when call started                   74,691           88.9          18.5
+CR blocks created                                 2            0.0           0.0
+Commit SCN cached                             3,804            4.5           0.9
+DBWR checkpoint buffers written             224,226          266.8          55.7
+DBWR checkpoints                                 99            0.1           0.0
+DBWR object drop buffers written                487            0.6           0.1
+DBWR revisited being-written buf                  1            0.0           0.0
+DBWR thread checkpoint buffers w            224,226          266.8          55.7
+DBWR transaction table writes                   198            0.2           0.1
+DBWR undo block writes                      200,065          238.0          49.7
+Effective IO time                                 0            0.0           0.0
+HSC Heap Segment Block Changes                9,122           10.9           2.3
+Heap Segment Array Inserts                       88            0.1           0.0
+Heap Segment Array Updates                      578            0.7           0.1
+IMU Flushes                                   3,650            4.3           0.9
+IMU Redo allocation size                  1,413,132        1,681.1         350.8
+IMU commits                                      15            0.0           0.0
+IMU contention                                    0            0.0           0.0
+IMU ktichg flush                                  1            0.0           0.0
+IMU pool not allocated                          388            0.5           0.1
+IMU recursive-transaction flush                   0            0.0           0.0
+IMU undo allocation size                  1,610,712        1,916.2         399.9
+IMU- failed to get a private str                388            0.5           0.1
+LOB table id lookup cache misses                  0            0.0           0.0
+Number of read IOs issued                         0            0.0           0.0
+Requests to/from client                         137            0.2           0.0
+SQL*Net roundtrips to/from clien                137            0.2           0.0
+TBS Extension: tasks created                    149            0.2           0.0
+active txn count during cleanout             11,618           13.8           2.9
+auto extends on undo tablespace                 149            0.2           0.0
+background checkpoints completed                 95            0.1           0.0
+background checkpoints started                   95            0.1           0.0
+background timeouts                           4,080            4.9           1.0
+branch node splits                               30            0.0           0.0
+buffer is not pinned count                    6,083            7.2           1.5
+buffer is pinned count                        7,752            9.2           1.9
+bytes received via SQL*Net from              39,031           46.4           9.7
+bytes sent via SQL*Net to client             53,809           64.0          13.4
+bytes via SQL*Net vector from cl                  0            0.0           0.0
+calls to get snapshot scn: kcmgs          5,926,379        7,050.2       1,471.3
+calls to kcmgas                           5,914,740        7,036.4       1,468.4
+calls to kcmgcs                             114,540          136.3          28.4
+cell physical IO interconnect by     36,754,365,952   43,724,278.3   9,124,718.5
+change write time                             8,240            9.8           2.1
+cleanout - number of ktugct call             15,910           18.9           4.0
+cleanouts only - consistent read                297            0.4           0.1
+cluster key scan block gets                     839            1.0           0.2
+cluster key scans                               817            1.0           0.2
+Other Instance Activity Stats              DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Ordered by statistic name
+
+Statistic                                     Total     per Second     per Trans
+-------------------------------- ------------------ -------------- -------------
+commit batch/immediate performed                 54            0.1           0.0
+commit batch/immediate requested                 54            0.1           0.0
+commit cleanout failures: block                   4            0.0           0.0
+commit cleanout failures: buffer                  4            0.0           0.0
+commit cleanout failures: callba                  5            0.0           0.0
+commit cleanouts                          3,349,356        3,984.5         831.5
+commit cleanouts successfully co          3,349,343        3,984.5         831.5
+commit immediate performed                       54            0.1           0.0
+commit immediate requested                       54            0.1           0.0
+commit txn count during cleanout             11,615           13.8           2.9
+consistent changes                            3,535            4.2           0.9
+consistent gets                         593,249,659      705,750.5     147,281.4
+consistent gets - examination            12,837,208       15,271.6       3,187.0
+consistent gets direct                            0            0.0           0.0
+consistent gets from cache              593,249,659      705,750.5     147,281.4
+consistent gets from cache (fast        571,059,200      679,352.0     141,772.4
+cursor authentications                           13            0.0           0.0
+data blocks consistent reads - u                  2            0.0           0.0
+db block gets                            55,029,561       65,465.1      13,661.8
+db block gets direct                      3,456,000        4,111.4         858.0
+db block gets from cache                 51,573,561       61,353.7      12,803.8
+db block gets from cache (fastpa         14,305,637       17,018.5       3,551.6
+deferred (CURRENT) block cleanou            340,647          405.3          84.6
+dirty buffers inspected                       1,064            1.3           0.3
+enqueue conversions                          10,671           12.7           2.7
+enqueue releases                          6,430,062        7,649.4       1,596.3
+enqueue requests                          6,430,061        7,649.4       1,596.3
+enqueue timeouts                                  0            0.0           0.0
+enqueue waits                                   675            0.8           0.2
+failed probes on index block rec                  8            0.0           0.0
+free buffer inspected                       242,749          288.8          60.3
+free buffer requested                     3,173,275        3,775.0         787.8
+heap block compress                               1            0.0           0.0
+hot buffers moved to head of LRU             13,247           15.8           3.3
+immediate (CR) block cleanout ap                297            0.4           0.1
+immediate (CURRENT) block cleano          3,003,832        3,573.5         745.7
+index crx upgrade (positioned)            6,406,709        7,621.6       1,590.5
+index fast full scans (full)                      0            0.0           0.0
+index fetch by key                            1,928            2.3           0.5
+index scans kdiixs1                       6,407,909        7,623.1       1,590.8
+leaf node 90-10 splits                        2,935            3.5           0.7
+leaf node splits                             10,071           12.0           2.5
+lob reads                                         0            0.0           0.0
+lob writes                                    4,008            4.8           1.0
+lob writes unaligned                          4,008            4.8           1.0
+logical read bytes from cache     5,282,391,818,240 6.28411792E+09 1.3114180E+09
+max cf enq hold time                            130            0.2           0.0
+messages received                            12,284           14.6           3.1
+messages sent                                12,285           14.6           3.1
+min active SCN optimization appl                  8            0.0           0.0
+no work - consistent read gets          570,486,266      678,670.4     141,630.2
+non-idle wait count                          54,845           65.3          13.6
+parse count (describe)                            0            0.0           0.0
+parse count (failures)                            0            0.0           0.0
+parse count (hard)                               46            0.1           0.0
+parse time cpu                                    4            0.0           0.0
+physical read IO requests                    15,026           17.9           3.7
+physical read bytes                     123,092,992      146,435.7      30,559.3
+physical read total IO requests              24,917           29.6           6.2
+physical read total bytes               279,297,024      332,261.5      69,338.9
+Other Instance Activity Stats              DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Ordered by statistic name
+
+Statistic                                     Total     per Second     per Trans
+-------------------------------- ------------------ -------------- -------------
+physical read total multi block                   0            0.0           0.0
+physical reads cache                         14,646           17.4           3.6
+physical reads cache prefetch                     0            0.0           0.0
+physical reads direct                           380            0.5           0.1
+physical reads direct (lob)                       0            0.0           0.0
+physical reads direct temporary                   0            0.0           0.0
+physical reads prefetch warmup                    0            0.0           0.0
+physical write IO requests                3,528,144        4,197.2         875.9
+physical write bytes                 30,200,102,912   35,927,097.9   7,497,542.9
+physical write total IO requests          3,545,800        4,218.2         880.3
+physical write total bytes           36,475,068,928   43,392,016.8   9,055,379.6
+physical write total multi block             17,855           21.2           4.4
+physical writes direct                    3,456,380        4,111.8         858.1
+physical writes direct (lob)              3,456,000        4,111.4         858.0
+physical writes from cache                  230,156          273.8          57.1
+physical writes non checkpoint            3,675,085        4,372.0         912.4
+pinned buffers inspected                      2,549            3.0           0.6
+pinned cursors current                            1            0.0           0.0
+prefetch warmup blocks aged out                 198            0.2           0.1
+prefetched blocks aged out befor                  2            0.0           0.0
+process last non-idle time                      841            1.0           0.2
+recursive calls                              30,631           36.4           7.6
+recursive cpu usage                          32,320           38.5           8.0
+redo blocks checksummed by FG (e            326,098          387.9          81.0
+redo blocks written                       9,118,075       10,847.2       2,263.7
+redo buffer allocation retries                  337            0.4           0.1
+redo entries                             23,550,250       28,016.2       5,846.6
+redo log space requests                         700            0.8           0.2
+redo ordering marks                           7,251            8.6           1.8
+redo size for direct writes             178,764,416      212,664.4      44,380.4
+redo synch long waits                             0            0.0           0.0
+redo synch time                                   6            0.0           0.0
+redo synch time (usec)                       63,754           75.8          15.8
+redo synch time overhead (usec)               2,873            3.4           0.7
+redo synch time overhead count (                 19            0.0           0.0
+redo synch time overhead count (                  0            0.0           0.0
+redo synch time overhead count (                  1            0.0           0.0
+redo synch time overhead count (                  0            0.0           0.0
+redo synch writes                                21            0.0           0.0
+redo wastage                              1,875,188        2,230.8         465.5
+redo write info find                             20            0.0           0.0
+redo write time                               5,367            6.4           1.3
+redo writes                                   7,812            9.3           1.9
+rollback changes - undo records                 101            0.1           0.0
+rollbacks only - consistent read                  2            0.0           0.0
+root node splits                                  1            0.0           0.0
+rows fetched via callback                       701            0.8           0.2
+securefile allocation bytes                       0            0.0           0.0
+securefile allocation chunks                      0            0.0           0.0
+securefile bytes non-transformed                  0            0.0           0.0
+securefile direct write bytes                     0            0.0           0.0
+securefile direct write ops                       0            0.0           0.0
+securefile number of flushes                      0            0.0           0.0
+securefile number of non-transfo                  0            0.0           0.0
+segment cfs allocations                           0            0.0           0.0
+segment chunks allocation from d                  0            0.0           0.0
+segment dispenser allocations                     0            0.0           0.0
+segment dispenser load empty                      0            0.0           0.0
+segment dispenser load tasks                      0            0.0           0.0
+segment prealloc bytes                            0            0.0           0.0
+Other Instance Activity Stats              DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Ordered by statistic name
+
+Statistic                                     Total     per Second     per Trans
+-------------------------------- ------------------ -------------- -------------
+segment prealloc ops                              0            0.0           0.0
+segment prealloc tasks                            0            0.0           0.0
+segment prealloc time (ms)                        0            0.0           0.0
+segment total chunk allocation                    0            0.0           0.0
+session connect time                            841            1.0           0.2
+shared hash latch upgrades - no           6,407,193        7,622.2       1,590.7
+shared io pool buffer get succes                  0            0.0           0.0
+sorts (memory)                                  729            0.9           0.2
+sorts (rows)                                  8,748           10.4           2.2
+sql area evicted                                 10            0.0           0.0
+sql area purged                                   6            0.0           0.0
+summed dirty queue length                     6,391            7.6           1.6
+switch current to new buffer              2,948,235        3,507.3         731.9
+table fetch by rowid                          2,605            3.1           0.7
+table fetch continued row                        31            0.0           0.0
+table scan blocks gotten                      5,475            6.5           1.4
+table scan rows gotten                       47,261           56.2          11.7
+table scans (short tables)                      458            0.5           0.1
+total cf enq hold time                        6,340            7.5           1.6
+total number of cf enq holders                1,225            1.5           0.3
+total number of times SMON poste                156            0.2           0.0
+transaction rollbacks                            54            0.1           0.0
+undo change vector size               1,501,645,844    1,786,410.4     372,801.9
+user logons cumulative                            3            0.0           0.0
+user logouts cumulative                           3            0.0           0.0
+write clones created in backgrou                  6            0.0           0.0
+write clones created in foregrou                135            0.2           0.0
+                          ------------------------------------------------------
+
+Instance Activity Stats - Absolute Values  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Statistics with absolute values (should not be diffed)
+
+Statistic                            Begin Value       End Value
+-------------------------------- --------------- ---------------
+logons current                                26              28
+opened cursors current                        32              34
+session cursor cache count                 1,019           1,243
+session pga memory                    49,826,992      68,425,816
+session pga memory max                69,168,512      90,913,064
+session uga memory                    14,016,752      17,936,416
+session uga memory max               107,844,032     132,755,384
+                          ------------------------------------------------------
+
+Instance Activity Stats - Thread Activity   DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Statistics identified by '(derived)' come from sources other than SYSSTAT
+
+Statistic                                     Total  per Hour
+-------------------------------- ------------------ ---------
+log switches (derived)                           95    406.86
+                          ------------------------------------------------------
+
+IOStat by Function summary                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> 'Data' columns suffixed with M,G,T,P are in multiples of 1024
+    other columns suffixed with K,M,G,T,P are in multiples of 1000
+-> ordered by (Data Read + Write) desc
+
+                Reads:   Reqs   Data    Writes:  Reqs   Data    Waits:    Avg
+Function Name   Data    per sec per sec Data    per sec per sec Count    Tm(ms)
+--------------- ------- ------- ------- ------- ------- ------- ------- -------
+Direct Writes        0M     0.0      0M   26.3G  4075.2 32.018M       0     N/A
+LGWR                64M     5.1   .076M    4.4G    15.8  5.334M   13.3K     4.0
+DBWR                12M     0.9   .014M    1.8G   108.5  2.139M     745     0.5
+Others              72M     5.8   .086M    1.6G    18.6  1.892M    6307     0.9
+Buffer Cache Re    114M    17.4   .136M      0M     0.0      0M   14.7K     0.5
+Direct Reads         3M     0.5   .004M      1M     0.1   .001M       0     N/A
+TOTAL:             265M    29.7   .315M     34G  4218.2 41.384M     35K     1.9
+                          ------------------------------------------------------
+
+IOStat by Filetype summary                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> 'Data' columns suffixed with M,G,T,P are in multiples of 1024
+    other columns suffixed with K,M,G,T,P are in multiples of 1000
+-> Small Read and Large Read are average service times, in milliseconds
+-> Ordered by (Data Read + Write) desc
+
+                Reads:   Reqs   Data    Writes:  Reqs   Data      Small   Large
+Filetype Name   Data    per sec per sec Data    per sec per sec    Read    Read
+--------------- ------- ------- ------- ------- ------- ------- ------- -------
+Data File          120M    18.3   .143M   28.1G  4197.4 34.264M     0.5     N/A
+Log File             0M     0.2      0M    4.3G    13.5  5.299M     0.4     N/A
+Control File       146M    11.1   .174M     70M     5.4   .083M     0.8     N/A
+Temp File            0M     0.0      0M      0M     0.0      0M     N/A     N/A
+TOTAL:             266M    29.7   .316M   32.5G  4216.3 39.646M     0.6     N/A
+                          ------------------------------------------------------
+
+IOStat by Function/Filetype summary         DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> 'Data' columns suffixed with M,G,T,P are in multiples of 1024
+    other columns suffixed with K,M,G,T,P are in multiples of 1000
+-> Ordered by (Data Read + Write) desc for each function
+
+ Reads:   Reqs   Data    Writes:  Reqs   Data    Waits:    Avg
+ Data    per sec per sec Data    per sec per sec Count    Tm(ms)
+ ------- ------- ------- ------- ------- ------- ------- -------
+Direct Writes
+      0M     0.0      0M   26.3G  4075.2 32.018M       0     N/A
+ Direct Writes (Data File)
+      0M     0.0      0M   26.3G  4075.2 32.018M       0     N/A
+LGWR
+     64M     5.1   .076M    4.4G    15.8  5.334M    4492     0.7
+ LGWR (Log File)
+      0M     0.2      0M    4.3G    13.5  5.299M     380     1.6
+ LGWR (Control File)
+     64M     4.9   .076M     30M     2.3   .036M    4112     0.6
+DBWR
+      0M     0.0      0M    1.8G   108.5  2.139M       0     N/A
+ DBWR (Data File)
+      0M     0.0      0M    1.8G   108.5  2.139M       0     N/A
+Others
+     72M     5.8   .086M    1.6G    18.6  1.892M    4993     0.9
+ Others (Data File)
+      2M     0.4   .002M    1.5G    15.4  1.843M     495     0.8
+ Others (Control File)
+     70M     5.4   .083M     41M     3.1   .049M    4498     0.9
+Buffer Cache Reads
+    114M    17.4   .136M      0M     0.0      0M   14.7K     0.5
+ Buffer Cache Reads (Data File)
+    114M    17.4   .136M      0M     0.0      0M   14.7K     0.5
+Direct Reads
+      3M     0.5   .004M      1M     0.1   .001M       0     N/A
+ Direct Reads (Data File)
+      3M     0.5   .004M      1M     0.1   .001M       0     N/A
+TOTAL:
+    253M    28.8   .301M     34G  4218.2 41.384M   24.1K     0.6
+                          ------------------------------------------------------
+
+Tablespace IO Stats                        DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> ordered by IOs (Reads + Writes) desc
+
+Tablespace
+------------------------------
+          Av       Av     Av      1-bk  Av 1-bk          Writes   Buffer  Av Buf
+  Reads   Rds/s  Rd(ms) Blks/Rd   Rds/s  Rd(ms)  Writes   avg/s    Waits  Wt(ms)
+------- ------- ------- ------- ------- ------- ------- ------- -------- -------
+USERS
+ 14,566      17     0.8     1.0 3.4E+06    17.3       1   4,103        0     0.0
+UNDOTBS1
+     99       0     0.1     1.0  79,045     0.1       0      94        1   640.0
+SYSAUX
+    119       0     0.2     1.0     351     0.1       0       0        0     0.0
+SYSTEM
+    209       0     0.2     1.0     151     0.2       0       0        0     0.0
+TEMP
+      0       0     0.0     N/A       1     0.0       0       0        0     0.0
+                          ------------------------------------------------------
+
+File IO Stats                              DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> ordered by Tablespace, File
+
+Tablespace               Filename
+------------------------ ----------------------------------------------------
+          Av       Av     Av      1-bk  Av 1-bk          Writes   Buffer  Av Buf
+  Reads   Rds/s  Rd(ms) Blks/Rd   Rds/s  Rd(ms)  Writes   avg/s    Waits  Wt(ms)
+------- ------- ------- ------- ------- ------- ------- ------- -------- -------
+SYSAUX                   /u01/data/REMIK/sysaux01.dbf
+    119       0     0.2     1.0       0     0.2     351       0        0     0.0
+SYSTEM                   /u01/data/REMIK/system01.dbf
+    209       0     0.2     1.0       0     0.3     151       0        0     0.0
+TEMP                     /u01/data/REMIK/temp01.dbf
+      0       0     N/A     N/A       0     N/A       1       0        0     N/A
+UNDOTBS1                 /u01/data/REMIK/undotbs01.dbf
+     99       0     0.1     1.0       0     0.1  79,045      94        1   640.0
+USERS                    /u01/data/REMIK/users01.dbf
+ 14,566      17     0.8     1.0      17     0.8 3.4E+06   4,103        0     0.0
+                          ------------------------------------------------------
+
+Buffer Pool Statistics                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Standard block size Pools  D: default,  K: keep,  R: recycle
+-> Default Pools for other block sizes: 2k, 4k, 8k, 16k, 32k
+
+                                                            Free   Writ   Buffer
+     Number of Pool       Buffer     Physical    Physical   Buff   Comp     Busy
+P      Buffers Hit%         Gets        Reads      Writes   Wait   Wait    Waits
+--- ---------- ---- ------------ ------------ ----------- ------ ------ --------
+D      104,357  100  644,823,198       14,640     230,156      0      0        1
+                          ------------------------------------------------------
+
+Checkpoint Activity                         DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Physical Writes:                    3,686,536
+
+                                          Other    Autotune      Thread
+       MTTR    Log Size    Log Ckpt    Settings        Ckpt        Ckpt
+     Writes      Writes      Writes      Writes      Writes      Writes
+----------- ----------- ----------- ----------- ----------- -----------
+          0     198,997           0           0           0      25,229
+                          ------------------------------------------------------
+
+Instance Recovery Stats                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> B: Begin Snapshot,  E: End Snapshot
+
+                                                                            Estd
+  Targt  Estd                                     Log Ckpt Log Ckpt    Opt   RAC
+  MTTR   MTTR Recovery  Actual   Target   Log Sz   Timeout Interval    Log Avail
+   (s)    (s) Estd IOs RedoBlks RedoBlks RedoBlks RedoBlks RedoBlks  Sz(M)  Time
+- ----- ----- -------- -------- -------- -------- -------- -------- ------ -----
+B     0    14     4497   165191   165888   165888   445043      N/A    N/A   N/A
+E     0    14     8433   165080   165888   165888   394035      N/A    N/A   N/A
+                          ------------------------------------------------------
+
+MTTR Advisory                                   DB/Inst: REMIK/REMIK  Snap: 19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Buffer Pool Advisory                            DB/Inst: REMIK/REMIK  Snap: 19
+-> Only rows with estimated physical reads >0 are displayed
+-> ordered by Block Size, Buffers For Estimate
+
+                                    Est
+                                   Phys      Estimated                  Est
+    Size for   Size      Buffers   Read     Phys Reads     Est Phys %DBtime
+P    Est (M) Factor  (thousands) Factor    (thousands)    Read Time for Rds
+--- -------- ------ ------------ ------ -------------- ------------ -------
+D         80     .1           10    1.1            317            1   121.0
+D        160     .2           20    1.1            312            1   119.0
+D        240     .3           30    1.0            309            1   118.0
+D        320     .4           39    1.0            307            1   117.0
+D        400     .5           49    1.0            304            1   116.0
+D        480     .6           59    1.0            303            1   116.0
+D        560     .7           69    1.0            300            1   115.0
+D        640     .8           79    1.0            299            1   114.0
+D        720     .8           89    1.0            297            1   113.0
+D        800     .9           98    1.0            296            1   113.0
+D        848    1.0          104    1.0            295            1   112.0
+D        880    1.0          108    1.0            294            1   112.0
+D        960    1.1          118    1.0            293            1   112.0
+D      1,040    1.2          128    1.0            292            1   111.0
+D      1,120    1.3          138    1.0            290            1   111.0
+D      1,200    1.4          148    1.0            288            1   110.0
+D      1,280    1.5          158    1.0            287            1   109.0
+D      1,360    1.6          167    1.0            287            1   109.0
+D      1,440    1.7          177    1.0            286            1   109.0
+D      1,520    1.8          187    1.0            286            1   109.0
+D      1,600    1.9          197    1.0            286            1   109.0
+                          ------------------------------------------------------
+
+PGA Aggr Summary                           DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> PGA cache hit % - percentage of W/A (WorkArea) data processed only in-memory
+
+PGA Cache Hit %   W/A MB Processed  Extra W/A MB Read/Written
+--------------- ------------------ --------------------------
+          100.0                 44                          0
+                          ------------------------------------------------------
+
+PGA Aggr Target Stats                       DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> B: Begin Snap   E: End Snap (rows dentified with B or E contain data
+   which is absolute i.e. not diffed over the interval)
+-> Auto PGA Target - actual workarea memory target
+-> W/A PGA Used    - amount of memory used for all Workareas (manual + auto)
+-> %PGA W/A Mem    - percentage of PGA memory allocated to workareas
+-> %Auto W/A Mem   - percentage of workarea memory controlled by Auto Mem Mgmt
+-> %Man W/A Mem    - percentage of workarea memory under manual control
+
+                                                %PGA  %Auto   %Man
+    PGA Aggr   Auto PGA   PGA Mem    W/A PGA     W/A    W/A    W/A Global Mem
+   Target(M)  Target(M)  Alloc(M)    Used(M)     Mem    Mem    Mem   Bound(K)
+- ---------- ---------- ---------- ---------- ------ ------ ------ ----------
+B        501        410       76.1        0.0     .0     .0     .0    102,400
+E        501        398       88.8        0.0     .0     .0     .0    102,400
+                          ------------------------------------------------------
+
+PGA Aggr Target Histogram                   DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Optimal Executions are purely in-memory operations
+
+  Low     High
+Optimal Optimal    Total Execs  Optimal Execs 1-Pass Execs M-Pass Execs
+------- ------- -------------- -------------- ------------ ------------
+     2K      4K            309            309            0            0
+    64K    128K              4              4            0            0
+   512K   1024K             22             22            0            0
+     1M      2M             11             11            0            0
+     4M      8M              2              2            0            0
+                          ------------------------------------------------------
+
+PGA Memory Advisory                             DB/Inst: REMIK/REMIK  Snap: 19
+-> When using Auto Memory Mgmt, minimally choose a pga_aggregate_target value
+   where Estd PGA Overalloc Count is 0
+
+                                       Estd Extra    Estd P Estd PGA
+PGA Target    Size           W/A MB   W/A MB Read/    Cache Overallo    Estd
+  Est (MB)   Factr        Processed Written to Disk   Hit %    Count    Time
+---------- ------- ---------------- ---------------- ------ -------- -------
+        63     0.1            722.7              0.0  100.0        2 2.3E+05
+       125     0.3            722.7              0.0  100.0        0 2.3E+05
+       251     0.5            722.7              0.0  100.0        0 2.3E+05
+       376     0.8            722.7              0.0  100.0        0 2.3E+05
+       501     1.0            722.7              0.0  100.0        0 2.3E+05
+       601     1.2            722.7              0.0  100.0        0 2.3E+05
+       701     1.4            722.7              0.0  100.0        0 2.3E+05
+       802     1.6            722.7              0.0  100.0        0 2.3E+05
+       902     1.8            722.7              0.0  100.0        0 2.3E+05
+     1,002     2.0            722.7              0.0  100.0        0 2.3E+05
+     1,503     3.0            722.7              0.0  100.0        0 2.3E+05
+     2,004     4.0            722.7              0.0  100.0        0 2.3E+05
+     3,006     6.0            722.7              0.0  100.0        0 2.3E+05
+     4,008     8.0            722.7              0.0  100.0        0 2.3E+05
+                          ------------------------------------------------------
+
+Shared Pool Advisory                           DB/Inst: REMIK/REMIK  Snap: 19
+-> SP: Shared Pool     Est LC: Estimated Library Cache   Factr: Factor
+-> Note there is often a 1:Many correlation between a single logical object
+   in the Library Cache, and the physical number of memory objects associated
+   with it.  Therefore comparing the number of Lib Cache objects (e.g. in
+   v$librarycache), with the number of Lib Cache Memory Objects is invalid.
+
+                                       Est LC Est LC  Est LC Est LC
+  Shared    SP   Est LC                  Time   Time    Load   Load       Est LC
+    Pool  Size     Size       Est LC    Saved  Saved    Time   Time      Mem Obj
+ Size(M) Factr      (M)      Mem Obj      (s)  Factr     (s)  Factr     Hits (K)
+-------- ----- -------- ------------ -------- ------ ------- ------ ------------
+     144    .4       31        1,931       81    1.0       2    1.0           43
+     176    .5       56        3,363       81    1.0       2    1.0           43
+     192    .6       56        3,363       81    1.0       2    1.0           43
+     208    .6       56        3,363       81    1.0       2    1.0           43
+     224    .7       56        3,363       81    1.0       2    1.0           43
+     240    .7       56        3,363       81    1.0       2    1.0           43
+     256    .8       56        3,363       81    1.0       2    1.0           43
+     272    .8       56        3,363       81    1.0       2    1.0           43
+     288    .9       56        3,363       81    1.0       2    1.0           43
+     304    .9       56        3,363       81    1.0       2    1.0           43
+     320   1.0       56        3,363       81    1.0       2    1.0           44
+     336   1.0       56        3,363       81    1.0       2    1.0           44
+     352   1.0       56        3,363       81    1.0       2    1.0           44
+     368   1.1       56        3,363       81    1.0       2    1.0           44
+     384   1.1       56        3,363       81    1.0       2    1.0           44
+     400   1.2       56        3,363       81    1.0       2    1.0           44
+     416   1.2       56        3,363       81    1.0       2    1.0           44
+     432   1.3       56        3,363       81    1.0       2    1.0           44
+     448   1.3       56        3,363       81    1.0       2    1.0           44
+     464   1.4       56        3,363       81    1.0       2    1.0           44
+     480   1.4       56        3,363       81    1.0       2    1.0           44
+     528   1.6       56        3,363       81    1.0       2    1.0           44
+     576   1.7       56        3,363       81    1.0       2    1.0           44
+     624   1.9       56        3,363       81    1.0       2    1.0           44
+     672   2.0       56        3,363       81    1.0       2    1.0           44
+                          ------------------------------------------------------
+
+SGA Target Advisory                             DB/Inst: REMIK/REMIK  Snap: 19
+
+SGA Target   SGA Size       Est DB     Est Physical
+  Size (M)     Factor     Time (s)            Reads
+---------- ---------- ------------ ----------------
+       752        0.5        1,143          301,484
+     1,128        0.8        1,140          293,819
+     1,504        1.0        1,139          289,249
+     1,880        1.3        1,137          286,299
+     2,256        1.5        1,137          286,212
+     2,632        1.8        1,137          286,212
+     3,008        2.0        1,137          286,212
+                          ------------------------------------------------------
+
+Streams Pool Advisory                           DB/Inst: REMIK/REMIK  Snap: 19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Java Pool Advisory                              DB/Inst: REMIK/REMIK  Snap: 19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Buffer Wait Statistics                      DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> ordered by wait time desc, waits desc
+
+Class                    Waits Total Wait Time (s)  Avg Time (ms)
+------------------ ----------- ------------------- --------------
+undo header                  1                   1            640
+                          ------------------------------------------------------
+
+Enqueue Activity                           DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> only enqueues with waits are shown
+-> Enqueue stats gathered prior to 10g should not be compared with 10g data
+-> ordered by Wait Time desc, Waits desc
+
+Enqueue Type (Request Reason)
+------------------------------------------------------------------------------
+    Requests    Succ Gets Failed Gets       Waits  Wt Time (s) Av Wt Time(ms)
+------------ ------------ ----------- ----------- ------------ --------------
+CR-Reuse Block Range (block range reuse ckpt)
+      13,914       13,914           0         620            1           1.10
+CF-Controlfile Transaction
+       2,919        2,919           0          52            1          10.96
+RO-Multiple Object Reuse (fast object reuse)
+          40           40           0           3            0          10.00
+                          ------------------------------------------------------
+
+Undo Segment Summary                       DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Min/Max TR (mins) - Min and Max Tuned Retention (minutes)
+-> STO - Snapshot Too Old count,  OOS - Out of Space count
+-> Undo segment block stats:
+-> uS - unexpired Stolen,   uR - unexpired Released,   uU - unexpired reUsed
+-> eS - expired   Stolen,   eR - expired   Released,   eU - expired   reUsed
+
+Undo   Num Undo       Number of  Max Qry   Max Tx Min/Max   STO/     uS/uR/uU/
+ TS# Blocks (K)    Transactions  Len (s) Concurcy TR (mins) OOS      eS/eR/eU
+---- ---------- --------------- -------- -------- --------- ----- --------------
+   2      215.4       3,165,609      963        4 20/30.1   0/0   0/0/0/175/1868
+                          ------------------------------------------------------
+
+Undo Segment Stats                          DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Most recent 35 Undostat rows, ordered by Time desc
+
+                Num Undo    Number of Max Qry  Max Tx Tun Ret STO/    uS/uR/uU/
+End Time          Blocks Transactions Len (s)   Concy  (mins) OOS     eS/eR/eU
+------------ ----------- ------------ ------- ------- ------- ----- ------------
+14-Mar 17:27     171,896    2,860,267     361       4      20 0/0   0/0/0/145/64
+14-Mar 17:17      43,525      305,342     963       4      30 0/0   0/0/0/30/180
+                          ------------------------------------------------------
+
+Latch Activity                             DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> "Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+   willing-to-wait latch get requests
+-> "NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+-> "Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                                    Get    Get   Slps   Time       NoWait NoWait
+Latch Name                     Requests   Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+AQ deq hash table latch               1    0.0             0            0    N/A
+ASM db client latch               3,186    0.0             0            0    N/A
+ASM map operation hash t              1    0.0             0            0    N/A
+ASM network state latch             169    0.0             0            0    N/A
+AWR Alerted Metric Eleme          5,958    0.0             0            0    N/A
+Change Notification Hash            280    0.0             0            0    N/A
+Consistent RBA                    7,909    0.0             0            0    N/A
+DML lock allocation              10,084    0.0             0            0    N/A
+Event Group Locks                    30    0.0             0            0    N/A
+FIB s.o chain latch                 298    0.0             0            0    N/A
+FOB s.o list latch                  369    0.0             0            0    N/A
+File State Object Pool P              1    0.0             0            0    N/A
+I/O Staticstics latch                 1    0.0             0            0    N/A
+IPC stats buffer allocat              1    0.0             0            0    N/A
+In memory undo latch             11,797    0.0             0        4,204    0.0
+JS Sh mem access                      3    0.0             0            0    N/A
+JS mem alloc latch                    2    0.0             0            0    N/A
+JS queue access latch                 3    0.0             0            0    N/A
+JS queue state obj latch          6,138    0.0             0            0    N/A
+JS slv state obj latch               13    0.0             0            0    N/A
+KFC FX Hash Latch                     1    0.0             0            0    N/A
+KFC Hash Latch                        1    0.0             0            0    N/A
+KFCL LE Freelist                      1    0.0             0            0    N/A
+KGNFS-NFS:SHM structure               1    0.0             0            0    N/A
+KGNFS-NFS:SVR LIST                    1    0.0             0            0    N/A
+KJC message pool free li              1    0.0             0            0    N/A
+KJCT flow control latch               1    0.0             0            0    N/A
+KMG MMAN ready and start            280    0.0             0            0    N/A
+KTF sga latch                         6    0.0             0          283    0.0
+Locator state objects po              1    0.0             0            0    N/A
+Lsod array latch                      1    0.0             0            0    N/A
+MQL Tracking Latch                    0    N/A             0           16    0.0
+Memory Management Latch               1    0.0             0          280    0.0
+Memory Queue                          1    0.0             0            0    N/A
+Memory Queue Message Sub              1    0.0             0            0    N/A
+Memory Queue Message Sub              1    0.0             0            0    N/A
+Memory Queue Message Sub              1    0.0             0            0    N/A
+Memory Queue Message Sub              1    0.0             0            0    N/A
+Memory Queue Subscriber               1    0.0             0            0    N/A
+MinActiveScn Latch                    8    0.0             0            0    N/A
+Mutex                                 1    0.0             0            0    N/A
+Mutex Stats                           1    0.0             0            0    N/A
+OS process                           97    0.0             0            0    N/A
+OS process allocation             1,730    0.0             0            0    N/A
+OS process: request allo             24    0.0             0            0    N/A
+PL/SQL warning settings              94    0.0             0            0    N/A
+PX hash array latch                   1    0.0             0            0    N/A
+QMT                                   1    0.0             0            0    N/A
+Real-time plan statistic             38    0.0             0            0    N/A
+SGA IO buffer pool latch          2,243    0.0             0        3,177    0.0
+SGA blob parent                       1    0.0             0            0    N/A
+SGA bucket locks                      1    0.0             0            0    N/A
+SGA heap locks                        1    0.0             0            0    N/A
+SGA pool locks                        1    0.0             0            0    N/A
+SQL memory manager latch              1    0.0             0          279    0.0
+SQL memory manager worka         18,965    0.0             0            0    N/A
+Shared B-Tree                        31    0.0             0            0    N/A
+Streams Generic                       1    0.0             0            0    N/A
+Testing                               1    0.0             0            0    N/A
+Token Manager                         1    0.0             0            0    N/A
+Latch Activity                             DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> "Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+   willing-to-wait latch get requests
+-> "NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+-> "Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                                    Get    Get   Slps   Time       NoWait NoWait
+Latch Name                     Requests   Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+Undo Hint Latch                       0    N/A             0          315    0.0
+WCR: sync                             1    0.0             0            0    N/A
+Write State Object Pool               1    0.0             0            0    N/A
+X$KSFQP                               1    0.0             0            0    N/A
+XDB NFS Security Latch                1    0.0             0            0    N/A
+XDB unused session pool               1    0.0             0            0    N/A
+XDB used session pool                 1    0.0             0            0    N/A
+active checkpoint queue           7,733    0.0             0            0    N/A
+active service list               1,859    0.0             0          928    0.0
+begin backup scn array        3,436,519    0.0             0            0    N/A
+buffer pool                           1    0.0             0            0    N/A
+business card                         1    0.0             0            0    N/A
+cache buffer handles              7,815    0.0             0            0    N/A
+cache buffers chains      1,345,842,290    0.0    1.0      0      350,076    0.0
+cache buffers lru chain       7,256,064    0.0    1.0      0    2,266,457    0.0
+call allocation                   8,223    0.0             0            0    N/A
+cas latch                             1    0.0             0            0    N/A
+change notification clie              1    0.0             0            0    N/A
+channel handle pool latc             29    0.0             0            0    N/A
+channel operations paren         24,903    0.0             0            0    N/A
+checkpoint queue latch        3,204,802    0.0    1.0      0      233,883    0.0
+client/application info              43    0.0             0            0    N/A
+compile environment latc             16    0.0             0            0    N/A
+corrupted undo seg latch            357    0.0             0            0    N/A
+cp cmon/server latch                  1    0.0             0            0    N/A
+cp pool latch                         1    0.0             0            0    N/A
+cp server hash latch                  1    0.0             0            0    N/A
+cp sga latch                        169    0.0             0            0    N/A
+cvmap freelist lock                   1    0.0             0            0    N/A
+deferred cleanup latch              169    0.0             0            0    N/A
+dml lock allocation                 177    0.0             0            0    N/A
+done queue latch                      1    0.0             0            0    N/A
+dummy allocation                     31    0.0             0            0    N/A
+eighth spare latch - X p              1    0.0             0            0    N/A
+eleventh spare latch - c              1    0.0             0            0    N/A
+enqueue freelist latch                1    0.0             0    6,923,203    0.0
+enqueue hash chains          12,872,349    0.0             0            2    0.0
+enqueues                            188    0.0             0            0    N/A
+fifteenth spare latch -               1    0.0             0            0    N/A
+file cache latch                  2,535    0.0             0            0    N/A
+flashback copy                        1    0.0             0            0    N/A
+fourteenth spare latch -              1    0.0             0            0    N/A
+fourth Audit Vault latch              1    0.0             0            0    N/A
+gc element                            1    0.0             0            0    N/A
+gcs commit scn state                  1    0.0             0            0    N/A
+gcs partitioned table ha              1    0.0             0            0    N/A
+gcs pcm hashed value buc              1    0.0             0            0    N/A
+gcs resource freelist                 1    0.0             0            0    N/A
+gcs resource hash                     1    0.0             0            0    N/A
+gcs resource scan list                1    0.0             0            0    N/A
+gcs resource validate li              1    0.0             0            0    N/A
+gcs shadows freelist                  1    0.0             0            0    N/A
+ges domain table                      1    0.0             0            0    N/A
+ges enqueue table freeli              1    0.0             0            0    N/A
+ges group table                       1    0.0             0            0    N/A
+ges process hash list                 1    0.0             0            0    N/A
+ges process parent latch              1    0.0             0            0    N/A
+ges resource hash list                1    0.0             0            0    N/A
+ges resource scan list                1    0.0             0            0    N/A
+ges resource table freel              1    0.0             0            0    N/A
+Latch Activity                             DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> "Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+   willing-to-wait latch get requests
+-> "NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+-> "Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                                    Get    Get   Slps   Time       NoWait NoWait
+Latch Name                     Requests   Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+ges value block free lis              1    0.0             0            0    N/A
+global KZLD latch for me              2    0.0             0            0    N/A
+global tx hash mapping                1    0.0             0            0    N/A
+granule operation                     1    0.0             0            0    N/A
+hash table column usage              80    0.0             0          159    0.0
+hash table modification              10    0.0             0            0    N/A
+heartbeat check                       1    0.0             0            0    N/A
+intra txn parallel recov              1    0.0             0            0    N/A
+io pool granule metadata              1    0.0             0            0    N/A
+job workq parent latch                4    0.0             0            3    0.0
+job_queue_processes free              8    0.0             0            0    N/A
+job_queue_processes para            186    0.0             0            0    N/A
+k2q lock allocation                   1    0.0             0            0    N/A
+kcbtsemkid latch                     95    0.0             0            0    N/A
+kdlx hb parent latch                  1    0.0             0            0    N/A
+kgb parent                            1    0.0             0            0    N/A
+kgnfs mount latch                     1    0.0             0            0    N/A
+kokc descriptor allocati              4    0.0             0            0    N/A
+ksfv messages                         1    0.0             0            0    N/A
+ksim group membership ca              1    0.0             0            0    N/A
+kss move lock                         9    0.0             0            0    N/A
+ksuosstats global area               87    0.0             0            0    N/A
+ksv allocation latch                183    0.0             0            0    N/A
+ksv class latch                      13    0.0             0            0    N/A
+ksv msg queue latch                   1    0.0             0            0    N/A
+ksz_so allocation latch              24    0.0             0            0    N/A
+ktm global data                     634    0.0             0            0    N/A
+kwqbsn:qsga                          30    0.0             0            0    N/A
+lgwr LWN SCN                      7,839    0.0             0            0    N/A
+list of block allocation          5,850    0.0             0            0    N/A
+loader state object free         17,142    0.0             0            0    N/A
+lob segment dispenser la              1    0.0             0            0    N/A
+lob segment hash table l              5    0.0             0            0    N/A
+lob segment query latch               1    0.0             0            0    N/A
+lock DBA buffer during m              1    0.0             0            0    N/A
+logical standby cache                 1    0.0             0            0    N/A
+logminer context allocat              1    0.0             0            0    N/A
+logminer local                        1    0.0             0            0    N/A
+logminer work area                    1    0.0             0            0    N/A
+longop free list parent               1    0.0             0            0    N/A
+mapped buffers lru chain              1    0.0             0            0    N/A
+message pool operations           5,728    0.0             0            0    N/A
+messages                         51,665    0.0             0            0    N/A
+mostly latch-free SCN             7,840    0.0             0            0    N/A
+msg queue latch                       1    0.0             0            0    N/A
+name-service namespace b              1    0.0             0            0    N/A
+ncodef allocation latch             169    0.0             0            0    N/A
+nineth spare latch - X p              1    0.0             0            0    N/A
+object queue header heap          3,909    0.0             0          204    0.0
+object queue header oper      4,044,422    0.0    1.0      0            0    N/A
+object stats modificatio             62    0.0             0            0    N/A
+parallel query alloc buf            109    0.0             0            0    N/A
+parallel query stats                  1    0.0             0            0    N/A
+parameter list                       24    0.0             0            0    N/A
+parameter table manageme             64    0.0             0            0    N/A
+peshm                                 1    0.0             0            0    N/A
+pesom_free_list                       1    0.0             0            0    N/A
+pesom_hash_node                       1    0.0             0            0    N/A
+post/wait queue                   1,575    0.0             0        2,094    0.0
+process allocation                   34    0.0             0           13    0.0
+Latch Activity                             DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> "Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+   willing-to-wait latch get requests
+-> "NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+-> "Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                                    Get    Get   Slps   Time       NoWait NoWait
+Latch Name                     Requests   Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+process group creation               24    0.0             0            0    N/A
+process queue                         1    0.0             0            0    N/A
+process queue reference               1    0.0             0            0    N/A
+qmn task queue latch                123    0.0             0            0    N/A
+query server freelists                1    0.0             0            0    N/A
+queued dump request                   3    0.0             0            0    N/A
+queuing load statistics               1    0.0             0            0    N/A
+recovery domain hash lis              1    0.0             0            0    N/A
+redo allocation                  34,886    0.5    1.1      0   23,550,478    0.0
+redo copy                             2    0.0             0   23,550,487    0.0
+redo writing                     29,209    0.0    1.0      0            0    N/A
+resmgr group change latc             10    0.0             0            0    N/A
+resmgr:active threads                31    0.0             0            0    N/A
+resmgr:actses change gro             11    0.0             0            0    N/A
+resmgr:actses change sta              1    0.0             0            0    N/A
+resmgr:free threads list             30    0.0             0            0    N/A
+resmgr:plan CPU method                1    0.0             0            0    N/A
+resmgr:resource group CP              1    0.0             0            0    N/A
+resmgr:schema config                  1    0.0             0            0    N/A
+resmgr:session queuing                1    0.0             0            0    N/A
+rm cas latch                          1    0.0             0            0    N/A
+row cache objects                82,141    0.0    1.0      0            0    N/A
+second Audit Vault latch              1    0.0             0            0    N/A
+sequence cache                      279    0.0             0            0    N/A
+session allocation                  143    0.0             0            0    N/A
+session idle bit                    496    0.0             0            0    N/A
+session queue latch                   1    0.0             0            0    N/A
+session state list latch             48    0.0             0            0    N/A
+session switching                   181    0.0             0            0    N/A
+session timer                       400    0.0             0            0    N/A
+seventh spare latch - X               1    0.0             0            0    N/A
+shared pool                      22,994    0.0    1.0      0            0    N/A
+shared pool sim alloc                 3    0.0             0            0    N/A
+shared pool simulator               109    0.0             0            0    N/A
+shrink stat allocation l          4,111    0.0             0            0    N/A
+sim partition latch                   1    0.0             0            0    N/A
+simulator hash latch         42,457,090    0.0    0.5      0            0    N/A
+simulator lru latch             217,865    0.0    1.0      0   42,212,409    0.0
+sixth spare latch - X pa              1    0.0             0            0    N/A
+sort extent pool                    362    0.0             0            0    N/A
+space background state o              2    0.0             0            0    N/A
+space background task la          4,273    0.0             0          568    0.0
+state object free list                2    0.0             0            0    N/A
+statistics aggregation              560    0.0             0            0    N/A
+tablespace key chain                  1    0.0             0            0    N/A
+temp lob duration state               4    0.0             0            0    N/A
+temporary table state ob              2    0.0             0            0    N/A
+tenth spare latch - X pa              1    0.0             0            0    N/A
+test excl. parent l0                  1    0.0             0            0    N/A
+test excl. parent2 l0                 1    0.0             0            0    N/A
+thirteenth spare latch -              1    0.0             0            0    N/A
+threshold alerts latch               32    0.0             0            0    N/A
+trace latch                           1    0.0             0            0    N/A
+transaction allocation           19,074    0.0             0            0    N/A
+twelfth spare latch - ch              1    0.0             0            0    N/A
+twenty-fifth spare latch              1    0.0             0            0    N/A
+twenty-first spare latch              1    0.0             0            0    N/A
+twenty-fourth spare latc              1    0.0             0            0    N/A
+twenty-second spare latc              1    0.0             0            0    N/A
+twenty-third spare latch              1    0.0             0            0    N/A
+Latch Activity                             DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> "Get Requests", "Pct Get Miss" and "Avg Slps/Miss" are statistics for
+   willing-to-wait latch get requests
+-> "NoWait Requests", "Pct NoWait Miss" are for no-wait latch get requests
+-> "Pct Misses" for both should be very close to 0.0
+
+                                           Pct    Avg   Wait                 Pct
+                                    Get    Get   Slps   Time       NoWait NoWait
+Latch Name                     Requests   Miss  /Miss    (s)     Requests   Miss
+------------------------ -------------- ------ ------ ------ ------------ ------
+undo global data              9,125,885    0.0             0            0    N/A
+virtual circuit buffers               1    0.0             0            0    N/A
+virtual circuit holder                1    0.0             0            0    N/A
+virtual circuit queues                1    0.0             0            0    N/A
+write info latch                      0    N/A             0        7,909    0.0
+                          ------------------------------------------------------
+
+Latch Sleep Breakdown                      DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> ordered by misses desc
+
+                                       Get                                 Spin
+Latch Name                        Requests       Misses      Sleeps        Gets
+-------------------------- --------------- ------------ ----------- -----------
+redo allocation                     34,886          187         203           0
+cache buffers chains         1,345,842,290           51          51           0
+cache buffers lru chain          7,256,064            6           6           0
+object queue header operat       4,044,422            5           5           0
+simulator lru latch                217,865            5           5           0
+checkpoint queue latch           3,204,802            3           3           0
+redo writing                        29,209            2           2           0
+row cache objects                   82,141            2           2           0
+simulator hash latch            42,457,090            2           1           1
+shared pool                         22,994            1           1           0
+                          ------------------------------------------------------
+
+Latch Miss Sources                         DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> only latches with sleeps are shown
+-> ordered by name, sleeps desc
+
+                                                     NoWait              Waiter
+Latch Name               Where                       Misses     Sleeps   Sleeps
+------------------------ -------------------------- ------- ---------- --------
+cache buffers chains     kcbgtcr: fast path (cr pin       0         43        2
+cache buffers chains     kcbrls: fast release             0          4       27
+cache buffers chains     kcbgcur: fast path (shr)         0          2        0
+cache buffers chains     kcbbic1                          0          1        6
+cache buffers chains     kcbget: fast exchange            0          1        0
+cache buffers lru chain  kcbzswcu                         0          3        0
+cache buffers lru chain  kcbbic2                          0          2        4
+cache buffers lru chain  kcbzgws_1                        0          1        1
+checkpoint queue latch   kcbbwthc: thread checkpoin       0          2        0
+checkpoint queue latch   kcbbwdl: thread checkpoint       0          1        0
+object queue header oper kcbo_switch_mq_bg                0          4        0
+object queue header oper kcbo_switch_q_bg                 0          1        0
+redo allocation          kcrfw_redo_gen: redo alloc       0        202        0
+redo allocation          kcrfw_redo_gen: redo alloc       0          1       14
+redo writing             kcrfw_post: rba scn pair         0          1        0
+redo writing             kcrfwcr                          0          1        1
+row cache objects        kqrcmt: while loop               0          1        0
+row cache objects        kqreqd: reget                    0          1        0
+shared pool              kghalo                           0          1        1
+simulator hash latch     kcbs_get_or_extract_simbuf       0          1        0
+simulator lru latch      kcbs_simulate: simulate se       0          5        0
+                          ------------------------------------------------------
+
+Mutex Sleep Summary                         DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Parent Latch Statistics                    DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Child Latch Statistics                      DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Segments by Logical Reads                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Logical Reads:     648,279,220
+-> Captured Segments account for   98.5% of Total
+
+           Tablespace                      Subobject  Obj.       Logical
+Owner         Name    Object Name            Name     Type         Reads  %Total
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_IL0000087813C000            INDEX  612,609,072   94.50
+REFTECH    USERS      SYS_LOB0000087813C00            LOB     22,516,400    3.47
+** MISSING TEMP       ** TRANSIENT: 419750 MISSING ** UNDEF    3,462,096     .53
+REFTECH    USERS      TEST                            TABLE        9,712     .00
+SYS        SYSTEM     SUBCOLTYPE$                     TABLE        4,704     .00
+                          ------------------------------------------------------
+
+Segments by Physical Reads                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Physical Reads:          15,026
+-> Captured Segments account for   96.9% of Total
+
+           Tablespace                      Subobject  Obj.      Physical
+Owner         Name    Object Name            Name     Type         Reads  %Total
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_LOB0000087813C00            LOB         12,051   80.20
+REFTECH    USERS      SYS_IL0000087813C000            INDEX        2,405   16.01
+SYS        SYSTEM     IDL_UB1$                        TABLE           65     .43
+REFTECH    USERS      TEST                            TABLE           11     .07
+SYS        SYSTEM     ACCESS$                         TABLE            5     .03
+                          ------------------------------------------------------
+
+Segments by Physical Read Requests          DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Physical Read Requests:          15,026
+-> Captured Segments account for   96.9% of Total
+
+           Tablespace                      Subobject  Obj.     Phys Read
+Owner         Name    Object Name            Name     Type      Requests  %Total
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_LOB0000087813C00            LOB         12,051   80.20
+REFTECH    USERS      SYS_IL0000087813C000            INDEX        2,405   16.01
+SYS        SYSTEM     IDL_UB1$                        TABLE           65     .43
+REFTECH    USERS      TEST                            TABLE           11     .07
+SYS        SYSTEM     ACCESS$                         TABLE            5     .03
+                          ------------------------------------------------------
+
+Segments by UnOptimized Reads               DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total UnOptimized Read Requests:          15,026
+-> Captured Segments account for   96.9% of Total
+
+           Tablespace                      Subobject  Obj.   UnOptimized
+Owner         Name    Object Name            Name     Type         Reads  %Total
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_LOB0000087813C00            LOB         12,051   80.20
+REFTECH    USERS      SYS_IL0000087813C000            INDEX        2,405   16.01
+SYS        SYSTEM     IDL_UB1$                        TABLE           65     .43
+REFTECH    USERS      TEST                            TABLE           11     .07
+SYS        SYSTEM     ACCESS$                         TABLE            5     .03
+                          ------------------------------------------------------
+
+Segments by Optimized Reads                 DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Segments by Direct Physical Reads           DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Segments by Physical Writes                 DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Physical Writes:       3,686,536
+-> Captured Segments account for   94.4% of Total
+
+           Tablespace                      Subobject  Obj.      Physical
+Owner         Name    Object Name            Name     Type        Writes  %Total
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_LOB0000087813C00            LOB      3,463,818   93.96
+REFTECH    USERS      SYS_IL0000087813C000            INDEX       16,918     .46
+REFTECH    USERS      TEST                            TABLE          193     .01
+SYS        SYSTEM     SEG$                            TABLE           18     .00
+SYS        SYSAUX     WRH$_SQL_PLAN_PK                INDEX           18     .00
+                          ------------------------------------------------------
+
+Segments by Physical Write Requests         DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Physical Write Requestss:       3,528,144
+-> Captured Segments account for   97.7% of Total
+
+           Tablespace                      Subobject  Obj.    Phys Write
+Owner         Name    Object Name            Name     Type      Requests  %Total
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_LOB0000087813C00            LOB      3,439,708   97.49
+REFTECH    USERS      SYS_IL0000087813C000            INDEX        8,604     .24
+REFTECH    USERS      TEST                            TABLE           80     .00
+SYS        SYSTEM     SEG$                            TABLE           15     .00
+SYS        SYSAUX     WRH$_SQL_PLAN_PK                INDEX           13     .00
+                          ------------------------------------------------------
+
+Segments by Direct Physical Writes          DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Total Direct Physical Writes:       3,456,380
+-> Captured Segments account for  100.0% of Total
+
+           Tablespace                      Subobject  Obj.        Direct
+Owner         Name    Object Name            Name     Type        Writes  %Total
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_LOB0000087813C00            LOB      3,456,000   99.99
+                          ------------------------------------------------------
+
+Segments by Table Scans                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Segments by DB Blocks Changes               DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> % of Capture shows % of DB Block Changes for each top segment compared
+-> with total DB Block Changes for all segments captured by the Snapshot
+
+           Tablespace                      Subobject  Obj.      DB Block    % of
+Owner         Name    Object Name            Name     Type       Changes Capture
+---------- ---------- -------------------- ---------- ----- ------------ -------
+REFTECH    USERS      SYS_IL0000087813C000            INDEX   10,733,840   53.36
+REFTECH    USERS      SYS_LOB0000087813C00            LOB      9,367,936   46.57
+REFTECH    USERS      TEST                            TABLE        8,800     .04
+** MISSING TEMP       ** TRANSIENT: 419750 MISSING ** UNDEF        2,624     .01
+SYS        SYSTEM     SEG$                            TABLE          672     .00
+                          ------------------------------------------------------
+
+Segments by Row Lock Waits                 DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Segments by ITL Waits                       DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Segments by Buffer Busy Waits               DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Dictionary Cache Stats                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> "Pct Misses"  should be very low (< 2% in most cases)
+-> "Final Usage" is the number of cache entries being used
+
+                                   Get    Pct    Scan   Pct      Mod      Final
+Cache                         Requests   Miss    Reqs  Miss     Reqs      Usage
+------------------------- ------------ ------ ------- ----- -------- ----------
+dc_awr_control                      19    0.0       0   N/A        2          1
+dc_global_oids                     113    1.8       0   N/A        0         41
+dc_histogram_data                   51    0.0       0   N/A        0        587
+dc_histogram_defs                  114    7.9       0   N/A        0      3,467
+dc_object_grants                     8    0.0       0   N/A        0         99
+dc_objects                         684    8.0       0   N/A       22      1,468
+dc_profiles                          8    0.0       0   N/A        0          1
+dc_rollback_segments             5,400    0.0       0   N/A        0         22
+dc_segments                      2,974    0.2       0   N/A      653        521
+dc_table_scns                        2  100.0       0   N/A        0          0
+dc_tablespace_quotas             3,996    0.0       0   N/A        0          2
+dc_tablespaces                   6,199    0.0       0   N/A        0          5
+dc_users                         8,867    0.0       0   N/A        0        103
+global database name               568    0.0       0   N/A        0          1
+outstanding_alerts                   6    0.0       0   N/A        0          4
+sch_lj_oids                          2    0.0       0   N/A        0          2
+                          ------------------------------------------------------
+
+Library Cache Activity                      DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> "Pct Misses"  should be very low
+
+                         Get    Pct            Pin    Pct             Invali-
+Namespace           Requests   Miss       Requests   Miss    Reloads  dations
+--------------- ------------ ------ -------------- ------ ---------- --------
+ACCOUNT_STATUS             6    0.0              0    N/A          0        0
+BODY                     188    1.1            427    0.5          0        0
+DBLINK                     8    0.0              0    N/A          0        0
+DIRECTORY                  2    0.0              7    0.0          0        0
+EDITION                    8    0.0             13    0.0          0        0
+INDEX                      8   12.5              8   37.5          1        0
+OBJECT ID                  4  100.0              0    N/A          0        0
+SCHEMA                    23    0.0              0    N/A          0        0
+SQL AREA                 683   23.3          7,652    1.2         15       19
+SQL AREA BUILD            28   46.4              0    N/A          0        0
+SQL AREA STATS            33   54.5             33   54.5          0        0
+TABLE/PROCEDURE          331   22.7            990    3.1          6        0
+TRIGGER                   78    0.0             78    0.0          0        0
+                          ------------------------------------------------------
+
+Memory Dynamic Components                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Min/Max sizes since instance startup
+-> Oper Types/Modes: INItializing,GROw,SHRink,STAtic/IMMediate,DEFerred
+-> ordered by Component
+
+                 Begin Snap     Current         Min         Max   Oper Last Op
+Component         Size (Mb)   Size (Mb)   Size (Mb)   Size (Mb)  Count Typ/Mod
+--------------- ----------- ----------- ----------- ----------- ------ -------
+ASM Buffer Cach         .00         .00         .00         .00      0 STA/
+DEFAULT 16K buf         .00         .00         .00         .00      0 STA/
+DEFAULT 2K buff         .00         .00         .00         .00      0 STA/
+DEFAULT 32K buf         .00         .00         .00         .00      0 STA/
+DEFAULT 4K buff         .00         .00         .00         .00      0 STA/
+DEFAULT 8K buff         .00         .00         .00         .00      0 STA/
+DEFAULT buffer       848.00      848.00      800.00    1,056.00      0 GRO/DEF
+KEEP buffer cac         .00         .00         .00         .00      0 STA/
+PGA Target           512.00      512.00      512.00      512.00      0 STA/
+RECYCLE buffer          .00         .00         .00         .00      0 STA/
+SGA Target         1,504.00    1,504.00    1,504.00    1,504.00      0 STA/
+Shared IO Pool       256.00      256.00         .00      256.00      0 GRO/IMM
+java pool             16.00       16.00       16.00       16.00      0 STA/
+large pool            32.00       32.00       32.00       80.00      0 SHR/DEF
+shared pool          336.00      336.00      336.00      336.00      0 STA/
+streams pool            .00         .00         .00         .00      0 STA/
+                          ------------------------------------------------------
+
+Memory Resize Operations Summary            DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Memory Resize Ops                           DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Process Memory Summary                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> B: Begin Snap   E: End Snap
+-> All rows below contain absolute values (i.e. not diffed over the interval)
+-> Max Alloc is Maximum PGA Allocation size at snapshot time
+-> Hist Max Alloc is the Historical Max Allocation for still-connected processes
+-> ordered by Begin/End snapshot, Alloc (MB) desc
+
+                                                            Hist
+                                    Avg  Std Dev     Max     Max
+               Alloc      Used    Alloc    Alloc   Alloc   Alloc    Num    Num
+  Category      (MB)      (MB)     (MB)     (MB)    (MB)    (MB)   Proc  Alloc
+- -------- --------- --------- -------- -------- ------- ------- ------ ------
+B Other         51.9       N/A      1.9      2.6      12      12     28     28
+  Freeable      23.0        .0      3.3      4.5      13     N/A      7      7
+  SQL             .8        .6       .1       .2       1       3     13      9
+  PL/SQL          .5        .4       .0       .1       0       0     26     26
+E Other         65.8       N/A      2.2      4.1      21      21     30     30
+  Freeable      21.8        .0      3.1      4.2      12     N/A      7      7
+  SQL             .7        .6       .0       .2       1       3     17     12
+  PL/SQL          .5        .4       .0       .0       0       0     28     28
+                          ------------------------------------------------------
+
+SGA Memory Summary                          DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                                                      End Size (Bytes)
+SGA regions                     Begin Size (Bytes)      (if different)
+------------------------------ ------------------- -------------------
+Database Buffers                     1,157,627,904
+Fixed Size                               2,253,584
+Redo Buffers                             7,471,104
+Variable Size                          402,656,496
+                               -------------------
+sum                                  1,570,009,088
+                          ------------------------------------------------------
+
+SGA breakdown difference                    DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> ordered by Pool, Name
+-> N/A value for Begin MB or End MB indicates the size of that Pool/Name was
+   insignificant, or zero in that snapshot
+
+Pool   Name                                 Begin MB         End MB  % Diff
+------ ------------------------------ -------------- -------------- -------
+java   free memory                              16.0           16.0    0.00
+large  PX msg pool                                .5             .5    0.00
+large  free memory                              31.5           31.5    0.00
+shared KCB Table Scan Buffer                     4.0            4.0    0.00
+shared KGLH0                                    19.6           19.9    1.30
+shared KGLHD                                     3.9            4.1    3.90
+shared KGLS                                      9.7            9.7    0.20
+shared KGLSG                                     5.0            5.0    0.00
+shared KSFD SGA I/O b                            4.0            4.0    0.00
+shared PLMCD                                     4.7            5.2    9.55
+shared SQLA                                     27.5           27.7    0.90
+shared db_block_hash_buckets                     5.6            5.6    0.00
+shared dbwriter coalesce buffer                  4.0            4.0    0.00
+shared free memory                             168.8          167.5   -0.82
+shared kglsim hash table bkts                    4.0            4.0    0.00
+shared private strands                           3.5            3.5    0.00
+shared row cache                                 8.2            8.2    0.00
+shared write state object                        5.4            5.4    0.00
+       buffer_cache                            848.0          848.0    0.00
+       fixed_sga                                 2.1            2.1    0.00
+       log_buffer                                7.1            7.1    0.00
+       shared_io_pool                          256.0          256.0    0.00
+                          ------------------------------------------------------
+
+Streams CPU/IO Usage                       DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Streams Capture                             DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Streams Capture Rate                        DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Streams Apply                               DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Streams Apply Rate                          DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Buffered Queues                             DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Buffered Queue Subscribers                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Rule Set                                    DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Persistent Queues                           DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Persistent Queues Rate                      DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Persistent Queue Subscribers                DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Resource Limit Stats                           DB/Inst: REMIK/REMIK  Snap: 19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Shared Servers Activity                     DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Values represent averages for all samples
+
+   Avg Total   Avg Active    Avg Total   Avg Active    Avg Total   Avg Active
+ Connections  Connections Shared Srvrs Shared Srvrs  Dispatchers  Dispatchers
+------------ ------------ ------------ ------------ ------------ ------------
+           0            0            1            0            1            0
+                          ------------------------------------------------------
+
+Shared Servers Rates                        DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+  Common     Disp                        Common       Disp     Server
+   Queue    Queue   Server    Server      Queue      Queue      Total     Server
+ Per Sec  Per Sec Msgs/Sec    KB/Sec      Total      Total       Msgs  Total(KB)
+-------- -------- -------- --------- ---------- ---------- ---------- ----------
+       0        0        0       0.0          0          0          0          0
+                          ------------------------------------------------------
+
+Shared Servers Utilization                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Statistics are combined for all servers
+-> Incoming and Outgoing Net % are included in %Busy
+
+  Total Server                    Incoming  Outgoing
+      Time (s)    %Busy    %Idle     Net %     Net %
+-------------- -------- -------- --------- ---------
+           841      0.0    100.0       0.0       0.0
+                          ------------------------------------------------------
+
+Shared Servers Common Queue                 DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+Shared Servers Dispatchers                  DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> Ordered by %Busy, descending
+-> Total Queued, Total Queue Wait and Avg Queue Wait are for dispatcher queue
+-> Name suffixes:
+     "(N)" - dispatcher started between begin and end snapshots
+     "(R)" - dispatcher re-started between begin and end snapshots
+
+              Avg Total Disp                        Total Total Queue  Avg Queue
+Name        Conns   Time (s)    %Busy    %Idle     Queued    Wait (s)  Wait (ms)
+------- --------- ---------- -------- -------- ---------- ----------- ----------
+D000          0.0        841      0.0    100.0          0           0
+                          ------------------------------------------------------
+
+init.ora Parameters                        DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                                                                End value
+Parameter Name                Begin value                       (if different)
+----------------------------- --------------------------------- --------------
+audit_file_dest               /home/oracle/app/oracle/admin/REM
+audit_trail                   DB
+compatible                    11.2.0.4.0
+control_files                 /u01/data/REMIK/control01.ctl, /u
+db_block_size                 8192
+db_domain
+db_name                       REMIK
+diagnostic_dest               /home/oracle/app/oracle
+dispatchers                   (PROTOCOL=TCP) (SERVICE=REMIKXDB)
+filesystemio_options          SETALL
+open_cursors                  300
+pga_aggregate_target          525336576
+plsql_warnings                DISABLE:ALL
+processes                     150
+recyclebin                    OFF
+remote_login_passwordfile     EXCLUSIVE
+sga_target                    1577058304
+undo_tablespace               UNDOTBS1
+                          ------------------------------------------------------
+
+init.ora Multi-Valued Parameters           DB/Inst: REMIK/REMIK  Snaps: 18-19
+-> This section only displays parameters that have more one value
+->'(NULL)' indicates a missing parameter value
+-> A blank in the End Snapshot indicates the same value as the BeginSnapshot
+
+                                                                End value
+Parameter Name                Begin value                       (if different)
+----------------------------- --------------------------------- --------------
+control_files                 /u01/data/REMIK/control01.ctl
+                              /u01/data/REMIK/control02.ctl
+                          ------------------------------------------------------
+
+Dynamic Remastering Stats                   DB/Inst: REMIK/REMIK  Snaps: 18-19
+
+                  No data exists for this section of the report.
+                          ------------------------------------------------------
+
+End of Report
