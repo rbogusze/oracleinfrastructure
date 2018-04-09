@@ -55,6 +55,17 @@ msgb()
   fi
 }
 
+msge()
+{
+  if [ "$INFO_MODE" = "ERROR" ] || [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    echo -e -n '\E[31m\07'
+    echo -n "[error]  "
+    echo -e -n '\E[39m\E[49m'
+    echo "$1"
+  fi
+}
+
 msgd()
 {
   if [ "$INFO_MODE" = "DEBUG" ] ; then
@@ -128,6 +139,12 @@ f_generate_awr()
   check_parameter $V_SNAP_START
   check_parameter $V_SNAP_END
 
+  msgd "Generating text AWR"
+  sqlplus -S /nolog <<EOF
+connect $V_USER/$V_PASS
+SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_TEXT($V_DBID,1,$V_SNAP_START,$V_SNAP_END));
+exit;
+EOF
 
 exit 0   
 
@@ -145,13 +162,46 @@ check_parameter $4
 check_parameter $5
 
 F_SNAP_FILE=$1
-USERNAME=$2
+V_USER=$2
 TIME_START=$3
 TIME_END=$4
 NR_DAYS_BACK=$5
 DATE_START=$6
 
 check_file $F_SNAP_FILE
+
+echo "Provide password for user $V_USER"
+read -s V_PASS
+
+F_SQLPLUS=`which sqlplus`
+msgd "F_SQLPLUS: $F_SQLPLUS"
+check_file $F_SQLPLUS
+
+testavail=`sqlplus -S /nolog <<EOF
+set head off pagesize 0 echo off verify off feedback off heading off
+connect $V_USER/$V_PASS
+select trim(1) result from dual;
+exit;
+EOF`
+
+msgd "testavail: $testavail"
+if [ "$testavail" != "1" ]; then
+  msge "Not connected to $CN exiting !! Turn on DEBUG on check the logs."
+  exit 0
+else
+  msgi "DB available, continuing"
+fi
+
+msgd "Getting DBID"
+V_DBID=`sqlplus -S /nolog <<EOF
+set head off pagesize 0 echo off verify off feedback off heading off
+connect $V_USER/$V_PASS
+select dbid from v\\$database;
+exit;
+EOF`
+
+msgd "V_DBID: $V_DBID"
+check_parameter $V_DBID
 
 myvar=0
 while [ $myvar -ne $NR_DAYS_BACK ]
@@ -182,7 +232,6 @@ do
 
     V_SNAP_END=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_END}" | awk '{print $1}'`
     msgd "V_SNAP_END: $V_SNAP_END"
-#exit 0
 
     if [ -z ${V_SNAP_START} ] || [ -z ${V_SNAP_END} ] ; then
       msgd "I could not fine snapshots for both times, skipping AWR creations"
