@@ -145,10 +145,16 @@ connect $V_USER/$V_PASS
 spool $D_OUTPUT_DIR/AWR_txt_day/awr_${ORACLE_SID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt
 SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_TEXT($V_DBID,1,$V_SNAP_START,$V_SNAP_END));
 spool off
+
+spool $D_OUTPUT_DIR/AWR_html_day/awr_${ORACLE_SID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.html
+SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_HTML($V_DBID,1,$V_SNAP_START,$V_SNAP_END));
+spool off
+
 exit;
 EOF
 
-exit 0   
+msgd "OK, we have AWR reports generated. Now it is time for SQL reports."
+#exit 0   
 
 #WIP
 
