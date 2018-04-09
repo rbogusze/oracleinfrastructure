@@ -1,14 +1,19 @@
 #!/bin/bash
 #$Id$
 #
-# Generate the statspack and hash reports for the long range of days
+# /tmp/ala.txt - file that lists snaps, result of
+# > spool /tmp/ala.txt
+#> @?/rdbms/admin/awrrpt.sql
+#Enter value for report_type: text
+#Enter value for num_days: 30
 #
+# username, you will be asked for password
 # Example
-# $ ./01_bulk_generate.sh EBSDB4 apps 08:00 16:00 8
+# $ ./01_bulk_generate.sh /tmp/ala.txt rboguszewicz 10:00 12:00 8
+#
 # Optionaly add at the end date from which to start
 # $ ./01_bulk_generate.sh EBSDB4 apps 08:00 16:00 8 2015-08-12
-#
-#
+
 # Load usefull functions
 V_INTERACTIVE=1
 
