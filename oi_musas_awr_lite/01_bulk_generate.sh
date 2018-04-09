@@ -140,7 +140,7 @@ f_generate_awr()
   check_parameter $V_SNAP_END
 
   msgd "Generating text AWR"
-  sqlplus -S /nolog <<EOF
+  sqlplus -S /nolog <<EOF > /dev/null
 connect $V_USER/$V_PASS
 spool $D_OUTPUT_DIR/AWR_txt_day/awr_${ORACLE_SID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt
 SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_TEXT($V_DBID,1,$V_SNAP_START,$V_SNAP_END));
@@ -154,7 +154,32 @@ exit;
 EOF
 
 msgd "OK, we have AWR reports generated. Now it is time for SQL reports."
-#exit 0   
+check_file "$D_OUTPUT_DIR/AWR_txt_day/awr_${ORACLE_SID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt"
+F_SQLID=$D_OUTPUT_DIR/sqlid.tmp
+cat $D_OUTPUT_DIR/AWR_txt_day/awr_${ORACLE_SID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt | grep --before-context=1 "Module:" | grep -v "Module:" | grep -v '\-\-' | awk '{print $NF}' | sort -u > $D_OUTPUT_DIR/sqlid.tmp
+
+msgd "We have all the sqlid from AWE in $D_OUTPUT_DIR/sqlid.tmp. Now loop through them and generate reports."
+while read V_SQLID
+do
+  msgd "SQL report for: $V_SQLID"
+
+  msgd "Generating SQLID report"
+  sqlplus -S /nolog <<EOF > /dev/null
+connect $V_USER/$V_PASS
+spool $D_OUTPUT_DIR/AWR_txt_day/hash_history/awr_${ORACLE_SID}_${V_SQLID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt
+SELECT output FROM TABLE(dbms_workload_repository.AWR_SQL_REPORT_TEXT($V_DBID,1,$V_SNAP_START,$V_SNAP_END,'$V_SQLID'));
+spool off
+
+spool $D_OUTPUT_DIR/AWR_html_day/hash_history/awr_${ORACLE_SID}_${V_SQLID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.html
+SELECT output FROM TABLE(dbms_workload_repository.AWR_SQL_REPORT_HTML($V_DBID,1,$V_SNAP_START,$V_SNAP_END,'$V_SQLID'));
+spool off
+
+exit;
+EOF
+
+
+done < $D_OUTPUT_DIR/sqlid.tmp
+
 
 #WIP
 
@@ -184,8 +209,8 @@ msgd "Determine output directory"
 msgd "ORACLE_SID: $ORACLE_SID"
 D_OUTPUT_DIR=/tmp/awr_reports/${ORACLE_SID}_${TIME_START}_${TIME_END}
 msgd "D_OUTPUT_DIR: $D_OUTPUT_DIR"
-mkdir -p $D_OUTPUT_DIR/AWR_txt_day
-mkdir -p $D_OUTPUT_DIR/AWR_html_day
+mkdir -p $D_OUTPUT_DIR/AWR_txt_day/hash_history
+mkdir -p $D_OUTPUT_DIR/AWR_html_day/hash_history
 
 
 
