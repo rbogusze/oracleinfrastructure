@@ -4,18 +4,59 @@
 # Generate the statspack and hash reports for the long range of days
 #
 # Example
-# $ ./bulk_generate.sh EBSDB4 apps 08:00 16:00 8
+# $ ./01_bulk_generate.sh EBSDB4 apps 08:00 16:00 8
 # Optionaly add at the end date from which to start
-# $ ./bulk_generate.sh EBSDB4 apps 08:00 16:00 8 2015-08-12
+# $ ./01_bulk_generate.sh EBSDB4 apps 08:00 16:00 8 2015-08-12
 #
 #
 # Load usefull functions
-if [ ! -f $HOME/scripto/bash/bash_library.sh ]; then
-  echo "[error] $HOME/scripto/bash/bash_library.sh not found. Exiting. "
-  exit 1
-else
-  . $HOME/scripto/bash/bash_library.sh
-fi
+V_INTERACTIVE=1
+
+check_parameter()
+{
+  check_variable "$1" "$2"
+}
+
+check_variable()
+{
+  if [ -z "$1" ]; then
+    error_log "[ check_variable ] Provided variable ${2} is empty. Exiting. " ${RECIPIENTS}
+    exit 1
+  fi
+}
+
+error_log()
+{
+  echo "[ error ]["`hostname`"]""["$0"]" $1
+  MSG=$1
+  shift
+  for i in $*
+  do
+    if `echo ${i} | grep "@" 1>/dev/null 2>&1`
+    then
+      echo "[ info ] Found @ in adress, sending above error to ${i}"
+      $MAILCMD -s "[error]["`hostname`"]""["$0"] ${MSG}" ${i} < /dev/null > /dev/null
+    else
+      echo "[ info ] Not found @ in adress, sending above error to ${i}@orainf.com"
+      $MAILCMD -s "[ error ]["`hostname`"]""["$0"] ${MSG}" ${i}@orainf.com < /dev/null > /dev/null
+    fi
+    shift
+  done
+}
+
+msgi()
+{
+  if [ "$INFO_MODE" = "INFO" ] || [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[32m'; fi
+    echo -n "[info]     "
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[39m\E[49m'; fi
+    echo "$1"
+  fi
+}
+
+
+
 
 INFO_MODE=DEBUG
 
@@ -47,7 +88,7 @@ do
   if [ "$DAY_OF_WEEK" == "7" ] || [ "$DAY_OF_WEEK" == "6" ]; then
     echo "This is Sunday or Saturday, skiping statspack report generation"
   else
-    run_command "./awr_reports.sh ${DB_CN} ${USERNAME} ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
+    echo "./awr_reports.sh ${DB_CN} ${USERNAME} ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
   fi #if [ "$DAY_OF_WEEK" == "0" ];
 
   myvar=$(( $myvar + 1 ))
