@@ -142,11 +142,15 @@ f_generate_awr()
   msgd "Generating text AWR"
   sqlplus -S /nolog <<EOF
 connect $V_USER/$V_PASS
+spool $D_OUTPUT_DIR/AWR_txt_day/awr_${ORACLE_SID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt
 SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_TEXT($V_DBID,1,$V_SNAP_START,$V_SNAP_END));
+spool off
 exit;
 EOF
 
 exit 0   
+
+#WIP
 
   msgb "${FUNCNAME[0]} Finished."
 } #f_generate_awr
@@ -169,6 +173,15 @@ NR_DAYS_BACK=$5
 DATE_START=$6
 
 check_file $F_SNAP_FILE
+
+msgd "Determine output directory"
+msgd "ORACLE_SID: $ORACLE_SID"
+D_OUTPUT_DIR=/tmp/awr_reports/${ORACLE_SID}_${TIME_START}_${TIME_END}
+msgd "D_OUTPUT_DIR: $D_OUTPUT_DIR"
+mkdir -p $D_OUTPUT_DIR/AWR_txt_day
+mkdir -p $D_OUTPUT_DIR/AWR_html_day
+
+
 
 echo "Provide password for user $V_USER"
 read -s V_PASS
