@@ -146,6 +146,8 @@ do
     CHECK_FOR_DATE_AWR_STYLE=`date -d"$CHECK_FOR_DATE" +"%d %b %Y"`
     msgd "CHECK_FOR_DATE_AWR_STYLE: $CHECK_FOR_DATE_AWR_STYLE"
 
+    unset V_SNAP_START
+    unset V_SNAP_END
     cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}"
     V_SNAP_START=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_START}" | awk '{print $1}'`
     msgd "V_SNAP_START: $V_SNAP_START"
@@ -154,9 +156,13 @@ do
     msgd "V_SNAP_END: $V_SNAP_END"
 #exit 0
 
-    msgd "If I have both snapshots then I can generate the AWR command"
+    if [ -z ${V_SNAP_START} ] || [ -z ${V_SNAP_END} ] ; then
+      msgd "I could not fine snapshots for both times, skipping AWR creations"
+    else
+      msgd "I have both snapshots then I can generate the AWR command"
+      echo "./awr_reports.sh ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
+    fi
 
-    echo "./awr_reports.sh ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
   fi #if [ "$DAY_OF_WEEK" == "0" ];
 
   myvar=$(( $myvar + 1 ))
