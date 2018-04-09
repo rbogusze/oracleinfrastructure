@@ -44,6 +44,17 @@ error_log()
   done
 }
 
+msgb()
+{
+  if [ "$INFO_MODE" = "DEBUG" ] ; then
+    echo -n "| `/bin/date '+%Y%m%d %H:%M:%S'` "
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[35m'; fi
+    echo -n "[block] "
+    if [ "$V_INTERACTIVE" -eq 1 ]; then echo -e -n '\E[39m\E[49m'; fi
+    echo "$1"
+  fi
+}
+
 msgd()
 {
   if [ "$INFO_MODE" = "DEBUG" ] ; then
@@ -106,6 +117,23 @@ run_command_e()
   return 0
 } #run_command_e
 
+f_generate_awr()
+{
+  msgb "${FUNCNAME[0]} Beginning."
+  V_SNAP_START=$1
+  V_SNAP_END=$2
+
+  msgd "V_SNAP_START: $V_SNAP_START"
+  msgd "V_SNAP_END: $V_SNAP_END"
+  check_parameter $V_SNAP_START
+  check_parameter $V_SNAP_END
+
+
+exit 0   
+
+  msgb "${FUNCNAME[0]} Finished."
+} #f_generate_awr
+
 
 INFO_MODE=DEBUG
 
@@ -160,7 +188,7 @@ do
       msgd "I could not fine snapshots for both times, skipping AWR creations"
     else
       msgd "I have both snapshots then I can generate the AWR command"
-      echo "./awr_reports.sh ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
+      f_generate_awr ${V_SNAP_START} ${V_SNAP_END}
     fi
 
   fi #if [ "$DAY_OF_WEEK" == "0" ];
