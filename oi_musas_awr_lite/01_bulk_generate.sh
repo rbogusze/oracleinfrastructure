@@ -140,10 +140,21 @@ do
     echo "This is Sunday or Saturday, skiping statspack report generation"
   else
     echo "Checking file with snaps for date and time"
-    cat $F_SNAP_FILE | grep ${CHECK_FOR_DATE}
+    msgd "CHECK_FOR_DATE: $CHECK_FOR_DATE"
+    #cat $F_SNAP_FILE
+    # awrrpt.sql prints date in format 06 Apr 2018
+    CHECK_FOR_DATE_AWR_STYLE=`date -d"$CHECK_FOR_DATE" +"%d %b %Y"`
+    msgd "CHECK_FOR_DATE_AWR_STYLE: $CHECK_FOR_DATE_AWR_STYLE"
 
-exit 0
+    cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}"
+    V_SNAP_START=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_START}" | awk '{print $1}'`
+    msgd "V_SNAP_START: $V_SNAP_START"
 
+    V_SNAP_END=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_END}" | awk '{print $1}'`
+    msgd "V_SNAP_END: $V_SNAP_END"
+#exit 0
+
+    msgd "If I have both snapshots then I can generate the AWR command"
 
     echo "./awr_reports.sh ${CHECK_FOR_DATE} ${TIME_START} ${TIME_END}"
   fi #if [ "$DAY_OF_WEEK" == "0" ];
