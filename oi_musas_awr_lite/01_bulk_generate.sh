@@ -147,6 +147,7 @@ f_generate_awr()
   msgd "Generating text AWR"
   sqlplus -S /nolog <<EOF > /dev/null
 connect $V_USER/$V_PASS
+set head off pagesize 0 echo off verify off feedback off heading off
 spool $D_OUTPUT_DIR/AWR_txt_day/awr_${ORACLE_SID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt
 SELECT output FROM TABLE(dbms_workload_repository.AWR_REPORT_TEXT($V_DBID,1,$V_SNAP_START,$V_SNAP_END));
 spool off
@@ -171,6 +172,7 @@ do
   msgd "Generating SQLID report"
   sqlplus -S /nolog <<EOF > /dev/null
 connect $V_USER/$V_PASS
+set head off pagesize 0 echo off verify off feedback off heading off
 spool $D_OUTPUT_DIR/AWR_txt_day/hash_history/awr_${ORACLE_SID}_${V_SQLID}_${CHECK_FOR_DATE}_${TIME_START}_${CHECK_FOR_DATE}_${TIME_END}.txt
 SELECT output FROM TABLE(dbms_workload_repository.AWR_SQL_REPORT_TEXT($V_DBID,1,$V_SNAP_START,$V_SNAP_END,'$V_SQLID'));
 spool off
