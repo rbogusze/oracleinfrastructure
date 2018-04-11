@@ -200,21 +200,19 @@ INFO_MODE=DEBUG
 check_parameter $1
 check_parameter $2
 check_parameter $3
-check_parameter $4
-check_parameter $5
 
 F_SNAP_FILE=$1
 V_USER=$2
-TIME_START=$3
-TIME_END=$4
-NR_DAYS_BACK=$5
-DATE_START=$6
+DATE_START=$3
+#TIME_START=$3
+#TIME_END=$4
+#NR_DAYS_BACK=$5
 
 check_file $F_SNAP_FILE
 
 msgd "Determine output directory"
 msgd "ORACLE_SID: $ORACLE_SID"
-D_OUTPUT_DIR=/tmp/awr_reports/${ORACLE_SID}_${TIME_START}_${TIME_END}
+D_OUTPUT_DIR=/tmp/awr_reports/${ORACLE_SID}_${DATE_START}
 msgd "D_OUTPUT_DIR: $D_OUTPUT_DIR"
 mkdir -p $D_OUTPUT_DIR/AWR_txt_day/hash_history
 mkdir -p $D_OUTPUT_DIR/AWR_html_day/hash_history
@@ -254,46 +252,60 @@ EOF`
 msgd "V_DBID: $V_DBID"
 check_parameter $V_DBID
 
-myvar=0
-while [ $myvar -ne $NR_DAYS_BACK ]
+TIME_START="00:00"
+TIME_END="01:00"
+
+myvar=1
+while [ $myvar -ne 24 ]
 do
 
-  CHECK_FOR_DATE=`date -I -d "$DATE_START $myvar day ago"`
+  CHECK_FOR_DATE=$DATE_START
   msgi "#################################################################"
-  msgi "Computing fo date: ${CHECK_FOR_DATE}"
+  msgi "Computing fo date: ${CHECK_FOR_DATE} $TIME_START $TIME_END"
   msgi "#################################################################"
 
   # If this is Sunday or Saturday skip that day
-  DAY_OF_WEEK=`date --date=$CHECK_FOR_DATE '+%u'`
-  if [ "$DAY_OF_WEEK" == "7" ] || [ "$DAY_OF_WEEK" == "6" ]; then
-    echo "This is Sunday or Saturday, skiping statspack report generation"
+  echo "Checking file with snaps for date and time"
+  msgd "CHECK_FOR_DATE: $CHECK_FOR_DATE"
+  #cat $F_SNAP_FILE
+  # awrrpt.sql prints date in format 06 Apr 2018
+  CHECK_FOR_DATE_AWR_STYLE=`date -d"$CHECK_FOR_DATE" +"%d %b %Y"`
+  msgd "CHECK_FOR_DATE_AWR_STYLE: $CHECK_FOR_DATE_AWR_STYLE"
+
+  unset V_SNAP_START
+  unset V_SNAP_END
+  cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}"
+  V_SNAP_START=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_START}" | awk '{print $1}'`
+  msgd "V_SNAP_START: $V_SNAP_START"
+
+  V_SNAP_END=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_END}" | awk '{print $1}'`
+  msgd "V_SNAP_END: $V_SNAP_END"
+
+  if [ -z ${V_SNAP_START} ] || [ -z ${V_SNAP_END} ] ; then
+    msgd "I could not fine snapshots for both times, skipping AWR creations"
   else
-    echo "Checking file with snaps for date and time"
-    msgd "CHECK_FOR_DATE: $CHECK_FOR_DATE"
-    #cat $F_SNAP_FILE
-    # awrrpt.sql prints date in format 06 Apr 2018
-    CHECK_FOR_DATE_AWR_STYLE=`date -d"$CHECK_FOR_DATE" +"%d %b %Y"`
-    msgd "CHECK_FOR_DATE_AWR_STYLE: $CHECK_FOR_DATE_AWR_STYLE"
+    msgd "I have both snapshots then I can generate the AWR command"
+    f_generate_awr ${V_SNAP_START} ${V_SNAP_END}
+  fi
 
-    unset V_SNAP_START
-    unset V_SNAP_END
-    cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}"
-    V_SNAP_START=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_START}" | awk '{print $1}'`
-    msgd "V_SNAP_START: $V_SNAP_START"
+  msgd "That was for:"
+  msgd "TIME_START: $TIME_START"
+  msgd "TIME_END: $TIME_END"
+  msgd "myvar: $myvar"
 
-    V_SNAP_END=`cat $F_SNAP_FILE | grep "${CHECK_FOR_DATE_AWR_STYLE}" | grep "${TIME_END}" | awk '{print $1}'`
-    msgd "V_SNAP_END: $V_SNAP_END"
 
-    if [ -z ${V_SNAP_START} ] || [ -z ${V_SNAP_END} ] ; then
-      msgd "I could not fine snapshots for both times, skipping AWR creations"
-    else
-      msgd "I have both snapshots then I can generate the AWR command"
-      f_generate_awr ${V_SNAP_START} ${V_SNAP_END}
-    fi
-
-  fi #if [ "$DAY_OF_WEEK" == "0" ];
+  msgd "Next loop will be for:"
+  TIME_START=`date +%H:%M -d "$CHECK_FOR_DATE $myvar hour"`
+  msgd "TIME_START: $TIME_START"
 
   myvar=$(( $myvar + 1 ))
+
+  TIME_END=`date +%H:%M -d "$CHECK_FOR_DATE $myvar hour"`
+  msgd "TIME_END: $TIME_END"
+  msgd "myvar: $myvar"
+
+#exit 0
+
 done
 
 echo "Done."
