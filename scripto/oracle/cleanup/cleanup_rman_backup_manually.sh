@@ -5,6 +5,8 @@
 # Load usefull functions
 V_INTERACTIVE=1
 
+V_DIR=$1
+
 check_parameter()
 {
   check_variable "$1" "$2"
@@ -29,5 +31,11 @@ check_directory()
     exit 1
   fi
 }
+
+
+
+echo "What I want to delete"
+find 
+
 
 
