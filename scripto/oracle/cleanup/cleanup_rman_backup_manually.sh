@@ -114,8 +114,8 @@ msgi "What I want to delete"
 run_command_e "find $V_DIR_TO_CLEANUP -type f -mtime +$RM_OLDER_THAN -name "o1_mf*.bkp" -print"
 
 msgi "Actual delete"
-run_command_e "find $V_DIR_TO_CLEANUP -type f -mtime +$RM_OLDER_THAN -name "o1_mf*.bkp" -print -exec rm -f {} \;"
+#run_command_e "find $V_DIR_TO_CLEANUP -type f -mtime +$RM_OLDER_THAN -name "o1_mf*.bkp" -print -exec rm -f {} \;"
 
 msgi "Deleting directories that should be empty now"
-run_command_e "find $V_DIR_TO_CLEANUP -type d -mtime +$RM_OLDER_THAN -print -exec rmdir {} \;"
+#run_command_e "find $V_DIR_TO_CLEANUP -type d -mtime +$RM_OLDER_THAN -print -exec rmdir {} \;"
 
