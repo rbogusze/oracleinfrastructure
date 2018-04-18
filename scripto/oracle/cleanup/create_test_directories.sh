@@ -19,16 +19,16 @@ do
   mkdir -p $V_DIR/${CHECK_FOR_DATE}
 
   V_FILE_NAME=$RANDOM
-  echo $RANDOM > $V_DIR/${CHECK_FOR_DATE}/${V_FILE_NAME}.bck
-  touch -d "$myvar days ago" $V_DIR/${CHECK_FOR_DATE}/${V_FILE_NAME}.bck
+  echo $RANDOM > $V_DIR/${CHECK_FOR_DATE}/o1_mf_annnn_TAG_${V_FILE_NAME}.bkp
+  touch -d "$myvar days ago" $V_DIR/${CHECK_FOR_DATE}/o1_mf_annnn_TAG_${V_FILE_NAME}.bkp
 
   V_FILE_NAME=$RANDOM
-  echo $RANDOM > $V_DIR/${CHECK_FOR_DATE}/${V_FILE_NAME}.bck
-  touch -d "$myvar days ago" $V_DIR/${CHECK_FOR_DATE}/${V_FILE_NAME}.bck
+  echo $RANDOM > $V_DIR/${CHECK_FOR_DATE}/o1_mf_annnn_TAG_${V_FILE_NAME}.bkp
+  touch -d "$myvar days ago" $V_DIR/${CHECK_FOR_DATE}/o1_mf_annnn_TAG_${V_FILE_NAME}.bkp
 
   V_FILE_NAME=$RANDOM
-  echo $RANDOM > $V_DIR/${CHECK_FOR_DATE}/${V_FILE_NAME}.bck
-  touch -d "$myvar days ago" $V_DIR/${CHECK_FOR_DATE}/${V_FILE_NAME}.bck
+  echo $RANDOM > $V_DIR/${CHECK_FOR_DATE}/o1_mf_annnn_TAG_${V_FILE_NAME}.bkp
+  touch -d "$myvar days ago" $V_DIR/${CHECK_FOR_DATE}/o1_mf_annnn_TAG_${V_FILE_NAME}.bkp
 
   touch -d "$myvar days ago" $V_DIR/${CHECK_FOR_DATE}
 
