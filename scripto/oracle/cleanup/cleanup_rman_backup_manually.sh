@@ -1,7 +1,8 @@
 #!/bin/bash
 #$Id$
 #
-# 
+#  Usage: $ ./cleanup_rman_backup_manually.sh /u01/backup
+#
 
 # Load usefull functions
 V_INTERACTIVE=1
@@ -118,4 +119,6 @@ msgi "Actual delete"
 
 msgi "Deleting directories that should be empty now"
 #run_command_e "find $V_DIR_TO_CLEANUP -type d -mtime +$RM_OLDER_THAN -print -exec rmdir {} \;"
+
+msgi "Done."
 
