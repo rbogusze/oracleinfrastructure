@@ -2,10 +2,14 @@
   become: yes
   become_user: root
   tasks:
-   # git checkout
-   - git:
+   - name: git checkout
+     git:
        repo: 'https://bitbucket.org/u9/devops-test1.git'
        dest: /opt/devops-test1
+     tags:
+      - deploy
+
+
    - name: Add the user krzysztofk
      user:
        name: krzysztofk
@@ -14,6 +18,8 @@
        groups: adm,sudo
        append: yes
        createhome: yes
+     tags:
+      - install_and_create_env
 
    - name: Add the user krzysztofs
      user:
@@ -23,6 +29,8 @@
        groups: adm,sudo
        append: yes
        createhome: yes
+     tags:
+      - install_and_create_env
 
    - name: Add the user maciejz
      user:
@@ -32,6 +40,8 @@
        groups: adm,sudo
        append: yes
        createhome: yes
+     tags:
+      - install_and_create_env
 
    - name: Add the user maksimb
      user:
@@ -41,30 +51,40 @@
        groups: adm,sudo
        append: yes
        createhome: yes
+     tags:
+      - install_and_create_env
 
    - name: Set authorized key took from file for krzysztofk
      authorized_key:
        user: krzysztofk
        state: present
        key: "{{ lookup('file', '/opt/devops-test1/public_keys/krzysztof.kokoszka') }}"
+     tags:
+      - install_and_create_env
 
    - name: Set authorized key took from file for krzysztofs
      authorized_key:
        user: krzysztofs
        state: present
        key: "{{ lookup('file', '/opt/devops-test1/public_keys/krzysztof.skoracki') }}"
+     tags:
+      - install_and_create_env
 
    - name: Set authorized key took from file for maciejz
      authorized_key:
        user: maciejz
        state: present
        key: "{{ lookup('file', '/opt/devops-test1/public_keys/maciej.zasada') }}"
+     tags:
+      - install_and_create_env
 
    - name: Set authorized key took from file for maksimb
      authorized_key:
        user: maksimb
        state: present
        key: "{{ lookup('file', '/opt/devops-test1/public_keys/maksim.bachurin') }}"
+     tags:
+      - install_and_create_env
 
    - name: Allow 'sudo' group members to have passwordless sudo
      lineinfile:
@@ -73,6 +93,8 @@
        regexp: '^%sudo'
        line: '%sudo ALL=(ALL:ALL) NOPASSWD: ALL'
        validate: 'visudo -cf %s'
+     tags:
+      - install_and_create_env
 
    - name: Add the user with plain password rysiek
      user:
@@ -81,3 +103,5 @@
        shell: /bin/bash
        createhome: yes
        password: $6$HoZbNFn2Jt61NJqn$4OlgUmcBLUHBBegP4HBwlKbZk6nEwCn7vjBazLgPhgEyxLlFx72Sa8YqAEX.HzSIY7neD4E0Znc9PNU48LYyO/
+     tags:
+      - install_and_create_env
