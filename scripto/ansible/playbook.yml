@@ -161,16 +161,19 @@
        line: 'ENV API_SECRET=alamakota'
        insertafter: '^WORKDIR'
      tags:
-      - wip1
-
+      - deploy
 
    - name: Build docker image
      docker_image:
        path: /opt/devops-test1/src
        name: image_test1
-       buildargs:
-         PORT: 1522
-         API_SECRET: alamakota
+     tags:
+      - deploy
+
+   - name: Direct docker logs to syslog
+     docker_image:
+       path: /opt/devops-test1/src
+       name: image_test1
      tags:
       - wip
 
