@@ -131,6 +131,7 @@
      git:
        repo: 'https://bitbucket.org/u9/devops-test1.git'
        dest: /opt/devops-test1
+       update: no
      tags:
       - deploy
 
