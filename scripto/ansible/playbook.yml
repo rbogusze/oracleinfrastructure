@@ -175,6 +175,7 @@
        dest: /etc/docker/daemon.json
        content: |
          { "log-driver": "syslog" }
+     register: docker_to_syslog
      tags:
       - deploy
 
@@ -182,5 +183,6 @@
      service:
        name: docker
        state: restarted
+     when: docker_to_syslog.changed
      tags:
-      - wip
+      - deploy
