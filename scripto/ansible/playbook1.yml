@@ -1,0 +1,19 @@
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+   - name: Install required packages
+     apt:
+       name: apt-transport-https,ca-certificates,curl,software-properties-common
+       state: present
+   - name: Add an docker Apt signing key
+     apt_key:
+       url: https://download.docker.com/linux/ubuntu/gpg
+       state: present
+   - apt_repository:
+       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+       state: present
+   - name: Update repositories cache and install "docker-ce" package
+     apt:
+       name: docker-ce
+       update_cache: yes
