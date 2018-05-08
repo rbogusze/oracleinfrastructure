@@ -15,8 +15,61 @@
        append: yes
        createhome: yes
 
+   - name: Add the user krzysztofs
+     user:
+       name: krzysztofs
+       state: present
+       shell: /bin/bash
+       groups: adm,sudo
+       append: yes
+       createhome: yes
+
+   - name: Add the user maciejz
+     user:
+       name: maciejz
+       state: present
+       shell: /bin/bash
+       groups: adm,sudo
+       append: yes
+       createhome: yes
+
+   - name: Add the user maksimb
+     user:
+       name: maksimb
+       state: present
+       shell: /bin/bash
+       groups: adm,sudo
+       append: yes
+       createhome: yes
+
    - name: Set authorized key took from file for krzysztofk
      authorized_key:
        user: krzysztofk
        state: present
        key: "{{ lookup('file', '/opt/devops-test1/public_keys/krzysztof.kokoszka') }}"
+
+   - name: Set authorized key took from file for krzysztofs
+     authorized_key:
+       user: krzysztofs
+       state: present
+       key: "{{ lookup('file', '/opt/devops-test1/public_keys/krzysztof.skoracki') }}"
+
+   - name: Set authorized key took from file for maciejz
+     authorized_key:
+       user: maciejz
+       state: present
+       key: "{{ lookup('file', '/opt/devops-test1/public_keys/maciej.zasada') }}"
+
+   - name: Set authorized key took from file for maksimb
+     authorized_key:
+       user: maksimb
+       state: present
+       key: "{{ lookup('file', '/opt/devops-test1/public_keys/maksim.bachurin') }}"
+
+   - name: Allow 'sudo' group members to have passwordless sudo
+     lineinfile:
+       dest: /etc/sudoers
+       state: present
+       regexp: '^%sudo'
+       line: '%sudo ALL=(ALL:ALL) NOPASSWD: ALL'
+       validate: 'visudo -cf %s'
