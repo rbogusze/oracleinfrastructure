@@ -2,12 +2,33 @@
   become: yes
   become_user: root
   tasks:
-   - name: git checkout
-     git:
-       repo: 'https://bitbucket.org/u9/devops-test1.git'
-       dest: /opt/devops-test1
+   - name: Install required packages
+     apt:
+       name: apt-transport-https,ca-certificates,curl,software-properties-common,python-pip,python-docker
+       state: present
      tags:
-      - deploy
+      - update
+
+   - name: Add an docker Apt signing key
+     apt_key:
+       url: https://download.docker.com/linux/ubuntu/gpg
+       state: present
+     tags:
+      - update
+
+   - name: Add apt repository
+     apt_repository:
+       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
+       state: present
+     tags:
+      - update
+
+   - name: Update repositories cache and install "docker-ce" package
+     apt:
+       name: docker-ce
+       update_cache: yes
+     tags:
+      - update
 
 
    - name: Add the user krzysztofk
@@ -106,30 +127,20 @@
      tags:
       - install_and_create_env
 
-   - name: Install required packages
-     apt:
-       name: apt-transport-https,ca-certificates,curl,software-properties-common
-       state: present
+   - name: git checkout
+     git:
+       repo: 'https://bitbucket.org/u9/devops-test1.git'
+       dest: /opt/devops-test1
      tags:
-      - update
+      - deploy
 
-   - name: Add an docker Apt signing key
-     apt_key:
-       url: https://download.docker.com/linux/ubuntu/gpg
-       state: present
+   - name: Build docker image
+     docker_image:
+       path: /opt/devops-test1/src
+       name: myimage
+       buildargs:
+         log_volume: /var/log/myapp
+         listen_port: 8080
      tags:
-      - update
+      - wip
 
-   - name: Add apt repository
-     apt_repository:
-       repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable
-       state: present
-     tags:
-      - update
-
-   - name: Update repositories cache and install "docker-ce" package
-     apt:
-       name: docker-ce
-       update_cache: yes
-     tags:
-      - update
