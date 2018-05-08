@@ -1,0 +1,22 @@
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+   # git checkout
+   - git:
+       repo: 'https://bitbucket.org/u9/devops-test1.git'
+       dest: /opt/devops-test1
+   - name: Add the user krzysztofk
+     user:
+       name: krzysztofk
+       state: present
+       shell: /bin/bash
+       groups: adm,sudo
+       append: yes
+       createhome: yes
+
+   - name: Set authorized key took from file for krzysztofk
+     authorized_key:
+       user: krzysztofk
+       state: present
+       key: "{{ lookup('file', '/opt/devops-test1/public_keys/krzysztof.kokoszka') }}"
