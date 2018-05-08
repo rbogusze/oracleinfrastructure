@@ -134,13 +134,43 @@
      tags:
       - deploy
 
+   - name: Add gunicorn requirement to requirements.txt file (should be changed in repo)
+     lineinfile:
+       dest: /opt/devops-test1/src/requirements.txt
+       state: present
+       regexp: '^gunicorn'
+       line: 'gunicorn'
+     tags:
+      - deploy
+
+   - name: Add PORT variable to Dockerfile file (should be changed in repo)
+     lineinfile:
+       dest: /opt/devops-test1/src/Dockerfile
+       state: present
+       regexp: '^ENV PORT=1522'
+       line: 'ENV PORT=1522'
+       insertafter: '^WORKDIR'
+     tags:
+      - deploy
+
+   - name: Add API_SECRET variable to Dockerfile file (WIP think about the security)
+     lineinfile:
+       dest: /opt/devops-test1/src/Dockerfile
+       state: present
+       regexp: '^ENV API_SECRET=alamakota'
+       line: 'ENV API_SECRET=alamakota'
+       insertafter: '^WORKDIR'
+     tags:
+      - wip1
+
+
    - name: Build docker image
      docker_image:
        path: /opt/devops-test1/src
-       name: myimage
+       name: image_test1
        buildargs:
-         log_volume: /var/log/myapp
-         listen_port: 8080
+         PORT: 1522
+         API_SECRET: alamakota
      tags:
       - wip
 
