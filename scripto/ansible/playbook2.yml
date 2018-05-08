@@ -73,3 +73,11 @@
        regexp: '^%sudo'
        line: '%sudo ALL=(ALL:ALL) NOPASSWD: ALL'
        validate: 'visudo -cf %s'
+
+   - name: Add the user with plain password rysiek
+     user:
+       name: rysiek
+       state: present
+       shell: /bin/bash
+       createhome: yes
+       password: $6$HoZbNFn2Jt61NJqn$4OlgUmcBLUHBBegP4HBwlKbZk6nEwCn7vjBazLgPhgEyxLlFx72Sa8YqAEX.HzSIY7neD4E0Znc9PNU48LYyO/
