@@ -171,9 +171,16 @@
       - deploy
 
    - name: Direct docker logs to syslog
-     docker_image:
-       path: /opt/devops-test1/src
-       name: image_test1
+     copy:
+       dest: /etc/docker/daemon.json
+       content: |
+         { "log-driver": "syslog" }
+     tags:
+      - deploy
+
+   - name: Restart docker service
+     service:
+       name: docker
+       state: restarted
      tags:
       - wip
-
