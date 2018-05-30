@@ -1,7 +1,3 @@
-    {
-      "collapse": false,
-      "height": 240,
-      "panels": [
         {
           "aliasColors": {},
           "bars": false,
@@ -29,7 +25,7 @@
           "renderer": "flot",
           "seriesOverrides": [],
           "spaceLength": 10,
-          "span": 12,
+          "span": 6,
           "stack": false,
           "steppedLine": false,
           "targets": [

@@ -36,8 +36,12 @@ F_HEADER=$D_TEMPLATES/header.json
 check_file "$F_HEADER"
 cat $F_HEADER >> $F_OUT
 
+S_CURRENT=0 
 msgd "Iterate through the actual graphs"
 msgd "Get the list of sections"
+A_SECTIONS_COUNT=`find $D_TEMPLATES | grep -v footer.json | grep -v header.json | grep -v foot | grep -v head | grep json | wc -l`
+
+msgd "Loop through list of sections"
 for i in `find $D_TEMPLATES | grep -v footer.json | grep -v header.json | grep -v foot | grep -v head | grep json`
 do
   msgd "$i"
@@ -62,7 +66,9 @@ do
   do
     echo $V_HOST
     msgd "A_HOSTS: ${A_HOSTS[$CURRENT]}"
-    cat $D_TEMPLATES/$F_SECTION_MAIN | sed -e "s/###HOST###/${A_HOSTS[$CURRENT]}/" | sed -e "s/###REFID###/${A_REFID[$CURRENT]}/" >> $F_OUT
+    V_SHOST=`echo ${A_HOSTS[$CURRENT]} | awk -F'-' '{print $NF}'`
+    msgd "V_SHOST: $V_SHOST"
+    cat $D_TEMPLATES/$F_SECTION_MAIN | sed -e "s/###HOST###/${A_HOSTS[$CURRENT]}/" | sed -e "s/###REFID###/${A_REFID[$CURRENT]}/" | sed -e "s/###SHOST###/$V_SHOST/" >> $F_OUT
     CURRENT=`expr ${CURRENT} + 1`
     if [ $CURRENT -ge $A_HOSTS_COUNT ]; then
       msgd "This is last iteration, no comma"
@@ -73,6 +79,16 @@ do
   done
   msgd "Add foot"
   cat $D_TEMPLATES/$F_SECTION_FOOT >> $F_OUT
+
+  S_CURRENT=`expr ${S_CURRENT} + 1`
+  msgd "S_CURRENT: $S_CURRENT"
+  msgd "A_SECTIONS_COUNT: $A_SECTIONS_COUNT"
+  if [ $S_CURRENT -ge $A_SECTIONS_COUNT ]; then
+    msgd "This is last iteration, no comma"
+  else
+    msgd "Entering comma after section"
+    echo "," >> $F_OUT
+  fi
 
 done
 
