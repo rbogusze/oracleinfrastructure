@@ -2,6 +2,8 @@ alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
 select * from APPLSYS.AD_BUGS;
 select * from dual;
 
+select * from DBA_HIST_SNAPSHOT;
+
 -- find my session
 SELECT SID, SERIAL#, OSUSER, USERNAME, MACHINE, PROCESS 
 FROM V$SESSION WHERE audsid = userenv('SESSIONID');
@@ -392,9 +394,89 @@ https://docs.oracle.com/cd/B28359_01/server.111/b28320/statviews_4029.htm
 http://remigium.blogspot.com/2014/04/calculating-segment-growth-in-oracle.html
 */
 
+select NAME,RTIME,TABLESPACE_SIZE/1024/1024,TABLESPACE_MAXSIZE/1024/1024,TABLESPACE_USEDSIZE/1024/1024 
+from dba_hist_tbspc_space_usage,v$tablespace where TABLESPACE_ID=TS# order by 1,2;
+
 select * from DBA_HIST_SEG_STAT;
 select A.SPACE_ALLOCATED_TOTAL, A.SPACE_ALLOCATED_DELTA from DBA_HIST_SEG_STAT a;
 select snap_id from DBA_HIST_SEG_STAT a where A.OBJ#='9846' order by snap_id ;
+
+
+SELECT
+    TO_CHAR(creation_time, 'RRRR-MM') month
+  , SUM(bytes)/1024/1024/1024                        growth_GB
+FROM     sys.v_$datafile
+GROUP BY TO_CHAR(creation_time, 'RRRR-MM')
+ORDER BY TO_CHAR(creation_time, 'RRRR-MM');
+
+SELECT name,
+    TO_CHAR(creation_time, 'RRRR-MM') month
+  , SUM(bytes)/1024/1024/1024                        growth
+FROM     sys.v_$datafile
+GROUP BY TO_CHAR(creation_time, 'RRRR-MM')
+ORDER BY TO_CHAR(creation_time, 'RRRR-MM');
+
+select * from sys.v_$datafile;
+
+select a.TABLESPACE_NAME,
+     a.BYTES bytes_used,
+     b.BYTES bytes_free,
+     b.largest,
+     round(((a.BYTES-b.BYTES)/a.BYTES)*100,2) percent_used
+     from
+     (select TABLESPACE_NAME,
+     sum(BYTES) BYTES
+     from dba_data_files
+     group by TABLESPACE_NAME)
+     a,
+     (select TABLESPACE_NAME,
+     sum(BYTES) BYTES ,
+     max(BYTES) largest
+     from dba_free_space
+     group by TABLESPACE_NAME)
+     b
+     where a.TABLESPACE_NAME=b.TABLESPACE_NAME
+     order by ((a.BYTES-b.BYTES)/a.BYTES) desc;
+
+
+select sum(space_used_delta) / 1024 / 1024 “Space used (M)”, sum(c.bytes) / 1024 / 1024 “Total Schema Size (M)”,
+round(sum(space_used_delta) / sum(c.bytes) * 100, 2) || ‘%’ “Percent of Total Disk Usage”
+from
+dba_hist_snapshot sn,
+dba_hist_seg_stat a,
+dba_objects b,
+dba_segments c
+see code depot for full script
+where end_interval_time > trunc(sysdate) – &days_back
+and sn.snap_id = a.snap_id
+and b.object_id = a.obj#
+and b.owner = c.owner
+and b.object_name = c.segment_name
+and c.owner = ‘&schema_name’
+and space_used_delta > 0;
+title “Total Disk Used by Object Type”
+select c.segment_type, sum(space_used_delta) / 1024 / 1024 “Space used (M)”, sum(c.bytes) / 1024 / 1024 “Total Space (M)”,
+round(sum(space_used_delta) / sum(c.bytes) * 100, 2) || ‘%’ “Percent of Total Disk Usage”
+from
+dba_hist_snapshot sn,
+dba_hist_seg_stat a,
+dba_objects b,
+dba_segments c
+see code depot for full script
+where end_interval_time > trunc(sysdate) – &days_back
+and sn.snap_id = a.snap_id
+and b.object_id = a.obj#
+and b.owner = c.owner
+and b.object_name = c.segment_name
+and space_used_delta > 0
+--and c.owner = ‘&schema_name’
+group by rollup(segment_type);
+
+
+select to_char(creation_time, 'MM-RRRR') "Month",
+sum(bytes)/1024/1024 "Growth in Meg"
+from sys.v_$datafile
+group by to_char(creation_time, 'MM-RRRR');
 
 -- figure out snap timestamps
 select * from dba_tables where table_name like 'DBA_HIST%';
@@ -553,4 +635,67 @@ select result_cache, count(*) from dba_tables group by result_cache;
 select * from V$RESULT_CACHE_OBJECTS;
 select sysdate, value from v$parameter where name = 'db_name';
    
+-- redo
+select * from v$log;
+select * from v$standby_log;
+select * from v$logfile;
+alter database add logfile group 4 ('/u01/data/REMIK/redo04a.log') size 100M;
+alter database drop logfile group 2;
+alter database add standby logfile group 10 '/u01/data/REMIK/stb_redo05.log' size 100M;
+
+alter database drop logfile group 10;
+
+alter database drop standby logfile group 4;
+
+select * from dba_tablespaces;
+select * from dba_data_files;
+select * from dba_segments where tablespace_name = 'REMI';
+
+
+-- are there any bitmap indexes?
+select * from dba_indexes where 
+owner not in ('SYS','SYSTEM','OUTLN','WMSYS','DBSNMP','EXFSYS','CTXSYS','XDB','ORDSYS','ORDDATA','MDSYS','OLAPSYS','SYSMAN','FLOWS_FILES','APEX_030200');
+select * from dba_indexes where index_type = 'BITMAP';
+
+
+alter tablespace REMI read only;
+
+alter database datafile '/u01/data/REMIK/remi01.dbf' autoextend on maxsize 6G;
+
+@tbs
+@tbsa
+
+--what Nagios is monitoring
+select sum(blocks), sum(maxblocks), round(sum(blocks)*100/sum(maxblocks)) rate from dba_data_files 
+where tablespace_name = 'REMI' group by tablespace_name;
+
+--what Nagios is monitoring, taking under account
+select tablespace_name, round(sum(blocks*8192/1024/1024)) UsedMB, round(sum(maxblocks*8192/1024/1024)) MaxMB, round(sum(blocks)*100/sum(maxblocks)) rate from dba_data_files 
+group by tablespace_name order by rate;
+
+select * from dba_tablespaces;
+
+alter tablespace REMI read write;
+
+
+select * from dba_data_files;
+select file_name, tablespace_name, blocks*8192/1024/1024 blocksMB, round(maxblocks*8192/1024/1024) maxblocksMB, round(increment_by*8192/1024/1024) incrementMB from dba_data_files;
+
+-- how many queries are run every minute
+select /*+ FULL(a) parallel(a,8) */ trunc(enq_time, 'YEAR') year, count(*) from WF_QUEUE_TEMP_EVT_TABLE a 
+group by trunc(enq_time, 'YEAR') order by trunc(enq_time, 'YEAR') desc;
+
+select count(sql_id) from v$active_session_history 
+where sql_exec_start > to_date('2018-04-26:12:35:19','YYYY-MM-DD:HH24:MI:SS') 
+and sql_exec_start < to_date('2018-04-26:13:36:21','YYYY-MM-DD:HH24:MI:SS');
+
+select * from v$active_session_history;
+select count(*) from v$active_session_history;
+
+alter session set NLS_DATE_FORMAT = "YYYY/MM/DD HH24:MI:SS";
+select trunc(sql_exec_start, 'MI'),count(*) from v$active_session_history group by trunc(sql_exec_start, 'MI') order by trunc(sql_exec_start, 'MI') desc;
+
+
+
+
 
