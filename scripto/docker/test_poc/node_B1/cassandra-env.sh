@@ -139,8 +139,8 @@ esac
 
     
       
-MAX_HEAP_SIZE="3G"
-HEAP_NEWSIZE="1G"
+MAX_HEAP_SIZE="8G"
+HEAP_NEWSIZE="2G"
       
     
 
