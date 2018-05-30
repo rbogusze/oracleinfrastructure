@@ -1,0 +1,38 @@
+            {
+              "application": {
+                "filter": "Network"
+              },
+              "functions": [
+                {
+                  "def": {
+                    "category": "Alias",
+                    "defaultParams": [],
+                    "name": "setAlias",
+                    "params": [
+                      {
+                        "name": "alias",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "params": [
+                    "###SHOST###"
+                  ],
+                  "text": "setAlias(###SHOST###)"
+                }
+              ],
+              "group": {
+                "filter": "[HOSTS] Databases"
+              },
+              "host": {
+                "filter": "###HOST###"
+              },
+              "item": {
+                "filter": "eth0: Outgoing network traffic"
+              },
+              "mode": 0,
+              "options": {
+                "showDisabledItems": false
+              },
+              "refId": "###REFID###"
+            }
