@@ -254,7 +254,7 @@ f_check_phase()
           msgd "Sleep for $V_SLEEP sec as I recevive ocassional timeouts"
           run_command "sleep $V_SLEEP"
           msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
-          msgd "Executing: $E_CQLSH -e copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null' WITH PAGETIMEOUT=10000 > $F_TMP_CP.4 "
+          msgd "Executing: $E_CQLSH -e copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null' WITH PAGETIMEOUT=10000 AND NUMPROCESSES=1 > $F_TMP_CP.4 "
           $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null' WITH PAGETIMEOUT=10000" > $F_TMP_CP.4
           if [ $? -ne 0 ]; then
             msge "An error occured during last command. Exiting NOW."
