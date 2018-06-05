@@ -43,10 +43,10 @@ f_cqlsh_sanity_check()
   msgd "Construct docker cqlsh executable command based of whether V_CQLSHRC was set"
   if [ -z $V_CQLSHRC ]; then
     msgd "No V_CQLSHRC set"
-    E_CQLSH="docker exec $V_DOCKER cqlsh"
+    E_CQLSH="docker exec $V_DOCKER cqlsh --request-timeout=6000"
   else
     msgd "V_CQLSHRC set, including that in E_CQLSH"
-    E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
+    E_CQLSH="docker exec $V_DOCKER cqlsh --request-timeout=6000 --cqlshrc=$V_CQLSHRC"
   fi
   msgd "E_CQLSH: $E_CQLSH"
 
@@ -74,10 +74,10 @@ f_cqlsh_sanity_check()
   msgd "Construct docker cqlsh executable command based of whether V_CQLSHRC was set"
   if [ -z $V_CQLSHRC ]; then
     msgd "No V_CQLSHRC set"
-    E_CQLSH="docker exec $V_DOCKER cqlsh"
+    E_CQLSH="docker exec $V_DOCKER cqlsh --request-timeout=6000"
   else
     msgd "V_CQLSHRC set, including that in E_CQLSH"
-    E_CQLSH="docker exec $V_DOCKER cqlsh --cqlshrc=$V_CQLSHRC"
+    E_CQLSH="docker exec $V_DOCKER cqlsh --request-timeout=6000 --cqlshrc=$V_CQLSHRC"
   fi
   msgd "E_CQLSH: $E_CQLSH"
 
@@ -254,7 +254,8 @@ f_check_phase()
           msgd "Sleep for $V_SLEEP sec as I recevive ocassional timeouts"
           run_command "sleep $V_SLEEP"
           msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
-          $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null'" > $F_TMP_CP.4
+          msgd "Executing: $E_CQLSH -e copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null' WITH PAGETIMEOUT=10000 > $F_TMP_CP.4 "
+          $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null' WITH PAGETIMEOUT=10000" > $F_TMP_CP.4
           if [ $? -ne 0 ]; then
             msge "An error occured during last command. Exiting NOW."
             exit 1
