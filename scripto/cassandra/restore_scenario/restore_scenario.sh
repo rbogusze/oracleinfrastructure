@@ -261,7 +261,7 @@ f_check_phase()
             V_CHECK_SMART_COLUMN=""
             msgd "That is where I will find all the desc command results"
             msgd "F_CHECK_OUTPUT: $F_CHECK_OUTPUT"
-            run_command "cat $F_CHECK_OUTPUT | grep --after-context=1 \"$V_KEYSPACE\".$V_TABLENAME > $F_TMP_CP.5"
+            run_command "cat $F_CHECK_OUTPUT | grep --after-context=1 -i \"CREATE TABLE $V_KEYSPACE\".${V_TABLENAME}\  > $F_TMP_CP.5"
             run_command_d "cat $F_TMP_CP.5"
             cat $F_TMP_CP.5 | grep -v -i "CREATE TABLE" | awk '{print "("$1")"}' > $F_TMP_CP.6
             run_command_d "cat $F_TMP_CP.6"
