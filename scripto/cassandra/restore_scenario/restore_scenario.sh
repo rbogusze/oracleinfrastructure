@@ -193,6 +193,7 @@ f_check_phase()
   do
     msgd "Desc keyspace for: $V_KEYSPACE"
     run_command_e "$E_CQLSH -e 'desc \"${V_KEYSPACE}\";' >> $F_CHECK_OUTPUT"
+
   done < $F_TMP_CP.1
 
   echo "Count table rows:" >> $F_CHECK_OUTPUT
@@ -254,8 +255,25 @@ f_check_phase()
           msgd "Sleep for $V_SLEEP sec as I recevive ocassional timeouts"
           run_command "sleep $V_SLEEP"
           msgd "Counting rows for $V_KEYSPACE.$V_TABLENAME"
-          msgd "Executing: $E_CQLSH -e copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null' WITH PAGETIMEOUT=10000 AND NUMPROCESSES=1 > $F_TMP_CP.4 "
-          $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME to '/dev/null' WITH PAGETIMEOUT=10000" > $F_TMP_CP.4
+
+          if [ "$V_CHECK_SMART" = "yes" ]; then
+            msgd "Smart count is enabled, finding the first column name to make the counting faster."
+            V_CHECK_SMART_COLUMN=""
+            msgd "That is where I will find all the desc command results"
+            msgd "F_CHECK_OUTPUT: $F_CHECK_OUTPUT"
+            run_command "cat $F_CHECK_OUTPUT | grep --after-context=1 \"$V_KEYSPACE\".$V_TABLENAME > $F_TMP_CP.5"
+            run_command_d "cat $F_TMP_CP.5"
+            cat $F_TMP_CP.5 | grep -v -i "CREATE TABLE" | awk '{print "("$1")"}' > $F_TMP_CP.6
+            run_command_d "cat $F_TMP_CP.6"
+            V_CHECK_SMART_COLUMN=`cat $F_TMP_CP.6`
+            msgd "V_CHECK_SMART_COLUMN: $V_CHECK_SMART_COLUMN"
+          else
+            V_CHECK_SMART_COLUMN=""
+          fi
+          msgd "V_CHECK_SMART_COLUMN: $V_CHECK_SMART_COLUMN"
+
+          msgd "Executing: $E_CQLSH -e copy \"$V_KEYSPACE\".$V_TABLENAME $V_CHECK_SMART_COLUMN to '/dev/null' WITH PAGETIMEOUT=10000 AND NUMPROCESSES=1 > $F_TMP_CP.4 "
+          $E_CQLSH -e "copy \"$V_KEYSPACE\".$V_TABLENAME $V_CHECK_SMART_COLUMN to '/dev/null' WITH PAGETIMEOUT=10000" > $F_TMP_CP.4
           if [ $? -ne 0 ]; then
             msge "An error occured during last command. Exiting NOW."
             exit 1
@@ -403,8 +421,8 @@ f_template()
 # --------------------------
 # Great sample getopt implementation by Cosimo Streppone
 # https://gist.github.com/cosimo/3760587#file-parse-options-sh
-SHORT='hd:r:c:d:p:r:m:s:t:'
-LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:,master_results:,skip_empty_dir:,sleep:'
+SHORT='hd:r:c:d:p:r:m:s:t:u:'
+LONG='help,docker_list:,cqlshrc:,create_phase_file:,destroy_phase_file:,phase:,phase_parameter:,master_results:,skip_empty_dir:,sleep:,check_smart:'
 OPTS=$( getopt -o $SHORT --long $LONG -n "$0" -- "$@" )
 
 if [ $? -gt 0 ]; then
@@ -425,6 +443,7 @@ while true; do
             -m|--master_results) F_MASTER_RESULTS="$2"; shift 2;;
             -s|--skip_empty_dir) V_SKIP_EMPTY_DIR="$2"; shift 2;;
             -t|--sleep) V_SLEEP="$2"; shift 2;;
+            -u|--check_smart) V_CHECK_SMART="$2"; shift 2;;
             --) shift; break;;
             *) printf "Error processing command arguments\n" >&2; exit 1;;
     esac
@@ -445,6 +464,10 @@ fi
 if [ -z "$V_SLEEP" ]; then
   V_SLEEP=1
   msgd "There is no parameter --sleep provided, assuming $V_SLEEP"
+fi
+if [ -z "$V_CHECK_SMART" ]; then
+  V_CHECK_SMART=no
+  msgd "There is no parameter --check_smart provided, assuming default: $V_CHECK_SMART"
 fi
 
 msgd "V_PHASE: $V_PHASE"
