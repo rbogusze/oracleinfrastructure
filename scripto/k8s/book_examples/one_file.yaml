@@ -1,0 +1,1573 @@
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"alpaca","env":"prod","ver":"1"},"name":"alpaca-prod","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/alpaca-prod"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"alpaca","env":"prod","ver":"1"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"alpaca","env":"prod","ver":"1"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:1","imagePullPolicy":"IfNotPresent","name":"alpaca-prod","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:06:52Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: prod
+      ver: "1"
+    name: alpaca-prod
+    namespace: default
+    resourceVersion: "703"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/alpaca-prod
+    uid: 209f0542-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: alpaca
+        env: prod
+        ver: "1"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: prod
+          ver: "1"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:1
+          imagePullPolicy: IfNotPresent
+          name: alpaca-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:06:54Z
+      lastUpdateTime: 2018-08-13T14:06:54Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+    updatedReplicas: 2
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"alpaca","env":"test","ver":"2"},"name":"alpaca-test","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/alpaca-test"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"alpaca","env":"test","ver":"2"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"alpaca","env":"test","ver":"2"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:2","imagePullPolicy":"IfNotPresent","name":"alpaca-test","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:06:57Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: test
+      ver: "2"
+    name: alpaca-test
+    namespace: default
+    resourceVersion: "719"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/alpaca-test
+    uid: 24184202-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: alpaca
+        env: test
+        ver: "2"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: test
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: alpaca-test
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:06:57Z
+      lastUpdateTime: 2018-08-13T14:06:57Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"bandicoot","env":"prod","ver":"2"},"name":"bandicoot-prod","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/bandicoot-prod"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"bandicoot","env":"prod","ver":"2"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"bandicoot","env":"prod","ver":"2"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:2","imagePullPolicy":"IfNotPresent","name":"bandicoot-prod","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:07:05Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: prod
+      ver: "2"
+    name: bandicoot-prod
+    namespace: default
+    resourceVersion: "748"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/bandicoot-prod
+    uid: 28a34759-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: prod
+        ver: "2"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: prod
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:07:07Z
+      lastUpdateTime: 2018-08-13T14:07:07Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+    updatedReplicas: 2
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"bandicoot","env":"staging","ver":"2"},"name":"bandicoot-staging","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/bandicoot-staging"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"bandicoot","env":"staging","ver":"2"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"bandicoot","env":"staging","ver":"2"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:2","imagePullPolicy":"IfNotPresent","name":"bandicoot-staging","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:07:10Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: staging
+      ver: "2"
+    name: bandicoot-staging
+    namespace: default
+    resourceVersion: "767"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/deployments/bandicoot-staging
+    uid: 2b871ae9-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: staging
+        ver: "2"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: staging
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-staging
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:07:10Z
+      lastUpdateTime: 2018-08-13T14:07:10Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
+- apiVersion: extensions/v1beta1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "2"
+      deployment.kubernetes.io/max-replicas: "3"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:06:52Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: prod
+      pod-template-hash: "2788055379"
+      ver: "1"
+    name: alpaca-prod-6cdd4997cf
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: alpaca-prod
+      uid: 209f0542-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "702"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/replicasets/alpaca-prod-6cdd4997cf
+    uid: 20a04dbe-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: alpaca
+        env: prod
+        pod-template-hash: "2788055379"
+        ver: "1"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: prod
+          pod-template-hash: "2788055379"
+          ver: "1"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:1
+          imagePullPolicy: IfNotPresent
+          name: alpaca-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    fullyLabeledReplicas: 2
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+- apiVersion: extensions/v1beta1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:06:57Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: test
+      pod-template-hash: "2726524277"
+      ver: "2"
+    name: alpaca-test-6c6b9686cc
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: alpaca-test
+      uid: 24184202-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "718"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/replicasets/alpaca-test-6c6b9686cc
+    uid: 24196ceb-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: alpaca
+        env: test
+        pod-template-hash: "2726524277"
+        ver: "2"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: test
+          pod-template-hash: "2726524277"
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: alpaca-test
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    fullyLabeledReplicas: 1
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+- apiVersion: extensions/v1beta1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "2"
+      deployment.kubernetes.io/max-replicas: "3"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:07:05Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: prod
+      pod-template-hash: "3681179853"
+      ver: "2"
+    name: bandicoot-prod-7bd55cfd97
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: bandicoot-prod
+      uid: 28a34759-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "747"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/replicasets/bandicoot-prod-7bd55cfd97
+    uid: 28a4a954-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: prod
+        pod-template-hash: "3681179853"
+        ver: "2"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: prod
+          pod-template-hash: "3681179853"
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    fullyLabeledReplicas: 2
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+- apiVersion: extensions/v1beta1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:07:10Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: staging
+      pod-template-hash: "255078669"
+      ver: "2"
+    name: bandicoot-staging-6994cdbbf
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: bandicoot-staging
+      uid: 2b871ae9-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "766"
+    selfLink: /apis/extensions/v1beta1/namespaces/default/replicasets/bandicoot-staging-6994cdbbf
+    uid: 2b881746-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: staging
+        pod-template-hash: "255078669"
+        ver: "2"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: staging
+          pod-template-hash: "255078669"
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-staging
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    fullyLabeledReplicas: 1
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"alpaca","env":"prod","ver":"1"},"name":"alpaca-prod","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/alpaca-prod"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"alpaca","env":"prod","ver":"1"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"alpaca","env":"prod","ver":"1"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:1","imagePullPolicy":"IfNotPresent","name":"alpaca-prod","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:06:52Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: prod
+      ver: "1"
+    name: alpaca-prod
+    namespace: default
+    resourceVersion: "703"
+    selfLink: /apis/apps/v1/namespaces/default/deployments/alpaca-prod
+    uid: 209f0542-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: alpaca
+        env: prod
+        ver: "1"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: prod
+          ver: "1"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:1
+          imagePullPolicy: IfNotPresent
+          name: alpaca-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:06:54Z
+      lastUpdateTime: 2018-08-13T14:06:54Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+    updatedReplicas: 2
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"alpaca","env":"test","ver":"2"},"name":"alpaca-test","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/alpaca-test"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"alpaca","env":"test","ver":"2"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"alpaca","env":"test","ver":"2"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:2","imagePullPolicy":"IfNotPresent","name":"alpaca-test","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:06:57Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: test
+      ver: "2"
+    name: alpaca-test
+    namespace: default
+    resourceVersion: "719"
+    selfLink: /apis/apps/v1/namespaces/default/deployments/alpaca-test
+    uid: 24184202-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: alpaca
+        env: test
+        ver: "2"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: test
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: alpaca-test
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:06:57Z
+      lastUpdateTime: 2018-08-13T14:06:57Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"bandicoot","env":"prod","ver":"2"},"name":"bandicoot-prod","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/bandicoot-prod"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"bandicoot","env":"prod","ver":"2"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"bandicoot","env":"prod","ver":"2"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:2","imagePullPolicy":"IfNotPresent","name":"bandicoot-prod","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:07:05Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: prod
+      ver: "2"
+    name: bandicoot-prod
+    namespace: default
+    resourceVersion: "748"
+    selfLink: /apis/apps/v1/namespaces/default/deployments/bandicoot-prod
+    uid: 28a34759-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: prod
+        ver: "2"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: prod
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:07:07Z
+      lastUpdateTime: 2018-08-13T14:07:07Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+    updatedReplicas: 2
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    annotations:
+      deployment.kubernetes.io/revision: "1"
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"extensions/v1beta1","kind":"Deployment","metadata":{"annotations":{"deployment.kubernetes.io/revision":"1"},"creationTimestamp":null,"generation":1,"labels":{"app":"bandicoot","env":"staging","ver":"2"},"name":"bandicoot-staging","namespace":"default","selfLink":"/apis/extensions/v1beta1/namespaces/default/deployments/bandicoot-staging"},"spec":{"replicas":1,"selector":{"matchLabels":{"app":"bandicoot","env":"staging","ver":"2"}},"strategy":{"rollingUpdate":{"maxSurge":1,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"bandicoot","env":"staging","ver":"2"}},"spec":{"containers":[{"image":"gcr.io/kuar-demo/kuard-amd64:2","imagePullPolicy":"IfNotPresent","name":"bandicoot-staging","resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File"}],"dnsPolicy":"ClusterFirst","restartPolicy":"Always","schedulerName":"default-scheduler","securityContext":{},"terminationGracePeriodSeconds":30}}},"status":{}}
+    creationTimestamp: 2018-08-13T14:07:10Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: staging
+      ver: "2"
+    name: bandicoot-staging
+    namespace: default
+    resourceVersion: "767"
+    selfLink: /apis/apps/v1/namespaces/default/deployments/bandicoot-staging
+    uid: 2b871ae9-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: staging
+        ver: "2"
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 1
+      type: RollingUpdate
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: staging
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-staging
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    conditions:
+    - lastTransitionTime: 2018-08-13T14:07:10Z
+      lastUpdateTime: 2018-08-13T14:07:10Z
+      message: Deployment has minimum availability.
+      reason: MinimumReplicasAvailable
+      status: "True"
+      type: Available
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+    updatedReplicas: 1
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "2"
+      deployment.kubernetes.io/max-replicas: "3"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:06:52Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: prod
+      pod-template-hash: "2788055379"
+      ver: "1"
+    name: alpaca-prod-6cdd4997cf
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: alpaca-prod
+      uid: 209f0542-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "702"
+    selfLink: /apis/apps/v1/namespaces/default/replicasets/alpaca-prod-6cdd4997cf
+    uid: 20a04dbe-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: alpaca
+        env: prod
+        pod-template-hash: "2788055379"
+        ver: "1"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: prod
+          pod-template-hash: "2788055379"
+          ver: "1"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:1
+          imagePullPolicy: IfNotPresent
+          name: alpaca-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    fullyLabeledReplicas: 2
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:06:57Z
+    generation: 1
+    labels:
+      app: alpaca
+      env: test
+      pod-template-hash: "2726524277"
+      ver: "2"
+    name: alpaca-test-6c6b9686cc
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: alpaca-test
+      uid: 24184202-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "718"
+    selfLink: /apis/apps/v1/namespaces/default/replicasets/alpaca-test-6c6b9686cc
+    uid: 24196ceb-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: alpaca
+        env: test
+        pod-template-hash: "2726524277"
+        ver: "2"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: alpaca
+          env: test
+          pod-template-hash: "2726524277"
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: alpaca-test
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    fullyLabeledReplicas: 1
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "2"
+      deployment.kubernetes.io/max-replicas: "3"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:07:05Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: prod
+      pod-template-hash: "3681179853"
+      ver: "2"
+    name: bandicoot-prod-7bd55cfd97
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: bandicoot-prod
+      uid: 28a34759-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "747"
+    selfLink: /apis/apps/v1/namespaces/default/replicasets/bandicoot-prod-7bd55cfd97
+    uid: 28a4a954-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: prod
+        pod-template-hash: "3681179853"
+        ver: "2"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: prod
+          pod-template-hash: "3681179853"
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-prod
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 2
+    fullyLabeledReplicas: 2
+    observedGeneration: 1
+    readyReplicas: 2
+    replicas: 2
+- apiVersion: apps/v1
+  kind: ReplicaSet
+  metadata:
+    annotations:
+      deployment.kubernetes.io/desired-replicas: "1"
+      deployment.kubernetes.io/max-replicas: "2"
+      deployment.kubernetes.io/revision: "1"
+    creationTimestamp: 2018-08-13T14:07:10Z
+    generation: 1
+    labels:
+      app: bandicoot
+      env: staging
+      pod-template-hash: "255078669"
+      ver: "2"
+    name: bandicoot-staging-6994cdbbf
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: Deployment
+      name: bandicoot-staging
+      uid: 2b871ae9-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "766"
+    selfLink: /apis/apps/v1/namespaces/default/replicasets/bandicoot-staging-6994cdbbf
+    uid: 2b881746-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: bandicoot
+        env: staging
+        pod-template-hash: "255078669"
+        ver: "2"
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: bandicoot
+          env: staging
+          pod-template-hash: "255078669"
+          ver: "2"
+      spec:
+        containers:
+        - image: gcr.io/kuar-demo/kuard-amd64:2
+          imagePullPolicy: IfNotPresent
+          name: bandicoot-staging
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+  status:
+    availableReplicas: 1
+    fullyLabeledReplicas: 1
+    observedGeneration: 1
+    readyReplicas: 1
+    replicas: 1
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+        alpaca-prod'
+    creationTimestamp: 2018-08-13T14:06:52Z
+    generateName: alpaca-prod-6cdd4997cf-
+    labels:
+      app: alpaca
+      env: prod
+      pod-template-hash: "2788055379"
+      ver: "1"
+    name: alpaca-prod-6cdd4997cf-49jmc
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: alpaca-prod-6cdd4997cf
+      uid: 20a04dbe-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "698"
+    selfLink: /api/v1/namespaces/default/pods/alpaca-prod-6cdd4997cf-49jmc
+    uid: 20a48412-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:1
+      imagePullPolicy: IfNotPresent
+      name: alpaca-prod
+      resources:
+        requests:
+          cpu: 100m
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-2vpjh
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    nodeName: gke-kuar-cluster-default-pool-80353616-v0gb
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: default-token-2vpjh
+      secret:
+        defaultMode: 420
+        secretName: default-token-2vpjh
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:52Z
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:54Z
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:52Z
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://e6f0241626b1947a2ecb2c7bed386f34a787fc696e7eaa54336e90b2f197fd42
+      image: gcr.io/kuar-demo/kuard-amd64:1
+      imageID: docker-pullable://gcr.io/kuar-demo/kuard-amd64@sha256:3e75660dfe00ba63d0e6b5db2985a7ed9c07c3e115faba291f899b05db0acd91
+      lastState: {}
+      name: alpaca-prod
+      ready: true
+      restartCount: 0
+      state:
+        running:
+          startedAt: 2018-08-13T14:06:54Z
+    hostIP: 10.142.0.5
+    phase: Running
+    podIP: 10.20.2.7
+    qosClass: Burstable
+    startTime: 2018-08-13T14:06:52Z
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+        alpaca-prod'
+    creationTimestamp: 2018-08-13T14:06:52Z
+    generateName: alpaca-prod-6cdd4997cf-
+    labels:
+      app: alpaca
+      env: prod
+      pod-template-hash: "2788055379"
+      ver: "1"
+    name: alpaca-prod-6cdd4997cf-v8mq5
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: alpaca-prod-6cdd4997cf
+      uid: 20a04dbe-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "701"
+    selfLink: /api/v1/namespaces/default/pods/alpaca-prod-6cdd4997cf-v8mq5
+    uid: 20a2c3a3-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:1
+      imagePullPolicy: IfNotPresent
+      name: alpaca-prod
+      resources:
+        requests:
+          cpu: 100m
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-2vpjh
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    nodeName: gke-kuar-cluster-default-pool-80353616-v0gb
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: default-token-2vpjh
+      secret:
+        defaultMode: 420
+        secretName: default-token-2vpjh
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:52Z
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:54Z
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:52Z
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://749d77c224873e06635eb61bd0c9603b23e1f2f4f4865f6bfe3ea0ade4ff5e1e
+      image: gcr.io/kuar-demo/kuard-amd64:1
+      imageID: docker-pullable://gcr.io/kuar-demo/kuard-amd64@sha256:3e75660dfe00ba63d0e6b5db2985a7ed9c07c3e115faba291f899b05db0acd91
+      lastState: {}
+      name: alpaca-prod
+      ready: true
+      restartCount: 0
+      state:
+        running:
+          startedAt: 2018-08-13T14:06:54Z
+    hostIP: 10.142.0.5
+    phase: Running
+    podIP: 10.20.2.6
+    qosClass: Burstable
+    startTime: 2018-08-13T14:06:52Z
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+        alpaca-test'
+    creationTimestamp: 2018-08-13T14:06:57Z
+    generateName: alpaca-test-6c6b9686cc-
+    labels:
+      app: alpaca
+      env: test
+      pod-template-hash: "2726524277"
+      ver: "2"
+    name: alpaca-test-6c6b9686cc-wdzxc
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: alpaca-test-6c6b9686cc
+      uid: 24196ceb-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "717"
+    selfLink: /api/v1/namespaces/default/pods/alpaca-test-6c6b9686cc-wdzxc
+    uid: 241a2206-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:2
+      imagePullPolicy: IfNotPresent
+      name: alpaca-test
+      resources:
+        requests:
+          cpu: 100m
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-2vpjh
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    nodeName: gke-kuar-cluster-default-pool-80353616-v0gb
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: default-token-2vpjh
+      secret:
+        defaultMode: 420
+        secretName: default-token-2vpjh
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:57Z
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:59Z
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:06:57Z
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://6fa8efa7190c7556b541c150c63436344f63370c1f97d0244aa994c80927861e
+      image: gcr.io/kuar-demo/kuard-amd64:2
+      imageID: docker-pullable://gcr.io/kuar-demo/kuard-amd64@sha256:3506f936374af92823dcd3b8b8ba23812a88fe6f18a6ebc3ad3ad53c03bd40de
+      lastState: {}
+      name: alpaca-test
+      ready: true
+      restartCount: 0
+      state:
+        running:
+          startedAt: 2018-08-13T14:06:59Z
+    hostIP: 10.142.0.5
+    phase: Running
+    podIP: 10.20.2.8
+    qosClass: Burstable
+    startTime: 2018-08-13T14:06:57Z
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+        bandicoot-prod'
+    creationTimestamp: 2018-08-13T14:07:05Z
+    generateName: bandicoot-prod-7bd55cfd97-
+    labels:
+      app: bandicoot
+      env: prod
+      pod-template-hash: "3681179853"
+      ver: "2"
+    name: bandicoot-prod-7bd55cfd97-lwpnr
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: bandicoot-prod-7bd55cfd97
+      uid: 28a4a954-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "743"
+    selfLink: /api/v1/namespaces/default/pods/bandicoot-prod-7bd55cfd97-lwpnr
+    uid: 28a88d2b-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:2
+      imagePullPolicy: IfNotPresent
+      name: bandicoot-prod
+      resources:
+        requests:
+          cpu: 100m
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-2vpjh
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    nodeName: gke-kuar-cluster-default-pool-80353616-v0gb
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: default-token-2vpjh
+      secret:
+        defaultMode: 420
+        secretName: default-token-2vpjh
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:05Z
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:07Z
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:05Z
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://e5c3c939b78334204b7530822586072f81975f989ec29b55c32e4f77600ae32b
+      image: gcr.io/kuar-demo/kuard-amd64:2
+      imageID: docker-pullable://gcr.io/kuar-demo/kuard-amd64@sha256:3506f936374af92823dcd3b8b8ba23812a88fe6f18a6ebc3ad3ad53c03bd40de
+      lastState: {}
+      name: bandicoot-prod
+      ready: true
+      restartCount: 0
+      state:
+        running:
+          startedAt: 2018-08-13T14:07:06Z
+    hostIP: 10.142.0.5
+    phase: Running
+    podIP: 10.20.2.10
+    qosClass: Burstable
+    startTime: 2018-08-13T14:07:05Z
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+        bandicoot-prod'
+    creationTimestamp: 2018-08-13T14:07:05Z
+    generateName: bandicoot-prod-7bd55cfd97-
+    labels:
+      app: bandicoot
+      env: prod
+      pod-template-hash: "3681179853"
+      ver: "2"
+    name: bandicoot-prod-7bd55cfd97-w7bpd
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: bandicoot-prod-7bd55cfd97
+      uid: 28a4a954-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "746"
+    selfLink: /api/v1/namespaces/default/pods/bandicoot-prod-7bd55cfd97-w7bpd
+    uid: 28a73bb7-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:2
+      imagePullPolicy: IfNotPresent
+      name: bandicoot-prod
+      resources:
+        requests:
+          cpu: 100m
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-2vpjh
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    nodeName: gke-kuar-cluster-default-pool-80353616-v0gb
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: default-token-2vpjh
+      secret:
+        defaultMode: 420
+        secretName: default-token-2vpjh
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:05Z
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:08Z
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:05Z
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://9992e51222a99837139e32352830ea4937161bb8cbe0ce1ab790b1011cd5a50f
+      image: gcr.io/kuar-demo/kuard-amd64:2
+      imageID: docker-pullable://gcr.io/kuar-demo/kuard-amd64@sha256:3506f936374af92823dcd3b8b8ba23812a88fe6f18a6ebc3ad3ad53c03bd40de
+      lastState: {}
+      name: bandicoot-prod
+      ready: true
+      restartCount: 0
+      state:
+        running:
+          startedAt: 2018-08-13T14:07:07Z
+    hostIP: 10.142.0.5
+    phase: Running
+    podIP: 10.20.2.9
+    qosClass: Burstable
+    startTime: 2018-08-13T14:07:05Z
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    annotations:
+      kubernetes.io/limit-ranger: 'LimitRanger plugin set: cpu request for container
+        bandicoot-staging'
+    creationTimestamp: 2018-08-13T14:07:10Z
+    generateName: bandicoot-staging-6994cdbbf-
+    labels:
+      app: bandicoot
+      env: staging
+      pod-template-hash: "255078669"
+      ver: "2"
+    name: bandicoot-staging-6994cdbbf-pq6fw
+    namespace: default
+    ownerReferences:
+    - apiVersion: extensions/v1beta1
+      blockOwnerDeletion: true
+      controller: true
+      kind: ReplicaSet
+      name: bandicoot-staging-6994cdbbf
+      uid: 2b881746-9f02-11e8-a0fb-42010a8e0fee
+    resourceVersion: "765"
+    selfLink: /api/v1/namespaces/default/pods/bandicoot-staging-6994cdbbf-pq6fw
+    uid: 2b8941b4-9f02-11e8-a0fb-42010a8e0fee
+  spec:
+    containers:
+    - image: gcr.io/kuar-demo/kuard-amd64:2
+      imagePullPolicy: IfNotPresent
+      name: bandicoot-staging
+      resources:
+        requests:
+          cpu: 100m
+      terminationMessagePath: /dev/termination-log
+      terminationMessagePolicy: File
+      volumeMounts:
+      - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+        name: default-token-2vpjh
+        readOnly: true
+    dnsPolicy: ClusterFirst
+    nodeName: gke-kuar-cluster-default-pool-80353616-p8fm
+    restartPolicy: Always
+    schedulerName: default-scheduler
+    securityContext: {}
+    serviceAccount: default
+    serviceAccountName: default
+    terminationGracePeriodSeconds: 30
+    tolerations:
+    - effect: NoExecute
+      key: node.kubernetes.io/not-ready
+      operator: Exists
+      tolerationSeconds: 300
+    - effect: NoExecute
+      key: node.kubernetes.io/unreachable
+      operator: Exists
+      tolerationSeconds: 300
+    volumes:
+    - name: default-token-2vpjh
+      secret:
+        defaultMode: 420
+        secretName: default-token-2vpjh
+  status:
+    conditions:
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:10Z
+      status: "True"
+      type: Initialized
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:13Z
+      status: "True"
+      type: Ready
+    - lastProbeTime: null
+      lastTransitionTime: 2018-08-13T14:07:10Z
+      status: "True"
+      type: PodScheduled
+    containerStatuses:
+    - containerID: docker://d9af8014cb931e653f23586fa8cf6405b5bec8e78073f804dbb7d0dceb75f875
+      image: gcr.io/kuar-demo/kuard-amd64:2
+      imageID: docker-pullable://gcr.io/kuar-demo/kuard-amd64@sha256:3506f936374af92823dcd3b8b8ba23812a88fe6f18a6ebc3ad3ad53c03bd40de
+      lastState: {}
+      name: bandicoot-staging
+      ready: true
+      restartCount: 0
+      state:
+        running:
+          startedAt: 2018-08-13T14:07:12Z
+    hostIP: 10.142.0.4
+    phase: Running
+    podIP: 10.20.0.7
+    qosClass: Burstable
+    startTime: 2018-08-13T14:07:10Z
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      kubectl.kubernetes.io/last-applied-configuration: |
+        {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"creationTimestamp":null,"labels":{"component":"apiserver","provider":"kubernetes"},"name":"kubernetes","namespace":"default","selfLink":"/api/v1/namespaces/default/services/kubernetes"},"spec":{"ports":[{"name":"https","port":443,"protocol":"TCP","targetPort":443}],"sessionAffinity":"ClientIP","sessionAffinityConfig":{"clientIP":{"timeoutSeconds":10800}},"type":"ClusterIP"},"status":{"loadBalancer":{}}}
+    creationTimestamp: 2018-08-13T14:04:52Z
+    labels:
+      component: apiserver
+      provider: kubernetes
+    name: kubernetes
+    namespace: default
+    resourceVersion: "644"
+    selfLink: /api/v1/namespaces/default/services/kubernetes
+    uid: d9802d7d-9f01-11e8-a0fb-42010a8e0fee
+  spec:
+    clusterIP: 10.23.240.1
+    ports:
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 443
+    sessionAffinity: ClientIP
+    sessionAffinityConfig:
+      clientIP:
+        timeoutSeconds: 10800
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
