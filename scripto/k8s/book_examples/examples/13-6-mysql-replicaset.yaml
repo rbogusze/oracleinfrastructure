@@ -17,7 +17,9 @@ spec:
     spec:
       containers:
       - name: database
-        image: mysql
+        image: mysql:5.7
+        args:
+          - "--ignore-db-dir=lost+found"
         resources:
           requests:
             cpu: 1
@@ -37,6 +39,7 @@ spec:
           - name: database
             # /var/lib/mysql is where MySQL stores its databases
             mountPath: "/var/lib/mysql"
+            subPath: zebra
       volumes:
       - name: database
         persistentVolumeClaim:
