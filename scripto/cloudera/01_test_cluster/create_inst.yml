@@ -1,0 +1,16 @@
+- name: Provision an EC2 Instance
+  hosts: local
+  connection: local
+  gather_facts: False
+  tags: provisioning
+
+  tasks:
+   - ec2:
+       instance_type: t2.micro
+       image: ami-9887c6e7 #CentOS Linux 7 x86_64 HVM EBS
+       wait: yes
+       count: 3
+       vpc_subnet_id: subnet-f6b637d9
+       assign_public_ip: yes
+       region: us-east-1
+       zone: us-east-1d
