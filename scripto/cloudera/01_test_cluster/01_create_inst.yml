@@ -6,7 +6,11 @@
 
   tasks:
    - ec2:
-       instance_type: t2.medium
+       #instance_type: t2.medium
+       instance_type: t2.large
+       #spot_price: 0.015
+       spot_price: 0.035
+       spot_wait_timeout: 600
        image: ami-9887c6e7 #CentOS Linux 7 x86_64 HVM EBS
        key_name: nvirginia
        wait: yes
@@ -23,5 +27,15 @@
            delete_on_termination: true
        instance_tags:
          Name: cloudera
-       spot_price: 0.015
-       spot_wait_timeout: 600
+
+# does not work that below
+   - ec2_instance_facts:
+       region: "ap-southeast-2"
+       filters:
+         "tag:Name": A01NANISIM04
+
+     register: ec2_metadata
+
+   - debug: msg="{{ ec2_metadata.instances }}"
+
+   - debug: msg="{{ ec2_metadata.instances[0].public_ip_address }}"

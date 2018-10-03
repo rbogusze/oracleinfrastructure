@@ -28,6 +28,22 @@
        path: /root/.vnc/passwd
        mode: 0600
 
+   # Set vm.swappiness to 5 in /etc/sysctl.conf
+   - sysctl:
+       name: vm.swappiness
+       value: 5
+       state: present
+
+   - name: disable transparent_hugepage 1
+     lineinfile: dest=/etc/rc.local 
+                 line="echo never > /sys/kernel/mm/transparent_hugepage/defrag"
+                 state=present
+
+   - name: disable transparent_hugepage 2
+     lineinfile: dest=/etc/rc.local 
+                 line="echo never > /sys/kernel/mm/transparent_hugepage/enabled"
+                 state=present
+
    - name: Restart server if SELinux changed
      command: reboot
      async: 0
