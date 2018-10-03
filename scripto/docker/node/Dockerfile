@@ -4,4 +4,4 @@ COPY . /app
 
 EXPOSE 8080
 
-CMD node /app/blocking.js
+CMD node /app/app.js
