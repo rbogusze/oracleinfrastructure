@@ -1,0 +1,42 @@
+- hosts: all
+  become: yes
+  become_user: root
+  tasks:
+   - name: Install required packages for Cloudera on Centos 7
+     yum:
+       name: wget, httpd, epel-release, tigervnc, tigervnc-server, telnet
+       state: present
+   - name: download cloudera installation
+     get_url: url=http://archive.cloudera.com/cm5/installer/5.15.1/cloudera-manager-installer.bin dest=/home/centos
+   - file:
+       path: /home/centos/cloudera-manager-installer.bin
+       mode: 0755
+   # Disable SELinux
+   - selinux:
+       state: disabled
+     register: st
+   - name: Restart server if SELinux changed
+     command: /sbin/shutdown -r +1
+     async: 0
+     poll: 0
+     ignore_errors: true
+     when: st.changed
+   - name: "Create the remote /root/.vnc directory"
+     file:
+       path: /root/.vnc
+       mode: 0755
+       state: directory
+   - name: "Generate vnc password for root user remotely"
+     shell: |
+        echo RedHat123 | vncpasswd -f > /root/.vnc/passwd
+   - name: "Change the permission to 600 for /root/.vnc/passwd file"
+     file:
+       path: /root/.vnc/passwd
+       mode: 0600
+
+   - name: "Start & enable the vncserver"
+     systemd:
+       state: started
+       daemon_reload: yes
+       name: vncserver@:1
+       enabled: True
