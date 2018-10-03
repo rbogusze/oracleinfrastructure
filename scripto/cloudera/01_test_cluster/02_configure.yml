@@ -15,12 +15,6 @@
    - selinux:
        state: disabled
      register: st
-   - name: Restart server if SELinux changed
-     command: /sbin/shutdown -r +1
-     async: 0
-     poll: 0
-     ignore_errors: true
-     when: st.changed
    - name: "Create the remote /root/.vnc directory"
      file:
        path: /root/.vnc
@@ -34,9 +28,9 @@
        path: /root/.vnc/passwd
        mode: 0600
 
-   - name: "Start & enable the vncserver"
-     systemd:
-       state: started
-       daemon_reload: yes
-       name: vncserver@:1
-       enabled: True
+   - name: Restart server if SELinux changed
+     command: reboot
+     async: 0
+     poll: 0
+     ignore_errors: true
+     when: st.changed

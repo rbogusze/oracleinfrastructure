@@ -6,7 +6,7 @@
 
   tasks:
    - ec2:
-       instance_type: t2.micro
+       instance_type: t2.medium
        image: ami-9887c6e7 #CentOS Linux 7 x86_64 HVM EBS
        key_name: nvirginia
        wait: yes
@@ -19,7 +19,9 @@
        volumes:
          - device_name: /dev/sda1
            volume_type: gp2
-           volume_size: 8
+           volume_size: 20
            delete_on_termination: true
        instance_tags:
          Name: cloudera
+       spot_price: 0.015
+       spot_wait_timeout: 600
