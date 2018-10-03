@@ -44,6 +44,11 @@
                  line="echo never > /sys/kernel/mm/transparent_hugepage/enabled"
                  state=present
 
+   - name: "Make sure /etc/rc.local has execute permission"
+     file:
+       path: /etc/rc.local
+       mode: 0755
+
    - name: Restart server if SELinux changed
      command: reboot
      async: 0
