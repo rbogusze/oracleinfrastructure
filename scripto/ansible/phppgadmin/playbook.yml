@@ -1,0 +1,13 @@
+- name: Build image
+  hosts: local
+  connection: local
+  gather_facts: False
+
+  tasks:
+
+  - name: Build an image and push it to a private repo
+    docker_image:
+      path: ~/scripto/docker/phppgadmin
+      name: unit9_phppgadmin
+      tag: latest
+      push: no
