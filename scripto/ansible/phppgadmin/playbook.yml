@@ -30,4 +30,9 @@
       exposed_ports:
         - 80
 
-  
+  - name: execute command in docker
+    shell: |
+      docker exec phppgadmin sh -l -c "cat /tmp/secret"
+    register: hello
+
+  - debug: msg="{{ hello.stdout }}"
