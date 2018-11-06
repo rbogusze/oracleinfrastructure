@@ -4,6 +4,11 @@
   gather_facts: False
 
   tasks:
+  - name: Stop a container
+    docker_container:
+      name: phppgadmin
+      state: stopped
+    ignore_errors: yes
 
   - name: Build an image and push it to a private repo
     docker_image:
@@ -11,3 +16,18 @@
       name: unit9_phppgadmin
       tag: latest
       push: no
+      force: yes
+      buildargs:
+        UNIT9_PASS: zebras
+
+  - name: start a container
+    docker_container:
+      name: phppgadmin
+      image: unit9_phppgadmin
+      state: started
+      restart: no
+      auto_remove: yes
+      exposed_ports:
+        - 80
+
+  
