@@ -35,7 +35,7 @@ try:
 	hour = dt.datetime.today().hour
         akcje_wartosc = 0
 
-	if (hour % 4 == 0):
+	if (hour % 13 == 0):
     	    print "Hour is %d, it is 4, getting new numbers." % hour
             subprocess.check_call(['wget', '-O', 'cdr.csv', 'https://stooq.pl/q/l/?s=cdr&e=csv'])
             subprocess.check_call(['wget', '-O', 'gtn.csv', 'https://stooq.pl/q/l/?s=gtn&e=csv'])
@@ -72,7 +72,7 @@ try:
         print "W gotówce mam: %d zł" % gotowka
         display.lcd_display_string("Akcje: " + str(int(akcje_wartosc)) + "zl", 1) # Write line of text to first line of display
         display.lcd_display_string("Gotowka: " + str(int(gotowka)) + "zl", 2) # Write line of text to second line of display
-        time.sleep(5)                                     # Give time for the message to be read
+        time.sleep(500)                                     # Give time for the message to be read
         display.lcd_clear()                               # Clear the display of any data
         time.sleep(0.5)                                     # Give time for the message to be read
         display.lcd_display_string("Razem: " + str(int(akcje_wartosc + gotowka)) + "zl", 1) # Write line of text to first line of display
