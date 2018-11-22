@@ -21,6 +21,9 @@ LCD_DISPLAYCONTROL = 0x08
 LCD_DISPLAYON = 0x04
 LCD_DISPLAYOFF = 0x00
 
+LCD_BACKLIGHT = 0x08
+LCD_NOBACKLIGHT = 0x00
+
 # Load the driver and set it to "display"
 # If you use something from the driver library use the "display." prefix first
 display = lcddriver.lcd()
@@ -45,11 +48,13 @@ try:
 
         print "Deciding if I should turn the display on or off"
         if (hour > 20 or hour < 9):
-           print "Time to go to sleep"
-           display.lcd_write(LCD_DISPLAYCONTROL | LCD_DISPLAYOFF)
+            print "Time to turn off backlight and forget about anything"
+            display.lcd_device.write_cmd(LCD_NOBACKLIGHT)
+            time.sleep(60)
+            continue
         else:
-           print "Time to wake up"
-        display.lcd_write(LCD_DISPLAYCONTROL | LCD_DISPLAYON)
+            print "Time to turn on backlight"
+            display.lcd_device.write_cmd(LCD_BACKLIGHT)
 
 
         print "Jest teraz %d:%d:%d" % (hour, minute, second)
