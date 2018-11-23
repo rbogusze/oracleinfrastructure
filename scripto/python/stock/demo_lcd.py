@@ -67,11 +67,11 @@ try:
         print "It is now: %d which is %d after that" % (unix_timestamp, unix_timestamp - stock_mtime)
 
 	if ((unix_timestamp - stock_mtime) > (24 * 60 * 60)):
-    	    print "Hour is right, getting new numbers." 
+    	    print "Hour is right, getting new numbers. "
             subprocess.check_call(['wget', '-O', 'cdr.csv', 'https://stooq.pl/q/l/?s=cdr&e=csv'])
             subprocess.check_call(['wget', '-O', 'gtn.csv', 'https://stooq.pl/q/l/?s=gtn&e=csv'])
         else:
-            print "Hour is young, not getting new numbers" 
+            print "Hour is young, not getting new numbers. %d hours since last stock update" % ((unix_timestamp - stock_mtime) / 60 / 60) 
 
                 # for CDA
         with open('cdr.csv', 'r') as fp:
