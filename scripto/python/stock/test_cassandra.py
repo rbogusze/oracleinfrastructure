@@ -1,13 +1,14 @@
 # coding: utf8
 from cassandra.cluster import Cluster
 
-cluster = Cluster(['192.168.1.233'])
+cluster = Cluster(['192.168.1.233','192.168.1.236','192.168.1.27'])
+#cluster = Cluster(['192.168.1.233'])
 
-session = cluster.connect('remi_test')
+session = cluster.connect('stock')
 
-rows = session.execute('SELECT * FROM table1')
+rows = session.execute('SELECT * FROM transactions')
 for user_row in rows:
-    print user_row.name, user_row.id, user_row.temperature
+    print user_row.asset, user_row.tran_date, user_row.amount
 
 print "ala"
 
