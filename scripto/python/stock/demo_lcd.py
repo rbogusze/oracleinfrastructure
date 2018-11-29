@@ -47,7 +47,7 @@ try:
 	second = dt.datetime.today().second
 
         print "Deciding if I should turn the display on or off"
-        if (hour > 20 or hour < 9):
+        if (hour >= 20 or hour < 9):
             print "Time to turn off backlight and forget about anything"
             display.lcd_device.write_cmd(LCD_NOBACKLIGHT)
             time.sleep(60)
@@ -60,7 +60,12 @@ try:
         print "Jest teraz %d:%d:%d" % (hour, minute, second)
         akcje_wartosc = 0
 
-        stock_mtime = os.path.getmtime('cdr.csv')
+        if os.path.exists('cdr.csv'):
+            stock_mtime = os.path.getmtime('cdr.csv')
+        else:
+            stock_mtime = 1
+
+
         print "'cdr.csv' mtime: %d" % stock_mtime 
         unix_timestamp = int(time.time())
         print unix_timestamp
