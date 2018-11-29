@@ -12,6 +12,8 @@ import sys
 import datetime as dt
 import os
 
+time.sleep(10)    # Give time for the boot
+
 akcje_cda = 0.5
 akcje_gtn = 60
 
@@ -69,9 +71,9 @@ try:
         print "'cdr.csv' mtime: %d" % stock_mtime 
         unix_timestamp = int(time.time())
         print unix_timestamp
-        print "It is now: %d which is %d after that" % (unix_timestamp, unix_timestamp - stock_mtime)
+        print "It is now: %d which is %d after last stock check" % (unix_timestamp, unix_timestamp - stock_mtime)
 
-	if ((unix_timestamp - stock_mtime) > (24 * 60 * 60)):
+	if ((unix_timestamp - stock_mtime) > (60 * 60)):
     	    print "Hour is right, getting new numbers. "
             subprocess.check_call(['wget', '-O', 'cdr.csv', 'https://stooq.pl/q/l/?s=cdr&e=csv'])
             subprocess.check_call(['wget', '-O', 'gtn.csv', 'https://stooq.pl/q/l/?s=gtn&e=csv'])
