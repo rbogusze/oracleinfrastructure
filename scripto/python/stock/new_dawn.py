@@ -16,18 +16,18 @@ session = cluster.connect('stock')
 
 # Get the distinct list of stocks I already have
 def check_quotes():
-    #session = cluster.connect('stock')
+
     rows = session.execute('SELECT * FROM transactions')
     my_quotes = []
     for tran in rows:
-            print tran.asset, tran.tran_date, tran.amount, tran.price
+            #print tran.asset, tran.tran_date, tran.amount, tran.price
             my_quotes.append(tran.asset)
 
-    print my_quotes
+    #print my_quotes
     # turn the list to only distinct elements
     my_quotes = list(set(my_quotes))
-    for x in range(len(my_quotes)):
-        print "Element: %d, has value: %s" % (x, my_quotes[x])
+    #for x in range(len(my_quotes)):
+    #    print "Element: %d, has value: %s" % (x, my_quotes[x])
 
     #session.shutdown()
     return my_quotes
@@ -61,11 +61,57 @@ def capture_current_quotes(my_quotes):
         cass_return = session.execute(cass_insert)
 
 
-print "Get the distinct list of stocks I already have"
-my_quotes = check_quotes()
-            
-print "capture the current quotes"
-capture_current_quotes(my_quotes)
+def my_stock_value(my_quotes):
+    print "Ala ma kota"
+    for x in range(len(my_quotes)):
+        print "Computing value for: %s" % (my_quotes[x])
+        print "Checking the quantity for %s" % (my_quotes[x])
+
+        cass_select = "select sum(amount) as sum_amount from stock.transactions where asset = '" + my_quotes[x] + "';"
+        print "Asking cassandra for: %s" % cass_select
+        rows = session.execute(cass_select)
+        for row in rows:
+            print row.sum_amount
+
+            # I know now how much I have of a particular stock, now what is the current value I ask the stock.quotes table
+            #cass_select_price = "select price from stock.quotes where asset='gtn' and quote_date='2018-12-05';"
+            cass_select_price = "select price from stock.quotes where asset='" + my_quotes[x] + "' and quote_date='" + str(dt.datetime.now().date()) + "';"
+            rows_price = session.execute(cass_select_price)
+            for row_price in rows_price:
+                print row_price.price
+                print "Current value for: %s is: %d" % (my_quotes[x], (row.sum_amount * row_price.price))
+     
+
+
+                
+
+# main endless loop
+
+
+
+checked_quotes_last_time = 0
+checked_frequency = 60  # in seconds
+
+while True:
+    now = int(time.time())
+    if (now - checked_quotes_last_time) > checked_frequency:
+        print "Time to check the quotes."
+
+        print "Get the distinct list of stocks I already have"
+        my_quotes = check_quotes()
+
+        print "capture the current quotes"
+        capture_current_quotes(my_quotes)
+        
+        checked_quotes_last_time = now
+        time.sleep(1)
+    else:
+        print "I was checking quotes recently, not doing that now. "
+        time.sleep(1)
+
+    # What is my current stock value
+    my_stock_value(check_quotes())
+
 
 
 session.shutdown()
