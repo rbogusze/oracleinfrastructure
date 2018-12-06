@@ -11,8 +11,6 @@ import os
 
 # $ sudo pip install python-dateutil
 
-cluster = Cluster(['192.168.1.233','192.168.1.236','192.168.1.27'])
-session = cluster.connect('stock')
 
 # Get the distinct list of stocks I already have
 def check_quotes():
@@ -62,16 +60,16 @@ def capture_current_quotes(my_quotes):
 
 
 def my_stock_value(my_quotes):
-    print "Ala ma kota"
+    my_stock_sum = 0
     for x in range(len(my_quotes)):
-        print "Computing value for: %s" % (my_quotes[x])
+        print "-" * 30
         print "Checking the quantity for %s" % (my_quotes[x])
 
         cass_select = "select sum(amount) as sum_amount from stock.transactions where asset = '" + my_quotes[x] + "';"
         print "Asking cassandra for: %s" % cass_select
         rows = session.execute(cass_select)
         for row in rows:
-            print row.sum_amount
+            print "I have %f pieces of %s " % (float(row.sum_amount), str(my_quotes[x]))
 
             # I know now how much I have of a particular stock, now what is the current value I ask the stock.quotes table
             #cass_select_price = "select price from stock.quotes where asset='gtn' and quote_date='2018-12-05';"
@@ -79,20 +77,42 @@ def my_stock_value(my_quotes):
             rows_price = session.execute(cass_select_price)
             for row_price in rows_price:
                 print row_price.price
-                print "Current value for: %s is: %d" % (my_quotes[x], (row.sum_amount * row_price.price))
+                print "Current value for: %s is: %f" % (my_quotes[x], (row.sum_amount * row_price.price))
+                my_stock_sum += (row.sum_amount * row_price.price)
+    print "Value in stock: %d" % my_stock_sum
      
 
+# Is it time to display (If it is a night I disable the LCD display)
+def time_to_display():
+    hour = dt.datetime.today().hour
 
+    LCD_BACKLIGHT = 0x08
+    LCD_NOBACKLIGHT = 0x00    
+
+    print "Deciding if I should turn the display on or off"
+    if (hour >= 20 or hour < 9):
+        print "Time to turn off backlight and forget about anything"
+        display.lcd_device.write_cmd(LCD_NOBACKLIGHT)
+        time.sleep(60)
+        return False
+    else:
+        print "Time to turn on backlight"
+        display.lcd_device.write_cmd(LCD_BACKLIGHT)
+        return True
+                                                        
                 
 
 # main endless loop
 
-
+cluster = Cluster(['192.168.1.233','192.168.1.236','192.168.1.27'])
+session = cluster.connect('stock')
+display = lcddriver.lcd()
 
 checked_quotes_last_time = 0
-checked_frequency = 60  # in seconds
+#checked_quotes_last_time = int(time.time())
+checked_frequency = 60 * 60  # in seconds
 
-while True:
+while time_to_display():
     now = int(time.time())
     if (now - checked_quotes_last_time) > checked_frequency:
         print "Time to check the quotes."
@@ -104,13 +124,16 @@ while True:
         capture_current_quotes(my_quotes)
         
         checked_quotes_last_time = now
-        time.sleep(1)
+        time.sleep(3)
     else:
+        print "\*" * 30
         print "I was checking quotes recently, not doing that now. "
-        time.sleep(1)
+        time.sleep(15)
 
     # What is my current stock value
     my_stock_value(check_quotes())
+
+    
 
 
 
