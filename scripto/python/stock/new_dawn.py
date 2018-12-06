@@ -115,6 +115,7 @@ def print_to_lcd(line1, line2):
 # main endless loop
 
 cluster = Cluster(['192.168.1.233','192.168.1.236','192.168.1.27'])
+cluster.connect_timeout = 30
 session = cluster.connect('stock')
 display = lcddriver.lcd()
 
