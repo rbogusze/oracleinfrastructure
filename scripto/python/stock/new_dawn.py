@@ -80,6 +80,7 @@ def my_stock_value(my_quotes):
                 print "Current value for: %s is: %f" % (my_quotes[x], (row.sum_amount * row_price.price))
                 my_stock_sum += (row.sum_amount * row_price.price)
     print "Value in stock: %d" % my_stock_sum
+    return my_stock_sum
      
 
 # Is it time to display (If it is a night I disable the LCD display)
@@ -100,7 +101,16 @@ def time_to_display():
         display.lcd_device.write_cmd(LCD_BACKLIGHT)
         return True
                                                         
-                
+def my_savings_value():
+    return 33
+
+def print_to_lcd(line1, line2):
+    print "First line: %s" % line1
+    print "Second line: %s" % line2
+    display.lcd_clear()                  # Clear the display of any data
+    display.lcd_display_string(line1, 1) # Write line of text to first line of display
+    display.lcd_display_string(line2, 2) # Write line of text to second line of display
+            
 
 # main endless loop
 
@@ -124,17 +134,20 @@ while time_to_display():
         capture_current_quotes(my_quotes)
         
         checked_quotes_last_time = now
-        time.sleep(3)
+        #time.sleep(3)
     else:
         print "\*" * 30
         print "I was checking quotes recently, not doing that now. "
-        time.sleep(15)
+        #time.sleep(15)
 
     # What is my current stock value
-    my_stock_value(check_quotes())
+    my_stock = my_stock_value(check_quotes())
+    my_savings = my_savings_value()
 
-    
-
+    print_to_lcd("Akcje: " + str(int(my_stock)) + "zl", "Oszczednosci: " + str(int(my_savings)) + "zl" )
+    time.sleep(3)
+    print_to_lcd("Razem: " + str(int((my_stock + my_savings))) + "zl", "")
+    time.sleep(3)
 
 
 session.shutdown()
