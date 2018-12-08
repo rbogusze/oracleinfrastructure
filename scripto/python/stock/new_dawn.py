@@ -59,7 +59,7 @@ def capture_current_quotes(my_quotes):
         cass_return = session.execute(cass_insert)
 
 
-def my_stock_value(my_quotes):
+def my_stock_value(my_quotes, for_date):
     my_stock_sum = 0
     for x in range(len(my_quotes)):
         print "-" * 30
@@ -73,7 +73,7 @@ def my_stock_value(my_quotes):
 
             # I know now how much I have of a particular stock, now what is the current value I ask the stock.quotes table
             #cass_select_price = "select price from stock.quotes where asset='gtn' and quote_date='2018-12-05';"
-            cass_select_price = "select price from stock.quotes where asset='" + my_quotes[x] + "' and quote_date='" + str(dt.datetime.now().date()) + "';"
+            cass_select_price = "select price from stock.quotes where asset='" + my_quotes[x] + "' and quote_date='" + for_date + "';"
             rows_price = session.execute(cass_select_price)
             for row_price in rows_price:
                 print row_price.price
@@ -91,7 +91,7 @@ def time_to_display():
     LCD_NOBACKLIGHT = 0x00    
 
     print "Deciding if I should turn the display on or off"
-    if (hour >= 20 or hour < 9):
+    if (hour >= 21 or hour < 9):
         print "Time to turn off backlight and forget about anything"
         display.lcd_device.write_cmd(LCD_NOBACKLIGHT)
         time.sleep(60)
@@ -102,7 +102,13 @@ def time_to_display():
         return True
                                                         
 def my_savings_value():
-    return 33
+    cass_select = "select sum(amount) as sum_amount from stock.savings;"
+    print "Asking cassandra for: %s" % cass_select
+    rows = session.execute(cass_select)
+    for row in rows:
+        print "I have savings of %s " % str(row.sum_amount)
+    return row.sum_amount
+                                    
 
 def print_to_lcd(line1, line2):
     print "First line: %s" % line1
@@ -123,7 +129,14 @@ checked_quotes_last_time = 0
 #checked_quotes_last_time = int(time.time())
 checked_frequency = 60 * 60  # in seconds
 
-while time_to_display():
+# test
+
+# /test
+
+while True:
+    if not time_to_display():
+        continue
+    
     now = int(time.time())
     if (now - checked_quotes_last_time) > checked_frequency:
         print "Time to check the quotes."
@@ -142,12 +155,18 @@ while time_to_display():
         #time.sleep(15)
 
     # What is my current stock value
-    my_stock = my_stock_value(check_quotes())
+    my_stock = my_stock_value(check_quotes(), str(dt.datetime.now().date()))
     my_savings = my_savings_value()
 
-    print_to_lcd("Akcje: " + str(int(my_stock)) + "zl", "Oszczednosci: " + str(int(my_savings)) + "zl" )
+    my_stock_yesterday = my_stock_value(check_quotes(), str(dt.datetime.now().date() - dt.timedelta(1)))
+
+    print_to_lcd("Akcje: " + str(int(my_stock)) + "zl", "Gotowka: " + str(int(my_savings)) + "zl" )
     time.sleep(3)
-    print_to_lcd("Razem: " + str(int((my_stock + my_savings))) + "zl", "")
+    if my_stock >= my_stock_yesterday:
+        print_to_lcd("Razem: " + str(int((my_stock + my_savings))) + "zl", "Zysk: " + str(int(my_stock - my_stock_yesterday)) + "zl")
+    else:
+        print_to_lcd("Razem: " + str(int((my_stock + my_savings))) + "zl", "Strata: " + str(int(my_stock_yesterday - my_stock)) + "zl")
+    
     time.sleep(3)
 
 
