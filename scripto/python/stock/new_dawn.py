@@ -58,6 +58,24 @@ def capture_current_quotes(my_quotes):
         print "cass_insert: %s" % cass_insert
         cass_return = session.execute(cass_insert)
 
+def ask_cassandra_stock_quote(quote_name, quote_date):
+    keep_asking = True
+
+    while keep_asking:
+        cass_sql = "select price from stock.quotes where asset='" + quote_name + "' and quote_date='" + quote_date + "';"
+        print "About to ask for: %s" % cass_sql
+        rows_price = session.execute(cass_sql)
+        if not rows_price:
+            print "Does not exist. I will ask for one day before that"
+            tmp_date = dt.datetime.strptime(quote_date, '%Y-%m-%d')
+            tmp_date = tmp_date - dt.timedelta(days=1)
+            quote_date = tmp_date.strftime('%Y-%m-%d')
+            print "Will ask for: %s" % quote_date
+        else:
+            keep_asking = False
+
+    return rows_price
+                
 
 def my_stock_value(my_quotes, for_date):
     my_stock_sum = 0
@@ -72,14 +90,16 @@ def my_stock_value(my_quotes, for_date):
             print "I have %f pieces of %s " % (float(row.sum_amount), str(my_quotes[x]))
 
             # I know now how much I have of a particular stock, now what is the current value I ask the stock.quotes table
-            #cass_select_price = "select price from stock.quotes where asset='gtn' and quote_date='2018-12-05';"
-            cass_select_price = "select price from stock.quotes where asset='" + my_quotes[x] + "' and quote_date='" + for_date + "';"
-            rows_price = session.execute(cass_select_price)
+            #cass_select_price = "select price from stock.quotes where asset='" + my_quotes[x] + "' and quote_date='" + for_date + "';"
+            #cass_select_price = "select price from stock.quotes where asset='" + my_quotes[x] + "' and quote_date='" + for_date + "';"
+            #rows_price = session.execute(cass_select_price)
+            rows_price = ask_cassandra_stock_quote(my_quotes[x], for_date)
             for row_price in rows_price:
                 print row_price.price
                 print "Current value for: %s is: %f" % (my_quotes[x], (row.sum_amount * row_price.price))
                 my_stock_sum += (row.sum_amount * row_price.price)
     print "Value in stock: %d" % my_stock_sum
+
     return my_stock_sum
      
 
