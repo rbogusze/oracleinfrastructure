@@ -1,0 +1,22 @@
+- name: Setup basic actions on computers at home
+  hosts: ania
+
+  vars_files:
+  - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
+
+  become: yes
+  become_user: root
+  tasks:
+   - name: Install required packages
+     apt:
+       name: rsync,samba
+       state: present
+     tags:
+      - update
+
+   - name: Create a file with smb credentials
+     copy:
+       dest: "/etc/samba/cred-file"
+       content: |
+         username="{{ vault_smb_user }}"
+         password="{{ vault_smb_pass }}"
