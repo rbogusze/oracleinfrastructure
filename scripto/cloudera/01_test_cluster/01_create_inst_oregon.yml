@@ -6,16 +6,17 @@
 
   tasks:
    - ec2:
-       instance_type: t2.medium
-       #instance_type: t2.large
-       spot_price: 0.015
-       #spot_price: 0.035
+       #instance_type: t2.medium
+       instance_type: t2.large
+       #spot_price: 0.015
+       spot_price: 0.035
        spot_wait_timeout: 600
        image: ami-3ecc8f46
            #CentOS Linux 7 x86_64 HVM EBS https://wiki.centos.org/Cloud/AWS#head-224024c7b3b083bd574bec6861bcdfd3487a5418
+           # anyway I faild to find the right ami number. It turned out to be best to launch small instance then ami-xx is visible
        key_name: oregon_remik
        wait: yes
-       count: 3
+       count: 1
        vpc_subnet_id: subnet-e2441eaa
        group_id: sg-04f4fc1d84bf5f20a
        assign_public_ip: yes

@@ -6,15 +6,15 @@
 
   tasks:
    - ec2:
-       #instance_type: t2.medium
-       instance_type: t2.large
-       #spot_price: 0.015
-       spot_price: 0.035
+       instance_type: t2.medium
+       #instance_type: t2.large
+       spot_price: 0.015
+       #spot_price: 0.035
        spot_wait_timeout: 600
        image: ami-9887c6e7 #CentOS Linux 7 x86_64 HVM EBS
        key_name: nvirginia
        wait: yes
-       count: 1
+       count: 3
        vpc_subnet_id: subnet-f6b637d9
        group_id: sg-0c48a75e2c61be048
        assign_public_ip: yes
