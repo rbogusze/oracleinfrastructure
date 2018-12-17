@@ -1,0 +1,42 @@
+- name: Provision an EC2 Instance
+  hosts: local
+  connection: local
+  gather_facts: False
+  tags: provisioning
+
+  tasks:
+   - ec2:
+       instance_type: t2.medium
+       #instance_type: t2.large
+       spot_price: 0.015
+       #spot_price: 0.035
+       spot_wait_timeout: 600
+       image: ami-3ecc8f46
+           #CentOS Linux 7 x86_64 HVM EBS https://wiki.centos.org/Cloud/AWS#head-224024c7b3b083bd574bec6861bcdfd3487a5418
+       key_name: oregon_remik
+       wait: yes
+       count: 3
+       vpc_subnet_id: subnet-e2441eaa
+       group_id: sg-04f4fc1d84bf5f20a
+       assign_public_ip: yes
+       region: us-west-2
+       zone: us-west-2b
+       volumes:
+         - device_name: /dev/sda1
+           volume_type: gp2
+           volume_size: 30
+           delete_on_termination: true
+       instance_tags:
+         Name: cloudera
+
+# does not work that below
+   - ec2_instance_facts:
+       region: "us-west-2"
+       filters:
+         "tag:Name": A01NANISIM04
+
+     register: ec2_metadata
+
+   - debug: msg="{{ ec2_metadata.instances }}"
+
+   - debug: msg="{{ ec2_metadata.instances[0].public_ip_address }}"
