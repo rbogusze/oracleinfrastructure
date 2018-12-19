@@ -3,6 +3,7 @@ from cassandra.cluster import Cluster
 from cassandra.policies import ConstantReconnectionPolicy, DCAwareRoundRobinPolicy
 import time
 import io
+import socket
 
 # $ sudo pip install python-dateutil
 
@@ -23,7 +24,7 @@ while True:
     now = int(time.time())
     print "Checking now: %s" % now
 
-    location = "oko2_cpu"
+    location = socket.gethostname() + "_cpu"
 
     f = open("/sys/class/thermal/thermal_zone0/temp", "r")
     temp_cpu = f.readline()[:-1]
