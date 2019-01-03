@@ -6,7 +6,7 @@
   tasks:
    - name: Install required packages for Cloudera on Centos 7
      yum:
-       name: wget, httpd, epel-release, tigervnc, tigervnc-server, telnet, iftop, nmon, libselinux-python, firewalld
+       name: wget, httpd, epel-release, tigervnc, tigervnc-server, telnet, iftop, nmon, libselinux-python, firewalld, vim
        state: present
    - name: download cloudera installation
      get_url: url=http://archive.cloudera.com/cm5/installer/5.15.1/cloudera-manager-installer.bin dest=/home/centos
@@ -63,3 +63,22 @@
      poll: 0
      ignore_errors: true
      when: st.changed
+
+   - name: No NTP
+     yum: 
+       name: ntp
+       state: present
+
+   - name: Install Crony https://blacksaildivision.com/ntp-centos
+     yum: 
+       name=chrony
+
+   - name: Start and enable chrony
+     service:
+       name: chronyd
+       state: started
+       enabled: True
+
+
+
+ 
