@@ -21,7 +21,9 @@ sleep_time = 1 #in seconds
 
 while True:
     
-    now = int(time.time())
+    now = int(time.time())  # time since epoch, in seconds
+    now = int(time.time()*1000.0) # time since epoch, + miliseconds
+
     print "Checking now: %s" % now
 
     location = socket.gethostname() + "_cpu"
