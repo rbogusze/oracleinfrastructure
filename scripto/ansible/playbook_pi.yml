@@ -1,0 +1,16 @@
+- name: Setup basic actions on computers at home
+  hosts: all
+
+  vars_files:
+  - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
+
+  become: yes
+  become_user: root
+  tasks:
+   - name: Install required packages
+     apt:
+       name: vim
+       state: present
+     tags:
+      - update
+
