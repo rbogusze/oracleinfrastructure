@@ -2,6 +2,8 @@
   hosts: local
   connection: local
   gather_facts: False
+  vars_files:
+  - vault.yml
 
   tasks:
   - name: Stop a container
@@ -18,7 +20,7 @@
       push: no
       force: yes
       buildargs:
-        UNIT9_PASS: zebras
+        UNIT9_PASS: "{{ phppgadmin.unit9_pass }}"
 
   - name: start a container
     docker_container:
