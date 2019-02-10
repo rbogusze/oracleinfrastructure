@@ -2,7 +2,7 @@
   hosts: all
 
   vars_files:
-  - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
+  - ~/_poufne/ansible_vault.yml
 
   become: yes
   become_user: root
@@ -14,3 +14,15 @@
      tags:
       - update
 
+   - name: Setup Wi-Fi abrakadabra
+     blockinfile:
+       path: /etc/wpa_supplicant/wpa_supplicant.conf
+       block: |
+         network={
+           ssid="abrakadabra"
+           psk="{{ vault_wifi_abrakadabra }}"
+         }
+     tags:
+      - wifia
+      
+      
