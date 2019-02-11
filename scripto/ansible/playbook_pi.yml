@@ -52,3 +52,28 @@
          static domain_name_servers=192.168.1.1
      tags:
       - static_ip
+
+   - name: Setup cassandra node, 1. copy jdk
+     unarchive:
+       src: /KASZTELAN/mirror/utils/jdk-8u191-linux-arm32-vfp-hflt.tar.gz
+       dest: /opt
+       creates : /opt/jdk1.8.0_191
+     tags:
+      - cassandra
+
+   - name: Setup cassandra node, 2. copy cassandra binaries
+     unarchive:
+       src: /KASZTELAN/mirror/utils/apache-cassandra-2.2.13-bin.tar.gz
+       dest: /opt
+       creates : /opt/apache-cassandra-2.2.13
+     tags:
+      - cassandra
+
+   - name: Setup cassandra node, 3. update alternative for java
+     alternatives:
+       name: java
+       link: /usr/bin/java
+       path: /opt/jdk1.8.0_191/bin/javac
+     tags:
+      - cassandra
+
