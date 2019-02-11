@@ -25,4 +25,30 @@
      tags:
       - wifia
       
-      
+   - name: Setup hostname
+     hostname:
+       name: "{{ inventory_hostname }}"
+     tags:
+      - hostname
+
+   - name: Setup /etc/hosts
+     lineinfile:
+       dest: /etc/hosts
+       regexp: '.*{{ inventory_hostname }}$'
+       line: '{{ ansible_ssh_host }} {{ inventory_hostname }}'
+       state: present
+     tags:
+      - hostname
+
+   
+   - name: Setup static ip for wlan0
+     blockinfile:
+       path: /etc/dhcpcd.conf
+       block: |
+         interface wlan0
+
+         static ip_address={{ ansible_ssh_host }}/24
+         static routers=192.168.1.1
+         static domain_name_servers=192.168.1.1
+     tags:
+      - static_ip
