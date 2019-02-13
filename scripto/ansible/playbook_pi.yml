@@ -113,3 +113,39 @@
          rpc_address: {{ ansible_ssh_host }}
      tags:
       - cassandra
+
+
+   - name: Setup cassandra node, 7. /opt/cassandra/conf/cassandra.yaml entries replaced
+     replace:
+       path: /opt/cassandra/conf/cassandra.yaml
+       regexp: '          - seeds: "127.0.0.1"'
+       replace: '          - seeds: "192.168.1.233,192.168.1.236"'
+     tags:
+      - cassandra
+
+
+   - name: Setup cassandra node, 7. /opt/cassandra/conf/cassandra.yaml entries replaced
+     replace:
+       path: /opt/cassandra/conf/cassandra.yaml
+       regexp: '^endpoint_snitch: SimpleSnitch'
+       replace: 'endpoint_snitch: GossipingPropertyFileSnitch'
+     tags:
+      - cassandra
+
+
+   - name: Setup cassandra node, 8a. /opt/cassandra/conf/cassandra-rackdc.properties entries replaced
+     replace:
+       path: /opt/cassandra/conf/cassandra-rackdc.properties
+       regexp: '^dc=dc1'
+       replace: 'dc=SLOWICZA'
+     tags:
+      - cassandra
+
+
+   - name: Setup cassandra node, 8b. /opt/cassandra/conf/cassandra-rackdc.properties entries replaced
+     replace:
+       path: /opt/cassandra/conf/cassandra-rackdc.properties
+       regexp: '^rack=rack1'
+       replace: 'rack={{ inventory_hostname }}'
+     tags:
+      - cassandra
