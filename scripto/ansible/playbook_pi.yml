@@ -77,3 +77,39 @@
      tags:
       - cassandra
 
+   - name: Setup cassandra node, 4. create a link to /opt/apache-cassandra-2.2.13
+     file:
+       src: /opt/apache-cassandra-2.2.13
+       dest: /opt/cassandra
+       owner: root
+       group: root
+       state: link
+     tags:
+      - cassandra
+
+
+
+   - name: Setup cassandra node, 5a. /opt/cassandra/conf/cassandra.yaml entries removed 1
+     lineinfile:
+       path: /opt/cassandra/conf/cassandra.yaml
+       state: absent
+       regexp: '^listen_address: localhost'
+     tags:
+      - cassandra
+
+   - name: Setup cassandra node, 5b. /opt/cassandra/conf/cassandra.yaml entries removed 2
+     lineinfile:
+       path: /opt/cassandra/conf/cassandra.yaml
+       state: absent
+       regexp: '^rpc_address: localhost'
+     tags:
+      - cassandra
+
+   - name: Setup cassandra node, 6. /opt/cassandra/conf/cassandra.yaml entries added
+     blockinfile:
+       path: /opt/cassandra/conf/cassandra.yaml
+       block: |
+         listen_address: {{ ansible_ssh_host }}
+         rpc_address: {{ ansible_ssh_host }}
+     tags:
+      - cassandra
