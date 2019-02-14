@@ -119,7 +119,7 @@
      replace:
        path: /opt/cassandra/conf/cassandra.yaml
        regexp: '          - seeds: "127.0.0.1"'
-       replace: '          - seeds: "192.168.1.233,192.168.1.236"'
+       replace: '          - seeds: "192.168.1.233"'
      tags:
       - cassandra
 
