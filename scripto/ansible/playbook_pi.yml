@@ -88,11 +88,14 @@
      tags:
       - cassandra
 
+
    - name: Setup cassandra node, 4. mv /opt/apache-cassandra-2.2.13 /opt/cassandra
      ignore_errors: yes
      command: mv /opt/apache-cassandra-2.2.13 /opt/cassandra
+     args:
+       creates: /opt/cassandra
      tags:
-      - cassandra2
+      - cassandra
 
 
 
