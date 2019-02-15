@@ -25,6 +25,17 @@
      tags:
       - wifia
       
+   - name: Setup Wi-Fi remikaniaslowicza
+     blockinfile:
+       path: /etc/wpa_supplicant/wpa_supplicant.conf
+       block: |
+         network={
+           ssid="remikaniaslowicza"
+           psk="{{ vault_wifi_remikaniaslowicza }}"
+         }
+     tags:
+      - wifir
+      
    - name: Setup hostname
      hostname:
        name: "{{ inventory_hostname }}"
@@ -65,7 +76,7 @@
      unarchive:
        src: /KASZTELAN/mirror/utils/apache-cassandra-2.2.13-bin.tar.gz
        dest: /opt
-       creates : /opt/apache-cassandra-2.2.13
+       creates : /opt/cassandra
      tags:
       - cassandra
 
@@ -77,15 +88,11 @@
      tags:
       - cassandra
 
-   - name: Setup cassandra node, 4. create a link to /opt/apache-cassandra-2.2.13
-     file:
-       src: /opt/apache-cassandra-2.2.13
-       dest: /opt/cassandra
-       owner: root
-       group: root
-       state: link
+   - name: Setup cassandra node, 4. mv /opt/apache-cassandra-2.2.13 /opt/cassandra
+     ignore_errors: yes
+     command: mv /opt/apache-cassandra-2.2.13 /opt/cassandra
      tags:
-      - cassandra
+      - cassandra2
 
 
 
@@ -114,8 +121,16 @@
      tags:
       - cassandra
 
+   - name: Setup cassandra node, 6. /opt/cassandra/conf/cassandra.yaml entries added
+     blockinfile:
+       path: /root/.bashrc
+       block: |
+         export JAVA_HOME="/opt/jdk1.8.0_191"
+         export PATH=$PATH:$JAVA_HOME/bin
+     tags:
+      - cassandra
 
-   - name: Setup cassandra node, 7. /opt/cassandra/conf/cassandra.yaml entries replaced
+   - name: Setup cassandra node, 7a. /opt/cassandra/conf/cassandra.yaml entries replaced
      replace:
        path: /opt/cassandra/conf/cassandra.yaml
        regexp: '          - seeds: "127.0.0.1"'
@@ -124,7 +139,7 @@
       - cassandra
 
 
-   - name: Setup cassandra node, 7. /opt/cassandra/conf/cassandra.yaml entries replaced
+   - name: Setup cassandra node, 7b. /opt/cassandra/conf/cassandra.yaml entries replaced
      replace:
        path: /opt/cassandra/conf/cassandra.yaml
        regexp: '^endpoint_snitch: SimpleSnitch'
@@ -147,5 +162,42 @@
        path: /opt/cassandra/conf/cassandra-rackdc.properties
        regexp: '^rack=rack1'
        replace: 'rack={{ inventory_hostname }}'
+     tags:
+      - cassandra
+
+   - name: Setup cassandra node, 9a. create service
+     copy:
+       dest: /lib/systemd/system/cassandra.service
+       content: |
+         [Unit]
+         Description=Remi's cassandra
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/opt/cassandra/bin
+         ExecStart=/opt/cassandra/bin/cassandra -f
+         Restart=on-failure
+         Environment="JAVA_HOME=/opt/jdk1.8.0_191"
+         Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jdk1.8.0_191/bin"
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - cassandra
+
+   
+   - name: Setup cassandra node, 9b. create service
+     file:
+       path: /lib/systemd/system/cassandra.service
+       mode: 0644
+     tags:
+      - cassandra
+
+   - name: Setup cassandra node, 9c. create service
+     systemd:
+       name: cassandra.service
+       state: started
+       enabled: yes
      tags:
       - cassandra
