@@ -1,5 +1,5 @@
 - name: Setup basic actions on computers at home
-  hosts: ania
+  hosts: t430
 
   vars_files:
   - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
@@ -18,13 +18,13 @@
      copy:
        dest: "/etc/samba/cred-file"
        content: |
-         username="{{ vault_smb_user }}"
-         password="{{ vault_smb_pass }}"
+         username={{ vault_smb_user }}
+         password={{ vault_smb_pass }}
 
    - name: add mount remote backup
      mount:
        name: /KASZTELAN
        src: //192.168.1.10/KASZTELAN
-       opts: "credentials=/etc/samba/cred-file,uid=remik,gid=remik"
+       opts: "credentials=/etc/samba/cred-file,uid=remik,gid=remik,vers=1.0"
        fstype: cifs
        state: mounted
