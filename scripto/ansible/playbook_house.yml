@@ -1,5 +1,5 @@
 - name: Setup basic actions on computers at home
-  hosts: t430
+  hosts: ania
 
   vars_files:
   - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml

@@ -204,3 +204,11 @@
        enabled: yes
      tags:
       - cassandra
+
+
+   - name: Disable default X startup (does not work, use rapi-config)
+     service:
+       name: lightdm.service
+       enabled: no
+     tags:
+      - nogui
