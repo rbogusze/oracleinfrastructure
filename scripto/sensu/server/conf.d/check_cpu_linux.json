@@ -1,0 +1,10 @@
+{
+      "checks": {
+       "check-cpu-linux": {
+       "command": "/opt/sensu/embedded/bin/check-cpu.rb -w 80 -c 90 ",
+       "interval": 6,
+       "occurrences": 5,
+          "subscribers": [ "default" ]
+       }
+         }
+}
