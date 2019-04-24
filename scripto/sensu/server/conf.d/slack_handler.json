@@ -2,6 +2,7 @@
   "handlers": {
     "slack": {
       "type": "pipe",
+      "filter": "state-change-only",
       "command": "handler-slack.rb",
       "severites": ["critical", "warning", "unknown"]
       }
