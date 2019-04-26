@@ -2,7 +2,7 @@
      "checks": {
         "check-disk-usage-linux": {
       "command": "/opt/sensu/embedded/bin/check-disk-usage.rb -p '(\/var|\/run|\/sys|\/snap|\/KASZTELAN)' -w 80 -c 90",
-      "interval": 60,
+      "interval": 600,
       "occurrences": 5,
       "subscribers": [ "default" ]
         }

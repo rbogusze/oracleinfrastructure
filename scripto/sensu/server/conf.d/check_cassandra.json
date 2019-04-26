@@ -2,7 +2,7 @@
      "checks": {
         "check-cassandra": {
       "command": "export JAVA_HOME=/opt/jdk1.8.0_191; export PATH=$PATH:/opt/cassandra/bin; /opt/sensu/embedded/bin/check-cassandra-schema.rb",
-      "interval": 60,
+      "interval": 300,
       "occurrences": 5,
       "subscribers": [ "cassandra" ]
         }
