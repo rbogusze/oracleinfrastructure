@@ -1,0 +1,73 @@
+- name: Raspberry | Install ruby,ruby-dev
+  apt:
+    name: ruby,ruby-dev,ruby-full,libssl-dev,autoconf,autogen,libtool,libffi-dev
+    state: present
+
+- name: Gem install sensu (this can take some time)
+  gem:
+    name: sensu
+    state: present
+
+- name: Gem install sensu-plugin
+  gem:
+    name: sensu-plugin
+    state: present
+
+- name: Gem install sys-filesystem
+  gem:
+    name: sys-filesystem
+    state: present
+
+- name: Add user sensu
+  user:
+    name: sensu
+
+- name: Don't know why I have to repeat that, but instaling gem sensu again
+  shell: gem install sensu
+  args:
+    chdir: /usr/local/bin/
+    creates: /usr/local/bin/sensu-client
+
+- name: Don't know why I have to repeat that, but instaling gem sensu-plugin again
+  shell: gem install sensu-plugin
+  args:
+    chdir: /usr/local/bin/
+    creates: /usr/local/bin/sensu-install
+
+- copy:
+    dest: /etc/systemd/system/sensu-client.service
+    content: |
+      [Unit]               
+      Description=sensu client                   
+
+      [Service]            
+      User=root
+      Group=root
+      ExecStart=/usr/local/bin/sensu-client                                    
+      KillMode=process     
+      Restart=on-failure   
+      RestartSec=1min      
+
+      [Install]            
+      WantedBy=multi-user.target
+
+
+
+- service:
+    name: sensu-client
+    enabled: yes
+
+- service:
+    name: sensu-client
+    state: started
+
+- name: Create directory and link on raspian
+  file:
+    path: /opt/sensu/embedded
+    state: directory
+
+- name: Create directory link
+  file: path=/opt/sensu/embedded/bin
+        src=/usr/local/bin
+        state=link
+        force=yes

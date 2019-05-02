@@ -1,0 +1,47 @@
+#- debug:
+#    var: hostvars[inventory_hostname]
+
+- name: Creates directory /etc/sensu/conf.d
+  file:
+    path: /etc/sensu/conf.d
+    state: directory
+
+
+- copy:
+    dest: /etc/sensu/conf.d/client.json
+    content: |
+      {
+        "client": {
+        "name": "{{ ansible_hostname }}",
+        "address": "{{ ansible_default_ipv4.address }}",
+        "subscriptions": [
+          "default",
+          "rhel-hosts"
+        ]
+        }
+      }
+
+- copy:
+    dest: /etc/sensu/conf.d/rabbitmq.json
+    content: |
+      {
+        "rabbitmq": {
+        "host": "192.168.1.167",
+        "port": 5672,
+        "vhost": "/sensu",
+        "user": "sensu",
+        "password": "secret"
+        }
+      }
+
+- copy:
+    dest: /etc/sensu/conf.d/transport.json
+    content: |
+      {
+        "transport": {
+        "name": "rabbitmq",
+        "reconnect_on_error": true
+        }
+      }
+
+

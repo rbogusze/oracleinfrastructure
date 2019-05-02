@@ -1,0 +1,15 @@
+#- debug:
+#    var: hostvars[inventory_hostname]
+
+
+- include: debian.yml
+  when: "'ubuntu' in group_names"
+  tags: install
+
+- include: redhat.yml
+  when: "'centos' in group_names"
+  tags: install
+
+- include: raspberry.yml
+  when: "'raspberry' in group_names"
+  tags: install

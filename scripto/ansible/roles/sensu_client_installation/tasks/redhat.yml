@@ -1,0 +1,23 @@
+- name: Redhat | Add yum repostory
+  yum_repository:
+    name: sensu
+    description: sensu repo
+    file: external_repos
+    baseurl: https://sensu.global.ssl.fastly.net/yum/$releasever/$basearch/
+    gpgcheck: no
+
+- yum:
+    name: "sensu"
+    state: present
+
+    #- debug:
+    #var: hostvars[inventory_hostname]
+
+- service:
+    name: sensu-client
+    enabled: yes
+
+- service:
+    name: sensu-client
+    state: started
+

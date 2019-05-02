@@ -1,0 +1,26 @@
+#- debug:
+#    var: hostvars[inventory_hostname]
+
+- shell: sensu-install -p cpu-checks
+  args:
+    chdir: /opt/sensu/embedded/bin/
+    creates: /opt/sensu/embedded/bin/check-cpu.rb
+  register: sensu
+
+- shell: sensu-install -p disk-checks
+  args:
+    chdir: /opt/sensu/embedded/bin/
+    creates: /opt/sensu/embedded/bin/check-disk-usage.rb
+  register: sensu
+
+- shell: sensu-install -p memory-checks 
+  args:
+    chdir: /opt/sensu/embedded/bin/
+    creates: /opt/sensu/embedded/bin/check-memory.rb
+  register: sensu
+
+- service:
+    name: sensu-client
+    state: restarted
+    enabled: yes
+  when: sensu.changed
