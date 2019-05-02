@@ -64,6 +64,29 @@
      tags:
       - static_ip
 
+   - name: Setup static ip for eth0
+     lineinfile: dest=/boot/cmdline.txt
+       backrefs=True
+       state=present
+       regexp='(^dwc_otg(.*)$)'
+       line='\1 net.ifnames=0'
+     tags:
+      - static_ip_eth0
+
+   - name: Setup static ip for wlan0
+     blockinfile:
+       path: /etc/dhcpcd.conf
+       block: |
+         interface eth0
+
+         static ip_address={{ ansible_ssh_new_host }}/24
+         static routers=192.168.1.1
+         static domain_name_servers=192.168.1.1
+     tags:
+      - static_ip_eth0
+
+
+
    - name: Setup cassandra node, 1. copy jdk
      unarchive:
        src: /KASZTELAN/mirror/utils/jdk-8u191-linux-arm32-vfp-hflt.tar.gz
