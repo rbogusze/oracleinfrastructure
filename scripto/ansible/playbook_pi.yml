@@ -73,7 +73,7 @@
      tags:
       - static_ip_eth0
 
-   - name: Setup static ip for wlan0
+   - name: Setup static ip for eth0
      blockinfile:
        path: /etc/dhcpcd.conf
        block: |
@@ -235,3 +235,47 @@
        enabled: no
      tags:
       - nogui
+
+
+   - name: Setup sensors_gathering. Install required packages
+     apt:
+       name: subversion,python-pip
+       state: present
+     tags:
+      - sensors_gathering
+
+   - name: Setup sensors_gathering. Install required pip packages
+     pip:
+       name: cassandra-driver
+     tags:
+      - sensors_gathering
+
+   - name: Setup sensors_gathering. Checkout scripto repository
+     subversion:
+       repo: https://github.com/rbogusze/oracleinfrastructure/trunk/scripto
+       dest: /home/pi/scripto
+     tags:
+      - sensors_gathering
+
+
+   - name: Setup sensors_gathering. Configure Temperature service
+     copy:
+       dest: /lib/systemd/system/temperature.service
+       content: |
+         [Unit]
+         Description=Remi Temperature gathering on cassandra
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/home/pi/scripto/python/temperature
+         ExecStart=/usr/bin/python collect.py
+         Restart=always
+         RestartSec=60
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - sensors_gathering
+
+   
