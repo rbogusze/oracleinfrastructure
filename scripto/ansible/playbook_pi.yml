@@ -278,4 +278,19 @@
      tags:
       - sensors_gathering
 
+   - name: Setup sensors_gathering. create service
+     file:
+       path: /lib/systemd/system/temperature.service
+       mode: 0644
+     tags:
+      - sensors_gathering
+
+   - name: Setup sensors_gathering. create service
+     systemd:
+       name: temperature.service
+       state: started
+       enabled: yes
+     tags:
+      - sensors_gathering
+
    
