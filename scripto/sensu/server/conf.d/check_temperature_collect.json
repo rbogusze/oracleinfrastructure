@@ -1,0 +1,11 @@
+{
+  "checks": {
+    "check_temperature_collection": {
+      "command": "check-process.rb -p collect.py",
+      "subscribers": [
+        "raspberry"
+      ],
+      "interval": 60
+    }
+  }
+}
