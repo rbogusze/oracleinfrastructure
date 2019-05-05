@@ -19,6 +19,18 @@
     creates: /opt/sensu/embedded/bin/check-memory.rb
   register: sensu
 
+- shell: sensu-install -p process-checks
+  args:
+    chdir: /opt/sensu/embedded/bin/
+    creates: /opt/sensu/embedded/bin/check-process.rb
+  register: sensu
+
+- shell: sensu-install -p sensu-plugins-cassandra
+  args:
+    chdir: /opt/sensu/embedded/bin/
+    creates: /opt/sensu/embedded/bin/check-cassandra-schema.rb
+  register: sensu
+
 - service:
     name: sensu-client
     state: restarted

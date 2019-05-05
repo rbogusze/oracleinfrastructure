@@ -16,10 +16,11 @@
         "address": "{{ ansible_default_ipv4.address }}",
         "subscriptions": [
           "default",
-          "{{ group_names[0] }}"
+          "{{ group_names|join('", "') }}"
         ]
         }
       }
+
 
 - copy:
     dest: /etc/sensu/conf.d/rabbitmq.json
