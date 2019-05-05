@@ -1,5 +1,5 @@
-#- debug:
-#    var: hostvars[inventory_hostname]
+- debug:
+    var: hostvars[inventory_hostname]
 
 - name: Creates directory /etc/sensu/conf.d
   file:
@@ -16,7 +16,7 @@
         "address": "{{ ansible_default_ipv4.address }}",
         "subscriptions": [
           "default",
-          "rhel-hosts"
+          "{{ group_names[0] }}"
         ]
         }
       }
