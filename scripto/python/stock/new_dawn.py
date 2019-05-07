@@ -1,5 +1,6 @@
 # coding: utf8
 from cassandra.cluster import Cluster
+from cassandra.policies import ConstantReconnectionPolicy, DCAwareRoundRobinPolicy
 import subprocess
 import lcddriver
 import time
@@ -111,7 +112,7 @@ def time_to_display():
     LCD_NOBACKLIGHT = 0x00    
 
     print "Deciding if I should turn the display on or off"
-    if (hour >= 20 or hour < 9):
+    if (hour >= 21 or hour < 9):
         print "Time to turn off backlight and forget about anything"
         display.lcd_device.write_cmd(LCD_NOBACKLIGHT)
         time.sleep(60)
@@ -140,7 +141,7 @@ def print_to_lcd(line1, line2):
 
 # main endless loop
 
-cluster = Cluster(['192.168.1.233','192.168.1.236','192.168.1.27'])
+cluster = Cluster(contact_points=['192.168.1.233','192.168.1.236','192.168.1.27'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
 cluster.connect_timeout = 30
 session = cluster.connect('stock')
 display = lcddriver.lcd()
