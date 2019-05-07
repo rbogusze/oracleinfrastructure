@@ -16,7 +16,7 @@ session = cluster.connect('temperature')
 sleep_time = 1 #in seconds
 
 # pip install kafka-python
-producer = KafkaProducer(bootstrap_servers=['sensu:9092'],
+producer = KafkaProducer(bootstrap_servers=['192.168.1.167:9092'],
                          value_serializer=lambda x: 
                          dumps(x).encode('utf-8'))
 
