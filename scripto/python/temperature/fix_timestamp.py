@@ -6,7 +6,7 @@ import csv
 
 # $ sudo pip install python-dateutil
 
-with open('/home/pi/test.csv') as fp:
+with open('/home/pi/cass_export_20190114b.csv') as fp:
     for line in fp:
 #        print line
         csv = line.split(",")
