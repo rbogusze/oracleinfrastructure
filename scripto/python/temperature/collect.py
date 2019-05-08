@@ -49,7 +49,7 @@ while True:
 
     # Now kafka publish
     data = {'reading_location' : location, 'reading_date' : str(now), 'reading_value' : str(temp_cpu)}
-    producer.send('temperature', value=data)
+#    producer.send('temperature', value=data)
                     
     time.sleep(sleep_time)
 
