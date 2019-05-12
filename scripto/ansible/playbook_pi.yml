@@ -14,6 +14,25 @@
      tags:
       - update
 
+   - name: Remove non-essential packages to save on space
+     apt:
+       name: emacs,samba-common,scratch,minecraft-pi,manpages,manpages-dev,gnome-user-guide,rpd-wallpaper,xserver-xorg,wolfram-engine,libreoffice,yelp
+       state: absent
+     tags:
+      - cleanup
+
+   - name: Remove useless packages from the cache
+     apt:
+       autoclean: yes
+     tags:
+      - cleanup
+
+   - name: Remove dependencies that are no longer required
+     apt:
+       autoremove: yes
+     tags:
+      - cleanup
+
    - name: Setup Wi-Fi abrakadabra
      blockinfile:
        path: /etc/wpa_supplicant/wpa_supplicant.conf
