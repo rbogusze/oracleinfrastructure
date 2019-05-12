@@ -246,7 +246,7 @@
 
    - name: Setup sensors_gathering. Install required pip packages
      pip:
-       name: cassandra-driver
+       name: cassandra-driver,kafka-python
      tags:
       - sensors_gathering
 
@@ -254,6 +254,7 @@
      subversion:
        repo: https://github.com/rbogusze/oracleinfrastructure/trunk/scripto
        dest: /home/pi/scripto
+     register: svnrepo
      tags:
       - sensors_gathering
 
@@ -294,3 +295,11 @@
       - sensors_gathering
 
    
+   - name: Restart temperature.service if SVN repository has changed
+     service:
+       name: temperature.service
+       state: restarted
+       enabled: yes
+     when: svnrepo.changed
+     tags:
+      - sensors_gathering
