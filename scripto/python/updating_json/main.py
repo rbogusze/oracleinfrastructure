@@ -1,10 +1,8 @@
 # coding: utf8
-from json import dumps
 import time
 import io
-import socket
-import thread
-import random
+import multiprocessing
+from random import randint
 
 # $ sudo pip install python-dateutil
 
@@ -20,7 +18,7 @@ def update_string (dictionary_id):
 
 
 def trigger_random_update ():
-    random_seed = random.randint(0, 9)
+    random_seed = randint(0, 9)
     print "String random: %s" % random_seed
     update_string(random_seed)
 
@@ -42,15 +40,24 @@ strings_dict = {
   9: "999999999999999999"
 }
 
-while True:
 
+PROCESSES = 5
+WORKER_CALLS = 7
+
+def worker(num):
+    """worker function"""
+    print 'Starting worker', num
     trigger_random_update()
- 
-    print "Sleeping"
-    time.sleep(1)
+    #time.sleep(randint(2,4))
+    print 'Exiting worker', num
+    return "ok"
 
-
-
+if __name__ == '__main__':
+    pool = multiprocessing.Pool(processes=PROCESSES)
+    pool_outputs = pool.map(worker, range(WORKER_CALLS))
+    pool.close()
+    pool.join()
+    print 'Pool:', pool_outputs
 
 
 
