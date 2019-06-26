@@ -1,7 +1,7 @@
 # coding: utf8
+import sys
 import time
 import io
-import multiprocessing
 from random import randint
 import logging
 import mysql.connector
@@ -36,14 +36,14 @@ def update_string (dictionary_id, worker_num):
     tmp_str = strings_dict[dictionary_id]
 
     if backend_mysql:
-       logging.debug("Get from mysql")
+       logging.debug("[%s] Get from mysql" % worker_num)
        query = ("SELECT stringi_text FROM remik.stringi where stringi_id = %s" % dictionary_id)
 
        cursor.execute(query)
        
        for stringi_text in cursor:
-         print "From DB: %s" % stringi_text
-       tmp_str = str(stringi_text)
+         tmp_str = str(stringi_text)
+         logging.debug("[%s] From DB: %s" % (worker_num, tmp_str))
     
     # Prepare random update 
     random_index = randint(0, 19)
@@ -52,13 +52,17 @@ def update_string (dictionary_id, worker_num):
     logging.debug("[%s] Hello, will update dict %s index %s to value %s" % (worker_num, dictionary_id, random_index, random_seed))
     tmp_bstr[random_index] = str(random_seed)
 
-    # Update
-    if backend_mysql:
-       logging.debug("Update to mysql")
-
+    # Update dictionary
     strings_dict[dictionary_id] = str(tmp_bstr)
-
     logging.debug("[%s] After change : %s" % (worker_num, strings_dict[dictionary_id]))
+
+    # Update MYSQL
+    if backend_mysql:
+       logging.debug("Update to mysql with: %s" % str(tmp_bstr))
+       query = ("""UPDATE stringi SET stringi_text = `%s` WHERE stringi_id = %s""" % (str(tmp_bstr), dictionary_id))
+       cursor.execute(query)
+       cnx.commit()
+
 
 
 def trigger_random_update (worker_num):
@@ -88,29 +92,8 @@ strings_dict = {
 }
 
 
-trigger_random_update(999)
+trigger_random_update(sys.argv[1])
 
-print "Sleep baby"
-time.sleep(1000)
-
-
-PROCESSES = 10
-WORKER_CALLS = 10
-
-def worker(num):
-    """worker function"""
-    print 'Starting worker', num
-    trigger_random_update(num)
-    #time.sleep(randint(2,4))
-    print '[%s] Exiting worker' % num
-    return "ok"
-
-if __name__ == '__main__':
-    pool = multiprocessing.Pool(processes=PROCESSES)
-    pool_outputs = pool.map(worker, range(WORKER_CALLS))
-    pool.close()
-    pool.join()
-    print 'Pool:', pool_outputs
 
 
 print("--- %s seconds ---" % (time.time() - start_time))
