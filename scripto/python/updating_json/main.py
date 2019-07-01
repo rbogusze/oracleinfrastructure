@@ -5,6 +5,7 @@ import io
 from random import randint
 import logging
 import mysql.connector
+import unicodedata
 
 start_time = time.time()
 
@@ -12,16 +13,17 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 #logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.debug('This is a log message.')
 
-backend_mysql = False
+backend_mysql = True
 
 sleep_time = 1 #in seconds
-iterations = 2
+iterations = 2 #nr of changes
 
 cnx = mysql.connector.connect(
   host="localhost",
   user="remik",
   passwd="remik",
-  database="remik"
+  database="remik",
+  charset='ascii'
 )
 
 cursor = cnx.cursor()
@@ -40,9 +42,10 @@ def update_string (dictionary_id, worker_num):
        query = ("SELECT stringi_text FROM remik.stringi where stringi_id = %s" % dictionary_id)
 
        cursor.execute(query)
+       rows = cursor.fetchall()
        
-       for stringi_text in cursor:
-         tmp_str = str(stringi_text)
+       for stringi_text in rows:
+         tmp_str = stringi_text[0].encode("ascii")
          logging.debug("[%s] From DB: %s" % (worker_num, tmp_str))
     
     # Prepare random update 
@@ -59,7 +62,7 @@ def update_string (dictionary_id, worker_num):
     # Update MYSQL
     if backend_mysql:
        logging.debug("Update to mysql with: %s" % str(tmp_bstr))
-       query = ("""UPDATE stringi SET stringi_text = `%s` WHERE stringi_id = %s""" % (str(tmp_bstr), dictionary_id))
+       query = ("""UPDATE stringi SET stringi_text = '%s' WHERE stringi_id = %s""" % (str(tmp_bstr), dictionary_id))
        cursor.execute(query)
        cnx.commit()
 
