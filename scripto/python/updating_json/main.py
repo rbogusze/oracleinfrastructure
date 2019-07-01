@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 #logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.debug('This is a log message.')
 
-backend_mysql = True
+backend_mysql = False
 
 sleep_time = 1 #in seconds
 iterations = 2
