@@ -7,6 +7,10 @@ import time
 import io
 import socket
 import logging
+import Adafruit_DHT as dht
+
+#Set DATA pin for DHT-22
+DHT = 4
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 #logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -40,15 +44,28 @@ while True:
     now = int(time.time())  # time since epoch, in seconds
     now = int(time.time()*1000.0) # time since epoch, + miliseconds
 
-    logging.info("Checking now: %s" % now)
-
-    # that should be gone
-    location = socket.gethostname() + "_cpu"
 
     # reading from CPU temp sensor
+    location = socket.gethostname() + "_cpu"
     f = open("/sys/class/thermal/thermal_zone0/temp", "r")
     temp_cpu = f.readline()[:-1]
-    temp_dict[socket.gethostname() + "_cpu"] = temp_cpu
+    logging.info("Checking now: %s" % now)
+    temp_dict[location] = temp_cpu
+    logging.info("Storing for: %s value: %s" % (location, temp_cpu))
+
+    # reading from DHT-22 sensor
+    logging.info("Read Temp and Hum from DHT22")
+    h,t = dht.read_retry(dht.DHT22, DHT)
+    #Print Temperature and Humidity on Shell window
+    logging.info('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(t,h))
+    location = socket.gethostname() + "_temp1"
+    logging.info("Storing for: %s value: %s" % (location, int(t*1000)))
+    temp_dict[location] = int(t*1000)
+    location = socket.gethostname() + "_humid1"
+    logging.info("Storing for: %s value: %s" % (location, int(h*1000)))
+    temp_dict[location] = int(h*1000)
+
+    
 
     logging.info("loop through all the elements in temp_dict and insert them to DB/Kafka")
     for sensor, reading in temp_dict.items():
@@ -67,9 +84,9 @@ while True:
         logging.info("Kafka insert: %s" % data)
         producer.send('temperature', value=data)
                     
+    logging.info("Sleeping for: %s sec" % sleep_time)
     time.sleep(sleep_time)
 
-    exit()
 
 
 session.shutdown()
