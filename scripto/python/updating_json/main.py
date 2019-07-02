@@ -6,6 +6,7 @@ from random import randint
 import logging
 import mysql.connector
 import unicodedata
+import redis
 
 start_time = time.time()
 
@@ -13,11 +14,14 @@ start_time = time.time()
 logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.debug('This is a log message.')
 
-backend_mysql = True
+backend_mysql = False
+backend_redis = False
+
 
 sleep_time = 1 #in seconds
-iterations = 10000 #nr of changes
+iterations = 100 #nr of changes
 
+# mysql
 cnx = mysql.connector.connect(
   host="localhost",
 #  host="sensu",
@@ -26,8 +30,16 @@ cnx = mysql.connector.connect(
   database="remik",
   charset='ascii'
 )
-
 cursor = cnx.cursor()
+
+# redis
+redis_host = "localhost"
+redis_port = 6379
+redis_password = ""
+try:
+    r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
+except Exception as e:
+    print(e)
 
 
 # Define a function for the thread
@@ -48,6 +60,12 @@ def update_string (dictionary_id, worker_num):
        for stringi_text in rows:
          tmp_str = stringi_text[0].encode("ascii")
          logging.debug("[%s] From DB: %s" % (worker_num, tmp_str))
+
+    if backend_redis:
+       logging.debug("[%s] Get from redis" % worker_num)
+       tmp_str = str(r.get(dictionary_id))
+       logging.debug("[%s] From redis: %s" % (worker_num, tmp_str))
+     
     
     # Prepare random update 
     random_index = randint(0, 19)
@@ -67,6 +85,9 @@ def update_string (dictionary_id, worker_num):
        cursor.execute(query)
        cnx.commit()
 
+    if backend_redis:
+       logging.debug("[%s} Update to redis with: %s" % (worker_num, str(tmp_bstr)))
+       r.set(dictionary_id, str(tmp_bstr))
 
 
 def trigger_random_update (worker_num):
