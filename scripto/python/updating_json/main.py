@@ -9,17 +9,18 @@ import unicodedata
 
 start_time = time.time()
 
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-#logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.debug('This is a log message.')
 
 backend_mysql = True
 
 sleep_time = 1 #in seconds
-iterations = 2 #nr of changes
+iterations = 10000 #nr of changes
 
 cnx = mysql.connector.connect(
   host="localhost",
+#  host="sensu",
   user="remik",
   passwd="remik",
   database="remik",
@@ -79,7 +80,6 @@ def trigger_random_update (worker_num):
 
 # main 
 
-print "Ala ma kota"
 
 strings_dict = {
   0: "00000000000000000000",
