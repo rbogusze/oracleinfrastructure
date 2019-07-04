@@ -115,7 +115,7 @@ def time_to_display():
     if (hour >= 21 or hour < 9):
         print "Time to turn off backlight and forget about anything"
         display.lcd_device.write_cmd(LCD_NOBACKLIGHT)
-        time.sleep(60)
+        time.sleep(5)
         return False
     else:
         print "Time to turn on backlight"
