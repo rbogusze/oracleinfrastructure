@@ -10,7 +10,7 @@ import logging
 import Adafruit_DHT as dht
 
 #Set DATA pin for DHT-22
-DHT = 4
+DHT = 26
 
 #logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
