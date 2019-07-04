@@ -258,7 +258,7 @@
 
    - name: Setup sensors_gathering. Install required packages
      apt:
-       name: subversion,python-pip
+       name: subversion,python-pip,build-essential,python-dev,git
        state: present
      tags:
       - sensors_gathering
@@ -277,6 +277,22 @@
      tags:
       - sensors_gathering
 
+   - name: Setup sensors_gathering. Checkout git repository for DHT-22 temp/humid sensor to work
+     git:
+       repo: 'https://github.com/adafruit/Adafruit_Python_DHT.git'
+       dest: /home/pi/scripto/python/temperature/Adafruit_Python_DHT
+       update: no
+     tags:
+      - sensors_gathering
+
+   - name: Setup sensors_gathering. Install python module for DHT-22
+     ignore_errors: yes
+     command: python setup.py install
+     args:
+       chdir: /home/pi/scripto/python/temperature/Adafruit_Python_DHT
+       creates: /home/pi/scripto/python/temperature/Adafruit_Python_DHT/build
+     tags:
+      - sensors_gathering
 
    - name: Setup sensors_gathering. Configure Temperature service
      copy:
