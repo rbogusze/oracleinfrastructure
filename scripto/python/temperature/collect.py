@@ -12,8 +12,8 @@ import Adafruit_DHT as dht
 #Set DATA pin for DHT-22
 DHT = 4
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-#logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('This is a log message.')
 
 
@@ -36,6 +36,25 @@ temp_dict = {}
 
 # test
 
+# checking is something is connected to PIN ponted by DHT variable (by default 4)
+import RPi.GPIO as GPIO
+
+channel = DHT
+
+# Setup your channel
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(channel, GPIO.IN)
+
+# To test the value of a pin use the .input method
+channel_is_on = GPIO.input(channel)  # Returns 0 if OFF or 1 if ON
+
+if channel_is_on:
+   logging.info('DHT temp sensor is active')
+else:
+   logging.info('DHT temp sensor not found')
+
+
 # /test
 
 # main endless loop
@@ -54,16 +73,17 @@ while True:
     logging.info("Storing for: %s value: %s" % (location, temp_cpu))
 
     # reading from DHT-22 sensor
-    logging.info("Read Temp and Hum from DHT22")
-    h,t = dht.read_retry(dht.DHT22, DHT)
-    #Print Temperature and Humidity on Shell window
-    logging.info('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(t,h))
-    location = socket.gethostname() + "_temp1"
-    logging.info("Storing for: %s value: %s" % (location, int(t*1000)))
-    temp_dict[location] = int(t*1000)
-    location = socket.gethostname() + "_humid1"
-    logging.info("Storing for: %s value: %s" % (location, int(h*1000)))
-    temp_dict[location] = int(h*1000)
+    if channel_is_on:
+       logging.info("Read Temp and Hum from DHT22")
+       h,t = dht.read_retry(dht.DHT22, DHT)
+       #Print Temperature and Humidity on Shell window
+       logging.info('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(t,h))
+       location = socket.gethostname() + "_temp1"
+       logging.info("Storing for: %s value: %s" % (location, int(t*1000)))
+       temp_dict[location] = int(t*1000)
+       location = socket.gethostname() + "_humid1"
+       logging.info("Storing for: %s value: %s" % (location, int(h*1000)))
+       temp_dict[location] = int(h*1000)
 
     
 
