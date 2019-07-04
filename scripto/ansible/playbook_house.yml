@@ -1,5 +1,5 @@
 - name: Setup basic actions on computers at home
-  hosts: ania
+  hosts: all
 
   vars_files:
   - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
@@ -9,7 +9,7 @@
   tasks:
    - name: Install required packages
      apt:
-       name: rsync,samba,cifs-utils
+       name: rsync,samba,cifs-utils,mc,subversion,git,cvs
        state: present
      tags:
       - update

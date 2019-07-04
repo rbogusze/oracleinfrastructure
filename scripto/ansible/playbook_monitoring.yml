@@ -4,6 +4,6 @@
   gather_facts: yes
   roles:
     - sensu_client_configuration
-          #- sensu_client_installation
+    - sensu_client_installation
     - sensu_client_checks
 
