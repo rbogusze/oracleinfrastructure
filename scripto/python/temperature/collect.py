@@ -77,7 +77,7 @@ while True:
        logging.info("Read Temp and Hum from DHT22")
        h,t = dht.read_retry(dht.DHT22, DHT)
        #Print Temperature and Humidity on Shell window
-       logging.info('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(t,h))
+       #logging.info('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(t,h)) #this was causing some errors?
        location = socket.gethostname() + "_temp1"
        logging.info("Storing for: %s value: %s" % (location, int(t*1000)))
        temp_dict[location] = int(t*1000)
