@@ -12,8 +12,8 @@ import Adafruit_DHT as dht
 #Set DATA pin for DHT-22
 DHT = 26
 
-#logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('This is a log message.')
 
 
@@ -57,6 +57,8 @@ else:
 
 # /test
 
+location = socket.gethostname() + "_cpu"
+
 # main endless loop
 while True:
     
@@ -65,7 +67,6 @@ while True:
 
 
     # reading from CPU temp sensor
-    location = socket.gethostname() + "_cpu"
     f = open("/sys/class/thermal/thermal_zone0/temp", "r")
     temp_cpu = f.readline()[:-1]
     logging.info("Checking now: %s" % now)
@@ -76,6 +77,13 @@ while True:
     if channel_is_on:
        logging.info("Read Temp and Hum from DHT22")
        h,t = dht.read_retry(dht.DHT22, DHT)
+       if h is None:
+          logging.warn("Just received garbage for h from dht22. Doing another loop.")
+          continue
+       if t is None:
+          logging.warn("Just received garbage for h from dht22. Doing another loop.")
+          continue
+          
        #Print Temperature and Humidity on Shell window
        #logging.info('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(t,h)) #this was causing some errors?
        location = socket.gethostname() + "_temp1"
