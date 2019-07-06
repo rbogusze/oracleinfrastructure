@@ -67,6 +67,9 @@ f2 = open("/tmp/h.txt", "w+")
 f2.close()
 f2 = open("/tmp/h.txt", "r")
 
+# running gather_DHT_sensor_data.py in background, but that actually should be done as another service
+
+
 # main endless loop
 while True:
     
@@ -104,7 +107,6 @@ while True:
        else:
           logging.info("No value read. Removing from temp_dict for: %s " % (location))
           temp_dict.pop(location, None)
-
     
 
     logging.info("loop through all the elements in temp_dict and insert them to DB/Kafka")
