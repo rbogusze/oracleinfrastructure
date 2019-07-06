@@ -58,6 +58,14 @@ else:
 # /test
 
 location = socket.gethostname() + "_cpu"
+# files that store temp and humid reading gathered by gather_DHT_sensor_data.py
+# just creating them the first time, so I do not have to mess with working around what to do if the do not exist
+f1 = open("/tmp/t.txt", "w+")
+f1.close()
+f1 = open("/tmp/t.txt", "r")
+f2 = open("/tmp/h.txt", "w+")
+f2.close()
+f2 = open("/tmp/h.txt", "r")
 
 # main endless loop
 while True:
@@ -75,23 +83,27 @@ while True:
 
     # reading from DHT-22 sensor
     if channel_is_on:
-       logging.info("Read Temp and Hum from DHT22")
-       h,t = dht.read_retry(dht.DHT22, DHT)
-       if h is None:
-          logging.warn("Just received garbage for h from dht22. Doing another loop.")
-          continue
-       if t is None:
-          logging.warn("Just received garbage for h from dht22. Doing another loop.")
-          continue
+       logging.info("Read Temp and Hum from DHT22 from files")
           
-       #Print Temperature and Humidity on Shell window
-       #logging.info('Temp={0:0.1f}*C  Humidity={1:0.1f}%'.format(t,h)) #this was causing some errors?
        location = socket.gethostname() + "_temp1"
-       logging.info("Storing for: %s value: %s" % (location, int(t*1000)))
-       temp_dict[location] = int(t*1000)
+       t1000 = f1.read()
+       f1.seek(0)
+       if t1000.isdigit():
+          logging.info("Storing for: %s value: %s" % (location, t1000))
+          temp_dict[location] = int(t1000)
+       else:
+          logging.info("No value read. Removing from temp_dict for: %s " % (location))
+          temp_dict.pop(location, None)
+
        location = socket.gethostname() + "_humid1"
-       logging.info("Storing for: %s value: %s" % (location, int(h*1000)))
-       temp_dict[location] = int(h*1000)
+       h1000 = f2.read()
+       f2.seek(0)
+       if h1000.isdigit():
+          logging.info("Storing for: %s value: %s" % (location, h1000))
+          temp_dict[location] = int(h1000)
+       else:
+          logging.info("No value read. Removing from temp_dict for: %s " % (location))
+          temp_dict.pop(location, None)
 
     
 
