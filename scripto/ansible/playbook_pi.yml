@@ -258,7 +258,7 @@
 
    - name: Setup sensors_gathering. Install required packages
      apt:
-       name: subversion,python-pip,build-essential,python-dev,git
+       name: subversion,python-pip,build-essential,python-dev,git,python-rpi.gpio
        state: present
      tags:
       - sensors_gathering
