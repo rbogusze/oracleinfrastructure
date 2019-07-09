@@ -12,7 +12,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logging.info('This is a log message.')
 
 
-sleep_time = 1 #in seconds
+# https://learn.adafruit.com/dht/overview
+# No more than 0.5 Hz sampling rate (once every 2 seconds)
+sleep_time = 3 #in seconds
 
 # dict that will store all the temperatures
 temp_dict = {}
