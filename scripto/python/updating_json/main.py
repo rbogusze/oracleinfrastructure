@@ -4,14 +4,12 @@ import time
 import io
 from random import randint
 import logging
-import mysql.connector
 import unicodedata
-import redis
 
 start_time = time.time()
 
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.debug('This is a log message.')
 
 backend_mysql = False
@@ -19,27 +17,35 @@ backend_redis = False
 
 
 sleep_time = 1 #in seconds
-iterations = 100 #nr of changes
+iterations = 2 #nr of changes
 
 # mysql
-cnx = mysql.connector.connect(
-  host="localhost",
-#  host="sensu",
-  user="remik",
-  passwd="remik",
-  database="remik",
-  charset='ascii'
-)
-cursor = cnx.cursor()
+if backend_mysql:
+   import mysql.connector
+
+   logging.debug("[%s] Setup mysql connection" % worker_num)
+   cnx = mysql.connector.connect(
+#  host="localhost",
+     host="sensu",
+     user="remik",
+     passwd="remik",
+     database="remik",
+     charset='ascii'
+   )
+   cursor = cnx.cursor()
 
 # redis
-redis_host = "localhost"
-redis_port = 6379
-redis_password = ""
-try:
-    r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
-except Exception as e:
-    print(e)
+if backend_redis:
+   import redis
+   logging.debug("[%s] Setup redis connection" % worker_num)
+   #redis_host = "localhost"
+   redis_host = "10.0.0.1"
+   redis_port = 6379
+   redis_password = ""
+   try:
+       r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
+   except Exception as e:
+       print(e)
 
 
 # Define a function for the thread
