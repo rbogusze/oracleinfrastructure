@@ -181,12 +181,12 @@ while True:
 
     my_stock_yesterday = my_stock_value(check_quotes(), str(dt.datetime.now().date() - dt.timedelta(1)))
 
-    print_to_lcd("Akcje: " + str(int(my_stock)) + "zl", "Gotowka: " + str(int(my_savings)) + "zl" )
+    print_to_lcd("Stock: " + str(int(my_stock)) + "$", "Cash: " + str(int(my_savings)) + "$" )
     time.sleep(3)
     if my_stock >= my_stock_yesterday:
-        print_to_lcd("Razem: " + str(int((my_stock + my_savings))) + "zl", "Zysk: " + str(int(my_stock - my_stock_yesterday)) + "zl")
+        print_to_lcd("Sum: " + str(int((my_stock + my_savings))) + "$", "Gain: " + str(int(my_stock - my_stock_yesterday)) + "$")
     else:
-        print_to_lcd("Razem: " + str(int((my_stock + my_savings))) + "zl", "Strata: " + str(int(my_stock_yesterday - my_stock)) + "zl")
+        print_to_lcd("Sum: " + str(int((my_stock + my_savings))) + "$", "Loss: " + str(int(my_stock_yesterday - my_stock)) + "$")
     
     time.sleep(3)
 
