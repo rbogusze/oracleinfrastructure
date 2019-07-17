@@ -19,8 +19,8 @@ display = lcddriver.lcd()
 checked_quotes_last_time = 0
 checked_frequency = 60 * 60  # in seconds
 
-#lang = "en"
-lang = "pl"
+lang = "en"
+#lang = "pl"
 
 messages = {
     "curr_en": "$",
@@ -197,12 +197,12 @@ while True:
 
     my_stock_yesterday = my_stock_value(check_quotes(), str(dt.datetime.now().date() - dt.timedelta(1)))
 
-    print_to_lcd("Stock: " + str(int(my_stock)) + "$", "Cash: " + str(int(my_savings)) + "$" )
+    print_to_lcd(messages["stock_" + lang] + ": " + str(int(my_stock)) + messages["curr_" + lang] , messages["cash_" + lang] + ": " + str(int(my_savings)) + messages["curr_" + lang] )
     time.sleep(3)
     if my_stock >= my_stock_yesterday:
-        print_to_lcd("Sum: " + str(int((my_stock + my_savings))) + "$", "Gain: " + str(int(my_stock - my_stock_yesterday)) + "$")
+        print_to_lcd(messages["sum_" + lang] + ": " + str(int((my_stock + my_savings))) + messages["curr_" + lang] , messages["gain_" + lang] + ": " + str(int(my_stock - my_stock_yesterday)) + messages["curr_" + lang])
     else:
-        print_to_lcd("Sum: " + str(int((my_stock + my_savings))) + "$", "Loss: " + str(int(my_stock_yesterday - my_stock)) + "$")
+        print_to_lcd(messages["sum_" + lang] + ": " + str(int((my_stock + my_savings))) + messages["curr_" + lang] , messages["loss_" + lang] + ": " + str(int(my_stock_yesterday - my_stock)) + messages["curr_" + lang])
     
     time.sleep(3)
 
