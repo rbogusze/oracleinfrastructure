@@ -10,8 +10,36 @@ import datetime as dt
 import dateutil.parser
 import os
 
-# $ sudo pip install python-dateutil
+# Settings
+cluster = Cluster(contact_points=['192.168.1.20'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
+cluster.connect_timeout = 30
+session = cluster.connect('stock')
+display = lcddriver.lcd()
 
+checked_quotes_last_time = 0
+checked_frequency = 60 * 60  # in seconds
+
+#lang = "en"
+lang = "pl"
+
+messages = {
+    "curr_en": "$",
+    "curr_pl": "zl",
+    "sum_en": "Sum",
+    "sum_pl": "Razem",
+    "stock_en": "Stock",
+    "stock_pl": "Akcje",
+    "cash_en": "Cash",
+    "cash_pl": "Gotowka",
+    "gain_en": "Gain",
+    "gain_pl": "Zysk",
+    "loss_en": "Loss",
+    "loss_pl": "Strata"
+}
+
+
+
+# Functions
 
 # Get the distinct list of stocks I already have
 def check_quotes():
@@ -141,18 +169,6 @@ def print_to_lcd(line1, line2):
 
 # main endless loop
 
-cluster = Cluster(contact_points=['192.168.1.20'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
-cluster.connect_timeout = 30
-session = cluster.connect('stock')
-display = lcddriver.lcd()
-
-checked_quotes_last_time = 0
-#checked_quotes_last_time = int(time.time())
-checked_frequency = 60 * 60  # in seconds
-
-# test
-
-# /test
 
 while True:
     if not time_to_display():
