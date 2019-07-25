@@ -14,7 +14,9 @@ import logging
 DHT = 26
 
 #Sleep time after readings are saved in backend
-sleep_time = 1 #in seconds
+#sleep_time = 1 #in seconds
+#sleep_time = 0.1 #in seconds
+sleep_time = 0 #in seconds
 
 #Set backend
 backend_mysql = True
@@ -22,6 +24,7 @@ backend_cassandra = False
 backend_kafka = False
 
 
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 #logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('This is a log message.')
@@ -77,10 +80,10 @@ GPIO.setup(channel, GPIO.IN)
 channel_is_on = GPIO.input(channel)  # Returns 0 if OFF or 1 if ON
 
 if channel_is_on:
-   logging.info('DHT temp sensor is active')
+   logging.debug('DHT temp sensor is active')
    import Adafruit_DHT as dht
 else:
-   logging.info('DHT temp sensor not found')
+   logging.debug('DHT temp sensor not found')
 
 
 # /test
@@ -99,31 +102,32 @@ f2 = open("/tmp/h.txt", "r")
 
 
 # main endless loop
+tps_start = int(time.time())  # time since epoch, in seconds
+tps_ratio = 0
 while True:
     
-    now = int(time.time())  # time since epoch, in seconds
     now = int(time.time()*1000.0) # time since epoch, + miliseconds
 
 
     # reading from CPU temp sensor
     f = open("/sys/class/thermal/thermal_zone0/temp", "r")
     temp_cpu = f.readline()[:-1]
-    logging.info("Checking now: %s" % now)
+    logging.debug("Checking now: %s" % now)
     temp_dict[location] = temp_cpu
-    logging.info("Storing for: %s value: %s" % (location, temp_cpu))
+    logging.debug("Storing for: %s value: %s" % (location, temp_cpu))
 
     # reading from DHT-22 sensor
     if channel_is_on:
-       logging.info("Read Temp and Hum from DHT22 from files")
+       logging.debug("Read Temp and Hum from DHT22 from files")
           
        location = socket.gethostname() + "_temp1"
        t1000 = f1.read()
        f1.seek(0)
        if t1000.isdigit():
-          logging.info("Storing for: %s value: %s" % (location, t1000))
+          logging.debug("Storing for: %s value: %s" % (location, t1000))
           temp_dict[location] = int(t1000)
        else:
-          logging.info("No value read. Removing from temp_dict for: %s " % (location))
+          logging.debug("No value read. Removing from temp_dict for: %s " % (location))
           temp_dict.pop(location, None)
 
        location = socket.gethostname() + "_humid1"
@@ -137,9 +141,10 @@ while True:
           temp_dict.pop(location, None)
     
 
-    logging.info("loop through all the elements in temp_dict and insert them to DB/Kafka")
+    logging.debug("loop through all the elements in temp_dict and insert them to chosen backend(s)")
     for sensor, reading in temp_dict.items():
-        logging.info("For: %s reading: %s" % (sensor, reading))
+        logging.debug("For: %s reading: %s" % (sensor, reading))
+        tps_ratio += 1
 
         if backend_mysql:
            logging.debug("Update to mysql with: %s" % str(reading))
@@ -163,9 +168,17 @@ while True:
            data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
            logging.info("Kafka insert: %s" % data)
            producer.send('temperature', value=data)
-                    
-    logging.info("Sleeping for: %s sec" % sleep_time)
-    time.sleep(sleep_time)
+    
+    if sleep_time > 0:                
+       logging.debug("Sleeping for: %s sec" % sleep_time)
+       time.sleep(sleep_time)
+
+    tps_end = int(time.time())  # time since epoch, in seconds
+    if (tps_end - tps_start) > 1:
+       logging.info("TPS: %s" % tps_ratio)
+       tps_start = int(time.time())  # time since epoch, in seconds
+       tps_ratio = 0
+  
 
 session.shutdown()
 
