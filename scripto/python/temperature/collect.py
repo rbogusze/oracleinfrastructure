@@ -1,34 +1,46 @@
 # coding: utf8
-from cassandra.cluster import Cluster
-from cassandra.policies import ConstantReconnectionPolicy, DCAwareRoundRobinPolicy
 from json import dumps
-from kafka import KafkaProducer
 import time
 import io
 import socket
 import logging
-import Adafruit_DHT as dht
+
+#Probably you need this installed
+# pip install python-dateutil
+# pip install kafka-python
 
 #Set DATA pin for DHT-22
 DHT = 26
+
+#Sleep time after readings are saved in backend
+sleep_time = 1 #in seconds
+
+#Set backend
+backend_mysql = False
+backend_cassandra = False
+backend_kafka = False
+
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 #logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('This is a log message.')
 
 
-# pip install python-dateutil
+if backend_cassandra:
+   from cassandra.cluster import Cluster
+   from cassandra.policies import ConstantReconnectionPolicy, DCAwareRoundRobinPolicy
 
-cluster = Cluster(contact_points=['192.168.1.233','192.168.1.77','192.168.1.27'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
-cluster.connect_timeout = 30
-session = cluster.connect('temperature')
+   cluster = Cluster(contact_points=['192.168.1.233','192.168.1.77','192.168.1.27'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
+   cluster.connect_timeout = 30
+   session = cluster.connect('temperature')
 
-sleep_time = 1 #in seconds
 
-# pip install kafka-python
-producer = KafkaProducer(bootstrap_servers=['192.168.1.167:9092'],
-                         value_serializer=lambda x: 
-                         dumps(x).encode('utf-8'))
+if backend_kafka:
+   from kafka import KafkaProducer
+
+   producer = KafkaProducer(bootstrap_servers=['192.168.1.167:9092'],
+                            value_serializer=lambda x: 
+                            dumps(x).encode('utf-8'))
 
 
 # dict that will store all the temperatures
@@ -51,6 +63,7 @@ channel_is_on = GPIO.input(channel)  # Returns 0 if OFF or 1 if ON
 
 if channel_is_on:
    logging.info('DHT temp sensor is active')
+   import Adafruit_DHT as dht
 else:
    logging.info('DHT temp sensor not found')
 
@@ -112,24 +125,24 @@ while True:
     logging.info("loop through all the elements in temp_dict and insert them to DB/Kafka")
     for sensor, reading in temp_dict.items():
         logging.info("For: %s reading: %s" % (sensor, reading))
-    
-        cass_insert = "INSERT INTO temperature.reading (reading_location, reading_date, reading_value, reading_note) values ('" + sensor + "', '" \
+   
+        if backend_cassandra: 
+           cass_insert = "INSERT INTO temperature.reading (reading_location, reading_date, reading_value, reading_note) values ('" + sensor + "', '" \
                   + str(now) + "', " \
                   + str(reading) + ", '" \
                   + "'" \
                   + ");"
-        logging.info("cass_insert: %s" % cass_insert)
-        cass_return = session.execute(cass_insert)
+           logging.info("cass_insert: %s" % cass_insert)
+           cass_return = session.execute(cass_insert)
 
-        # Now kafka publish
-        data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
-        logging.info("Kafka insert: %s" % data)
-        producer.send('temperature', value=data)
+        if backend_kafka:
+           # Now kafka publish
+           data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
+           logging.info("Kafka insert: %s" % data)
+           producer.send('temperature', value=data)
                     
     logging.info("Sleeping for: %s sec" % sleep_time)
     time.sleep(sleep_time)
-
-
 
 session.shutdown()
 
