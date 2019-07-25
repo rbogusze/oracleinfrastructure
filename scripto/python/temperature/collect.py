@@ -8,6 +8,7 @@ import logging
 #Probably you need this installed
 # pip install python-dateutil
 # pip install kafka-python
+# pip install mysql-connector
 
 #Set DATA pin for DHT-22
 DHT = 26
@@ -16,7 +17,7 @@ DHT = 26
 sleep_time = 1 #in seconds
 
 #Set backend
-backend_mysql = False
+backend_mysql = True
 backend_cassandra = False
 backend_kafka = False
 
@@ -24,6 +25,20 @@ backend_kafka = False
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 #logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.info('This is a log message.')
+
+if backend_mysql:
+   import mysql.connector
+
+   logging.debug("Setup mysql connection")
+   cnx = mysql.connector.connect(
+#  host="localhost",
+     host="mysql",
+     user="remik",
+     passwd="remik",
+     database="temperature",
+     charset='ascii'
+   )
+   cursor = cnx.cursor()
 
 
 if backend_cassandra:
@@ -125,6 +140,14 @@ while True:
     logging.info("loop through all the elements in temp_dict and insert them to DB/Kafka")
     for sensor, reading in temp_dict.items():
         logging.info("For: %s reading: %s" % (sensor, reading))
+
+        if backend_mysql:
+           logging.debug("Update to mysql with: %s" % str(reading))
+           sql = "INSERT INTO temperature.reading (reading_location, reading_date, reading_value) VALUES (%s, FROM_UNIXTIME(%s/1000), %s)"
+           val = (sensor, str(now), str(reading))
+           cursor.execute(sql, val)
+           cnx.commit()
+
    
         if backend_cassandra: 
            cass_insert = "INSERT INTO temperature.reading (reading_location, reading_date, reading_value, reading_note) values ('" + sensor + "', '" \
