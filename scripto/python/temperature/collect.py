@@ -184,7 +184,7 @@ while True:
        time.sleep(sleep_time)
 
     tps_end = int(time.time())  # time since epoch, in seconds
-    if (tps_end - tps_start) > 1:
+    if (tps_end - tps_start) >= 1:
        logging.info("TPS: %s" % tps_ratio)
        tps_start = int(time.time())  # time since epoch, in seconds
        tps_ratio = 0
