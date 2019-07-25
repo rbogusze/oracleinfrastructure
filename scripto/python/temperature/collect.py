@@ -23,6 +23,7 @@ backend_mysql = True
 backend_cassandra = False
 backend_kafka = False
 
+mysql_commit_frequency = 1000 # 0 means commit every insert
 
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -104,6 +105,7 @@ f2 = open("/tmp/h.txt", "r")
 # main endless loop
 tps_start = int(time.time())  # time since epoch, in seconds
 tps_ratio = 0
+total_trans = 0
 while True:
     
     now = int(time.time()*1000.0) # time since epoch, + miliseconds
@@ -145,13 +147,21 @@ while True:
     for sensor, reading in temp_dict.items():
         logging.debug("For: %s reading: %s" % (sensor, reading))
         tps_ratio += 1
+        total_trans += 1
 
         if backend_mysql:
            logging.debug("Update to mysql with: %s" % str(reading))
            sql = "INSERT INTO temperature.reading (reading_location, reading_date, reading_value) VALUES (%s, FROM_UNIXTIME(%s/1000), %s)"
            val = (sensor, str(now), str(reading))
            cursor.execute(sql, val)
-           cnx.commit()
+           if mysql_commit_frequency == 0:
+              cnx.commit()
+           else:
+              # commit every mysql_commit_frequency
+              if total_trans%mysql_commit_frequency == 0:
+                 logging.debug("Total trans: %s and it is time to commit." % str(total_trans))
+                 cnx.commit()
+
 
    
         if backend_cassandra: 
