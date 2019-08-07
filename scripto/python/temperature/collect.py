@@ -23,7 +23,7 @@ backend_mysql = True
 backend_cassandra = False
 backend_kafka = False
 
-mysql_commit_frequency = 1000 # 0 means commit every insert
+mysql_commit_frequency = 0 # 0 means commit every insert
 
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -49,7 +49,7 @@ if backend_cassandra:
    from cassandra.cluster import Cluster
    from cassandra.policies import ConstantReconnectionPolicy, DCAwareRoundRobinPolicy
 
-   cluster = Cluster(contact_points=['192.168.1.233','192.168.1.77','192.168.1.27'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
+   cluster = Cluster(contact_points=['192.168.1.90'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
    cluster.connect_timeout = 30
    session = cluster.connect('temperature')
 
@@ -103,7 +103,8 @@ f2 = open("/tmp/h.txt", "r")
 
 
 # main endless loop
-tps_start = int(time.time())  # time since epoch, in seconds
+tse_start = int(time.time() - 1)  # time since epoch, in seconds to compute average TPS
+tps_start = 0
 tps_ratio = 0
 total_trans = 0
 while True:
@@ -185,7 +186,8 @@ while True:
 
     tps_end = int(time.time())  # time since epoch, in seconds
     if (tps_end - tps_start) >= 1:
-       logging.info("TPS: %s" % tps_ratio)
+       logging.debug("tps_ratio: %s total_trans: %s tps_end: %s tse_start: %s" % (tps_ratio, total_trans, tps_end, tse_start))
+       logging.info("TPS: %s Average TPS: %s" % (tps_ratio, total_trans/(tps_end - tse_start)))
        tps_start = int(time.time())  # time since epoch, in seconds
        tps_ratio = 0
   
