@@ -17,6 +17,7 @@ DHT = 26
 #sleep_time = 1 #in seconds
 #sleep_time = 0.1 #in seconds
 sleep_time = 0 #in seconds
+test_time = 300 #in seconds how long the test will run
 
 #Set backend
 backend_mysql = True
@@ -65,7 +66,6 @@ if backend_kafka:
 # dict that will store all the temperatures
 temp_dict = {}
 
-# test
 
 # checking is something is connected to PIN ponted by DHT variable (by default 4)
 import RPi.GPIO as GPIO
@@ -184,13 +184,17 @@ while True:
        logging.debug("Sleeping for: %s sec" % sleep_time)
        time.sleep(sleep_time)
 
-    tps_end = int(time.time())  # time since epoch, in seconds
-    if (tps_end - tps_start) >= 1:
-       logging.debug("tps_ratio: %s total_trans: %s tps_end: %s tse_start: %s" % (tps_ratio, total_trans, tps_end, tse_start))
-       logging.info("TPS: %s Average TPS: %s" % (tps_ratio, total_trans/(tps_end - tse_start)))
+    tse_end = int(time.time())  # time since epoch, in seconds
+    if (tse_end - tps_start) >= 1:
+       logging.debug("tps_ratio: %s total_trans: %s tse_end: %s tse_start: %s" % (tps_ratio, total_trans, tse_end, tse_start))
+       logging.info("TPS: %s Average TPS: %s" % (tps_ratio, total_trans/(tse_end - tse_start)))
        tps_start = int(time.time())  # time since epoch, in seconds
        tps_ratio = 0
-  
+
+    logging.debug("Check if it is time to exit the program")
+    if (int(time.time()) - tse_start) >= test_time:
+       logging.info("Done.")
+       exit()  
 
 session.shutdown()
 
