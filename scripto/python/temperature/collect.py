@@ -4,6 +4,7 @@ import time
 import io
 import socket
 import logging
+import datetime
 
 #Probably you need this installed
 # pip install python-dateutil
@@ -20,8 +21,8 @@ sleep_time = 0 #in seconds
 test_time = 300 #in seconds how long the test will run
 
 #Set backend
-backend_mysql = True
-backend_cassandra = False
+backend_mysql = False
+backend_cassandra = True
 backend_kafka = False
 
 mysql_commit_frequency = 10 # 0 means commit every insert
@@ -167,11 +168,11 @@ while True:
    
         if backend_cassandra: 
            cass_insert = "INSERT INTO temperature.reading (reading_location, reading_date, reading_value, reading_note) values ('" + sensor + "', '" \
-                  + str(now) + "', " \
+                  + time.strftime("%Y-%m-%d", time.gmtime()) + "', " \
                   + str(reading) + ", '" \
                   + "'" \
                   + ");"
-           logging.info("cass_insert: %s" % cass_insert)
+           logging.debug("cass_insert: %s" % cass_insert)
            cass_return = session.execute(cass_insert)
 
         if backend_kafka:
