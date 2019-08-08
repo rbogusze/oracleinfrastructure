@@ -24,7 +24,7 @@ backend_mysql = True
 backend_cassandra = False
 backend_kafka = False
 
-mysql_commit_frequency = 0 # 0 means commit every insert
+mysql_commit_frequency = 10 # 0 means commit every insert
 
 #logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
