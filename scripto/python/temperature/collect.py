@@ -1,15 +1,27 @@
 # coding: utf8
+# pip install python-dateutil 
 from json import dumps
 import time
 import io
 import socket
 import logging
 import datetime
+import argparse
 
-#Probably you need this installed
-# pip install python-dateutil
-# pip install kafka-python
-# pip install mysql-connector
+#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+#logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.info('This is a log message.')
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--backend", default="mysql")
+parser.add_argument("--frequency", default=10)
+args = parser.parse_args()
+if args.backend:
+    logging.debug('Backend option provided: %s', args.backend)
+if args.frequency:
+    logging.debug('frequency option provided: %s', args.frequency)
+    mysql_commit_frequency = args.frequency # 0 means commit every insert
 
 #Set DATA pin for DHT-22
 DHT = 26
@@ -21,17 +33,24 @@ sleep_time = 0 #in seconds
 test_time = 300 #in seconds how long the test will run
 
 #Set backend
-backend_mysql = True
+backend_mysql = False
 backend_cassandra = False
 backend_kafka = False
 
-mysql_commit_frequency = 10 # 0 means commit every insert
+if args.backend == "mysql":
+    backend_mysql = True
+    
+if args.backend == "cassandra":
+    backend_cassandra = True
+    
+if args.backend == "kafka":
+    backend_kafka = True
+    
 
-#logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-#logging.basicConfig(level=logging.WARN, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.info('This is a log message.')
+logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency))
 
+
+# pip install mysql-connector
 if backend_mysql:
    import mysql.connector
 
@@ -56,6 +75,7 @@ if backend_cassandra:
    session = cluster.connect('temperature')
 
 
+# pip install kafka-python
 if backend_kafka:
    from kafka import KafkaProducer
 
@@ -195,6 +215,10 @@ while True:
     logging.debug("Check if it is time to exit the program")
     if (int(time.time()) - tse_start) >= test_time:
        logging.info("Done.")
+       logging.debug("Closing connection.")
+       if backend_kafka:
+          producer.close()
+          
        exit()  
 
 session.shutdown()
