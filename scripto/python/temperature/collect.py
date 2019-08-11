@@ -21,8 +21,8 @@ sleep_time = 0 #in seconds
 test_time = 300 #in seconds how long the test will run
 
 #Set backend
-backend_mysql = False
-backend_cassandra = True
+backend_mysql = True
+backend_cassandra = False
 backend_kafka = False
 
 mysql_commit_frequency = 10 # 0 means commit every insert
@@ -59,7 +59,7 @@ if backend_cassandra:
 if backend_kafka:
    from kafka import KafkaProducer
 
-   producer = KafkaProducer(bootstrap_servers=['192.168.1.167:9092'],
+   producer = KafkaProducer(bootstrap_servers=['192.168.1.90:9092'],
                             value_serializer=lambda x: 
                             dumps(x).encode('utf-8'))
 
@@ -178,7 +178,7 @@ while True:
         if backend_kafka:
            # Now kafka publish
            data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
-           logging.info("Kafka insert: %s" % data)
+           logging.debug("Kafka insert: %s" % data)
            producer.send('temperature', value=data)
     
     if sleep_time > 0:                
