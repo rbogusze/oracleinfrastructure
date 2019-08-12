@@ -16,3 +16,5 @@ do
 done
 
 wait $(jobs -p)
+
+echo "[info] Executed: $V_EXECUTE threads. To get a number of TPS this client generated multiply average TPS by this number."
