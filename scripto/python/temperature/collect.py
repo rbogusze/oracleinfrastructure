@@ -16,12 +16,16 @@ logging.info('This is a log message.')
 parser = argparse.ArgumentParser()
 parser.add_argument("--backend", default="mysql")
 parser.add_argument("--frequency", default=10)
+parser.add_argument("--broker", default="none")
 args = parser.parse_args()
 if args.backend:
     logging.debug('Backend option provided: %s', args.backend)
 if args.frequency:
     logging.debug('frequency option provided: %s', args.frequency)
     mysql_commit_frequency = args.frequency # 0 means commit every insert
+if args.broker:
+    logging.debug('broker option provided: %s', args.broker)
+    broker = args.broker
 
 #Set DATA pin for DHT-22
 DHT = 26
@@ -36,6 +40,7 @@ test_time = 300 #in seconds how long the test will run
 backend_mysql = False
 backend_cassandra = False
 backend_kafka = False
+backend_awsiot = False
 
 if args.backend == "mysql":
     backend_mysql = True
@@ -46,8 +51,16 @@ if args.backend == "cassandra":
 if args.backend == "kafka":
     backend_kafka = True
     
+if args.backend == "awsiot":
+    backend_awsiot = True
+    logging.debug("Checking if broker is provided")
+    if (broker == "none"):
+        logging.error("With AWS IoT backend you need to provide --broker parameter. Exiting.")
+        exit()
+        
+    
 
-logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency))
+logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s \n broker: %s" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency, broker))
 
 
 # pip install mysql-connector
@@ -82,6 +95,31 @@ if backend_kafka:
    producer = KafkaProducer(bootstrap_servers=['192.168.1.90:9092'],
                             value_serializer=lambda x: 
                             dumps(x).encode('utf-8'))
+
+if backend_awsiot:
+   import paho.mqtt.client as mqttClient 
+   import ssl
+   Connected = False #global variable for the state of the connection
+
+   def on_connect(client, userdata, flags, rc):
+       if rc == 0:
+           print("Connected to broker")
+           global Connected                #Use global variable
+           Connected = True                #Signal connection 
+       else:
+           print("Connection failed")
+   Connected = False   #global variable for the state of the connection
+   client = mqttClient.Client("Python")               #create new instance
+   client.tls_set(ca_certs="/home/pi/certs/rootCA.pem", certfile="/home/pi/certs/certificate.pem.crt", keyfile="/home/pi/certs/private.pem.key", cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+   client.tls_insecure_set(True)
+
+   client.on_connect= on_connect                      #attach function to callback
+   client.connect(broker, 8883, 60)
+   client.loop_start()        #start the loop
+   while Connected != True:    #Wait for connection
+       time.sleep(0.1)
+
+
 
 
 # dict that will store all the temperatures
@@ -200,6 +238,11 @@ while True:
            data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
            logging.debug("Kafka insert: %s" % data)
            producer.send('temperature', value=data)
+
+        if backend_awsiot:
+           data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
+           logging.debug("MQTT insert: %s" % data)
+           client.publish("temperature",str(data))
     
     if sleep_time > 0:                
        logging.debug("Sleeping for: %s sec" % sleep_time)
