@@ -226,7 +226,7 @@ while True:
    
         if backend_cassandra: 
            cass_insert = "INSERT INTO temperature.reading (reading_location, reading_date, reading_value, reading_note) values ('" + sensor + "', '" \
-                  + time.strftime("%Y-%m-%d", time.gmtime()) + "', " \
+                  + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3] + "', " \
                   + str(reading) + ", '" \
                   + "'" \
                   + ");"
