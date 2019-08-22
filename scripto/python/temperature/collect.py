@@ -17,6 +17,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--backend", default="mysql")
 parser.add_argument("--frequency", default=10)
 parser.add_argument("--broker", default="none")
+parser.add_argument("--username", default="none")
+parser.add_argument("--password", default="none")
 args = parser.parse_args()
 if args.backend:
     logging.debug('Backend option provided: %s', args.backend)
@@ -26,6 +28,12 @@ if args.frequency:
 if args.broker:
     logging.debug('broker option provided: %s', args.broker)
     broker = args.broker
+if args.username:
+    logging.debug('username option provided: %s', args.username)
+    username = args.username
+if args.password:
+    logging.debug('password option provided: %s', args.password)
+    password = args.password
 
 #Set DATA pin for DHT-22
 DHT = 26
@@ -41,6 +49,7 @@ backend_mysql = False
 backend_cassandra = False
 backend_kafka = False
 backend_awsiot = False
+backend_mqtt = False
 
 if args.backend == "mysql":
     backend_mysql = True
@@ -58,6 +67,14 @@ if args.backend == "awsiot":
         logging.error("With AWS IoT backend you need to provide --broker parameter. Exiting.")
         exit()
         
+if args.backend == "mqtt":
+    backend_mqtt = True
+    logging.debug("Checking if broker is provided")
+    if (broker == "none") or (username == "none") or (password == "none"):
+        logging.error("With MQTT backend you need to provide --broker --username --password parameters. Exiting.")
+        exit()
+        
+    
     
 
 logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s \n broker: %s" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency, broker))
@@ -83,7 +100,7 @@ if backend_cassandra:
    from cassandra.cluster import Cluster
    from cassandra.policies import ConstantReconnectionPolicy, DCAwareRoundRobinPolicy
 
-   cluster = Cluster(contact_points=['192.168.1.90'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
+   cluster = Cluster(contact_points=['cassandra2'], idle_heartbeat_interval=5,load_balancing_policy=DCAwareRoundRobinPolicy(), reconnection_policy=ConstantReconnectionPolicy(delay=5, max_attempts=50), idle_heartbeat_timeout=5)
    cluster.connect_timeout = 30
    session = cluster.connect('temperature')
 
@@ -119,6 +136,26 @@ if backend_awsiot:
    while Connected != True:    #Wait for connection
        time.sleep(0.1)
 
+if backend_mqtt:
+   import paho.mqtt.client as mqttClient 
+   Connected = False #global variable for the state of the connection
+
+   def on_connect(client, userdata, flags, rc):
+       if rc == 0:
+           print("Connected to broker")
+           global Connected                #Use global variable
+           Connected = True                #Signal connection 
+       else:
+           print("Connection failed")
+   Connected = False   #global variable for the state of the connection
+   client = mqttClient.Client("Python")               #create new instance
+   client.username_pw_set(username, password)
+
+   client.on_connect= on_connect                      #attach function to callback
+   client.connect(broker, 1883, 60)
+   client.loop_start()        #start the loop
+   while Connected != True:    #Wait for connection
+       time.sleep(0.1)
 
 
 
@@ -240,6 +277,11 @@ while True:
            producer.send('temperature', value=data)
 
         if backend_awsiot:
+           data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
+           logging.debug("MQTT insert: %s" % data)
+           client.publish("temperature",str(data))
+    
+        if backend_mqtt:
            data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
            logging.debug("MQTT insert: %s" % data)
            client.publish("temperature",str(data))
