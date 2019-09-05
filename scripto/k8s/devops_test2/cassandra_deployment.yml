@@ -1,0 +1,31 @@
+# deployment.yml
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: cassandra
+  labels:
+    app: cassandra
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cassandra
+  template:
+    metadata:
+      labels:
+        app: cassandra
+    spec:
+      containers:
+      - name: cassandra-container
+        image: cassandra:3.11.4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9042
+        volumeMounts:
+          # define persistent storage 
+        - mountPath: /var/lib/cassandra
+          name: pd-cassandra-volume
+      volumes:
+      - name: pd-cassandra-volume
+        persistentVolumeClaim:
+          claimName: pd-cassandra-volume-claim
