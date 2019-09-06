@@ -87,3 +87,53 @@ resource "kubernetes_deployment" "cassandra" {
     }
   }
 }
+
+resource "kubernetes_service" "cassandra" {
+  metadata {
+    name = "cassandra"
+  }
+  spec {
+    selector = {
+      test = "cassandra"
+    }
+    port {
+      port        = 9042
+      target_port = 9042
+    }
+
+    type = "ClusterIP"
+  }
+}
+
+
+
+
+resource "kubernetes_job" "demo" {
+  metadata {
+    name = "demo"
+  }
+  spec {
+    template {
+      metadata {}
+      spec {
+        container {
+          name    = "pi"
+          image   = "cassandra:3.11.4"
+          command = ["cqlsh", "-f", "/opt/cassandra-cql/create-schema.cql", "cassandra.default.svc.cluster.local"]
+          volume_mount {
+            name = "cassandra-cql"
+            mount_path = "/opt/cassandra-cql"
+          }
+        }
+        volume {
+          name = "cassandra-cql"
+          config_map {
+            name = "cassandra-cql"
+          }
+        }
+        restart_policy = "Never"
+      }
+    }
+    backoff_limit = 4
+  }
+}
