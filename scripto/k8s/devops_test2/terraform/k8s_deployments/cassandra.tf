@@ -13,6 +13,21 @@ resource "kubernetes_persistent_volume_claim" "pd-cassandra-volume-claim" {
 }
 
 
+resource "kubernetes_config_map" "example" {
+  metadata {
+    name = "my-config"
+  }
+
+  data = {
+    "create-schema.cql" = "${file("${path.module}/create-schema.cql")}"
+    "insert-data.cql" = "${file("${path.module}/insert-data.cql")}"
+    "query-data.cql" = "${file("${path.module}/query-data.cql")}"
+  }
+
+}
+
+
+
 resource "kubernetes_deployment" "cassandra" {
   metadata {
     name = "cassandra"
