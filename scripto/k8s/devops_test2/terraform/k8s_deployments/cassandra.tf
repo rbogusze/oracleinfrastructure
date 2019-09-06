@@ -86,6 +86,10 @@ resource "kubernetes_deployment" "cassandra" {
       }
     }
   }
+  provisioner "local-exec" {
+      command = "echo sleep 60s to let cassandra initialise; sleep 60"
+  }
+
 }
 
 resource "kubernetes_service" "cassandra" {
