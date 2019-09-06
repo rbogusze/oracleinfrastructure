@@ -1,3 +1,18 @@
+resource "kubernetes_persistent_volume_claim" "pd-cassandra-volume-claim" {
+  metadata {
+    name = "pd-cassandra-volume-claim"
+  }
+  spec {
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "5Gi"
+      }
+    }
+  }
+}
+
+
 resource "kubernetes_deployment" "cassandra" {
   metadata {
     name = "cassandra"
@@ -7,7 +22,7 @@ resource "kubernetes_deployment" "cassandra" {
   }
 
   spec {
-    replicas = 3
+    replicas = 1
 
     selector {
       match_labels = {
