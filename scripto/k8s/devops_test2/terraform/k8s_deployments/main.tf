@@ -136,6 +136,16 @@ resource "kubernetes_service" "scala-app" {
   depends_on = [kubernetes_deployment.scala-app]
 }
 
+output "instance_ip_addr" {
+  value       = "${kubernetes_service.scala-app.load_balancer_ingress.0.ip}"
+
+  depends_on = [
+    # Security group rule must be created before this IP address could
+    # actually be used, otherwise the services will be unreachable.
+    kubernetes_deployment.scala-app
+  ]
+}
+
 
 
 resource "kubernetes_job" "cassandra-create-schema" {
