@@ -108,16 +108,16 @@ resource "kubernetes_service" "cassandra" {
 
 
 
-resource "kubernetes_job" "demo" {
+resource "kubernetes_job" "cassandra-create-schema" {
   metadata {
-    name = "demo"
+    name = "cassandra-create-schema"
   }
   spec {
     template {
       metadata {}
       spec {
         container {
-          name    = "pi"
+          name    = "cassandra-create-schema"
           image   = "cassandra:3.11.4"
           command = ["cqlsh", "-f", "/opt/cassandra-cql/create-schema.cql", "cassandra.default.svc.cluster.local"]
           volume_mount {
@@ -134,6 +134,39 @@ resource "kubernetes_job" "demo" {
         restart_policy = "Never"
       }
     }
-    backoff_limit = 4
+    backoff_limit = 6
   }
+  depends_on = [kubernetes_deployment.cassandra]
+}
+
+
+resource "kubernetes_job" "cassandra-insert-data" {
+  metadata {
+    name = "cassandra-insert-data"
+  }
+  spec {
+    template {
+      metadata {}
+      spec {
+        container {
+          name    = "cassandra-insert-data"
+          image   = "cassandra:3.11.4"
+          command = ["cqlsh", "-f", "/opt/cassandra-cql/insert-data.cql", "cassandra.default.svc.cluster.local"]
+          volume_mount {
+            name = "cassandra-cql"
+            mount_path = "/opt/cassandra-cql"
+          }
+        }
+        volume {
+          name = "cassandra-cql"
+          config_map {
+            name = "cassandra-cql"
+          }
+        }
+        restart_policy = "Never"
+      }
+    }
+    backoff_limit = 6
+  }
+  depends_on = [kubernetes_job.cassandra-create-schema]
 }
