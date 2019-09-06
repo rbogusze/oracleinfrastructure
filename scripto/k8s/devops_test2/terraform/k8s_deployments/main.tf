@@ -23,7 +23,16 @@ resource "kubernetes_config_map" "cassandra-cql" {
     "insert-data.cql" = "${file("${path.module}/insert-data.cql")}"
     "query-data.cql" = "${file("${path.module}/query-data.cql")}"
   }
+}
 
+resource "kubernetes_config_map" "scala-app-env" {
+  metadata {
+    name = "scala-app-env"
+  }
+
+  data = {
+    CASSANDRA_HOST = "cassandra.default.svc.cluster.local"
+  }
 }
 
 
@@ -174,3 +183,53 @@ resource "kubernetes_job" "cassandra-insert-data" {
   }
   depends_on = [kubernetes_job.cassandra-create-schema]
 }
+
+
+
+
+resource "kubernetes_deployment" "scala-app" {
+  metadata {
+    name = "scala-app"
+    labels = {
+      test = "scala-app"
+    }
+  }
+
+  spec {
+    replicas = 1
+
+    selector {
+      match_labels = {
+        test = "scala-app"
+      }
+    }
+
+    template {
+      metadata {
+        labels = {
+          test = "scala-app"
+        }
+      }
+
+      spec {
+        container {
+          image = "gcr.io/remi-test-241607/scala-app:latest"
+          name  = "scala-app"
+          image_pull_policy = "Always"
+          port {
+            container_port = 9000
+          }
+          env_from {
+            config_map_ref {
+              name = "scala-app-env"
+            }
+          }
+        }
+
+
+      }
+    }
+  }
+  depends_on = [kubernetes_job.cassandra-insert-data]
+}
+
