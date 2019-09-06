@@ -118,6 +118,23 @@ resource "kubernetes_service" "cassandra" {
   }
 }
 
+resource "kubernetes_service" "scala-app" {
+  metadata {
+    name = "scala-app"
+  }
+  spec {
+    selector = {
+      test = "scala-app"
+    }
+    port {
+      port        = 9000
+      target_port = 9000
+    }
+
+    type = "LoadBalancer"
+  }
+  depends_on = [kubernetes_deployment.scala-app]
+}
 
 
 
