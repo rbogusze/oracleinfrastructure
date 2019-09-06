@@ -13,9 +13,9 @@ resource "kubernetes_persistent_volume_claim" "pd-cassandra-volume-claim" {
 }
 
 
-resource "kubernetes_config_map" "example" {
+resource "kubernetes_config_map" "cassandra-cql" {
   metadata {
-    name = "my-config"
+    name = "cassandra-cql"
   }
 
   data = {
@@ -61,8 +61,12 @@ resource "kubernetes_deployment" "cassandra" {
             container_port = 9042
           }
           volume_mount {
-            mount_path = "/var/lib/cassandra"
             name = "pd-cassandra-volume"
+            mount_path = "/var/lib/cassandra"
+          }
+          volume_mount {
+            name = "cassandra-cql"
+            mount_path = "/opt/cassandra-cql"
           }
         }
 
@@ -70,6 +74,12 @@ resource "kubernetes_deployment" "cassandra" {
           name = "pd-cassandra-volume"
           persistent_volume_claim {
             claim_name = "pd-cassandra-volume-claim"
+          }
+        }
+        volume {
+          name = "cassandra-cql"
+          config_map {
+            name = "cassandra-cql"
           }
         }
 
