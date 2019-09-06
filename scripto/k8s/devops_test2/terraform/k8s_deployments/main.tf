@@ -17,3 +17,4 @@ resource "kubernetes_pod" "nginx" {
     }
   }
 }
+
