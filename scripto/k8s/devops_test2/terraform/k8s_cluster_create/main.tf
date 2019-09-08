@@ -8,7 +8,7 @@ resource "google_container_cluster" "remi-test" {
   name               = "remi-test"
   network            = "default"
   location           = "us-central1-a"
-  initial_node_count = 3
+  initial_node_count = 1
 }
 
 provider "kubernetes" {}
