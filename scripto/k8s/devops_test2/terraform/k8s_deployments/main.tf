@@ -136,7 +136,7 @@ resource "kubernetes_service" "scala-app" {
   depends_on = [kubernetes_deployment.scala-app]
 }
 
-output "instance_ip_addr" {
+output "load_balancer_endpoint" {
   value       = "${kubernetes_service.scala-app.load_balancer_ingress.0.ip}"
 
   depends_on = [
