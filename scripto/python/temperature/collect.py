@@ -19,6 +19,7 @@ parser.add_argument("--frequency", default=10)
 parser.add_argument("--broker", default="none")
 parser.add_argument("--username", default="none")
 parser.add_argument("--password", default="none")
+parser.add_argument("--dht", default="false")
 args = parser.parse_args()
 if args.backend:
     logging.debug('Backend option provided: %s', args.backend)
@@ -34,9 +35,10 @@ if args.username:
 if args.password:
     logging.debug('password option provided: %s', args.password)
     password = args.password
+if args.dht:
+    logging.debug('dht option provided: %s', args.dht)
+    dht_sensors = args.dht
 
-#Set DATA pin for DHT-22
-DHT = 26
 
 #Sleep time after readings are saved in backend
 #sleep_time = 1 #in seconds
@@ -162,25 +164,28 @@ if backend_mqtt:
 # dict that will store all the temperatures
 temp_dict = {}
 
-
 # checking is something is connected to PIN ponted by DHT variable (by default 4)
-import RPi.GPIO as GPIO
+if dht_sensors:
+   import RPi.GPIO as GPIO
 
-channel = DHT
+   #Set DATA pin for DHT-22
+   DHT = 26
 
-# Setup your channel
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(channel, GPIO.IN)
+   channel = DHT
 
-# To test the value of a pin use the .input method
-channel_is_on = GPIO.input(channel)  # Returns 0 if OFF or 1 if ON
+   # Setup your channel
+   GPIO.setwarnings(False)
+   GPIO.setmode(GPIO.BCM)
+   GPIO.setup(channel, GPIO.IN)
 
-if channel_is_on:
-   logging.debug('DHT temp sensor is active')
-   import Adafruit_DHT as dht
-else:
-   logging.debug('DHT temp sensor not found')
+   # To test the value of a pin use the .input method
+   channel_is_on = GPIO.input(channel)  # Returns 0 if OFF or 1 if ON
+
+   if channel_is_on:
+      logging.debug('DHT temp sensor is active')
+      import Adafruit_DHT as dht
+   else:
+      logging.debug('DHT temp sensor not found')
 
 
 # /test
