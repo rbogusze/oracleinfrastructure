@@ -166,6 +166,7 @@ temp_dict = {}
 
 # checking is something is connected to PIN ponted by DHT variable (by default 4)
 channel_is_on = False
+dht_sensors = False
 if dht_sensors:
    import RPi.GPIO as GPIO
 
