@@ -165,6 +165,7 @@ if backend_mqtt:
 temp_dict = {}
 
 # checking is something is connected to PIN ponted by DHT variable (by default 4)
+channel_is_on = False
 if dht_sensors:
    import RPi.GPIO as GPIO
 
@@ -220,6 +221,7 @@ while True:
     temp_dict[location] = temp_cpu
     logging.debug("Storing for: %s value: %s" % (location, temp_cpu))
 
+    channel_is_on = False
     # reading from DHT-22 sensor
     if channel_is_on:
        logging.debug("Read Temp and Hum from DHT22 from files")
