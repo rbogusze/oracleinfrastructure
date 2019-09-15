@@ -305,7 +305,7 @@ while True:
     tse_end = int(time.time())  # time since epoch, in seconds
     if (tse_end - tps_start) >= 1:
        logging.debug("tps_ratio: %s total_trans: %s tse_end: %s tse_start: %s" % (tps_ratio, total_trans, tse_end, tse_start))
-       logging.info("TPS: %s Average TPS: %s" % (tps_ratio, total_trans/(tse_end - tse_start)))
+       logging.info("TPS: %s Average TPS: %s Total trans: %s" % (tps_ratio, total_trans/(tse_end - tse_start), total_trans))
        tps_start = int(time.time())  # time since epoch, in seconds
        tps_ratio = 0
 
