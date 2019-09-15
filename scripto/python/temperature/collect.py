@@ -282,7 +282,11 @@ while True:
            # Now kafka publish
            data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
            logging.debug("Kafka insert: %s" % data)
-           producer.send('temperature', value=data)
+           # async
+           #producer.send('temperature', value=data)
+           # sync
+           future = producer.send('temperature', value=data)
+           result = future.get(timeout=60)
 
         if backend_awsiot:
            data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
