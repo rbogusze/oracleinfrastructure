@@ -8,6 +8,7 @@ mkdir -p $LOG_DIR
 echo "Determining number of collect scripts to run"
 
 V_EXECUTE=`cat /proc/cpuinfo | grep ^processor | wc -l`
+V_EXECUTE=32
 
 # multiply by 2, so that each CPU thread has 2 collect scripts running
 V_EXECUTE=`expr $V_EXECUTE + $V_EXECUTE`
