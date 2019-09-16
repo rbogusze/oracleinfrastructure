@@ -110,6 +110,7 @@ if backend_cassandra:
 # pip install kafka-python
 if backend_kafka:
    from kafka import KafkaProducer
+   from kafka.errors import KafkaError
 
    producer = KafkaProducer(bootstrap_servers=['192.168.1.90:9092'],
                             value_serializer=lambda x: 
@@ -284,9 +285,20 @@ while True:
            logging.debug("Kafka insert: %s" % data)
            # async
            #producer.send('temperature', value=data)
-           # sync
+           # sync?
+           #future = producer.send('temperature', value=data)
+           #result = future.get(timeout=60)
+           # Block for 'synchronous' sends
            future = producer.send('temperature', value=data)
-           result = future.get(timeout=60)
+           try:
+               record_metadata = future.get(timeout=10)
+           except KafkaError:
+               # Decide what to do if produce request failed...
+               log.exception()
+           pass
+           logging.debug("Kafka insert debug topic: %s partition %s offset %s" % (record_metadata.topic, record_metadata.partition, record_metadata.offset))
+           producer.flush()
+       
 
         if backend_awsiot:
            data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
