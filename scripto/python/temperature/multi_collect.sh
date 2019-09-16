@@ -39,4 +39,4 @@ done
 echo "TOTAL_TRANS: $TOTAL_TRANS"
 END_TIME=`date +%s`
 ELAPSED=`expr $END_TIME - $START_TIME`
-echo "This took: $ELAPSED
+echo "This took: $ELAPSED seconds"
