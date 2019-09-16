@@ -1,6 +1,7 @@
 #!/bin/bash
 
 PID=$$
+START_TIME=`date +%s`
 
 LOG_DIR=/tmp/multi_log_${PID}
 mkdir -p $LOG_DIR
@@ -8,7 +9,7 @@ mkdir -p $LOG_DIR
 echo "Determining number of collect scripts to run"
 
 V_EXECUTE=`cat /proc/cpuinfo | grep ^processor | wc -l`
-V_EXECUTE=32
+V_EXECUTE=16
 
 # multiply by 2, so that each CPU thread has 2 collect scripts running
 V_EXECUTE=`expr $V_EXECUTE + $V_EXECUTE`
@@ -36,3 +37,6 @@ do
 done
 
 echo "TOTAL_TRANS: $TOTAL_TRANS"
+END_TIME=`date +%s`
+ELAPSED=`expr $END_TIME - $START_TIME`
+echo "This took: $ELAPSED
