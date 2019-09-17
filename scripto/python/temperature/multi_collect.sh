@@ -9,10 +9,10 @@ mkdir -p $LOG_DIR
 echo "Determining number of collect scripts to run"
 
 V_EXECUTE=`cat /proc/cpuinfo | grep ^processor | wc -l`
-V_EXECUTE=16
 
 # multiply by 2, so that each CPU thread has 2 collect scripts running
 V_EXECUTE=`expr $V_EXECUTE + $V_EXECUTE`
+V_EXECUTE=64
 
 V_EXECUTE_COUNT=0
 while [ ${V_EXECUTE_COUNT} -lt ${V_EXECUTE} ]
@@ -31,6 +31,9 @@ for i in $LOG_DIR/*
 do
   #echo $i 
   TRANS=`cat $i | grep "INFO - TPS" | tail -1 | awk '{print $NF}'`
+  if [ -z ${TRANS} ]; then
+    continue
+  fi
   #echo "TRANS: $TRANS"
   TOTAL_TRANS=`expr $TOTAL_TRANS + $TRANS`
   #echo "TOTAL_TRANS: $TOTAL_TRANS"
