@@ -294,7 +294,7 @@ while True:
                record_metadata = future.get(timeout=10)
            except KafkaError:
                # Decide what to do if produce request failed...
-               log.exception()
+               logging.error("Failure.")
            pass
            logging.debug("Kafka insert debug topic: %s partition %s offset %s" % (record_metadata.topic, record_metadata.partition, record_metadata.offset))
            producer.flush()
