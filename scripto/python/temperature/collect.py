@@ -113,7 +113,6 @@ if backend_kafka:
    from kafka.errors import KafkaError
 
    producer = KafkaProducer(bootstrap_servers=['192.168.1.90:9092'],
-                            acks=-1,
                             value_serializer=lambda x: 
                             dumps(x).encode('utf-8'))
 
