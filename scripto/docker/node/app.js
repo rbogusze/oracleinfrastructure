@@ -8,15 +8,18 @@ var http = require('http');
 var userCount = 0;
 var os = require("os");
 var hostname = os.hostname();
-http.createServer(function (request, response) {
+
+var express = require('express');
+var app = express();
+app.use(express.static(__dirname + '/public'));
+
+app.get('/', (req, res) => {
     console.log('New connection');
     userCount++;
-    response.write('<html><head><body>\n');
-    response.write('<font color="red">RED</font><BR>');
-    response.write('I am running on: '+hostname+'<BR>');
-    response.write('We have had '+userCount+' visits!\n');
-    response.write('</body></html></head>\n');
-    response.end();
-}).listen(8080);
+    res.send('<html><head><body>\n<font color="green">GREEN</font><BR>I am running on: '+hostname+'<BR>We have had '+userCount+' visits!<BR><img src="/monty.jpg" alt="monty" height="420"> <BR></body></html></head>\n');
+});
+
+app.listen(8080);
+
 
 console.log('Server started');
