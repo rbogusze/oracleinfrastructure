@@ -20,6 +20,8 @@
        content: |
          username={{ vault_smb_user }}
          password={{ vault_smb_pass }}
+     tags:
+      - kasztelan
 
    - name: add mount remote backup
      mount:
@@ -28,3 +30,5 @@
        opts: "credentials=/etc/samba/cred-file,uid=remik,gid=remik,vers=1.0"
        fstype: cifs
        state: mounted
+     tags:
+      - kasztelan
