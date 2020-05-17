@@ -20,6 +20,8 @@ parser.add_argument("--broker", default="none")
 parser.add_argument("--username", default="none")
 parser.add_argument("--password", default="none")
 parser.add_argument("--dht", default="false")
+parser.add_argument("--sleep_time", default=1)
+parser.add_argument("--test_time", default=0)
 args = parser.parse_args()
 if args.backend:
     logging.debug('Backend option provided: %s', args.backend)
@@ -38,13 +40,17 @@ if args.password:
 if args.dht:
     logging.debug('dht option provided: %s', args.dht)
     dht_sensors = args.dht
+if args.sleep_time:
+    logging.debug('sleep_time option provided: %s', args.sleep_time)
+    sleep_time = args.sleep_time
+if args.test_time:
+    logging.debug('test_time option provided: %s', args.test_time)
+    test_time = args.test_time
 
 
 #Sleep time after readings are saved in backend
-#sleep_time = 1 #in seconds
-#sleep_time = 0.1 #in seconds
-sleep_time = 0 #in seconds
-test_time = 300 #in seconds how long the test will run
+#sleep_time = 0 #in seconds
+#test_time = 300 #in seconds how long the test will run
 
 #Set backend
 backend_mysql = False
@@ -323,13 +329,14 @@ while True:
        tps_ratio = 0
 
     logging.debug("Check if it is time to exit the program")
-    if (int(time.time()) - tse_start) >= test_time:
-       logging.info("Done.")
-       logging.debug("Closing connection.")
-       if backend_kafka:
-          producer.close()
+    if test_time > 0:
+      if (int(time.time()) - tse_start) >= test_time:
+         logging.info("Done.")
+         logging.debug("Closing connection.")
+         if backend_kafka:
+            producer.close()
           
-       exit()  
+         exit()  
 
 session.shutdown()
 
