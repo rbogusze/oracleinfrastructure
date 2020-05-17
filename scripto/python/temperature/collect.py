@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logging.info('This is a log message.')
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--backend", default="mysql")
+parser.add_argument("--backend", default="kafka")
 parser.add_argument("--frequency", default=10)
 parser.add_argument("--broker", default="none")
 parser.add_argument("--username", default="none")
