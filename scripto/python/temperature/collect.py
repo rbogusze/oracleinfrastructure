@@ -43,7 +43,7 @@ if args.dht:
 if args.sleep_time:
     logging.debug('sleep_time option provided: %s', args.sleep_time)
     sleep_time = args.sleep_time
-if args.test_time:
+if args.test_time == 0:
     logging.debug('test_time option provided: %s', args.test_time)
     test_time = args.test_time
 
@@ -85,7 +85,7 @@ if args.backend == "mqtt":
     
     
 
-logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s \n broker: %s" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency, broker))
+logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s \n broker: %s \n sleep_time: %s \n test_time: %s \n" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency, broker, sleep_time, test_time))
 
 
 # pip install mysql-connector
