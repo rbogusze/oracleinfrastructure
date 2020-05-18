@@ -19,7 +19,7 @@ parser.add_argument("--frequency", default=10)
 parser.add_argument("--broker", default="none")
 parser.add_argument("--username", default="none")
 parser.add_argument("--password", default="none")
-parser.add_argument("--dht", default="false")
+parser.add_argument("--dht", default="true")
 parser.add_argument("--sleep_time", default=1)
 parser.add_argument("--test_time", default=0)
 args = parser.parse_args()
@@ -83,9 +83,8 @@ if args.backend == "mqtt":
         exit()
         
     
-    
 
-logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s \n broker: %s \n sleep_time: %s \n test_time: %s \n" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency, broker, sleep_time, test_time))
+logging.debug("Backend options - \n backend_mysql: %s \n backend_cassandra: %s \n backend_kafka: %s \n mysql_commit_frequency: %s \n broker: %s \n dht_sensors: %s \n sleep_time: %s \n test_time: %s \n" % (backend_mysql, backend_cassandra, backend_kafka, mysql_commit_frequency, broker, dht_sensors, sleep_time, test_time))
 
 
 # pip install mysql-connector
@@ -174,7 +173,7 @@ temp_dict = {}
 
 # checking is something is connected to PIN ponted by DHT variable (by default 4)
 channel_is_on = False
-dht_sensors = False
+
 if dht_sensors:
    import RPi.GPIO as GPIO
 
@@ -230,7 +229,6 @@ while True:
     temp_dict[location] = temp_cpu
     logging.debug("Storing for: %s value: %s" % (location, temp_cpu))
 
-    channel_is_on = False
     # reading from DHT-22 sensor
     if channel_is_on:
        logging.debug("Read Temp and Hum from DHT22 from files")
