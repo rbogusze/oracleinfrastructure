@@ -1,18 +1,22 @@
 #!/usr/bin/python
 # coding: utf8
+import sys
 from time import sleep
 from json import loads
 from kafka import KafkaConsumer
 from ConfigParser import SafeConfigParser
 
 print("Reading configuration file")
+parser_file = '/etc/lufcik.ini'
+
 parser = SafeConfigParser()
-parser.read('/etc/lufcik.ini')
+parser.read(parser_file)
 
 kafka_topic = parser.get('main', 'kafka_topic')
 open_max = parser.get('main', 'open_max')
 
 print("Read from config file \n\t kafka_topic: {} \n\t open_max: {}").format(kafka_topic, open_max)
+
 
 consumer = KafkaConsumer(kafka_topic,
                          bootstrap_servers=['sensu:9092'],
@@ -22,19 +26,20 @@ consumer = KafkaConsumer(kafka_topic,
                          )
 
 def read_open_level():
-    return a
+    return 0
 
 def set_open_level():
-    return a
-
-
-
+    parser.set('main', 'open_current', '3')
+    parser.write(sys.stdout)
+    return 0
 
 def f_open():
     print("opening")
 
 def f_close():
     print("Closing")
+
+set_open_level()
 
 print("Will read from kafka topic: {}").format(kafka_topic)
 for message in consumer:
