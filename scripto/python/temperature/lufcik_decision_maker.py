@@ -28,9 +28,11 @@ consumer = KafkaConsumer(kafka_topic,
 def read_open_level():
     return 0
 
-def set_open_level():
-    parser.set('main', 'open_current', '3')
-    parser.write(sys.stdout)
+def set_open_level(level):
+    parser.set('main', 'open_current', str(level))
+    #parser.write(sys.stdout)
+    with open(parser_file, 'w') as configfile:
+        parser.write(configfile)
     return 0
 
 def f_open():
@@ -39,7 +41,9 @@ def f_open():
 def f_close():
     print("Closing")
 
-set_open_level()
+set_open_level(2)
+sleep(10)
+set_open_level(20)
 
 print("Will read from kafka topic: {}").format(kafka_topic)
 for message in consumer:
