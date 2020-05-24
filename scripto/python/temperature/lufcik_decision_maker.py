@@ -5,6 +5,10 @@ from time import sleep
 from json import loads
 from kafka import KafkaConsumer
 from ConfigParser import SafeConfigParser
+import RPi.GPIO as GPIO
+
+# init list with pin numbers
+pinList = [27,17]
 
 print("Reading configuration file")
 parser_file = '/etc/lufcik.ini'
@@ -24,6 +28,21 @@ consumer = KafkaConsumer(kafka_topic,
                          enable_auto_commit=True,
                          group_id='lufcik_decision_maker',
                          )
+
+def switch_on(x,y):
+    print('Switch {} on'.format(x))
+    #GPIO.output(x, GPIO.LOW)
+    #GPIO.output(x, 1)
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(x, GPIO.OUT)
+
+    sleep(y)
+
+def switch_off(x,y):
+    print('Switch {} off'.format(x))
+    #GPIO.output(x, GPIO.HIGH)
+    GPIO.cleanup()
+    sleep(y)
 
 def read_open_level():
     return int(parser.get('main', 'open_current'))
@@ -45,6 +64,9 @@ def f_open():
     else:
         print("-> (YES) opening more")
         set_open_level(open_current + 1) 
+        switch_on(pinList[0],2)
+        switch_off(pinList[0],1)
+        switch_off(pinList[1],1)
 
     
 def f_close():
@@ -56,10 +78,15 @@ def f_close():
     else:
         print("-> (YES) closing")
         set_open_level(open_current - 1) 
+        switch_on(pinList[1],2)
+        switch_off(pinList[0],1)
+        switch_off(pinList[1],1)
 
 # acutal execution
+switch_off(pinList[0],1)
+switch_off(pinList[1],1)
 
-set_open_level(2)
+#set_open_level(5)
 #open_current = read_open_level()
 #print("Currently we are open: {}").format(open_current)
 #sleep(2)
@@ -80,3 +107,5 @@ for message in consumer:
         f_close()
 
     sleep(1)
+
+
