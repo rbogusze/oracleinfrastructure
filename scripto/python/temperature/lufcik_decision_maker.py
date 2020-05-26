@@ -23,22 +23,23 @@ kafka_topic = parser.get('main', 'kafka_topic')
 
 print(temperature_sensor)
 
+# need to include that in the loop, so that I get the fresh values every time
 # read just one message from temperature topic
-consumer = KafkaConsumer('temperature',
-                         bootstrap_servers=['sensu:9092'],
-                         enable_auto_commit=False,
-			 auto_offset_reset='latest',
-                         value_deserializer=lambda x: loads(x.decode('utf-8')))
-
-consumer2 = KafkaConsumer('temperature_outside',
-                         bootstrap_servers=['sensu:9092'],
-                         enable_auto_commit=False,
-			 auto_offset_reset='latest',
-                         value_deserializer=lambda x: loads(x.decode('utf-8')))
-
-producer = KafkaProducer(bootstrap_servers=['sensu:9092'])
-
 while True:
+    consumer = KafkaConsumer('temperature',
+                         bootstrap_servers=['sensu:9092'],
+                         enable_auto_commit=False,
+			 auto_offset_reset='latest',
+                         value_deserializer=lambda x: loads(x.decode('utf-8')))
+
+    consumer2 = KafkaConsumer('temperature_outside',
+                         bootstrap_servers=['sensu:9092'],
+                         enable_auto_commit=False,
+			 auto_offset_reset='latest',
+                         value_deserializer=lambda x: loads(x.decode('utf-8')))
+
+    producer = KafkaProducer(bootstrap_servers=['sensu:9092'])
+
     # get current_temp
     for message in consumer:
         message = message.value
