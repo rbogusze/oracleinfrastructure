@@ -22,17 +22,19 @@ owm_key = parser.get('main', 'owm_key')
 
 owm = pyowm.OWM(owm_key)  # You MUST provide a valid API key
 
-# Search for current weather in London (Great Britain)
-observation = owm.weather_at_place('Lodz,PL')
 
 producer = KafkaProducer(bootstrap_servers=['sensu:9092'],
                          value_serializer=lambda x: 
                          dumps(x).encode('utf-8'))
 
 while True:
+    # Search for current weather in London (Great Britain)
+    observation = owm.weather_at_place('Lodz,PL')
     w = observation.get_weather()
     temp_outside = float(w.get_temperature('celsius')['temp'])
-    #print("{} Sending to kafka topic: temperature_outside, value: {}").format(datetime.now().isoformat(), temp_outside)
-    producer.send('temperature_outside', value=temp_outside)
+    send_to_kafka = {'send_time' : datetime.now().replace(microsecond=0).isoformat(), 'reference_time' : w.get_reference_time(timeformat='iso'), 'temp_outside' : str(temp_outside)}
+    print("Sending to kafka topic: temperature_outside, value: {}").format(send_to_kafka)
+    print(w)
+    producer.send('temperature_outside', value=send_to_kafka)
     sleep(10)
 
