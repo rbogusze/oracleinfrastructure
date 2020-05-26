@@ -33,8 +33,7 @@ while True:
     w = observation.get_weather()
     temp_outside = float(w.get_temperature('celsius')['temp'])
     send_to_kafka = {'send_time' : datetime.now().replace(microsecond=0).isoformat(), 'reference_time' : w.get_reference_time(timeformat='iso'), 'temp_outside' : str(temp_outside)}
-    print("Sending to kafka topic: temperature_outside, value: {}").format(send_to_kafka)
-    print(w)
+    #print("Sending to kafka topic: temperature_outside, value: {}").format(send_to_kafka)
     producer.send('temperature_outside', value=send_to_kafka)
     sleep(10)
 

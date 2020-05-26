@@ -25,8 +25,7 @@ print("Read from config file \n\t kafka_topic: {} \n\t open_max: {}").format(kaf
 consumer = KafkaConsumer(kafka_topic,
                          bootstrap_servers=['sensu:9092'],
                          auto_offset_reset='latest',
-                         enable_auto_commit=True,
-                         group_id='lufcik_decision_maker',
+                         enable_auto_commit=False
                          )
 
 def switch_on(x,y):
