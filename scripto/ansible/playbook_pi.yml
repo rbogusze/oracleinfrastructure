@@ -265,7 +265,7 @@
 
    - name: Setup sensors_gathering. Install required pip packages
      pip:
-       name: cassandra-driver,kafka-python
+       name: cassandra-driver,kafka-python,mysql-connector
      tags:
       - sensors_gathering
 
