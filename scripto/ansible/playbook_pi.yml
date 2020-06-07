@@ -334,6 +334,71 @@
      tags:
       - sensors_gathering
 
+   - name: Setup temperature_outside service. create service file
+     copy:
+       dest: /lib/systemd/system/temperature_outside.service
+       content: |
+         [Unit]
+         Description=Remi temperature_outside
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/home/pi/scripto/python/temperature
+         ExecStart=/usr/bin/python outside_temperature.py
+         Restart=always
+         RestartSec=60
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - temperature_outside
+
+   - name: Setup lufcik_action service. create service file
+     copy:
+       dest: /lib/systemd/system/lufcik_action.service
+       content: |
+         [Unit]
+         Description=Remi lufcik_action
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/home/pi/scripto/python/temperature
+         ExecStart=/usr/bin/python lufcik_action.py
+         Restart=always
+         RestartSec=60
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - lufcik_action
+
+
+   - name: Setup lufcik_decision_maker service. create service file
+     copy:
+       dest: /lib/systemd/system/lufcik_decision_maker.service
+       content: |
+         [Unit]
+         Description=Remi lufcik_decision_maker
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/home/pi/scripto/python/temperature
+         ExecStart=/usr/bin/python lufcik_decision_maker.py
+         Restart=always
+         RestartSec=60
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - lufcik_decision_maker
+
+
+
+
+
 
 
 
@@ -350,6 +415,29 @@
        mode: 0644
      tags:
       - sensors_gathering
+
+   - name: Setup temperature_outside service. create service file permissions
+     file:
+       path: /lib/systemd/system/temperature_outside.service
+       mode: 0644
+     tags:
+      - temperature_outside
+
+
+   - name: Setup lufcik_action service. create service file permissions
+     file:
+       path: /lib/systemd/system/lufcik_action.service
+       mode: 0644
+     tags:
+      - lufcik_action
+
+   - name: Setup lufcik_decision_maker service. create service file permissions
+     file:
+       path: /lib/systemd/system/lufcik_decision_maker.service
+       mode: 0644
+     tags:
+      - lufcik_decision_maker
+
 
 
 
@@ -368,6 +456,30 @@
        enabled: yes
      tags:
       - sensors_gathering
+
+   - name: Setup temperature_outside service. start service
+     systemd:
+       name: temperature_outside.service
+       state: started
+       enabled: yes
+     tags:
+      - temperature_outside
+
+   - name: Setup lufcik_action service. start service
+     systemd:
+       name: lufcik_action.service
+       state: started
+       enabled: yes
+     tags:
+      - lufcik_action
+
+   - name: Setup lufcik_decision_maker service. start service
+     systemd:
+       name: lufcik_decision_maker.service
+       state: started
+       enabled: yes
+     tags:
+      - lufcik_decision_maker
 
 
 
