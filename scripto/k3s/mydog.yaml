@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mydog-nginx
+  labels:
+    app: mydog-nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mydog-nginx
+  template:
+    metadata:
+      labels:
+        app: mydog-nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-volume
+        configMap:
+          name: mydog-html
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mydog-nginx-service
+spec:
+  selector:
+    app: mydog-nginx
+  ports:
+    - protocol: TCP
+      port: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: mydog-nginx-ingress
+  annotations:
+    kubernetes.io/ingress.class: "traefik"
+    traefik.frontend.rule.type: PathPrefixStrip
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /mydog
+        backend:
+          serviceName: mydog-nginx-service
+          servicePort: 80
