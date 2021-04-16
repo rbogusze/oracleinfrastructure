@@ -27,7 +27,8 @@ if args.backend:
     logging.debug('Backend option provided: %s', args.backend)
 if args.frequency:
     logging.debug('frequency option provided: %s', args.frequency)
-    mysql_commit_frequency = args.frequency # 0 means commit every insert
+    mysql_commit_frequency = int(args.frequency) # 0 means commit every insert
+    postgres_commit_frequency = int(args.frequency) # 0 means commit every insert
 if args.broker:
     logging.debug('broker option provided: %s', args.broker)
     broker = args.broker
@@ -54,6 +55,7 @@ if args.test_time == 0:
 
 #Set backend
 backend_mysql = False
+backend_postgres = False
 backend_cassandra = False
 backend_kafka = False
 backend_awsiot = False
@@ -61,6 +63,9 @@ backend_mqtt = False
 
 if args.backend == "mysql":
     backend_mysql = True
+    
+if args.backend == "postgres":
+    backend_postgres = True
     
 if args.backend == "cassandra":
     backend_cassandra = True
@@ -101,6 +106,15 @@ if backend_mysql:
      charset='ascii'
    )
    cursor = cnx.cursor()
+
+# $ sudo pip install psycopg2
+if backend_postgres:
+   import psycopg2
+   conn = psycopg2.connect(
+       host="localhost",
+       database="temperature",
+       user="pi",
+       password="pi")
 
 
 if backend_cassandra:
@@ -272,6 +286,18 @@ while True:
               if total_trans%mysql_commit_frequency == 0:
                  logging.debug("Total trans: %s and it is time to commit." % str(total_trans))
                  cnx.commit()
+
+#WIP
+        if backend_postgres:
+           cur = conn.cursor()
+           cur.execute("insert into reading values ('pppi',now(),'testing123', 23.5);")
+           if postgres_commit_frequency == 0:
+              conn.commit()
+           else:
+              # commit every postgres_commit_frequency
+              if total_trans%postgres_commit_frequency == 0:
+                 logging.debug("Total trans: %s and it is time to commit." % str(total_trans))
+                 conn.commit()
 
 
    
