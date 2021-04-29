@@ -113,6 +113,7 @@
        creates : /opt/jdk1.8.0_191
      tags:
       - cassandra
+      - jdk
 
    - name: Setup cassandra node, 2. copy cassandra binaries
      unarchive:
@@ -129,6 +130,7 @@
        path: /opt/jdk1.8.0_191/bin/javac
      tags:
       - cassandra
+      - jdk
 
 
    - name: Setup cassandra node, 4. mv /opt/apache-cassandra-2.2.13 /opt/cassandra
@@ -509,3 +511,25 @@
      when: svnrepo.changed
      tags:
       - sensors_gathering
+
+   - name: k8s - Install required packages
+     apt:
+       pkg:
+       - vim
+       - python3
+     tags:
+      - k8s
+
+   - name: k8s - Install microk8s with snap
+     snap:
+       name: microk8s 
+       classic: yes
+     tags:
+      - k8s
+
+   - name: k8s - Fixing "https://github.com/ubuntu/microk8s/issues/728" DO THIS MANUALLY
+     shell: cat /boot/firmware/cmdline.txt
+     register: cmdline
+     tags:
+      - k8s1
+
