@@ -83,6 +83,6 @@ for x in range(0, len(playlist_dict['song_title'])):
 #     print(type(song_offset_start))
     
     #download from kafka
-    save_file_from_kafka(playlist_seq=playlist_seq, file_name=str(x)+"_"+song_title,offset_start=song_offset_start, offset_end=song_offset_end)
+    save_file_from_kafka(playlist_seq=playlist_seq, file_name=str(x).zfill(2)+"_"+song_title,offset_start=song_offset_start, offset_end=song_offset_end)
     #break
 
