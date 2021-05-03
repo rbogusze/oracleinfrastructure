@@ -32,9 +32,9 @@ cursor.close()
 # pick only some
 while True:
     df = dataframe
-    df1 = df[df.song_class == "intro"].sample(n=2)
-    df2 = df[df.song_class == "main"].sample(n=7)
-    df3 = df[df.song_class == "finish"].sample(n=2)
+    df1 = df[df.song_class == "intro"].sample(n=2).sort_values("song_id")
+    df2 = df[df.song_class == "main"].sample(n=7).sort_values("song_id")
+    df3 = df[df.song_class == "finish"].sample(n=2).sort_values("song_id")
 
     dff1 = pd.concat([df1,df2,df3])
     dff2 = dff1.drop(columns=['song_added','song_notes'])
