@@ -30,5 +30,6 @@ do
   free -m >> $LOG
   $REDISCLI info replication >> $LOG
   $REDISCLI slowlog get 50 >> $LOG
+  $REDISCLI slowlog reset >> $LOG
   sleep 10
 done
