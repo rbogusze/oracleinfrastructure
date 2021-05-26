@@ -19,6 +19,7 @@ cat $FILE_SLOWLOG | grep "$DATE_TO_GREP" > /tmp/slowlog.tmp1
 # read from dates file two lines
 while read -r DATE1 && read -r DATE2
 do 
-  echo "DATE1=$DATE1 and DATE2=$DATE2"; 
-  sed -n "/$DATE1/,/$DATE2/p" $FILE_SLOWLOG | wc -l
+  #echo "DATE1=$DATE1 and DATE2=$DATE2"; 
+  LINES_BETWEEN=`sed -n "/$DATE1/,/$DATE2/p" $FILE_SLOWLOG | wc -l`
+  echo "$DATE1 | $LINES_BETWEEN"
 done </tmp/slowlog.tmp1
