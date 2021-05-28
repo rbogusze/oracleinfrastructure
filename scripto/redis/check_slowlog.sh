@@ -29,7 +29,8 @@ do
   top -b -n 2 -d 0.2 -p $REDIS_PID | tail -2 >> $LOG
   free -m >> $LOG
   $REDISCLI info replication >> $LOG
-  $REDISCLI slowlog get 50 >> $LOG
+  $REDISCLI info stats >> $LOG
+  $REDISCLI slowlog get >> $LOG
   $REDISCLI slowlog reset >> $LOG
-  sleep 10
+  sleep 12
 done
