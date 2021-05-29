@@ -43,7 +43,7 @@ if args.dht:
     dht_sensors = args.dht
 if args.sleep_time:
     logging.debug('sleep_time option provided: %s', args.sleep_time)
-    sleep_time = args.sleep_time
+    sleep_time = float(args.sleep_time)
 if args.test_time == 0:
     logging.debug('test_time option provided: %s', args.test_time)
     test_time = args.test_time
@@ -72,6 +72,10 @@ if args.backend == "cassandra":
     
 if args.backend == "kafka":
     backend_kafka = True
+    logging.debug("Checking if broker is provided")
+    if (broker == "none"):
+        logging.error("With Kafka backend you need to provide --broker parameter. Exiting.")
+        exit()
     
 if args.backend == "awsiot":
     backend_awsiot = True
@@ -131,7 +135,7 @@ if backend_kafka:
    from kafka import KafkaProducer
    from kafka.errors import KafkaError
 
-   producer = KafkaProducer(bootstrap_servers=['sensu:9092'],
+   producer = KafkaProducer(bootstrap_servers=[broker],
                             acks=-1,
                             value_serializer=lambda x: 
                             dumps(x).encode('utf-8'))
