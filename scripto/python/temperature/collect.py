@@ -268,7 +268,7 @@ while True:
           logging.info("Storing for: %s value: %s" % (location, h1000))
           temp_dict[location] = int(h1000)
        else:
-          logging.info("No value read. Removing from temp_dict for: %s " % (location))
+          logging.debug("No value read. Removing from temp_dict for: %s " % (location))
           temp_dict.pop(location, None)
     
 
