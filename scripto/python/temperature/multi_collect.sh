@@ -12,7 +12,9 @@ V_EXECUTE=`cat /proc/cpuinfo | grep ^processor | wc -l`
 
 # multiply by 2, so that each CPU thread has 2 collect scripts running
 V_EXECUTE=`expr $V_EXECUTE + $V_EXECUTE`
-V_EXECUTE=80
+
+# or overwrite if you know better
+# V_EXECUTE=8
 
 V_EXECUTE_COUNT=0
 while [ ${V_EXECUTE_COUNT} -lt ${V_EXECUTE} ]
