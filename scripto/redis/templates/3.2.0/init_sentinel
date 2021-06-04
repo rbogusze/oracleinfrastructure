@@ -1,0 +1,30 @@
+#!/bin/bash
+# Start/Stop/restart script for Redis Sentinel
+
+NAME=`basename ${0}`
+EXEC=/usr/local/bin/redis-server
+PIDFILE="/var/run/${NAME}.pid"
+CONF="/etc/redis/${NAME}.conf"
+
+PID=`cat $PIDFILE 2> /dev/null`
+case "$1" in
+     start)
+         echo "Starting $NAME ..."
+         touch $PIDFILE
+         exec $EXEC $CONF --sentinel --pidfile $PIDFILE
+         ;;
+     stop)
+         echo "Stopping $NAME PID: $PID ..."
+         kill $PID
+         ;;
+     restart)
+         echo "Restarting $NAME ..."
+         $0 stop
+         sleep 2
+         $0 start
+         ;;
+     *)
+         echo "Usage $0 {start|stop|restart}"
+         ;;
+esac
+
