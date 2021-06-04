@@ -4,8 +4,8 @@
 # as it does use of the /proc filesystem.
 
 REDISPORT=R_PORT
-EXEC=/usr/local/bin/redis_${R_VERSION}/redis-server
-CLIEXEC=/usr/local/bin/redis_${R_VERSION}/redis-cli
+EXEC=/usr/local/bin/redis_R_VERSION/redis-server
+CLIEXEC=/usr/local/bin/redis_R_VERSION/redis-cli
 PASS='R_PASS'
 PIDFILE=/var/run/redis_R_VERSION_R_MASTER_NAME.pid
 CONF="/etc/redis/R_VERSION_R_MASTER_NAME/R_PORT.conf"
