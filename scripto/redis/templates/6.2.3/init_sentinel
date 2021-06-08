@@ -1,5 +1,6 @@
 #!/bin/bash
-# Start/Stop/restart script for Redis Sentinel
+# chkconfig: 345 20 80
+# description: Start/Stop/restart script for Redis Sentinel
 
 EXEC=/usr/local/bin/redis_R_VERSION/redis-server
 PIDFILE="/var/run/sentinel_R_VERSION_R_MASTER_NAME.pid"
