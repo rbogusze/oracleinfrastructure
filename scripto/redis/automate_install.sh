@@ -71,6 +71,9 @@ check_variable "$R_SHUTDOWN_COMMAND"
 check_variable "$R_MASTER_IP"
 check_variable "$R_MAXMEMORY"
 
+msgi "Prepare etc directory"
+run_command_e "sudo mkdir -p /etc/redis/${R_VERSION}_${R_MASTER_NAME}"
+
 msgi "Populate Redis configuration from template"
 run_command_e "sed -e \"s/R_MASTER_NAME/$R_MASTER_NAME/g\" -e \"s/R_PORT/$R_PORT/g\" -e \"s/R_SENTINEL_PORT/$R_SENTINEL_PORT/g\" -e \"s/R_VERSION/$R_VERSION/g\" -e \"s/R_PASS/$R_PASS/g\" -e \"s/R_SHUTDOWN_COMMAND/$R_SHUTDOWN_COMMAND/g\" -e \"s/R_MAXMEMORY/$R_MAXMEMORY/g\" ~/sre-bigdata/redis/templates/${R_VERSION}/redis.conf | sudo tee /etc/redis/${R_VERSION}_${R_MASTER_NAME}/${R_PORT}.conf"
 

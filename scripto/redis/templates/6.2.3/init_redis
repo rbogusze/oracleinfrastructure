@@ -16,7 +16,7 @@ case "$1" in
         then
                 echo "$PIDFILE exists, process is already running or crashed"
         else
-                echo "Starting Redis server..."
+                echo "Starting Redis server R_VERSION name R_MASTER_NAME on port R_PORT ..."
                 $EXEC $CONF
         fi
         ;;
@@ -26,7 +26,7 @@ case "$1" in
                 echo "$PIDFILE does not exist, process is not running"
         else
                 PID=$(cat $PIDFILE)
-                echo "Stopping ..."
+                echo "Stopping Redis server R_VERSION name R_MASTER_NAME on port R_PORT ..."
                 $CLIEXEC -a $PASS -p $REDISPORT R_SHUTDOWN_COMMAND
                 while [ -x /proc/${PID} ]
                 do
