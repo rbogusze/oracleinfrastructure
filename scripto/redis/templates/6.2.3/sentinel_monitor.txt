@@ -1,0 +1,5 @@
+sentinel monitor R_MASTER_NAME R_MASTER_IP R_PORT 2
+sentinel auth-pass R_MASTER_NAME R_PASS
+sentinel down-after-milliseconds R_MASTER_NAME 30000
+sentinel parallel-syncs R_MASTER_NAME 1
+sentinel failover-timeout R_MASTER_NAME 180000
