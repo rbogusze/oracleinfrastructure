@@ -3,22 +3,22 @@
 # description: Start/Stop/restart script for Redis Sentinel
 
 EXEC=/usr/local/bin/redis_R_VERSION/redis-server
-PIDFILE="/var/run/sentinel_R_VERSION_R_MASTER_NAME.pid"
-CONF="/etc/redis/R_VERSION_R_MASTER_NAME/sentinel_R_SENTINEL_PORT.conf"
+PIDFILE="/var/run/sentinel_R_SENTINEL_UNIQUE_STR.pid"
+CONF="/etc/redis/sentinel_R_SENTINEL_UNIQUE_STR/sentinel_R_SENTINEL_PORT.conf"
 
 PID=`cat $PIDFILE 2> /dev/null`
 case "$1" in
      start)
-         echo "Starting sentinel R_VERSION_R_MASTER_NAME ..."
+         echo "Starting sentinel R_SENTINEL_UNIQUE_STR ..."
          touch $PIDFILE
          exec $EXEC $CONF --sentinel --pidfile $PIDFILE
          ;;
      stop)
-         echo "Stopping sentinel R_VERSION_R_MASTER_NAME PID: $PID ..."
+         echo "Stopping sentinel R_SENTINEL_UNIQUE_STR PID: $PID ..."
          kill $PID
          ;;
      restart)
-         echo "Restarting sentinel R_VERSION_R_MASTER_NAME ..."
+         echo "Restarting sentinel R_SENTINEL_UNIQUE_STR ..."
          $0 stop
          sleep 2
          $0 start
