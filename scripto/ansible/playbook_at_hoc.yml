@@ -1,0 +1,35 @@
+- name: Setup basic actions on computers at home
+  hosts: all
+
+  vars_files:
+  - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
+
+# if below become lines are commented the commands are executed as the user used for login
+#  become: yes
+#  become_user: root
+  tasks:
+   - name: Install required packages
+     apt:
+       name: vim,subversion
+       state: present
+     tags:
+      - scripto
+
+
+   - name: Checkout scripto repository. It will do the update if repo exists.
+     subversion:
+       repo: https://github.com/rbogusze/oracleinfrastructure/trunk/scripto
+       dest: /home/pi/scripto
+     register: svnrepo
+     tags:
+      - scripto
+
+
+   - name: Execute ad-hoc script once
+     command: ./run_me.sh
+     args:
+       chdir: /home/pi/scripto/storm
+       # commenting below line makes the script to be executed every time the playbook is run
+       creates: /tmp/ala.txt
+     tags:
+      - ad-hoc
