@@ -14,6 +14,68 @@
      tags:
       - update
 
+  
+   - name: Make sure .vimrc disables visual mode
+     lineinfile:
+       dest: /home/pi/.vimrc
+       line: "set mouse-=a"
+       state: present
+       create: yes
+     tags:
+      - update
+
+   - name: Make sure .vimrc enables syntax highlighting
+     lineinfile:
+       dest: /home/pi/.vimrc
+       line: "syntax on"
+       state: present
+       create: yes
+     tags:
+      - update
+
+   - name: Make sure .vimrc has proper owner:group
+     file:
+       path: /home/pi/.vimrc
+       owner: pi
+       group: pi
+       mode: 0644
+     tags:
+      - update
+
+   - name: Make sure root/.vimrc disables visual mode
+     lineinfile:
+       dest: /root/.vimrc
+       line: "set mouse-=a"
+       state: present
+       create: yes
+     tags:
+      - update
+
+   - name: Make sure root/.vimrc enables syntax highlighting
+     lineinfile:
+       dest: /root/.vimrc
+       line: "syntax on"
+       state: present
+       create: yes
+     tags:
+      - update
+
+   - name: Fix locale Cannot set LC_CTYPE to default locale No such file or directory
+     blockinfile:
+       path: /home/pi/.profile
+       block: |
+         export LANGUAGE=en_GB.UTF-8
+         export LANG=en_GB.UTF-8
+         export LC_ALL=en_GB.UTF-8
+     tags:
+      - update
+
+   - name: Set CEST timezone
+     ansible.builtin.shell: timedatectl set-timezone Europe/Warsaw
+     tags:
+      - update
+
+
    - name: Remove non-essential packages to save on space
      apt:
        name: emacs,samba-common,scratch,minecraft-pi,manpages,manpages-dev,gnome-user-guide,rpd-wallpaper,xserver-xorg,wolfram-engine,libreoffice,yelp
@@ -278,6 +340,7 @@
      register: svnrepo
      tags:
       - sensors_gathering
+      - scripto
 
    - name: Setup sensors_gathering. Checkout git repository for DHT-22 temp/humid sensor to work
      git:
