@@ -596,3 +596,30 @@
      tags:
       - k8s1
 
+   - name: Make sure /etc/hosts has the same entries on all hosts
+     lineinfile:
+       dest: /etc/hosts
+       line: '{{ item }}'
+     with_items:
+       - '192.168.1.152 producer2' 
+       - '192.168.1.153 producer3' 
+       - '192.168.1.154 producer4' 
+       - '192.168.1.155 producer5' 
+       - '192.168.1.171 red01' 
+       - '192.168.1.172 red02' 
+       - '192.168.1.173 red03' 
+       - '192.168.1.161 consumer1' 
+       - '192.168.1.162 consumer2' 
+       - '192.168.1.163 consumer3' 
+       - '192.168.1.164 consumer4' 
+       - '192.168.1.104 monitoring' 
+     tags:
+      - hosts_unity
+
+   - name: Make sure /etc/hosts has the same entries on all hosts, remove 127.0.1.1 line
+     lineinfile:
+       dest: /etc/hosts
+       regexp: '^127\.0\.1\.1'
+       state: absent
+     tags:
+      - hosts_unity
