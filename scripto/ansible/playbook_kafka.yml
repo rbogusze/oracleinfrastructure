@@ -27,6 +27,7 @@
        src: /opt/kafka_2.12-1.1.1.tgz
        dest: /opt
        remote_src: yes
+       creates: /opt/kafka_2.12-1.1.1
      tags:
       - kafka_1.1.1
 
