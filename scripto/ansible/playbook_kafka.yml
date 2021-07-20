@@ -1,0 +1,106 @@
+- name: Setup basic actions on computers at home
+  hosts: all
+
+  vars_files:
+  - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
+
+  become: yes
+  become_user: root
+  tasks:
+   - name: Install required packages
+     apt:
+       name: vim
+       state: present
+     tags:
+      - update
+
+   - name: Download kafka_2.12-1.1.1.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/1.1.1/kafka_2.12-1.1.1.tgz
+       dest: /opt/kafka_2.12-1.1.1.tgz
+       checksum: md5:29c20027940c5c6f83fffd393df78f09
+     tags:
+      - kafka_1.1.1
+
+   - name: Extract kafka_2.12-1.1.1.tgz into /opt
+     unarchive:
+       src: /opt/kafka_2.12-1.1.1.tgz
+       dest: /opt
+       remote_src: yes
+     tags:
+      - kafka_1.1.1
+
+   - name: Modify server.properties listeners=PLAINTEXT
+     replace:
+       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       regexp: '^#listeners=PLAINTEXT'
+       replace: 'listeners=PLAINTEXT'
+     tags:
+      - kafka_1.1.1
+
+   - name: Modify server.properties log.dirs
+     replace:
+       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       regexp: '^log.dirs=/tmp/kafka-logs'
+       replace: 'log.dirs=/opt/kafka-1.1.1-data'
+     tags:
+      - kafka_1.1.1
+
+   - name: Creates /opt/kafka-1.1.1-data directory
+     file:
+       path: /opt/kafka-1.1.1-data
+       state: directory
+     tags:
+      - kafka_1.1.1
+
+   - name: Modify server.properties zookeeper.connect
+     replace:
+       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       regexp: '^zookeeper.connect=localhost:2181'
+       replace: 'zookeeper.connect=consumer1:2181'
+     tags:
+      - kafka_1.1.1
+
+   - name: Modify server.properties broker.id and use last ip octet
+     replace:
+       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       regexp: '^broker.id=0'
+       replace: 'broker.id={{ ansible_eth0.ipv4.address.split(".")[-1] }}'
+     tags:
+      - kafka_1.1.1
+
+   - name: Run Kafka 1.1.1 as a service
+     copy:
+       dest: /etc/systemd/system/kafka111.service
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+
+         [Service]
+         Type=simple
+         User=root
+         ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
+         ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
+         Restart=on-abnormal
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - kafka_1.1.1
+
+   - name: Creates /opt/kafka-1.1.1-data directory
+     file:
+       path: /opt/kafka_2.12-1.1.1/logs
+       state: directory
+     tags:
+      - kafka_1.1.1
+
+   - name: Start Kafka 1.1.1
+     service:
+       name: kafka111.service
+       state: started
+       enabled: yes
+     tags:
+      - kafka_1.1.1
+
