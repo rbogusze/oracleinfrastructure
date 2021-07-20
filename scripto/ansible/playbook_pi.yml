@@ -751,4 +751,21 @@
       - logstash
       - logstash_opt
 
+   - name: Disable temperature gathering service
+     service:
+       name: temperature.service
+       state: stopped
+       enabled: no
+     tags:
+      - disable_temp
+
+   - name: Disable temperature gathering service
+     service:
+       name: dht22.service
+       state: stopped
+       enabled: no
+     tags:
+      - disable_temp
+
+
 
