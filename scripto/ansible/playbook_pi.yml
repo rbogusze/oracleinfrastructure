@@ -623,3 +623,132 @@
        state: absent
      tags:
       - hosts_unity
+
+   - name: Logstash - Download logstash-5.4.2.deb
+     get_url: 
+       url: https://artifacts.elastic.co/downloads/logstash/logstash-5.4.2.deb
+       dest: /opt/logstash-5.4.2.deb
+       checksum: md5:16307bfde7929bea4086d108f5e45b8b
+     tags:
+      - logstash
+
+
+   - name: Logstash - Install logstash-5.4.2.deb
+     apt:
+       deb: /opt/logstash-5.4.2.deb
+     tags:
+      - logstash
+
+   - name: Logstash - Install ant,texinfo
+     apt:
+       name: ant,texinfo,git
+       state: present
+     tags:
+      - logstash
+
+   - name: Logstash - checkout jffi
+     git:
+       repo: 'https://github.com/jnr/jffi.git'
+       dest: /opt/jffi
+       update: no
+     tags:
+      - logstash
+
+   - name: Logstash - run ant jar
+     command: ant jar
+     args:
+       chdir: /opt/jffi
+       creates: /opt/jffi/build/jni/libjffi-1.2.so
+     tags:
+      - logstash
+
+
+   - name: Logstash - copy libjffi-1.2.so
+     ansible.builtin.copy:
+       src: /opt/jffi/build/jni/libjffi-1.2.so
+       dest: /usr/share/logstash/vendor/jruby/lib/jni/arm-Linux
+       owner: root
+       group: root
+       mode: '0755'
+       backup: yes
+       remote_src: yes
+     tags:
+      - logstash
+
+   - name: Logstash - decrease JVM memory
+     ansible.builtin.replace:
+       path: /etc/logstash/jvm.options
+       regexp: '-Xms256m'
+       replace: '-Xms64m'
+       backup: yes
+     tags:
+      - logstash
+
+
+   - name: Logstash - decrease JVM memory
+     ansible.builtin.replace:
+       path: /etc/logstash/jvm.options
+       regexp: '-Xmx1g'
+       replace: '-Xmx64m'
+       backup: yes
+     tags:
+      - logstash
+
+   - name: Logstash - /var/log/*.log to logstash
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/logstash/var_log_to_logstash.conf
+       dest: /etc/logstash/conf.d/var_log_to_logstash.conf
+       owner: root
+       group: root
+       mode: '0644'
+     register: logstash
+     tags:
+      - logstash
+
+
+   - name: Logstash - /var/log/*.log to logstash, general filter output
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/logstash/filter_output.conf
+       dest: /etc/logstash/conf.d/filter_output.conf
+       owner: root
+       group: root
+       mode: '0644'
+     register: logstash
+     tags:
+      - logstash
+
+   - name: Logstash - add logstash user to adm group
+     ansible.builtin.user:
+       name: logstash
+       group: logstash
+       groups: root,adm
+     register: logstash
+     tags:
+      - logstash
+   
+
+
+   - name: Logstash - opt log to logstash
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/logstash/opt_log_to_logstash.conf
+       dest: /etc/logstash/conf.d/opt_log_to_logstash.conf
+       owner: root
+       group: root
+       mode: '0644'
+     register: logstash
+     tags:
+      - logstash
+      - logstash_opt
+     
+    
+   - name: Logstash - restart service if conf has changed
+     service:
+       name: logstash.service
+       state: restarted
+       enabled: yes
+     when: logstash.changed
+     tags:
+      - logstash
+      - logstash_opt
+
+
