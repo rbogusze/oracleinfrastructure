@@ -78,10 +78,10 @@
      tags:
       - redis-dir-bin
 
-   - name: Ansible Template Example
+   - name: Create env file
      template:
        src: ~/sre-bigdata/redis/ansible/templates/redis_env.j2
-       dest: ~/redis_dcim_test.env
+       dest: ~/redis_{{ R_MASTER_NAME }}.env
        backup: yes
      tags:
       - tmp2
