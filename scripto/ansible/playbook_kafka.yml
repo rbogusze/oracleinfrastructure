@@ -47,6 +47,21 @@
      tags:
       - kafka_1.1.1
 
+   - name: Modify server.properties add couple non default parameters
+     blockinfile:
+       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       block: |
+         delete.topic.enable=true
+         num.partitions=8
+         default.replication.factor=3
+         log.retention.hours=168
+         zookeeper.connection.timeout.ms=6000
+         auto.create.topics.enable=false
+         offsets.topic.replication.factor=3
+     tags:
+      - kafka_1.1.1
+      - tmp
+
    - name: Creates /opt/kafka-1.1.1-data directory
      file:
        path: /opt/kafka-1.1.1-data
@@ -81,6 +96,7 @@
          [Service]
          Type=simple
          User=root
+         Environment="KAFKA_HEAP_OPTS=-Xmx256M -Xms128M"
          ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
          Restart=on-abnormal
