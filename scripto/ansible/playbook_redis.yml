@@ -7,6 +7,7 @@
   become: yes
   become_user: root
   tasks:
+
    - name: Create redis_compile directory
      file:
        path: ~/redis_compile
@@ -35,15 +36,53 @@
      stat:
        path: ~/redis_compile/redis-6.2.3/src/redis-cli
      register: compiled
+     tags:
+      - redis-compile
 
    - name: Run make on ~/redis_compile/redis-6.2.3
      make:
        chdir: ~/redis_compile/redis-6.2.3
      when: compiled.stat.exists == False
      register: just_compiled
+     tags:
+      - redis-compile
 
    - name: Run make test on ~/redis_compile/redis-6.2.3
      make:
        chdir: ~/redis_compile/redis-6.2.3
        target: test
      when: just_compiled.changed
+     tags:
+      - redis-compile
+
+   - name: Create dir for binaries directory
+     file:
+       path: /usr/local/bin/redis_6.2.3
+       state: directory
+     tags:
+      - redis-dir-bin
+
+   - name: Copy binaries
+     ansible.builtin.copy:
+       src: '{{ item }}'
+       dest: /usr/local/bin/redis_6.2.3
+       owner: root
+       group: root
+       mode: '0755'
+       backup: yes
+       remote_src: yes
+     loop:
+       - ~/redis_compile/redis-6.2.3/src/redis-cli
+       - ~/redis_compile/redis-6.2.3/src/redis-server
+       - ~/redis_compile/redis-6.2.3/src/redis-sentinel
+     tags:
+      - redis-dir-bin
+
+   - name: Ansible Template Example
+     template:
+       src: ~/sre-bigdata/redis/ansible/templates/redis_env.j2
+       dest: ~/redis_dcim_test.env
+       backup: yes
+     tags:
+      - tmp2
+
