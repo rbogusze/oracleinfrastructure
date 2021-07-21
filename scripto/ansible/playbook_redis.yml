@@ -1,0 +1,49 @@
+- name: Setup basic actions on computers at home
+  hosts: all
+
+  vars_files:
+  - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
+
+  become: yes
+  become_user: root
+  tasks:
+   - name: Create redis_compile directory
+     file:
+       path: ~/redis_compile
+       state: directory
+     tags:
+      - redis-dir
+
+   - name: Download redis-6.2.3.tar.gz
+     get_url:
+       url: https://download.redis.io/releases/redis-6.2.3.tar.gz
+       dest: ~/redis_compile/redis-6.2.3.tar.gz
+       checksum: md5:15d090d65986bf2dc91223fec8da5627
+     tags:
+      - redis-download
+
+   - name: Extract redis-6.2.3.tar.gz
+     unarchive:
+       src: ~/redis_compile/redis-6.2.3.tar.gz
+       dest: ~/redis_compile
+       remote_src: yes
+       creates: ~/redis_compile/redis-6.2.3
+     tags:
+      - redis-extract
+
+   - name: Check if make was already run
+     stat:
+       path: ~/redis_compile/redis-6.2.3/src/redis-cli
+     register: compiled
+
+   - name: Run make on ~/redis_compile/redis-6.2.3
+     make:
+       chdir: ~/redis_compile/redis-6.2.3
+     when: compiled.stat.exists == False
+     register: just_compiled
+
+   - name: Run make test on ~/redis_compile/redis-6.2.3
+     make:
+       chdir: ~/redis_compile/redis-6.2.3
+       target: test
+     when: just_compiled.changed
