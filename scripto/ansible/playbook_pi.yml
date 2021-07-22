@@ -740,6 +740,18 @@
       - logstash
       - logstash_opt
      
+   - name: Logstash - apps log to logstash
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/logstash/apps_log_to_logstash.conf
+       dest: /etc/logstash/conf.d/apps_log_to_logstash.conf
+       owner: root
+       group: root
+       mode: '0644'
+     register: logstash
+     tags:
+      - logstash
+      - logstash_apps
+     
     
    - name: Logstash - restart service if conf has changed
      service:
