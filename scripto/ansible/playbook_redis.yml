@@ -204,7 +204,7 @@
          tags:
           - redis-apps-dir
     
-       - name: Enable services for automatic start
+       - name: Enable redis_{{ R_PORT }} service for automatic start
          service:
            name: redis_{{ R_PORT }}
            state: started
@@ -293,7 +293,7 @@
          tags:
           - sentinel-debian-init-conf
     
-       - name: Enable Sentinel service for automatic start
+       - name: Enable Sentinel sentinel_{{ R_SENTINEL_UNIQUE_STR }} service for automatic start
          service:
            name: sentinel_{{ R_SENTINEL_UNIQUE_STR }}
            state: started
