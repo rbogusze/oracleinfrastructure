@@ -11,6 +11,32 @@
 # setup_common
    - name: Common block that installs Redis binaries, to be used both on Redis and Sentinel hosts
      block:
+
+       - name: Check if port {{ R_PORT }} is open. If it is, let's fail and investigate manually.
+         shell: ss -ltpn | grep :{{ R_PORT }} | wc -l
+         register: open_redis_port
+
+       - debug: msg="{{ open_redis_port.stdout }}"
+       
+       - name: Fail playbook execution if port {{ R_PORT }} is open
+         fail:
+           msg: Port {{ R_PORT }} is open. Failing, please investigate manually.
+         when: open_redis_port.stdout == "2" or open_redis_port.stdout == "1"
+
+
+       - name: Check if port {{ R_SENTINEL_PORT }} is open. If it is, let's fail and investigate manually.
+         shell: ss -ltpn | grep :{{ R_SENTINEL_PORT }} | wc -l
+         register: open_redis_port
+
+       - debug: msg="{{ open_redis_port.stdout }}"
+       
+       - name: Fail playbook execution if port {{ R_SENTINEL_PORT }} is open
+         fail:
+           msg: Port {{ R_SENTINEL_PORT }} is open. Failing, please investigate manually.
+         when: open_redis_port.stdout == "2" or open_redis_port.stdout == "1"
+
+
+
        - name: Install required packages on Debian
          apt:
            name: tcl
@@ -109,6 +135,20 @@
 # setup_redis
    - name: Setup Redis
      block:
+
+       - name: Check if port {{ R_PORT }} is open. If it is, let's fail and investigate manually.
+         shell: ss -ltpn | grep :{{ R_PORT }} | wc -l
+         register: open_redis_port
+
+       - debug: msg="{{ open_redis_port.stdout }}"
+       
+       - name: Fail playbook execution if port {{ R_PORT }} is open
+         fail:
+           msg: Port {{ R_PORT }} is open. Failing, please investigate manually.
+         when: open_redis_port.stdout == "2" or open_redis_port.stdout == "1"
+
+
+
        - name: Create /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }} directory
          file:
            path: /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}
@@ -178,6 +218,18 @@
     
    - name: Setup Sentinel
      block:
+
+       - name: Check if port {{ R_SENTINEL_PORT }} is open. If it is, let's fail and investigate manually.
+         shell: ss -ltpn | grep :{{ R_SENTINEL_PORT }} | wc -l
+         register: open_redis_port
+
+       - debug: msg="{{ open_redis_port.stdout }}"
+       
+       - name: Fail playbook execution if port {{ R_SENTINEL_PORT }} is open
+         fail:
+           msg: Port {{ R_SENTINEL_PORT }} is open. Failing, please investigate manually.
+         when: open_redis_port.stdout == "2" or open_redis_port.stdout == "1"
+
        - name: Create /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
          file:
            path: /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
