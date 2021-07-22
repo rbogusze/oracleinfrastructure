@@ -124,22 +124,31 @@
          tags:
           - redis-etc-conf
     
-       - name: Create Redis init from template
+       - name: Create Redis init from template (for Redhat)
          template:
            src: ~/sre-bigdata/redis/ansible/templates/6.2.3/redhat_init_redis.j2
            dest: /etc/init.d/redis_{{ R_PORT }}
            backup: yes
          when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
-          - redis-init
+          - redis-init-redhat
     
-       - name: Make Redis init executable
+       - name: Make Redis init executable (for Redhat)
          ansible.builtin.file:
            path: /etc/init.d/redis_{{ R_PORT }}
            mode: '0755'
          when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
-          - redis-init
+          - redis-init-redhat
+
+       - name: Create Redis init from template (for Debian)
+         template:
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/debian_init_redis.j2
+           dest: /etc/systemd/system/redis_{{ R_PORT }}.service
+           backup: yes
+         when: ansible_distribution == 'Debian' 
+         tags:
+          - redis-init-debian
     
        - name: Create /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/log directory
          file:
@@ -160,7 +169,6 @@
            name: redis_{{ R_PORT }}
            state: started
            enabled: yes
-         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
           - redis-autostart
      tags:
@@ -207,29 +215,37 @@
          tags:
           - sentinel-etc-conf
 
-       - name: Create Sentinel init.d start/stop script from template
+       - name: Create Sentinel init.d start/stop script from template (for Redhat)
          template:
            src: ~/sre-bigdata/redis/ansible/templates/6.2.3/redhat_init_sentinel.j2
            dest: /etc/init.d/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
            backup: yes
          when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
-          - sentinel-init-conf
+          - sentinel-redhat-init-conf
 
-       - name: Make Sentinel init executable
+       - name: Make Sentinel init executable (for Redhat)
          ansible.builtin.file:
            path: /etc/init.d/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
            mode: '0755'
          when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
-          - sentinel-init-conf
+          - sentinel-redhat-init-conf
+
+       - name: Create Sentinel init.d start/stop script from template (for Debian)
+         template:
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/debian_init_sentinel.j2
+           dest: /etc/systemd/system/sentinel_{{ R_SENTINEL_UNIQUE_STR }}.service
+           backup: yes
+         when: ansible_distribution == 'Debian'
+         tags:
+          - sentinel-debian-init-conf
     
        - name: Enable Sentinel service for automatic start
          service:
            name: sentinel_{{ R_SENTINEL_UNIQUE_STR }}
            state: started
            enabled: yes
-         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
           - sentinel-autostart
      tags:
