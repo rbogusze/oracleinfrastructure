@@ -8,6 +8,13 @@
   become_user: root
   tasks:
 
+   - name: Install required packages
+     apt:
+       name: tcl
+       state: present
+     tags:
+      - install-os-packages
+
    - name: Create redis_compile directory
      file:
        path: ~/redis_compile
@@ -47,7 +54,7 @@
      tags:
       - redis-compile
 
-   - name: Run make test on ~/redis_compile/redis-6.2.3
+   - name: Run make test on ~/redis_compile/redis-6.2.3 (this can take a while)
      make:
        chdir: ~/redis_compile/redis-6.2.3
        target: test
@@ -85,4 +92,59 @@
        backup: yes
      tags:
       - tmp2
+
+
+   - name: Create /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }} directory
+     file:
+       path: /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}
+       state: directory
+     tags:
+      - redis-etc-dir
+
+   - name: Create Redis configuration from template
+     template:
+       src: ~/sre-bigdata/redis/ansible/templates/6.2.3/redis.conf.j2
+       dest: /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }}.conf
+       backup: yes
+     tags:
+      - redis-etc-conf
+
+   - name: Create Redis init from template
+     template:
+       src: ~/sre-bigdata/redis/ansible/templates/6.2.3/init_redis.j2
+       dest: /etc/init.d/redis_{{ R_PORT }}
+       backup: yes
+     tags:
+      - redis-init
+
+   - name: Make Redis init executable
+     ansible.builtin.file:
+       path: /etc/init.d/redis_{{ R_PORT }}
+       mode: '0755'
+     tags:
+      - redis-init
+
+   - name: Create /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/log directory
+     file:
+       path: /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/log
+       state: directory
+     tags:
+      - redis-apps-dir
+
+   - name: Create /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }} directory
+     file:
+       path: /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }}
+       state: directory
+     tags:
+      - redis-apps-dir
+
+   - name: Enable services for automatic start
+     service:
+       name: redis_{{ R_PORT }}
+       state: started
+       enabled: yes
+     when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+     tags:
+      - redis-autostart
+
 
