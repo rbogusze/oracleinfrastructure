@@ -126,9 +126,10 @@
     
        - name: Create Redis init from template
          template:
-           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/init_redis.j2
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/redhat_init_redis.j2
            dest: /etc/init.d/redis_{{ R_PORT }}
            backup: yes
+         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
           - redis-init
     
@@ -136,6 +137,7 @@
          ansible.builtin.file:
            path: /etc/init.d/redis_{{ R_PORT }}
            mode: '0755'
+         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
           - redis-init
     
@@ -189,19 +191,28 @@
          tags:
           - sentinel-apps-dir
 
+       - name: Check if Sentinel configuration already exists
+         stat:
+           path: /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/sentinel_{{ R_SENTINEL_PORT }}.conf
+         register: sentinel_config
+         tags:
+          - sentinel-etc-conf
+
        - name: Create Sentinel configuration from template /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/sentinel_{{ R_SENTINEL_PORT }}.conf
          template:
            src: ~/sre-bigdata/redis/ansible/templates/6.2.3/sentinel.conf.j2
            dest: /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/sentinel_{{ R_SENTINEL_PORT }}.conf
            backup: yes
+         when: sentinel_config.stat.exists == False
          tags:
           - sentinel-etc-conf
 
        - name: Create Sentinel init.d start/stop script from template
          template:
-           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/init_sentinel.j2
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/redhat_init_sentinel.j2
            dest: /etc/init.d/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
            backup: yes
+         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
           - sentinel-init-conf
 
@@ -209,6 +220,7 @@
          ansible.builtin.file:
            path: /etc/init.d/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
            mode: '0755'
+         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
          tags:
           - sentinel-init-conf
     
