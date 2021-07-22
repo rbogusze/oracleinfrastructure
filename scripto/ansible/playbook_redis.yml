@@ -8,143 +8,226 @@
   become_user: root
   tasks:
 
-   - name: Install required packages
-     apt:
-       name: tcl
-       state: present
+# setup_common
+   - name: Common block that installs Redis binaries, to be used both on Redis and Sentinel hosts
+     block:
+       - name: Install required packages on Debian
+         apt:
+           name: tcl
+           state: present
+         when: ansible_distribution == 'Debian'
+         tags:
+          - install-os-packages
+
+       - name: Install required packages on Redhat
+         yum:
+           name: tcl,gcc-c++,gcc,git
+           state: present
+         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
+         tags:
+          - install-os-packages
+    
+       - name: Create redis_compile directory
+         file:
+           path: ~/redis_compile
+           state: directory
+         tags:
+          - redis-dir
+    
+       - name: Download redis-6.2.3.tar.gz
+         get_url:
+           url: https://download.redis.io/releases/redis-6.2.3.tar.gz
+           dest: ~/redis_compile/redis-6.2.3.tar.gz
+           checksum: md5:15d090d65986bf2dc91223fec8da5627
+         tags:
+          - redis-download
+    
+       - name: Extract redis-6.2.3.tar.gz
+         unarchive:
+           src: ~/redis_compile/redis-6.2.3.tar.gz
+           dest: ~/redis_compile
+           remote_src: yes
+           creates: ~/redis_compile/redis-6.2.3
+         tags:
+          - redis-extract
+    
+       - name: Check if make was already run
+         stat:
+           path: ~/redis_compile/redis-6.2.3/src/redis-cli
+         register: compiled
+         tags:
+          - redis-compile
+    
+       - name: Run make on ~/redis_compile/redis-6.2.3
+         make:
+           chdir: ~/redis_compile/redis-6.2.3
+         when: compiled.stat.exists == False
+         tags:
+          - redis-compile
+    
+       - name: Run make test on ~/redis_compile/redis-6.2.3 (this can take a while)
+         make:
+           chdir: ~/redis_compile/redis-6.2.3
+           target: test
+         when: compiled.stat.exists == False
+         tags:
+          - redis-compile
+    
+       - name: Create dir for binaries directory
+         file:
+           path: /usr/local/bin/redis_6.2.3
+           state: directory
+         tags:
+          - redis-dir-bin
+    
+       - name: Copy binaries
+         ansible.builtin.copy:
+           src: '{{ item }}'
+           dest: /usr/local/bin/redis_6.2.3
+           owner: root
+           group: root
+           mode: '0755'
+           backup: yes
+           remote_src: yes
+         loop:
+           - ~/redis_compile/redis-6.2.3/src/redis-cli
+           - ~/redis_compile/redis-6.2.3/src/redis-server
+           - ~/redis_compile/redis-6.2.3/src/redis-sentinel
+         tags:
+          - redis-dir-bin
+    
+       - name: Create env file
+         template:
+           src: ~/sre-bigdata/redis/ansible/templates/redis_env.j2
+           dest: ~/redis_{{ R_MASTER_NAME }}.env
+           backup: yes
+         tags:
+          - tmp2
      tags:
-      - install-os-packages
-
-   - name: Create redis_compile directory
-     file:
-       path: ~/redis_compile
-       state: directory
+      - setup_common
+# /setup_common
+# setup_redis
+   - name: Setup Redis
+     block:
+       - name: Create /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }} directory
+         file:
+           path: /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}
+           state: directory
+         tags:
+          - redis-etc-dir
+    
+       - name: Create Redis configuration from template
+         template:
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/redis.conf.j2
+           dest: /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }}.conf
+           backup: yes
+         tags:
+          - redis-etc-conf
+    
+       - name: Create Redis init from template
+         template:
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/init_redis.j2
+           dest: /etc/init.d/redis_{{ R_PORT }}
+           backup: yes
+         tags:
+          - redis-init
+    
+       - name: Make Redis init executable
+         ansible.builtin.file:
+           path: /etc/init.d/redis_{{ R_PORT }}
+           mode: '0755'
+         tags:
+          - redis-init
+    
+       - name: Create /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/log directory
+         file:
+           path: /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/log
+           state: directory
+         tags:
+          - redis-apps-dir
+    
+       - name: Create /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }} directory
+         file:
+           path: /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }}
+           state: directory
+         tags:
+          - redis-apps-dir
+    
+       - name: Enable services for automatic start
+         service:
+           name: redis_{{ R_PORT }}
+           state: started
+           enabled: yes
+         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
+         tags:
+          - redis-autostart
      tags:
-      - redis-dir
+      - setup_redis
+# /setup_redis
+# setup_sentinel
+    
+   - name: Setup Sentinel
+     block:
+       - name: Create /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
+         file:
+           path: /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
+           state: directory
+         tags:
+          - sentinel-etc-dir
 
-   - name: Download redis-6.2.3.tar.gz
-     get_url:
-       url: https://download.redis.io/releases/redis-6.2.3.tar.gz
-       dest: ~/redis_compile/redis-6.2.3.tar.gz
-       checksum: md5:15d090d65986bf2dc91223fec8da5627
+       - name: Create /apps/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/log/
+         file:
+           path: /apps/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/log/
+           state: directory
+         tags:
+          - sentinel-apps-dir
+
+       - name: Create /apps/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/{{ R_SENTINEL_PORT }}
+         file:
+           path: /apps/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/{{ R_SENTINEL_PORT }}
+           state: directory
+         tags:
+          - sentinel-apps-dir
+
+       - name: Create Sentinel configuration from template /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/sentinel_{{ R_SENTINEL_PORT }}.conf
+         template:
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/sentinel.conf.j2
+           dest: /etc/redis/sentinel_{{ R_SENTINEL_UNIQUE_STR }}/sentinel_{{ R_SENTINEL_PORT }}.conf
+           backup: yes
+         tags:
+          - sentinel-etc-conf
+
+       - name: Create Sentinel init.d start/stop script from template
+         template:
+           src: ~/sre-bigdata/redis/ansible/templates/6.2.3/init_sentinel.j2
+           dest: /etc/init.d/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
+           backup: yes
+         tags:
+          - sentinel-init-conf
+
+       - name: Make Sentinel init executable
+         ansible.builtin.file:
+           path: /etc/init.d/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
+           mode: '0755'
+         tags:
+          - sentinel-init-conf
+    
+       - name: Enable Sentinel service for automatic start
+         service:
+           name: sentinel_{{ R_SENTINEL_UNIQUE_STR }}
+           state: started
+           enabled: yes
+         when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' or ansible_distribution == 'OracleLinux'
+         tags:
+          - sentinel-autostart
      tags:
-      - redis-download
-
-   - name: Extract redis-6.2.3.tar.gz
-     unarchive:
-       src: ~/redis_compile/redis-6.2.3.tar.gz
-       dest: ~/redis_compile
-       remote_src: yes
-       creates: ~/redis_compile/redis-6.2.3
-     tags:
-      - redis-extract
-
-   - name: Check if make was already run
-     stat:
-       path: ~/redis_compile/redis-6.2.3/src/redis-cli
-     register: compiled
-     tags:
-      - redis-compile
-
-   - name: Run make on ~/redis_compile/redis-6.2.3
-     make:
-       chdir: ~/redis_compile/redis-6.2.3
-     when: compiled.stat.exists == False
-     register: just_compiled
-     tags:
-      - redis-compile
-
-   - name: Run make test on ~/redis_compile/redis-6.2.3 (this can take a while)
-     make:
-       chdir: ~/redis_compile/redis-6.2.3
-       target: test
-     when: just_compiled.changed
-     tags:
-      - redis-compile
-
-   - name: Create dir for binaries directory
-     file:
-       path: /usr/local/bin/redis_6.2.3
-       state: directory
-     tags:
-      - redis-dir-bin
-
-   - name: Copy binaries
-     ansible.builtin.copy:
-       src: '{{ item }}'
-       dest: /usr/local/bin/redis_6.2.3
-       owner: root
-       group: root
-       mode: '0755'
-       backup: yes
-       remote_src: yes
-     loop:
-       - ~/redis_compile/redis-6.2.3/src/redis-cli
-       - ~/redis_compile/redis-6.2.3/src/redis-server
-       - ~/redis_compile/redis-6.2.3/src/redis-sentinel
-     tags:
-      - redis-dir-bin
-
-   - name: Create env file
-     template:
-       src: ~/sre-bigdata/redis/ansible/templates/redis_env.j2
-       dest: ~/redis_{{ R_MASTER_NAME }}.env
-       backup: yes
-     tags:
-      - tmp2
+      - setup_sentinel
+# /setup_sentinel
 
 
-   - name: Create /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }} directory
-     file:
-       path: /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}
-       state: directory
-     tags:
-      - redis-etc-dir
-
-   - name: Create Redis configuration from template
-     template:
-       src: ~/sre-bigdata/redis/ansible/templates/6.2.3/redis.conf.j2
-       dest: /etc/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }}.conf
-       backup: yes
-     tags:
-      - redis-etc-conf
-
-   - name: Create Redis init from template
-     template:
-       src: ~/sre-bigdata/redis/ansible/templates/6.2.3/init_redis.j2
-       dest: /etc/init.d/redis_{{ R_PORT }}
-       backup: yes
-     tags:
-      - redis-init
-
-   - name: Make Redis init executable
-     ansible.builtin.file:
-       path: /etc/init.d/redis_{{ R_PORT }}
-       mode: '0755'
-     tags:
-      - redis-init
-
-   - name: Create /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/log directory
-     file:
-       path: /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/log
-       state: directory
-     tags:
-      - redis-apps-dir
-
-   - name: Create /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }} directory
-     file:
-       path: /apps/redis/{{ R_VERSION }}_{{ R_MASTER_NAME }}/{{ R_PORT }}
-       state: directory
-     tags:
-      - redis-apps-dir
-
-   - name: Enable services for automatic start
-     service:
-       name: redis_{{ R_PORT }}
-       state: started
-       enabled: yes
-     when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-     tags:
-      - redis-autostart
-
-
+   - name: Display all variables/facts known for a host
+     debug:
+       var: hostvars[inventory_hostname]
+     tags: 
+      - debug_info
+      - never
