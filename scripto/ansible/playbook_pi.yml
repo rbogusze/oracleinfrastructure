@@ -762,6 +762,7 @@
      tags:
       - logstash
       - logstash_opt
+      - logstash_apps
 
    - name: Disable temperature gathering service
      service:
@@ -779,5 +780,41 @@
      tags:
       - disable_temp
 
+   - name: Cleanup Redis/Sentinel installation 1/3
+     service:
+       name: redis_{{ R_PORT }}.service
+       state: stopped
+       enabled: no
+       daemon_reload: yes
+     ignore_errors: yes
+     tags:
+      - cleanup_redis
+
+   - name: Cleanup Redis/Sentinel installation 2/3
+     service:
+       name: sentinel_{{ R_SENTINEL_UNIQUE_STR }}.service
+       state: stopped
+       enabled: no
+       daemon_reload: yes
+     ignore_errors: yes
+     tags:
+      - cleanup_redis
+
+   - name: Cleanup Redis/Sentinel installation 3/3
+     file:
+       path: "{{ item }}"
+       state: absent
+     with_items:
+#       - ~/redis_compile/redis-6.2.3  # takes too much time to run make and make test
+       - /usr/local/bin/redis_6.2.3
+       - ~/redis_{{ R_MASTER_NAME }}.env
+       - /etc/redis
+       - /etc/init.d/redis_{{ R_PORT }}
+       - /etc/systemd/system/redis_{{ R_PORT }}.service
+       - /apps/redis
+       - /etc/init.d/sentinel_{{ R_SENTINEL_UNIQUE_STR }}
+       - /etc/systemd/system/sentinel_{{ R_SENTINEL_UNIQUE_STR }}.service
+     tags:
+      - cleanup_redis
 
 

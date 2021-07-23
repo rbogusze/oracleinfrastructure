@@ -6,6 +6,7 @@
 
   become: yes
   become_user: root
+  serial: "{{ serial_number|default(3) }}"
   tasks:
 
 # setup_common
@@ -325,6 +326,10 @@
        - debug: msg="{{ redis_master_action.stdout }}"
          when: redis_master_action.stdout is defined
 
+       - name: Wait 1 min to allow Redis master -> replica synchronisation
+         pause:
+           minutes: 1
+
      tags:
       - configure_master_replica
 
@@ -372,9 +377,22 @@
          when: sentinel_check.stdout | int == 0
 
 
+       - name: Wait 1 min to allow Sentinel to start and receive configuration from Redis master
+         pause:
+           minutes: 1
 
      tags:
       - configure_sentinels
+
+   - name: Debug block
+     block:
+
+       - debug: msg="Hello from {{ ansible_ssh_host }}"
+
+       - debug: msg="Hello again from {{ ansible_ssh_host }}"
+
+     tags:
+      - block_debug
 
 
 
