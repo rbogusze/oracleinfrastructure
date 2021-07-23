@@ -303,8 +303,29 @@
      tags:
       - setup_sentinel
 # /setup_sentinel
+# configure_master_replica
+   - name: On a replica instance tell Redis where is the master
+     block:
 
+       - name: Configure a replica on hosts that are not designated master and not replicas already. Checks.
+         shell: /usr/local/bin/redis_{{ R_VERSION }}/redis-cli -p {{ R_PORT }} -a {{ R_PASS }} info replication | grep ^role
+         register: redis_master_check
 
+       - debug: msg="{{ redis_master_check.stdout }}"
+
+       
+       - name: Configure a replica on hosts that are not designated master and not replicas already. Running /usr/local/bin/redis_{{ R_VERSION }}/redis-cli -p {{ R_PORT }} -a {{ R_PASS }} replicaof {{ R_MASTER_IP }} {{ R_PORT }}
+         shell: /usr/local/bin/redis_{{ R_VERSION }}/redis-cli -p {{ R_PORT }} -a {{ R_PASS }} replicaof {{ R_MASTER_IP }} {{ R_PORT }}
+         register: redis_master_action
+         when: R_MASTER_IP != ansible_ssh_host and redis_master_check.stdout == "role:master"
+       
+       - debug: msg="{{ redis_master_action.stdout }}"
+         when: redis_master_action.stdout is defined
+
+     tags:
+      - configure_master_replica
+
+# debug
    - name: Display all variables/facts known for a host
      debug:
        var: hostvars[inventory_hostname]
