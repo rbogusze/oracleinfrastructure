@@ -92,6 +92,8 @@
          [Unit]
          Requires=network.target remote-fs.target
          After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
 
          [Service]
          Type=simple
@@ -99,7 +101,8 @@
          Environment="KAFKA_HEAP_OPTS=-Xmx256M -Xms128M"
          ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
-         Restart=on-abnormal
+         Restart=on-failure
+         RestartSec=60s
 
          [Install]
          WantedBy=multi-user.target
