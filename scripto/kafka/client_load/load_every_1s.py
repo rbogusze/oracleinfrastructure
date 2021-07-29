@@ -6,7 +6,7 @@ from json import dumps
 from json import loads
 from kafka import KafkaProducer
 
-producer = KafkaProducer(bootstrap_servers=['192.168.1.152:9092'],
+producer = KafkaProducer(bootstrap_servers=['192.168.1.152:9092','192.168.1.153:9092','192.168.1.154:9092'],
                          value_serializer=lambda x: dumps(x).encode('utf-8'))
 
 for e in range(24*60*60):
