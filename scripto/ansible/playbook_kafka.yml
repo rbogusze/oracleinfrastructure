@@ -98,7 +98,7 @@
          [Service]
          Type=simple
          User=root
-         Environment="KAFKA_HEAP_OPTS=-Xmx256M -Xms128M"
+         Environment="KAFKA_HEAP_OPTS=-Xmx512M -Xms256M"
          ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
          Restart=on-failure
@@ -106,6 +106,7 @@
 
          [Install]
          WantedBy=multi-user.target
+     register: kafka
      tags:
       - kafka_1.1.1
 
@@ -121,6 +122,16 @@
        name: kafka111.service
        state: started
        enabled: yes
+     tags:
+      - kafka_1.1.1
+
+   - name: Restart Kafka 1.1.1 if some configuration has changed
+     service:
+       name: kafka111.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: kafka.changed
      tags:
       - kafka_1.1.1
 
