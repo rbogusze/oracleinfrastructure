@@ -177,10 +177,24 @@
        name: "{{ item.item.split('.')[0] | basename }}"
        state: started
        enabled: yes
+       daemon_reload: yes
      loop: "{{ stat_result.results }}"
      when: item.stat.exists
      tags:
       - mm_scripts
+
+
+   - name: Creates /opt/kafka-1.1.1-data directory
+     ansible.builtin.file:
+       path: /var/log/mirror_maker
+       state: directory
+       owner: pi
+       group: pi
+       mode: '0755'
+     tags:
+      - mm_scripts
+      - kafka_1.1.1
+
 
 # debug
    - name: Display all variables/facts known for a host

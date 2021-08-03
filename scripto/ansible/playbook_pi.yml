@@ -715,6 +715,7 @@
      register: logstash
      tags:
       - logstash
+      - logstash_var
 
 
    - name: Logstash - /var/log/*.log to logstash, general filter output
@@ -792,6 +793,7 @@
      when: logstash is changed
      tags:
       - logstash
+      - logstash_var
       - logstash_opt
       - logstash_apps
       - logstash_filter
