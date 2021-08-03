@@ -106,9 +106,37 @@
      tags:
       - kafka_1.1.1
 
+#WIP
+   - name: Creates /opt/prometheus directory
+     file:
+       path: /opt/prometheus
+       state: directory
+     tags:
+      - kafka_1.1.1
+
+   - name: Download jmx_prometheus_javaagent-0.3.1.jar
+     get_url:
+       url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.1/jmx_prometheus_javaagent-0.3.1.jar
+       dest: /opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar
+       checksum: md5:4f08e57afb4088469904956237c0cf8e
+     tags:
+      - kafka_1.1.1
+
+   - name: Download kafka-0-8-2.yml
+     get_url:
+       url: https://raw.githubusercontent.com/prometheus/jmx_exporter/master/example_configs/kafka-0-8-2.yml
+       dest: /opt/prometheus/kafka-0-8-2.yml
+       checksum: md5:8341aa61b494660132ab8a6c7312a780
+     tags:
+      - kafka_1.1.1
+
+
+#/WIP
+
    - name: Run Kafka 1.1.1 as a service
      copy:
        dest: /etc/systemd/system/kafka111.service
+       backup: yes
        content: |
          [Unit]
          Requires=network.target remote-fs.target
@@ -120,6 +148,7 @@
          Type=simple
          User=root
          Environment="KAFKA_HEAP_OPTS=-Xmx512M -Xms256M"
+         Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml"
          ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
          Restart=on-failure
@@ -205,7 +234,7 @@
       - mm_scripts
 
 
-   - name: Creates /opt/kafka-1.1.1-data directory
+   - name: Creates /var/log/mirror_maker directory
      ansible.builtin.file:
        path: /var/log/mirror_maker
        state: directory
