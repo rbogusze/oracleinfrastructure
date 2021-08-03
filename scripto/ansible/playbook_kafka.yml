@@ -135,3 +135,57 @@
      tags:
       - kafka_1.1.1
 
+   - name: Checking loop
+     debug:
+       msg="Now working with {{ item }}"
+     loop: "{{ mm_scripts }}"
+     tags:
+      - mm_scripts
+
+   - name: Mirror Maker - check if configured script exists
+     stat:
+       path: "{{ item }}"
+     loop: "{{ mm_scripts }}"
+     register: stat_result
+     tags:
+      - mm_scripts
+
+   - name: Mirror Maker - if file exists
+     debug:
+       #msg="Will work with {{ item.item }}"
+       #msg="Will work with {{ item.item | basename }}"
+       #msg="Will work with {{ item.item | dirname }}"
+       msg="Will work with {{ item.item.split(".")[0] | basename }}"
+     loop: "{{ stat_result.results }}"
+     when: item.stat.exists
+     tags:
+      - mm_scripts
+
+   - name: Mirror Maker - Create systemd script from template 
+     template:
+       src: ~/scripto/ansible/templates/systemd_mirror_maker_job.j2
+       dest: /etc/systemd/system/{{ item.item.split(".")[0] | basename }}.service
+       backup: yes
+     loop: "{{ stat_result.results }}"
+     when: item.stat.exists
+     tags:
+      - mm_scripts
+
+
+   - name: Enable {{ item.item.split(".")[0] | basename }} service for automatic start
+     service:
+       name: "{{ item.item.split('.')[0] | basename }}"
+       state: started
+       enabled: yes
+     loop: "{{ stat_result.results }}"
+     when: item.stat.exists
+     tags:
+      - mm_scripts
+
+# debug
+   - name: Display all variables/facts known for a host
+     debug:
+       var: hostvars[inventory_hostname]
+     tags:
+      - debug_info
+      - never

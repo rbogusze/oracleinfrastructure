@@ -1,9 +1,4 @@
-R_MASTER_NAME: "dcim_test1"
-R_PORT: 6380
-R_SENTINEL_PORT: 26380
-R_SENTINEL_UNIQUE_STR: "6_2_3"
-R_VERSION: "6.2.3"
-R_PASS: "abracadabra"
-R_SHUTDOWN_COMMAND: "SHUTDOWN_ORANGE"
-R_MASTER_IP: "192.168.1.171"
-R_MAXMEMORY: "2gb"
+mm_scripts:
+  - /home/pi/scripto/kafka/mirror_maker/kafka_mirror_mm_test1.sh
+  - /home/pi/scripto/kafka/mirror_maker/kafka_mirror_mm_test2.sh
+  - /home/pi/scripto/kafka/mirror_maker/kafka_mirror_mm_test3.sh
