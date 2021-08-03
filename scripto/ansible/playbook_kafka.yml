@@ -31,6 +31,27 @@
      tags:
       - kafka_1.1.1
 
+## For Kafka kafka_2.11-1.0.0 just basic binaries install
+   - name: Download kafka_2.11-1.0.0.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/1.0.0/kafka_2.11-1.0.0.tgz
+       dest: /opt/kafka_2.11-1.0.0.tgz
+       checksum: md5:b652611004a992cd71f13b1dfe304b55
+     tags:
+      - kafka_1.0.0
+
+   - name: Extract kafka_2.11-1.0.0.tgz into /opt
+     unarchive:
+       src: /opt/kafka_2.11-1.0.0.tgz
+       dest: /opt
+       remote_src: yes
+       creates: /opt/kafka_2.11-1.0.0
+     tags:
+      - kafka_1.0.0
+
+
+## / For Kafka kafka_2.11-1.0.0 just basic binaries install
+
    - name: Modify server.properties listeners=PLAINTEXT
      replace:
        path: /opt/kafka_2.12-1.1.1/config/server.properties
