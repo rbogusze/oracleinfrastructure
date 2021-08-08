@@ -9,7 +9,7 @@
   tasks:
    - name: Install required packages
      apt:
-       name: vim
+       name: vim,jq
        state: present
      tags:
       - update
@@ -106,7 +106,6 @@
      tags:
       - kafka_1.1.1
 
-#WIP
    - name: Creates /opt/prometheus directory
      file:
        path: /opt/prometheus
@@ -131,6 +130,24 @@
       - kafka_1.1.1
 
 
+#WIP
+   - name: Jolokia - Creates /opt/jolokia directory
+     file:
+       path: /opt/jolokia
+       state: directory
+     tags:
+      - kafka_1.1.1
+      - jolokia
+
+   - name: Jolokia - Download jolokia-jvm-1.6.0-agent.jar
+     get_url:
+       url: http://search.maven.org/remotecontent?filepath=org/jolokia/jolokia-jvm/1.6.0/jolokia-jvm-1.6.0-agent.jar
+       dest: /opt/jolokia/jolokia-agent.jar
+       checksum: md5:01df022b01a34c9b021231172adc776b
+     tags:
+      - kafka_1.1.1
+      - jolokia
+
 #/WIP
 
    - name: Run Kafka 1.1.1 as a service
@@ -148,7 +165,7 @@
          Type=simple
          User=root
          Environment="KAFKA_HEAP_OPTS=-Xmx512M -Xms256M"
-         Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml"
+         Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
          ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
          Restart=on-failure
@@ -159,6 +176,7 @@
      register: kafka
      tags:
       - kafka_1.1.1
+      - service
 
    - name: Creates /opt/kafka-1.1.1-data directory
      file:
@@ -184,6 +202,7 @@
      when: kafka.changed
      tags:
       - kafka_1.1.1
+      - service
 
    - name: Checking loop
      debug:
