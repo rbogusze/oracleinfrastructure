@@ -889,18 +889,32 @@
      tags:
       - fluent
 
-   - name: Fluent -Install required packages with gem fluentd
-     community.general.gem:
-       name: fluentd
-       version: 0.12.43
-       state: present
+# that somehow does not do the install
+#   - name: Fluent -Install required packages with gem fluentd
+#     community.general.gem:
+#       name: fluentd
+#       version: 0.12.43
+#       state: present
+#     tags:
+#      - fluent
+#
+#   - name: Fluent -Install required packages with gem rake
+#     community.general.gem:
+#       name: rake
+#       state: present
+#     tags:
+#      - fluent
+   - name: Fluent -Install fluentd
+     command: /usr/bin/gem install fluentd -v "~> 0.12.0"
+     args:
+       creates: /usr/local/bin/fluent-gem
      tags:
       - fluent
 
-   - name: Fluent -Install required packages with gem rake
-     community.general.gem:
-       name: rake
-       state: present
+   - name: Fluent -Install rake 
+     command: /usr/bin/gem install rake
+     args:
+       creates: /var/lib/gems/2.5.0/gems/fluent-plugin-kafka-0.16.3
      tags:
       - fluent
 
@@ -908,13 +922,6 @@
      command: /usr/local/bin/fluent-gem install fluent-plugin-td
      args:
        creates: /var/lib/gems/2.5.0/gems/fluent-plugin-td-1.1.0
-     tags:
-      - fluent
-
-   - name: Fluent -Install rake manually??
-     command: /usr/bin/gem install rake
-     args:
-       creates: /var/lib/gems/2.5.0/gems/fluent-plugin-kafka-0.16.3
      tags:
       - fluent
 
