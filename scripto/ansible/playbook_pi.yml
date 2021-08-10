@@ -852,4 +852,119 @@
      tags:
       - cleanup_redis
 
+# Fluent
+   - name: Fluent - creates /etc/fluent directory
+     ansible.builtin.file:
+       path: /etc/fluent
+       state: directory
+       mode: '0755'
+     tags:
+      - fluent
 
+   - name: Fluent - configuration file
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/fluent/fluent.conf
+       dest: /etc/fluent/fluent.conf
+       owner: root
+       group: root
+       mode: '0644'
+     register: fluent_conf
+     tags:
+      - fluent
+
+   - name: Fluent - shutdown logstash
+     service:
+       name: logstash.service
+       state: stopped
+       enabled: no
+       daemon_reload: yes
+     ignore_errors: yes
+     tags:
+      - fluent
+
+   - name: Fluent -Install required packages with apt ruby-dev
+     apt:
+       name: ruby-dev
+       state: present
+     tags:
+      - fluent
+
+   - name: Fluent -Install required packages with gem fluentd
+     community.general.gem:
+       name: fluentd
+       version: 0.12.43
+       state: present
+     tags:
+      - fluent
+
+   - name: Fluent -Install required packages with gem rake
+     community.general.gem:
+       name: rake
+       state: present
+     tags:
+      - fluent
+
+   - name: Fluent -Install required packages with fluent-gem fluent-plugin-td
+     command: /usr/local/bin/fluent-gem install fluent-plugin-td
+     args:
+       creates: /var/lib/gems/2.5.0/gems/fluent-plugin-td-1.1.0
+     tags:
+      - fluent
+
+   - name: Fluent -Install rake manually??
+     command: /usr/bin/gem install rake
+     args:
+       creates: /var/lib/gems/2.5.0/gems/fluent-plugin-kafka-0.16.3
+     tags:
+      - fluent
+
+   - name: Fluent -Install required packages with fluent-gem fluent-plugin-kafka
+     command: /usr/local/bin/fluent-gem install fluent-plugin-kafka
+     args:
+       creates: /var/lib/gems/2.5.0/gems/fluent-plugin-kafka-0.16.3
+     tags:
+      - fluent
+
+   - name: Fluent -Run fluent as a service
+     copy:
+       dest: /etc/systemd/system/fluentd.service
+       backup: yes
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
+
+         [Service]
+         Type=simple
+         User=root
+         ExecStart=/usr/local/bin/fluentd
+         Restart=on-failure
+         RestartSec=60s
+
+         [Install]
+         WantedBy=multi-user.target
+     register: fluent
+     tags:
+      - fluent_service
+      - fluent
+
+   - name: Fluent -Start fluent service
+     service:
+       name: fluentd.service
+       state: started
+       enabled: yes
+     tags:
+      - fluent
+
+   - name: Fluent -restart fluent service if service conf changed
+     service:
+       name: fluentd.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: fluent.changed
+     tags:
+      - fluent_service
+      - fluent

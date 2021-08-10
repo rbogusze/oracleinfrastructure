@@ -165,7 +165,7 @@
          [Service]
          Type=simple
          User=root
-         Environment="KAFKA_HEAP_OPTS=-Xmx512M -Xms256M"
+         Environment="KAFKA_HEAP_OPTS=-Xmx300M -Xms256M"
          Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
          ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
