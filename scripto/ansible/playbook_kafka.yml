@@ -6,6 +6,7 @@
 
   become: yes
   become_user: root
+  serial: "{{ serial_number|default(3) }}"
   tasks:
    - name: Install required packages
      apt:
@@ -13,6 +14,7 @@
        state: present
      tags:
       - update
+      - kafka_1.1.1
 
    - name: Download kafka_2.12-1.1.1.tgz
      get_url:
@@ -32,6 +34,17 @@
      tags:
       - kafka_1.1.1
       - kafka_1.1.1_bin
+
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-1.1.1
+     ansible.builtin.file:
+       src: /opt/kafka_2.12-1.1.1
+       dest: /opt/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_1.1.1
+      - kafka_1.1.1_bin_link
+
 
 ## For Kafka kafka_2.11-1.0.0 just basic binaries install
    - name: Download kafka_2.11-1.0.0.tgz
@@ -169,8 +182,8 @@
          User=root
          Environment="KAFKA_HEAP_OPTS=-Xmx300M -Xms256M"
          Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
-         ExecStart=/bin/sh -c '/opt/kafka_2.12-1.1.1/bin/kafka-server-start.sh /opt/kafka_2.12-1.1.1/config/server.properties > /opt/kafka_2.12-1.1.1/logs/kafka_start.log 2>&1'
-         ExecStop=/opt/kafka_2.12-1.1.1/bin/kafka-server-stop.sh
+         ExecStart=/bin/sh -c '/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties > /opt/kafka/logs/kafka_start.log 2>&1'
+         ExecStop=/opt/kafka/bin/kafka-server-stop.sh
          Restart=on-failure
          RestartSec=60s
 
@@ -266,6 +279,109 @@
      tags:
       - mm_scripts
       - kafka_1.1.1
+
+   - name: Upgrade to Kafka 2 - Modify server.properties add 
+     blockinfile:
+       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=1.1
+         log.message.format.version=1.1
+     register: kafka_config
+     tags:
+      - kafka_up_2a
+
+   - name: Restart Kafka 1.1.1 if some configuration has changed
+     service:
+       name: kafka.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: kafka_config.changed
+     tags:
+      - kafka_up_2a
+
+   - name: Wait 10 seconds to allow Sentinel to start and receive configuration from Redis master
+     pause:
+       seconds: 10
+     tags:
+      - kafka_up_2a
+
+
+   - name: Download kafka_2.12-2.3.0.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/2.3.0/kafka_2.12-2.3.0.tgz
+       dest: /opt/kafka_2.12-2.3.0.tgz
+       checksum: md5:8f86fb2421f6392f72bd8d7e1cfe4bf6
+     tags:
+      - kafka_2.3.0
+
+   - name: Extract kafka_2.12-2.3.0.tgz into /opt
+     unarchive:
+       src: /opt/kafka_2.12-2.3.0.tgz
+       dest: /opt
+       remote_src: yes
+       creates: /opt/kafka_2.12-2.3.0
+     tags:
+      - kafka_2.3.0
+
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-2.3.0
+     ansible.builtin.file:
+       src: /opt/kafka_2.12-2.3.0
+       dest: /opt/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_2.3.0_bin_link
+
+   - name: Copy /opt/kafka_2.12-1.1.1/config/server.properties to /opt/kafka_2.12-2.3.0/config/
+     ansible.builtin.copy:
+       remote_src: yes
+       src: /opt/kafka_2.12-1.1.1/config/server.properties
+       dest: /opt/kafka_2.12-2.3.0/config/server.properties
+       backup: yes
+     tags:
+      - kafka_2.3.0_copy_from_1.1.1
+
+   - name: Restart Kafka from new binaries
+     service:
+       name: kafka.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     tags:
+      - kafka_restart
+
+   - name: Wait 10 seconds to allow Sentinel to start and receive configuration from Redis master
+     pause:
+       seconds: 10
+     tags:
+      - kafka_restart
+
+   - name: Upgrade to Kafka 2 - Modify server.properties add 
+     blockinfile:
+       path: /opt/kafka_2.12-2.3.0/config/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=2.3
+         log.message.format.version=1.1
+     register: kafka_config
+     tags:
+      - kafka_inter_broker_2_3
+
+   - name: Upgrade to Kafka 2 - Modify server.properties add 
+     blockinfile:
+       path: /opt/kafka_2.12-2.3.0/config/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=2.3
+         log.message.format.version=2.3
+     register: kafka_config
+     tags:
+      - kafka_log_message_2_3
 
 
 # debug
