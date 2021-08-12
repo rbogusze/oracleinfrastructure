@@ -21,6 +21,7 @@
        checksum: md5:29c20027940c5c6f83fffd393df78f09
      tags:
       - kafka_1.1.1
+      - kafka_1.1.1_bin
 
    - name: Extract kafka_2.12-1.1.1.tgz into /opt
      unarchive:
@@ -30,6 +31,7 @@
        creates: /opt/kafka_2.12-1.1.1
      tags:
       - kafka_1.1.1
+      - kafka_1.1.1_bin
 
 ## For Kafka kafka_2.11-1.0.0 just basic binaries install
    - name: Download kafka_2.11-1.0.0.tgz
