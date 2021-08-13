@@ -868,9 +868,11 @@
        owner: root
        group: root
        mode: '0644'
-     register: fluent_conf
+     register: fluent
      tags:
       - fluent
+      - fluent_conf
+      
 
    - name: Fluent - shutdown logstash
      service:
@@ -971,7 +973,9 @@
        state: restarted
        enabled: yes
        daemon_reload: yes
-     when: fluent.changed
+     when: 
+      - fluent.changed
      tags:
       - fluent_service
       - fluent
+      - fluent_conf
