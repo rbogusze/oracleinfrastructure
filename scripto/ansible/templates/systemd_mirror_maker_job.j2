@@ -4,7 +4,7 @@ StartLimitBurst=10
 
 [Service]
 Type=forking
-User=pi
+User=root
 WorkingDirectory={{ item.item | dirname }}
 ExecStart={{ item.item }}
 Restart=on-failure

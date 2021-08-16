@@ -258,7 +258,7 @@
       - mm_scripts
 
 
-   - name: Enable {{ item.item.split(".")[0] | basename }} service for automatic start
+   - name: Enable "{{ item.item.split(".")[0] | basename }}" service for automatic start
      service:
        name: "{{ item.item.split('.')[0] | basename }}"
        state: started
@@ -274,8 +274,8 @@
      ansible.builtin.file:
        path: /var/log/mirror_maker
        state: directory
-       owner: pi
-       group: pi
+       owner: root
+       group: root
        mode: '0755'
      tags:
       - mm_scripts
