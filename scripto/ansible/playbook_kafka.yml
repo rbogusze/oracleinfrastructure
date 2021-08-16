@@ -385,6 +385,33 @@
       - kafka_log_message_2_3
 
 
+   - name: Checking loop
+     debug:
+       msg="Checking if the following processes are running {{ ps_check }}"
+     tags:
+      - mm_monitor
+
+   - name: Look for the "foo" process
+     shell: ps -ef |  grep "{{ ps_check }}" | grep -v grep
+     register: process_list
+     changed_when: false  
+     failed_when: process_list.rc != 1 and process_list.rc != 0
+     tags:
+      - mm_monitor
+
+   - name: (debug) What I found running 
+     debug:
+       msg="check {{ process_list }}"
+     tags:
+      - mm_monitor
+
+   - name: Process is not running, doing something with it.
+     shell: echo "ala ma kota" >> /tmp/ala_ma_kota
+     when: "process_list.rc == 1"  
+     tags:
+      - mm_monitor
+
+
 # debug
    - name: Display all variables/facts known for a host
      debug:
