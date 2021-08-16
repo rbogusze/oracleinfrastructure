@@ -411,6 +411,20 @@
      tags:
       - mm_monitor
 
+   - name: Sending an e-mail using Gmail SMTP servers
+     mail:
+       host: smtp.gmail.com
+       port: 587
+       username: "{{ vault_email_username }}"
+       password: "{{ vault_email_password }}"
+       to: remigiusz.boguszewicz@gmail.com
+       subject: Ansible Report
+       body: System [[ ansible_hostname ]] has been successfully provisioned.
+     when: "process_list.rc == 1"  
+     tags:
+      - mm_monitor
+
+
 
 # debug
    - name: Display all variables/facts known for a host
