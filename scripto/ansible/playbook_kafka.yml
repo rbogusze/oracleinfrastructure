@@ -129,6 +129,7 @@
      tags:
       - kafka_1.1.1
       - jmx_prometheus_javaagent-0.3.1
+      - jmx_prometheus_javaagent-0.16.1
 
    - name: Download jmx_prometheus_javaagent-0.3.1.jar
      get_url:
@@ -147,6 +148,29 @@
      tags:
       - kafka_1.1.1
       - jmx_prometheus_javaagent-0.3.1
+
+   - name: Download mx_prometheus_javaagent-0.16.1.jar
+     get_url:
+       url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar
+       dest: /opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar
+       checksum: md5:2882dbb749e2bdfba6cc44f9f992ccd8
+     tags:
+      - kafka_1.1.1
+      - jmx_prometheus_javaagent-0.16.1
+
+   - name: Download kafka-2_0_0.yml
+     get_url:
+       url: https://raw.githubusercontent.com/prometheus/jmx_exporter/master/example_configs/kafka-2_0_0.yml
+       dest: /opt/prometheus/kafka-2_0_0.yml
+       checksum: md5:3ac75e7b2dbf441945a4fc8bc06e9e39
+     tags:
+      - kafka_1.1.1
+      - jmx_prometheus_javaagent-0.16.1
+
+
+
+
+
 
 
    - name: Jolokia - Creates /opt/jolokia directory
@@ -181,8 +205,10 @@
          [Service]
          Type=simple
          User=root
+         Environment="JMX_PORT=9999"
          Environment="KAFKA_HEAP_OPTS=-Xmx300M -Xms256M"
-         Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
+         #Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
+         Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/prometheus/kafka-2_0_0.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
          ExecStart=/bin/sh -c '/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties > /opt/kafka/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka/bin/kafka-server-stop.sh
          Restart=on-failure
