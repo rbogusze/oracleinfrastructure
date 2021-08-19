@@ -22,6 +22,7 @@ parser.add_argument("--password", default="none")
 parser.add_argument("--dht", default="true")
 parser.add_argument("--sleep_time", default=1)
 parser.add_argument("--test_time", default=0)
+parser.add_argument("--reading_multiplyer", default=1)
 args = parser.parse_args()
 if args.backend:
     logging.debug('Backend option provided: %s', args.backend)
@@ -47,6 +48,10 @@ if args.sleep_time:
 if args.test_time == 0:
     logging.debug('test_time option provided: %s', args.test_time)
     test_time = args.test_time
+if args.reading_multiplyer:
+    logging.debug('reading_multiplyer option provided: %s', args.reading_multiplyer)
+    reading_multiplyer = int(args.reading_multiplyer)
+
 
 
 #Sleep time after readings are saved in backend
@@ -316,7 +321,8 @@ while True:
 
         if backend_kafka:
            # Now kafka publish
-           data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : str(reading)}
+           logging.debug("Reading multiplyer: %s" % reading_multiplyer)
+           data = {'reading_location' : sensor, 'reading_date' : str(now), 'reading_value' : (str(reading) * reading_multiplyer) }
            logging.debug("Kafka insert: %s" % data)
            # async
            #producer.send('temperature', value=data)
