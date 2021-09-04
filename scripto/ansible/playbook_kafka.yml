@@ -168,9 +168,14 @@
       - jmx_prometheus_javaagent-0.16.1
 
 
-
-
-
+   - name: Download kafka_broker.yml
+     get_url:
+       url: https://raw.githubusercontent.com/confluentinc/jmx-monitoring-stacks/6.1.0-post/shared-assets/jmx-exporter/kafka_broker.yml
+       dest: /opt/prometheus/kafka_broker.yml
+       checksum: md5:ffcdb7d5619a204a236353b5ecab9d83
+     tags:
+      - kafka_1.1.1
+      - jmx_prometheus_javaagent-0.16.1
 
 
    - name: Jolokia - Creates /opt/jolokia directory
@@ -208,7 +213,8 @@
          Environment="JMX_PORT=9999"
          Environment="KAFKA_HEAP_OPTS=-Xmx300M -Xms256M"
          #Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
-         Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/prometheus/kafka-2_0_0.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
+         #Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/prometheus/kafka-2_0_0.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
+         Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/prometheus/kafka_broker.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
          ExecStart=/bin/sh -c '/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties > /opt/kafka/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka/bin/kafka-server-stop.sh
          Restart=on-failure
@@ -220,6 +226,43 @@
      tags:
       - kafka_1.1.1
       - service
+
+
+   - name: Run Zookeeper from Kafka binaries as a service
+     copy:
+       dest: /etc/systemd/system/zookeeper.service
+       backup: yes
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
+
+         [Service]
+         Type=simple
+         User=root
+         ExecStart=/opt/kafka/bin/zookeeper-server-start.sh /opt/kafka/config/zookeeper.properties
+         ExecStop=/opt/kafka/bin/zookeeper-server-stop.sh
+         Restart=on-failure
+         RestartSec=60s
+
+         [Install]
+         WantedBy=multi-user.target
+     register: zookeeper
+     tags:
+      - zookeeper
+
+   - name: Restart Zookeeper if some configuration has changed
+     service:
+       name: zookeeper.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: zookeeper.changed
+     tags:
+      - zookeeper
+
 
    - name: Creates /opt/kafka-1.1.1-data directory
      file:
