@@ -64,6 +64,14 @@
      tags:
       - kafka_0.10.1
 
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.10-0.10.1.0
+     ansible.builtin.file:
+       src: /opt/kafka_2.10-0.10.1.0
+       dest: /opt/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_0.10.1_bin_link
 
 ## / For Kafka 2.10-0.10.1 just basic binaries install
 
