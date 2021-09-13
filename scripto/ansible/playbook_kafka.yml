@@ -522,6 +522,57 @@
      tags:
       - mm_monitor
 
+   - name: Download kafka_exporter-1.3.1.linux-armv7.tar.gz
+     get_url:
+       url: wget https://github.com/danielqsj/kafka_exporter/releases/download/v1.3.1/kafka_exporter-1.3.1.linux-armv7.tar.gz
+       dest: /opt/kafka_exporter-1.3.1.linux-armv7.tar.gz
+       checksum: md5:1aa0fbc9bdf5507beeca7009e88b41a8
+     tags:
+      - danielqsj_kafka_exporter_1.3.1
+
+   - name: Extract kafka_exporter-1.3.1.linux-armv7.tar.gz into /opt
+     unarchive:
+       src: /opt/kafka_exporter-1.3.1.linux-armv7.tar.gz
+       dest: /opt
+       remote_src: yes
+       creates: /opt/kafka_exporter-1.3.1.linux-armv7
+     tags:
+      - danielqsj_kafka_exporter_1.3.1
+
+   - name: Run kafka_exporter-1.3.1.linux-armv7 as a service
+     copy:
+       dest: /etc/systemd/system/kafka_exporter_131.service
+       backup: yes
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
+
+         [Service]
+         Type=simple
+         User=root
+         ExecStart=/opt/kafka_exporter-1.3.1.linux-armv7/kafka_exporter --kafka.server={{ ansible_ssh_host }}:9092
+         Restart=on-failure
+         RestartSec=60s
+
+         [Install]
+         WantedBy=multi-user.target
+     register: kafka_exporter_131
+     tags:
+      - danielqsj_kafka_exporter_1.3.1
+
+   - name: Start kafka_exporter_131
+     service:
+       name: kafka_exporter_131.service
+       state: started
+       enabled: yes
+       daemon_reload: yes
+     when: kafka_exporter_131.changed
+     tags:
+      - danielqsj_kafka_exporter_1.3.1
+
 
 
 # debug
