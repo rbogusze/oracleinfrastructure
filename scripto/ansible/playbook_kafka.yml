@@ -524,7 +524,7 @@
 
    - name: Download kafka_exporter-1.3.1.linux-armv7.tar.gz
      get_url:
-       url: wget https://github.com/danielqsj/kafka_exporter/releases/download/v1.3.1/kafka_exporter-1.3.1.linux-armv7.tar.gz
+       url: https://github.com/danielqsj/kafka_exporter/releases/download/v1.3.1/kafka_exporter-1.3.1.linux-armv7.tar.gz
        dest: /opt/kafka_exporter-1.3.1.linux-armv7.tar.gz
        checksum: md5:1aa0fbc9bdf5507beeca7009e88b41a8
      tags:
@@ -573,7 +573,78 @@
      tags:
       - danielqsj_kafka_exporter_1.3.1
 
+# Install Kafka Manager - CMAK: (Yahoo)
 
+   - name: Download https://github.com/yahoo/CMAK/releases/download/3.0.0.5/cmak-3.0.0.5.zip
+     get_url:
+       url: https://github.com/yahoo/CMAK/releases/download/3.0.0.5/cmak-3.0.0.5.zip
+       dest: /opt/cmak-3.0.0.5.zip
+       checksum: md5:10f5307e780ae88cca888e39b763b42e
+     tags:
+      - kafka_cmak
+
+   - name: Extract cmak-3.0.0.5.zip into /opt
+     unarchive:
+       src: /opt/cmak-3.0.0.5.zip
+       dest: /opt
+       remote_src: yes
+       creates: /opt/cmak-3.0.0.5
+     tags:
+      - kafka_cmak
+
+   - name: Install required packages
+     apt:
+       name: default-jdk
+       state: present
+     tags:
+      - kafka_cmak
+
+   - name: Modify application.conf and set local ZK
+     replace:
+       path: /opt/cmak-3.0.0.5/conf/application.conf
+       regexp: 'kafka-manager-zookeeper'
+       replace: '{{ ansible_ssh_host }}'
+       backup: yes
+     tags:
+      - kafka_cmak
+
+   - name: Run CMAK as a service
+     copy:
+       dest: /etc/systemd/system/kafka_cmak.service
+       backup: yes
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
+
+         [Service]
+         Type=simple
+         User=root
+         Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-armhf"
+         ExecStart=/opt/cmak-3.0.0.5/bin/cmak -Dhttp.port=9100
+         Restart=on-failure
+         RestartSec=60s
+
+         [Install]
+         WantedBy=multi-user.target
+     register: kafka_cmak
+     tags:
+      - kafka_cmak
+
+   - name: Start kafka_cmak
+     service:
+       name: kafka_cmak.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: kafka_cmak.changed
+     tags:
+      - kafka_cmak
+
+
+# / Install Kafka Manager - CMAK: (Yahoo)
 
 # debug
    - name: Display all variables/facts known for a host
