@@ -643,6 +643,13 @@
      tags:
       - kafka_cmak
 
+   - name: Installing cronjob ro remove /opt/cmak-3.0.0.5/RUNNING_PID on startup as it usually stays there and prevents startup
+     ansible.builtin.cron:
+       name: "remove /opt/cmak-3.0.0.5/RUNNING_PID on startup as it usually stays there and prevents CMAK startup"
+       special_time: reboot
+       job: "rm -f /opt/cmak-3.0.0.5/RUNNING_PID"
+     tags:
+      - kafka_cmak
 
 # / Install Kafka Manager - CMAK: (Yahoo)
 
