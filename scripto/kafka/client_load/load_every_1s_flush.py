@@ -13,6 +13,6 @@ for e in range(24*60*60):
     data = {'number' : e}
     print(f"sending {data}")
     producer.send('testing_idempotency', value=data)
-#    producer.flush()
+    producer.flush()
     sleep(1)
 
