@@ -7,6 +7,10 @@
   become: yes
   become_user: root
   serial: "{{ serial_number|default(3) }}"
+
+# 
+# Generic tasks
+#
   tasks:
    - name: Install required packages
      apt:
@@ -16,6 +20,58 @@
       - update
       - kafka_1.1.1
 
+#
+# Binaries
+#
+# Binaries for 0.10.1
+   - name: Download kafka_2.10-0.10.1.0.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/0.10.1.0/kafka_2.10-0.10.1.0.tgz
+       dest: /opt/kafka_2.10-0.10.1.0.tgz
+       checksum: md5:8d78aaa8eb3853cedfd17f1b76596987
+     tags:
+      - kafka_0.10.1_bin
+
+   - name: Extract kafka_2.10-0.10.1.0.tgz into /opt
+     unarchive:
+       src: /opt/kafka_2.10-0.10.1.0.tgz
+       dest: /opt
+       remote_src: yes
+       creates: /opt/kafka_2.10-0.10.1.0
+     tags:
+      - kafka_0.10.1_bin
+
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.10-0.10.1.0
+     ansible.builtin.file:
+       src: /opt/kafka_2.10-0.10.1.0
+       dest: /opt/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_0.10.1_bin_link
+# /Binaries for 0.10.1
+
+
+# Binaries for 1.0.0
+   - name: Download kafka_2.11-1.0.0.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/1.0.0/kafka_2.11-1.0.0.tgz
+       dest: /opt/kafka_2.11-1.0.0.tgz
+       checksum: md5:b652611004a992cd71f13b1dfe304b55
+     tags:
+      - kafka_1.0.0_bin
+
+   - name: Extract kafka_2.11-1.0.0.tgz into /opt
+     unarchive:
+       src: /opt/kafka_2.11-1.0.0.tgz
+       dest: /opt
+       remote_src: yes
+       creates: /opt/kafka_2.11-1.0.0
+     tags:
+      - kafka_1.0.0_bin
+# /Binaries for 1.0.0
+
+# Binaries for 1.1.1
    - name: Download kafka_2.12-1.1.1.tgz
      get_url:
        url: https://archive.apache.org/dist/kafka/1.1.1/kafka_2.12-1.1.1.tgz
@@ -44,77 +100,116 @@
      tags:
       - kafka_1.1.1
       - kafka_1.1.1_bin_link
+# /Binaries for 1.1.1
 
-## For Kafka kafka_2.10-0.10.1 just basic binaries install
-
-   - name: Download kafka_2.10-0.10.1.0.tgz
+# Binaries for 2.3.0
+   - name: Download kafka_2.12-2.3.0.tgz
      get_url:
-       url: https://archive.apache.org/dist/kafka/0.10.1.0/kafka_2.10-0.10.1.0.tgz
-       dest: /opt/kafka_2.10-0.10.1.0.tgz
-       checksum: md5:8d78aaa8eb3853cedfd17f1b76596987
+       url: https://archive.apache.org/dist/kafka/2.3.0/kafka_2.12-2.3.0.tgz
+       dest: /opt/kafka_2.12-2.3.0.tgz
+       checksum: md5:8f86fb2421f6392f72bd8d7e1cfe4bf6
      tags:
-      - kafka_0.10.1
+      - kafka_2.3.0_bin
 
-   - name: Extract kafka_2.10-0.10.1.0.tgz into /opt
+   - name: Extract kafka_2.12-2.3.0.tgz into /opt
      unarchive:
-       src: /opt/kafka_2.10-0.10.1.0.tgz
+       src: /opt/kafka_2.12-2.3.0.tgz
        dest: /opt
        remote_src: yes
-       creates: /opt/kafka_2.10-0.10.1.0
+       creates: /opt/kafka_2.12-2.3.0
      tags:
-      - kafka_0.10.1
+      - kafka_2.3.0_bin
 
-   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.10-0.10.1.0
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-2.3.0
      ansible.builtin.file:
-       src: /opt/kafka_2.10-0.10.1.0
+       src: /opt/kafka_2.12-2.3.0
        dest: /opt/kafka
        state: link
        force: yes
      tags:
-      - kafka_0.10.1_bin_link
+      - kafka_2.3.0_bin_link
+# /Binaries for 2.3.0
 
-## / For Kafka 2.10-0.10.1 just basic binaries install
-
-## For Kafka kafka_2.11-1.0.0 just basic binaries install
-   - name: Download kafka_2.11-1.0.0.tgz
+# Binaries for 2.5.1
+   - name: Download kafka_2.12-2.5.1.tgz
      get_url:
-       url: https://archive.apache.org/dist/kafka/1.0.0/kafka_2.11-1.0.0.tgz
-       dest: /opt/kafka_2.11-1.0.0.tgz
-       checksum: md5:b652611004a992cd71f13b1dfe304b55
+       url: https://archive.apache.org/dist/kafka/2.5.1/kafka_2.12-2.5.1.tgz
+       dest: /opt/kafka_2.12-2.5.1.tgz
+       checksum: md5:b4262ee6b2e843cd25a4e92a355ced0c
      tags:
-      - kafka_1.0.0
+      - kafka_2.5.1_bin
 
-   - name: Extract kafka_2.11-1.0.0.tgz into /opt
+   - name: Extract kafka_2.12-2.5.1.tgz into /opt
      unarchive:
-       src: /opt/kafka_2.11-1.0.0.tgz
+       src: /opt/kafka_2.12-2.5.1.tgz
        dest: /opt
        remote_src: yes
-       creates: /opt/kafka_2.11-1.0.0
+       creates: /opt/kafka_2.12-2.5.1
      tags:
-      - kafka_1.0.0
+      - kafka_2.5.1_bin
+
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-2.5.1
+     ansible.builtin.file:
+       src: /opt/kafka_2.12-2.5.1
+       dest: /opt/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_2.5.1_bin_link
+# /Binaries for 2.5.1
+
+#
+# Vanilla Configuration files
+#
+
+   - name: Creates /var/log/mirror_maker directory
+     ansible.builtin.file:
+       path: /etc/kafka
+       state: directory
+       mode: '0755'
+     tags:
+      - kafka_2.3.0_conf
+
+   - name: Copy vanilla 2.3.0 conf to /etc/kafka
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/templates/server.properties_2.3.0
+       dest: /etc/kafka/server.properties
+       backup: yes
+     tags:
+      - kafka_2.3.0_conf
 
 
-## / For Kafka kafka_2.11-1.0.0 just basic binaries install
+#
+# Configuration changes
+#
+   - name: Creates /opt/kafka-data directory
+     ansible.builtin.file:
+       path: /opt/kafka-data
+       state: directory
+       mode: '0755'
+     tags:
+      - kafka_conf  
+
 
    - name: Modify server.properties listeners=PLAINTEXT
      replace:
-       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       path: /etc/kafka/server.properties
        regexp: '^#listeners=PLAINTEXT'
        replace: 'listeners=PLAINTEXT'
      tags:
-      - kafka_1.1.1
+      - kafka_conf
 
    - name: Modify server.properties log.dirs
      replace:
-       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       path: /etc/kafka/server.properties
        regexp: '^log.dirs=/tmp/kafka-logs'
-       replace: 'log.dirs=/opt/kafka-1.1.1-data'
+       replace: 'log.dirs=/opt/kafka-data'
      tags:
-      - kafka_1.1.1
+      - kafka_conf
 
    - name: Modify server.properties add couple non default parameters
      blockinfile:
-       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       path: /etc/kafka/server.properties
        block: |
          delete.topic.enable=true
          num.partitions=8
@@ -125,38 +220,33 @@
          offsets.topic.replication.factor=3
          min.insync.replicas=2
      tags:
-      - kafka_1.1.1
-      - change_config
+      - kafka_conf
 
-   - name: Creates /opt/kafka-1.1.1-data directory
-     file:
-       path: /opt/kafka-1.1.1-data
-       state: directory
-     tags:
-      - kafka_1.1.1
-
-   - name: Modify server.properties zookeeper.connect
-     replace:
-       path: /opt/kafka_2.12-1.1.1/config/server.properties
-       regexp: '^zookeeper.connect=localhost:2181'
-       replace: 'zookeeper.connect=consumer1:2181'
-     tags:
-      - kafka_1.1.1
 
    - name: Modify server.properties broker.id and use last ip octet
      replace:
-       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       path: /etc/kafka/server.properties
        regexp: '^broker.id=0'
        replace: 'broker.id={{ ansible_eth0.ipv4.address.split(".")[-1] }}'
      tags:
-      - kafka_1.1.1
+      - kafka_conf
+
+   - name: "Modify server.properties zookeeper.connect, host variable zookeeper_location needs to be set like eg. zookeeper_location: monitoring:2181/kafka_consumer4"
+     replace:
+       path: /etc/kafka/server.properties
+       regexp: '^zookeeper.connect=localhost:2181'
+       replace: 'zookeeper.connect={{ zookeeper_location }}'
+     tags:
+      - kafka_conf
+#
+# Prometheus exporter (required for start as is included in service script)
+#
 
    - name: Creates /opt/prometheus directory
      file:
        path: /opt/prometheus
        state: directory
      tags:
-      - kafka_1.1.1
       - jmx_prometheus_javaagent-0.3.1
       - jmx_prometheus_javaagent-0.16.1
 
@@ -166,7 +256,6 @@
        dest: /opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar
        checksum: md5:4f08e57afb4088469904956237c0cf8e
      tags:
-      - kafka_1.1.1
       - jmx_prometheus_javaagent-0.3.1
 
    - name: Download kafka-0-8-2.yml
@@ -175,7 +264,6 @@
        dest: /opt/prometheus/kafka-0-8-2.yml
        checksum: md5:8341aa61b494660132ab8a6c7312a780
      tags:
-      - kafka_1.1.1
       - jmx_prometheus_javaagent-0.3.1
 
    - name: Download mx_prometheus_javaagent-0.16.1.jar
@@ -184,7 +272,6 @@
        dest: /opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar
        checksum: md5:2882dbb749e2bdfba6cc44f9f992ccd8
      tags:
-      - kafka_1.1.1
       - jmx_prometheus_javaagent-0.16.1
 
    - name: Download kafka-2_0_0.yml
@@ -193,7 +280,6 @@
        dest: /opt/prometheus/kafka-2_0_0.yml
        checksum: md5:3ac75e7b2dbf441945a4fc8bc06e9e39
      tags:
-      - kafka_1.1.1
       - jmx_prometheus_javaagent-0.16.1
 
 
@@ -212,7 +298,6 @@
        path: /opt/jolokia
        state: directory
      tags:
-      - kafka_1.1.1
       - jolokia
 
    - name: Jolokia - Download jolokia-jvm-1.6.0-agent.jar
@@ -221,11 +306,21 @@
        dest: /opt/jolokia/jolokia-agent.jar
        checksum: md5:01df022b01a34c9b021231172adc776b
      tags:
-      - kafka_1.1.1
       - jolokia
 
 
-   - name: Run Kafka 1.1.1 as a service
+
+#
+# Startup script as systemd service
+#
+   - name: Create log dir
+     file:
+       path: /opt/kafka/logs
+       state: directory
+     tags:
+      - service
+
+   - name: Run Kafka as a service
      copy:
        dest: /etc/systemd/system/kafka.service
        backup: yes
@@ -244,7 +339,7 @@
          #Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.3.1.jar=8080:/opt/prometheus/kafka-0-8-2.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
          #Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/prometheus/kafka-2_0_0.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
          Environment="KAFKA_OPTS=-javaagent:/opt/prometheus/jmx_prometheus_javaagent-0.16.1.jar=8080:/opt/prometheus/kafka_broker.yml -javaagent:/opt/jolokia/jolokia-agent.jar=host=*"
-         ExecStart=/bin/sh -c '/opt/kafka/bin/kafka-server-start.sh /opt/kafka/config/server.properties > /opt/kafka/logs/kafka_start.log 2>&1'
+         ExecStart=/bin/sh -c '/opt/kafka/bin/kafka-server-start.sh /etc/kafka/server.properties > /opt/kafka/logs/kafka_start.log 2>&1'
          ExecStop=/opt/kafka/bin/kafka-server-stop.sh
          Restart=on-failure
          RestartSec=60s
@@ -253,8 +348,36 @@
          WantedBy=multi-user.target
      register: kafka
      tags:
-      - kafka_1.1.1
       - service
+
+   - name: Start Kafka 
+     service:
+       name: kafka.service
+       state: started
+       enabled: yes
+     tags:
+      - service
+
+   - name: Restart Kafka if some configuration has changed
+     service:
+       name: kafka.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: kafka.changed
+     tags:
+      - service
+
+#
+# -----------
+#
+
+
+
+
+
+
+
 
 
    - name: Run Zookeeper from Kafka binaries as a service
@@ -300,13 +423,24 @@
      tags:
       - kafka_1.1.1
 
-   - name: Start Kafka 1.1.1
-     service:
-       name: kafka.service
-       state: started
-       enabled: yes
+
+
+
+
+#
+# Upgrade
+#
+   - name: Upgrade to Kafka 2 - Modify server.properties add 
+     blockinfile:
+       path: /opt/kafka_2.12-1.1.1/config/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=1.1
+         log.message.format.version=1.1
+     register: kafka_config
      tags:
-      - kafka_1.1.1
+      - kafka_up_2a
 
    - name: Restart Kafka 1.1.1 if some configuration has changed
      service:
@@ -314,11 +448,71 @@
        state: restarted
        enabled: yes
        daemon_reload: yes
-     when: kafka.changed
+     when: kafka_config.changed
      tags:
-      - kafka_1.1.1
-      - service
+      - kafka_up_2a
 
+   - name: Wait 10 seconds 
+     pause:
+       seconds: 10
+     tags:
+      - kafka_up_2a
+
+
+
+
+# Kafka upgrade from 1.1.1 to 2.3.0
+   - name: Copy /opt/kafka_2.12-1.1.1/config/server.properties to /opt/kafka_2.12-2.3.0/config/
+     ansible.builtin.copy:
+       remote_src: yes
+       src: /opt/kafka_2.12-1.1.1/config/server.properties
+       dest: /opt/kafka_2.12-2.3.0/config/server.properties
+       backup: yes
+     tags:
+      - kafka_2.3.0_copy_from_1.1.1
+
+   - name: Restart Kafka from new binaries
+     service:
+       name: kafka.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     tags:
+      - kafka_restart
+
+   - name: Wait 10 seconds 
+     pause:
+       seconds: 10
+     tags:
+      - kafka_restart
+
+   - name: Upgrade to Kafka 2 - Modify server.properties add 
+     blockinfile:
+       path: /opt/kafka_2.12-2.3.0/config/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=2.3
+         log.message.format.version=1.1
+     register: kafka_config
+     tags:
+      - kafka_inter_broker_2_3
+
+   - name: Upgrade to Kafka 2 - Modify server.properties add 
+     blockinfile:
+       path: /opt/kafka_2.12-2.3.0/config/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=2.3
+         log.message.format.version=2.3
+     register: kafka_config
+     tags:
+      - kafka_log_message_2_3
+
+#
+# Mirror - maker
+#
    - name: Checking loop
      debug:
        msg="Now working with {{ item }}"
@@ -377,112 +571,11 @@
        mode: '0755'
      tags:
       - mm_scripts
-      - kafka_1.1.1
-
-   - name: Upgrade to Kafka 2 - Modify server.properties add 
-     blockinfile:
-       path: /opt/kafka_2.12-1.1.1/config/server.properties
-       backup: yes
-       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
-       block: |
-         inter.broker.protocol.version=1.1
-         log.message.format.version=1.1
-     register: kafka_config
-     tags:
-      - kafka_up_2a
-
-   - name: Restart Kafka 1.1.1 if some configuration has changed
-     service:
-       name: kafka.service
-       state: restarted
-       enabled: yes
-       daemon_reload: yes
-     when: kafka_config.changed
-     tags:
-      - kafka_up_2a
-
-   - name: Wait 10 seconds to allow Sentinel to start and receive configuration from Redis master
-     pause:
-       seconds: 10
-     tags:
-      - kafka_up_2a
 
 
-   - name: Download kafka_2.12-2.3.0.tgz
-     get_url:
-       url: https://archive.apache.org/dist/kafka/2.3.0/kafka_2.12-2.3.0.tgz
-       dest: /opt/kafka_2.12-2.3.0.tgz
-       checksum: md5:8f86fb2421f6392f72bd8d7e1cfe4bf6
-     tags:
-      - kafka_2.3.0
-
-   - name: Extract kafka_2.12-2.3.0.tgz into /opt
-     unarchive:
-       src: /opt/kafka_2.12-2.3.0.tgz
-       dest: /opt
-       remote_src: yes
-       creates: /opt/kafka_2.12-2.3.0
-     tags:
-      - kafka_2.3.0
-
-   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-2.3.0
-     ansible.builtin.file:
-       src: /opt/kafka_2.12-2.3.0
-       dest: /opt/kafka
-       state: link
-       force: yes
-     tags:
-      - kafka_2.3.0_bin_link
-
-   - name: Copy /opt/kafka_2.12-1.1.1/config/server.properties to /opt/kafka_2.12-2.3.0/config/
-     ansible.builtin.copy:
-       remote_src: yes
-       src: /opt/kafka_2.12-1.1.1/config/server.properties
-       dest: /opt/kafka_2.12-2.3.0/config/server.properties
-       backup: yes
-     tags:
-      - kafka_2.3.0_copy_from_1.1.1
-
-   - name: Restart Kafka from new binaries
-     service:
-       name: kafka.service
-       state: restarted
-       enabled: yes
-       daemon_reload: yes
-     tags:
-      - kafka_restart
-
-   - name: Wait 10 seconds to allow Sentinel to start and receive configuration from Redis master
-     pause:
-       seconds: 10
-     tags:
-      - kafka_restart
-
-   - name: Upgrade to Kafka 2 - Modify server.properties add 
-     blockinfile:
-       path: /opt/kafka_2.12-2.3.0/config/server.properties
-       backup: yes
-       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
-       block: |
-         inter.broker.protocol.version=2.3
-         log.message.format.version=1.1
-     register: kafka_config
-     tags:
-      - kafka_inter_broker_2_3
-
-   - name: Upgrade to Kafka 2 - Modify server.properties add 
-     blockinfile:
-       path: /opt/kafka_2.12-2.3.0/config/server.properties
-       backup: yes
-       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
-       block: |
-         inter.broker.protocol.version=2.3
-         log.message.format.version=2.3
-     register: kafka_config
-     tags:
-      - kafka_log_message_2_3
-
-
+#
+# Mirror maker monitoring
+#
    - name: Checking loop
      debug:
        msg="Checking if the following processes are running {{ ps_check }}"
@@ -522,6 +615,10 @@
      tags:
       - mm_monitor
 
+
+#
+# Kafka exporter 
+#
    - name: Download kafka_exporter-1.3.1.linux-armv7.tar.gz
      get_url:
        url: https://github.com/danielqsj/kafka_exporter/releases/download/v1.3.1/kafka_exporter-1.3.1.linux-armv7.tar.gz
@@ -573,7 +670,9 @@
      tags:
       - danielqsj_kafka_exporter_1.3.1
 
+#
 # Install Kafka Manager - CMAK: (Yahoo)
+#
 
    - name: Download https://github.com/yahoo/CMAK/releases/download/3.0.0.5/cmak-3.0.0.5.zip
      get_url:
@@ -651,9 +750,9 @@
      tags:
       - kafka_cmak
 
-# / Install Kafka Manager - CMAK: (Yahoo)
-
+#
 # debug
+#
    - name: Display all variables/facts known for a host
      debug:
        var: hostvars[inventory_hostname]
