@@ -9,10 +9,11 @@
   tasks:
    - name: Install required packages
      apt:
-       name: vim
+       name: vim,subversion
        state: present
      tags:
       - update
+      - scripto
 
   
    - name: Make sure .vimrc disables visual mode

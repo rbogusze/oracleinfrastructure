@@ -201,7 +201,7 @@
      get_url:
        url: https://raw.githubusercontent.com/confluentinc/jmx-monitoring-stacks/6.1.0-post/shared-assets/jmx-exporter/kafka_broker.yml
        dest: /opt/prometheus/kafka_broker.yml
-       checksum: md5:ffcdb7d5619a204a236353b5ecab9d83
+       #checksum: md5:ffcdb7d5619a204a236353b5ecab9d83
      tags:
       - kafka_1.1.1
       - jmx_prometheus_javaagent-0.16.1
