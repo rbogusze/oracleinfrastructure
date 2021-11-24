@@ -7,3 +7,4 @@ R_PASS: "abracadabra"
 R_SHUTDOWN_COMMAND: "SHUTDOWN_ORANGE"
 R_MASTER_IP: "192.168.1.171"
 R_MAXMEMORY: "2gb"
+zookeeper_location: monitoring:2181/kafka_red0123

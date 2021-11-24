@@ -2,3 +2,4 @@ mm_scripts:
   - /home/pi/scripto/kafka/mirror_maker/kafka_mirror_mm_test1.sh
   - /home/pi/scripto/kafka/mirror_maker/kafka_mirror_mm_test2.sh
   - /home/pi/scripto/kafka/mirror_maker/kafka_mirror_mm_test3.sh
+zookeeper_location: monitoring:2181/kafka_red0123

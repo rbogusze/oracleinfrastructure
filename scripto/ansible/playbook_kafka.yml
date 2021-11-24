@@ -78,7 +78,6 @@
        dest: /opt/kafka_2.12-1.1.1.tgz
        checksum: md5:29c20027940c5c6f83fffd393df78f09
      tags:
-      - kafka_1.1.1
       - kafka_1.1.1_bin
 
    - name: Extract kafka_2.12-1.1.1.tgz into /opt
@@ -88,7 +87,6 @@
        remote_src: yes
        creates: /opt/kafka_2.12-1.1.1
      tags:
-      - kafka_1.1.1
       - kafka_1.1.1_bin
 
    - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-1.1.1
@@ -98,7 +96,6 @@
        state: link
        force: yes
      tags:
-      - kafka_1.1.1
       - kafka_1.1.1_bin_link
 # /Binaries for 1.1.1
 
@@ -157,6 +154,20 @@
      tags:
       - kafka_2.5.1_bin_link
 # /Binaries for 2.5.1
+
+# Generic section for binaries
+   - name: Create log dir
+     file:
+       path: /opt/kafka/logs
+       state: directory
+     tags:
+      - kafka_2.5.1_bin
+      - kafka_2.3.0_bin
+      - kafka_1.1.1_bin
+      - kafka_1.0.0_bin
+      - kafka_0.10.1_bin
+
+# /Generic section for binaries
 
 #
 # Vanilla Configuration files
@@ -238,6 +249,40 @@
        replace: 'zookeeper.connect={{ zookeeper_location }}'
      tags:
       - kafka_conf
+
+#
+# Upgrade
+#
+   - name: Upgrade - set inter.broker.protocol.version and log.message.format.version to 2.3
+     blockinfile:
+       path: /etc/kafka/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE BLOCK"
+       block: |
+         inter.broker.protocol.version=2.3
+         log.message.format.version=2.3
+     register: kafka_config
+     tags:
+      - kafka_protocol_message_2_3
+
+   - name: Restart Kafka if some configuration has changed
+     service:
+       name: kafka.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: kafka_config.changed
+     tags:
+      - kafka_protocol_message_2_3
+
+   - name: Wait 10 seconds 
+     pause:
+       seconds: 10
+     tags:
+      - kafka_protocol_message_2_3
+
+
+
 #
 # Prometheus exporter (required for start as is included in service script)
 #
@@ -313,12 +358,7 @@
 #
 # Startup script as systemd service
 #
-   - name: Create log dir
-     file:
-       path: /opt/kafka/logs
-       state: directory
-     tags:
-      - service
+
 
    - name: Run Kafka as a service
      copy:
