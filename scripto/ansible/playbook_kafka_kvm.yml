@@ -1,0 +1,290 @@
+- name: Setup basic actions on computers at home
+  hosts: all
+
+  vars_files:
+  - ~/osobiste/dane_aplikacji/remik/ansible_vault.yml
+
+  vars:
+    zookeeper_location: 10.189.131.18:2181/kafka_0234
+
+#  become: yes
+#  become_user: root
+  serial: "{{ serial_number|default(3) }}"
+  tasks:
+
+   - name: Download kafka_2.12-2.3.1.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/2.3.1/kafka_2.12-2.3.1.tgz
+       dest: ~/kafka_2.12-2.3.1.tgz
+       checksum: md5:a087702e906c94bd5dd8bf4b768592fb
+     tags:
+      - kafka_2.3.1_bin
+      - kafka_2.3.1_setup
+
+   - name: Extract kafka_2.12-2.3.1.tgz into ~/
+     unarchive:
+       src: ~/kafka_2.12-2.3.1.tgz
+       dest: ~/
+       remote_src: yes
+       creates: ~/kafka_2.12-2.3.1
+     tags:
+      - kafka_2.3.1_bin
+      - kafka_2.3.1_setup
+
+   - name: Create a symbolic link ~/kafka -> ~/kafka_2.12-2.3.1
+     ansible.builtin.file:
+       src: ~/kafka_2.12-2.3.1
+       dest: ~/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_2.3.1_bin_link
+      - kafka_2.3.1_setup
+
+   - name: Create log dir ~/kafka/logs
+     file:
+       path: ~/kafka/logs
+       state: directory
+     tags:
+      - kafka_conf
+
+   - name: Creates ~/kafka-data directory
+     ansible.builtin.file:
+       path: ~/kafka-data
+       state: directory
+       mode: '0755'
+     tags:
+      - kafka_conf
+
+   - name: Creates ~/kafka-etc directory
+     ansible.builtin.file:
+       path: ~/kafka-etc
+       state: directory
+       mode: '0755'
+     tags:
+      - kafka_conf
+
+   - name: Copy vanilla 2.3.0 conf to /etc/kafka
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/templates/server.properties_2.3.0
+       dest: ~/kafka-etc/server.properties
+       backup: yes
+     tags:
+      - kafka_conf
+
+   - name: Modify server.properties listeners=PLAINTEXT
+     replace:
+       path: ~/kafka-etc/server.properties
+       regexp: '^#listeners=PLAINTEXT'
+       replace: 'listeners=PLAINTEXT'
+     tags:
+      - kafka_conf
+
+   - name: Modify server.properties log.dirs
+     replace:
+       path: ~/kafka-etc/server.properties
+       regexp: '^log.dirs=/tmp/kafka-logs'
+       replace: 'log.dirs=~/kafka-data'
+     tags:
+      - kafka_conf
+
+
+   - name: Modify server.properties add couple non default parameters
+     blockinfile:
+       path: ~/kafka-etc/server.properties
+       block: |
+         delete.topic.enable=true
+         num.partitions=8
+         default.replication.factor=3
+         log.retention.hours=168
+         zookeeper.connection.timeout.ms=6000
+         auto.create.topics.enable=false
+         offsets.topic.replication.factor=3
+         min.insync.replicas=2
+     tags:
+      - kafka_conf
+
+
+   - name: Modify server.properties broker.id and use last ip octet
+     replace:
+       path: ~/kafka-etc/server.properties
+       regexp: '^broker.id=0'
+       replace: 'broker.id={{ ansible_eth0.ipv4.address.split(".")[-1] }}'
+     tags:
+      - kafka_conf
+
+   - name: "Modify server.properties zookeeper.connect, host variable zookeeper_location needs to be set like eg. zookeeper_location:
+monitoring:2181/kafka_consumer4"
+     replace:
+       path: ~/kafka-etc/server.properties
+       regexp: '^zookeeper.connect=localhost:2181'
+       replace: 'zookeeper.connect={{ zookeeper_location }}'
+     tags:
+      - kafka_conf
+
+   - name: Creates ~/prometheus directory
+     file:
+       path: ~/prometheus
+       state: directory
+     tags:
+      - jmx_prometheus_javaagent-0.16.1
+
+
+   - name: Download mx_prometheus_javaagent-0.16.1.jar
+     get_url:
+       url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar
+       dest: ~/prometheus/jmx_prometheus_javaagent-0.16.1.jar
+       checksum: md5:2882dbb749e2bdfba6cc44f9f992ccd8
+     tags:
+      - jmx_prometheus_javaagent-0.16.1
+
+   - name: Download kafka-2_0_0.yml
+     get_url:
+       url: https://raw.githubusercontent.com/prometheus/jmx_exporter/master/example_configs/kafka-2_0_0.yml
+       dest: ~/prometheus/kafka-2_0_0.yml
+       checksum: md5:3ac75e7b2dbf441945a4fc8bc06e9e39
+     tags:
+      - jmx_prometheus_javaagent-0.16.1
+
+
+   - name: Download kafka_broker.yml
+     get_url:
+       url: https://raw.githubusercontent.com/confluentinc/jmx-monitoring-stacks/6.1.0-post/shared-assets/jmx-exporter/kafka_broker.yml
+       dest: ~/prometheus/kafka_broker.yml
+       #checksum: md5:ffcdb7d5619a204a236353b5ecab9d83
+     tags:
+      - kafka_1.1.1
+      - jmx_prometheus_javaagent-0.16.1
+
+   - name: Setup ~/kafka_start.sh
+     copy:
+       dest: ~/kafka_start.sh
+       backup: no
+       content: |
+         #!/bin/bash
+         export JMX_PORT=9999
+         export KAFKA_HEAP_OPTS="-Xmx3000M -Xms2560M"
+         export KAFKA_OPTS="-javaagent:/home/rboguszewicz/prometheus/jmx_prometheus_javaagent-0.16.1.jar=80:/home/rboguszewicz/prometheus/kafka_broker.yml"
+         nohup ~/kafka/bin/kafka-server-start.sh ~/kafka-etc/server.properties > ~/kafka/logs/kafka_start.log 2>&1 &
+     tags:
+      - service
+
+   - name: Chmod 755 ~/kafka_start.sh
+     ansible.builtin.file:
+       path: ~/kafka_start.sh
+       state: file
+       mode: '0755'
+     tags:
+      - service
+
+   - name: Run Kafka as a service
+     copy:
+       dest: ~/kafka_stop.sh
+       backup: no
+       content: |
+         #!/bin/bash
+         ~/kafka/bin/kafka-server-stop.sh
+     tags:
+      - service
+
+   - name: chmod 755 ~/kafka_stop.sh
+     ansible.builtin.file:
+       path: ~/kafka_stop.sh
+       state: file
+       mode: '0755'
+     tags:
+      - service
+
+   - name: Upgrade to Kafka 2 - Modify server.properties add
+     blockinfile:
+       path: ~/kafka-etc/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=2.3
+         log.message.format.version=2.3
+     register: kafka_config
+     tags:
+      - kafka_log_message_2_3
+
+   - name: Upgrade to Kafka 2 - Modify server.properties add
+     blockinfile:
+       path: ~/kafka-etc/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE 2 BLOCK"
+       block: |
+         inter.broker.protocol.version=2.5
+         log.message.format.version=2.5
+     register: kafka_config
+     tags:
+      - kafka_log_message_2_5
+
+# Binaries for 2.5.1
+   - name: Download kafka_2.12-2.5.1.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/2.5.1/kafka_2.12-2.5.1.tgz
+       dest: ~/kafka_2.12-2.5.1.tgz
+       checksum: md5:b4262ee6b2e843cd25a4e92a355ced0c
+     tags:
+      - kafka_2.5.1_bin
+
+   - name: Extract kafka_2.12-2.5.1.tgz into /opt
+     unarchive:
+       src: ~/kafka_2.12-2.5.1.tgz
+       dest: ~/
+       remote_src: yes
+       creates: ~/kafka_2.12-2.5.1
+     tags:
+      - kafka_2.5.1_bin
+
+   - name: Create a symbolic link ~/kafka -> ~/kafka_2.12-2.5.1
+     ansible.builtin.file:
+       src: ~/kafka_2.12-2.5.1
+       dest: ~/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_2.5.1_bin_link
+# /Binaries for 2.5.1
+
+
+# Binaries for 2.8.1
+   - name: Download kafka_2.13-2.8.1.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/2.8.1/kafka_2.13-2.8.1.tgz
+       dest: ~/kafka_2.13-2.8.1.tgz
+       checksum: md5:04ed506da2d68fb118332875639020e7
+     tags:
+      - kafka_2.8.1_bin
+
+   - name: Extract kafka_2.13-2.8.1.tgz into /opt
+     unarchive:
+       src: ~/kafka_2.13-2.8.1.tgz
+       dest: ~/
+       remote_src: yes
+       creates: ~/kafka_2.13-2.8.1
+     tags:
+      - kafka_2.8.1_bin
+
+   - name: Create a symbolic link ~/kafka -> ~/kafka_2.13-2.8.1
+     ansible.builtin.file:
+       src: ~/kafka_2.13-2.8.1
+       dest: ~/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_2.8.1_bin_link
+# /Binaries for 2.5.1
+
+
+   - name: Create test directory
+     file:
+       path: ~/remi_test
+       state: directory
+     tags:
+      - remi_test
+      - never
+
+
+
+
