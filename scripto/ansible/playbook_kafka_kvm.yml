@@ -72,27 +72,48 @@
      tags:
       - kafka_conf
 
-   - name: Modify server.properties listeners=PLAINTEXT
-     replace:
-       path: ~/kafka-etc/server.properties
-       regexp: '^#listeners=PLAINTEXT'
-       replace: 'listeners=PLAINTEXT'
-     tags:
-      - kafka_conf
+#   - name: Modify server.properties listeners=PLAINTEXT
+#     replace:
+#       path: ~/kafka-etc/server.properties
+#       regexp: '^#listeners=PLAINTEXT'
+#       replace: 'listeners=PLAINTEXT'
+#     tags:
+#      - kafka_conf
 
    - name: Modify server.properties log.dirs
      replace:
        path: ~/kafka-etc/server.properties
        regexp: '^log.dirs=/tmp/kafka-logs'
-       replace: 'log.dirs=~/kafka-data'
+       replace: '#log.dirs=/tmp/kafka-logs'
      tags:
       - kafka_conf
 
+   - name: Modify server.properties broker.id and use last ip octet
+     replace:
+       path: ~/kafka-etc/server.properties
+       regexp: '^broker.id=0'
+       replace: '#broker.id=0'
+     tags:
+      - kafka_conf
+
+   - name: "Modify server.properties zookeeper.connect, host variable zookeeper_location needs to be set like eg. zookeeper_location:
+monitoring:2181/kafka_consumer4"
+     replace:
+       path: ~/kafka-etc/server.properties
+       regexp: '^zookeeper.connect=localhost:2181'
+       replace: '#zookeeper.connect=localhost:2181'
+     tags:
+      - kafka_conf
 
    - name: Modify server.properties add couple non default parameters
      blockinfile:
        path: ~/kafka-etc/server.properties
+       marker: "# {mark} ANSIBLE MANAGED CONFIG BLOCK"
        block: |
+         listeners=PLAINTEXT://:9092
+         log.dirs=/home/rboguszewicz/kafka-data
+         broker.id={{ ansible_eth0.ipv4.address.split(".")[-1] }}
+         zookeeper.connect={{ zookeeper_location }}
          delete.topic.enable=true
          num.partitions=8
          default.replication.factor=3
@@ -105,22 +126,6 @@
       - kafka_conf
 
 
-   - name: Modify server.properties broker.id and use last ip octet
-     replace:
-       path: ~/kafka-etc/server.properties
-       regexp: '^broker.id=0'
-       replace: 'broker.id={{ ansible_eth0.ipv4.address.split(".")[-1] }}'
-     tags:
-      - kafka_conf
-
-   - name: "Modify server.properties zookeeper.connect, host variable zookeeper_location needs to be set like eg. zookeeper_location:
-monitoring:2181/kafka_consumer4"
-     replace:
-       path: ~/kafka-etc/server.properties
-       regexp: '^zookeeper.connect=localhost:2181'
-       replace: 'zookeeper.connect={{ zookeeper_location }}'
-     tags:
-      - kafka_conf
 
    - name: Creates ~/prometheus directory
      file:
@@ -275,7 +280,59 @@ monitoring:2181/kafka_consumer4"
      tags:
       - kafka_2.8.1_bin_link
 # /Binaries for 2.5.1
+   - name: Common block that installs Redis binaries, to be used both on Redis and Sentinel hosts
+     block:
+       - name: Run kafka_stop.sh
+         command: ./kafka_stop.sh
+         args:
+           chdir: ~/
+         ignore_errors: yes
 
+       - name: Download kafka_2.12-{{ kafka_version }}.tgz
+         get_url:
+           url: https://archive.apache.org/dist/kafka/{{ kafka_version }}/kafka_2.12-{{ kafka_version }}.tgz
+           dest: ~/kafka_2.12-{{ kafka_version }}.tgz
+
+       - name: Extract kafka_2.12-{{ kafka_version }}.tgz into /opt
+         unarchive:
+           src: ~/kafka_2.12-{{ kafka_version }}.tgz
+           dest: ~/
+           remote_src: yes
+           creates: ~/kafka_2.12-{{ kafka_version }}
+
+       - name: Create a symbolic link ~/kafka -> ~/kafka_2.12-{{ kafka_version }}
+         ansible.builtin.file:
+           src: ~/kafka_2.12-{{ kafka_version }}
+           dest: ~/kafka
+           state: link
+           force: yes
+
+       - name: Create log dir ~/kafka/logs
+         file:
+           path: ~/kafka/logs
+           state: directory
+
+       - debug: msg="{{ zookeeper_location.split(':')[0] }}"
+
+       - name: Refresh /home/rboguszewicz/kafka-data dir
+         command: rm -Rf /home/rboguszewicz/kafka-data/*
+
+       - name: Refresh zookeeper
+         command: ./zookeeper_refresh.sh
+         args:
+           chdir: ~/
+         ignore_errors: yes
+         delegate_to: "{{ zookeeper_hostname }}"
+         run_once: true
+
+       - name: Run kafka_start.sh
+         command: ./kafka_start.sh
+         args:
+           chdir: ~/
+
+     tags:
+      - automation_stress_testing
+# /setup_common
 
    - name: Create test directory
      file:
