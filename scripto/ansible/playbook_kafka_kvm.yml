@@ -315,7 +315,10 @@ monitoring:2181/kafka_consumer4"
        - debug: msg="{{ zookeeper_location.split(':')[0] }}"
 
        - name: Refresh /home/rboguszewicz/kafka-data dir
-         command: rm -Rf /home/rboguszewicz/kafka-data/*
+         file: path=/home/rboguszewicz/kafka-data state=absent
+
+       - name: Refresh /home/rboguszewicz/kafka-data dir
+         file: path=/home/rboguszewicz/kafka-data state=directory
 
        - name: Refresh zookeeper
          command: ./zookeeper_refresh.sh
@@ -329,6 +332,36 @@ monitoring:2181/kafka_consumer4"
          command: ./kafka_start.sh
          args:
            chdir: ~/
+
+       - name: Run ./run_test.sh
+         command: "./run_test.sh | tee test-results/ola.txt"
+         args:
+           chdir: /home/rboguszewicz
+         delegate_to: "{{ zookeeper_hostname }}"
+         run_once: true
+         register: run_test
+         tags:
+          - tmp123
+
+       - debug: msg="{{ run_test.stdout }}"
+         run_once: true
+         tags:
+          - tmp123
+
+       - debug: msg="{{ run_test.stderr }}"
+         run_once: true
+         tags:
+          - tmp123
+
+       - name: copy the output to a local file
+         copy:
+           content: "{{ run_test.stdout }}"
+           dest: "~/test-results/{{ kafka_version }}_{{ ansible_date_time.iso8601 }}.txt"
+         delegate_to: localhost
+         run_once: true
+         tags:
+          - tmp123
+     
 
      tags:
       - automation_stress_testing
