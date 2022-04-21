@@ -155,12 +155,48 @@
       - kafka_2.5.1_bin_link
 # /Binaries for 2.5.1
 
+# Binaries for 2.6.3
+   - name: Download kafka_2.12-2.6.3.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/2.6.3/kafka_2.12-2.6.3.tgz
+       dest: /opt/kafka_2.12-2.6.3.tgz
+       checksum: md5:3eb610e6918cab898450567b1f7c1f7f
+     tags:
+      - kafka_2.6.3_bin
+
+   - name: Extract kafka_2.12-2.6.3.tgz into /opt
+     unarchive:
+       src: /opt/kafka_2.12-2.6.3.tgz
+       dest: /opt
+       remote_src: yes
+       creates: /opt/kafka_2.12-2.6.3
+     tags:
+      - kafka_2.6.3_bin
+
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-2.6.3
+     ansible.builtin.file:
+       src: /opt/kafka_2.12-2.6.3
+       dest: /opt/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_2.6.3_bin_link
+# /Binaries for 2.6.3
+
+
+
+
+
+
+
+
 # Generic section for binaries
    - name: Create log dir
      file:
        path: /opt/kafka/logs
        state: directory
      tags:
+      - kafka_2.6.3_bin
       - kafka_2.5.1_bin
       - kafka_2.3.0_bin
       - kafka_1.1.1_bin
@@ -265,6 +301,18 @@
      tags:
       - kafka_protocol_message_2_3
 
+   - name: Upgrade - set inter.broker.protocol.version and log.message.format.version to 2.6
+     blockinfile:
+       path: /etc/kafka/server.properties
+       backup: yes
+       marker: "# {mark} ANSIBLE MANAGED UPGRADE BLOCK"
+       block: |
+         inter.broker.protocol.version=2.6
+         log.message.format.version=2.6
+     register: kafka_config
+     tags:
+      - kafka_protocol_message_2_6
+
    - name: Restart Kafka if some configuration has changed
      service:
        name: kafka.service
@@ -274,12 +322,33 @@
      when: kafka_config.changed
      tags:
       - kafka_protocol_message_2_3
+      - kafka_protocol_message_2_6
 
    - name: Wait 10 seconds 
      pause:
        seconds: 10
      tags:
       - kafka_protocol_message_2_3
+      - kafka_protocol_message_2_6
+
+#
+# Kafka rolling restart, use like:
+# $ ansible-playbook playbook_kafka.yml --tags kafka_rolling_restart --limit red01,red02,red03 -e serial_number=1
+#
+   - name: Restart Kafka 
+     service:
+       name: kafka.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     tags:
+      - kafka_rolling_restart
+
+   - name: Wait 10 seconds 
+     pause:
+       seconds: 10
+     tags:
+      - kafka_rolling_restart
 
 
 
