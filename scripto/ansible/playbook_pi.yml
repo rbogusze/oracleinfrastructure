@@ -980,3 +980,81 @@
       - fluent_service
       - fluent
       - fluent_conf
+
+# say that I am up https://github.com/rbogusze/say-that-i-am-up
+# monitoring uptime and activity to kafka topic
+
+
+   - name: Checkout say-that-i-am-up git repo
+     git:
+       repo: 'https://github.com/adafruit/Adafruit_Python_DHT.git'
+       repo: 'https://github.com/rbogusze/say-that-i-am-up.git'
+       dest: /opt/say-that-i-am-up
+       update: yes
+     tags:
+      - say-that-i-am-up
+
+   - name: Setup say-that-i-am-up. Install required packages
+     apt:
+       name: python3-pip
+       state: present
+       update_cache: true
+       cache_valid_time: 36000
+     tags:
+      - say-that-i-am-up
+
+   - name: Setup say-that-i-am-up. Install required pip3 packages
+     pip:
+       name: kafka-python,psutil,gitpython,analytics-python
+       executable: pip3
+     tags:
+      - say-that-i-am-up
+
+   - name: Setup say-that-i-am-up. Segment dev key
+     copy:
+       dest: /opt/segment_token.txt
+       content: |
+         {{ vault_segment_dev_token }}
+     tags:
+      - say-that-i-am-up_segment_key
+      - say-that-i-am-up
+
+   - name: Setup say-that-i-am-up. Create service 1/3
+     copy:
+       dest: /lib/systemd/system/say-that-i-am-up.service
+       content: |
+         [Unit]
+         Description=Remi's say-that-i-am-up
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/opt/say-that-i-am-up
+         ExecStart=python3 activity_monitor.py
+         Restart=on-failure
+         Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jdk1.8.0_191/bin"
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - say-that-i-am-up
+      - say-that-i-am-up_service
+
+   
+   - name: Setup say-that-i-am-up. Create service 2/3
+     file:
+       path: /lib/systemd/system/say-that-i-am-up.service
+       mode: 0644
+     tags:
+      - say-that-i-am-up
+      - say-that-i-am-up_service
+
+   - name: Setup say-that-i-am-up. Create service 3/3
+     systemd:
+       name: say-that-i-am-up.service
+       state: started
+       enabled: yes
+     tags:
+      - say-that-i-am-up
+      - say-that-i-am-up_service
+
