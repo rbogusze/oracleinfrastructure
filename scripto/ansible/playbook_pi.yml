@@ -984,6 +984,15 @@
 # say that I am up https://github.com/rbogusze/say-that-i-am-up
 # monitoring uptime and activity to kafka topic
 
+   - name: Setup say-that-i-am-up. Install required packages
+     apt:
+       name: python3-pip,git
+       state: present
+       update_cache: true
+       cache_valid_time: 36000
+     tags:
+      - say-that-i-am-up
+
 
    - name: Checkout say-that-i-am-up git repo
      git:
@@ -991,15 +1000,6 @@
        repo: 'https://github.com/rbogusze/say-that-i-am-up.git'
        dest: /opt/say-that-i-am-up
        update: yes
-     tags:
-      - say-that-i-am-up
-
-   - name: Setup say-that-i-am-up. Install required packages
-     apt:
-       name: python3-pip
-       state: present
-       update_cache: true
-       cache_valid_time: 36000
      tags:
       - say-that-i-am-up
 
@@ -1030,7 +1030,7 @@
          [Service]
          Type=idle
          WorkingDirectory=/opt/say-that-i-am-up
-         ExecStart=python3 activity_monitor.py
+         ExecStart=/usr/bin/python3 activity_monitor.py
          Restart=on-failure
          Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/jdk1.8.0_191/bin"
 
