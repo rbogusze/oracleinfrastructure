@@ -860,6 +860,45 @@
       - kafka_cmak
 
 #
+# Schema Registry
+#
+   - name: Run schema registry as a service
+     copy:
+       dest: /etc/systemd/system/schema_registry.service
+       backup: yes
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
+
+         [Service]
+         Type=simple
+         User=root
+         WorkingDirectory=/opt/confluent/confluent-5.3.8
+         Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-armhf"
+         ExecStart=/opt/confluent/confluent-5.3.8/bin/schema-registry-start /opt/confluent/confluent-5.3.8/etc/schema-registry/schema-registry.properties
+         Restart=on-failure
+         RestartSec=60s
+
+         [Install]
+         WantedBy=multi-user.target
+     register: schema_registry
+     tags:
+      - schema_registry
+
+   - name: Start schema_registry
+     service:
+       name: schema_registry.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: schema_registry.changed
+     tags:
+      - schema_registry
+
+#
 # debug
 #
    - name: Display all variables/facts known for a host
