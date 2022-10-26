@@ -286,6 +286,17 @@
      tags:
       - kafka_conf
 
+   - name: "Modify /opt/kafka/config/log4j.properties to not add hour to previous log names"
+     replace:
+       path: /opt/kafka/config/log4j.properties
+       regexp: 'yyyy-MM-dd-HH'
+       replace: 'yyyy-MM-dd'
+     tags:
+      - kafka_log4j
+      - kafka_conf
+
+
+
 #
 # Upgrade
 #
