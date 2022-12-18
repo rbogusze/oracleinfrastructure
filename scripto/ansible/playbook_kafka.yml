@@ -183,6 +183,36 @@
       - kafka_2.6.3_bin_link
 # /Binaries for 2.6.3
 
+# Binaries for 3.3.1
+   - name: Download kafka_2.12-3.3.1.tgz
+     get_url:
+       url: https://archive.apache.org/dist/kafka/3.3.1/kafka_2.12-3.3.1.tgz
+       dest: /opt/kafka_2.12-3.3.1.tgz
+       checksum: md5:6d1db3717969ead1483e38c430cfdff2
+     tags:
+      - kafka_3.3.1_bin
+
+   - name: Extract kafka_2.12-3.3.1.tgz into /opt
+     unarchive:
+       src: /opt/kafka_2.12-3.3.1.tgz
+       dest: /opt
+       remote_src: yes
+       creates: /opt/kafka_2.12-3.3.1
+     tags:
+      - kafka_3.3.1_bin
+
+   - name: Create a symbolic link /opt/kafka -> /opt/kafka_2.12-3.3.1
+     ansible.builtin.file:
+       src: /opt/kafka_2.12-3.3.1
+       dest: /opt/kafka
+       state: link
+       force: yes
+     tags:
+      - kafka_3.3.1_bin_link
+# /Binaries for 2.6.3
+
+
+
 
 
 
@@ -196,6 +226,7 @@
        path: /opt/kafka/logs
        state: directory
      tags:
+      - kafka_3.3.1_bin
       - kafka_2.6.3_bin
       - kafka_2.5.1_bin
       - kafka_2.3.0_bin
