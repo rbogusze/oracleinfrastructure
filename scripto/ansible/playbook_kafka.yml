@@ -434,7 +434,7 @@
      get_url:
        url: https://raw.githubusercontent.com/prometheus/jmx_exporter/master/example_configs/kafka-2_0_0.yml
        dest: /opt/prometheus/kafka-2_0_0.yml
-       checksum: md5:3ac75e7b2dbf441945a4fc8bc06e9e39
+       #checksum: md5:3ac75e7b2dbf441945a4fc8bc06e9e39
      tags:
       - jmx_prometheus_javaagent-0.16.1
 
@@ -939,6 +939,83 @@
      when: schema_registry.changed
      tags:
       - schema_registry
+
+#
+# Run tcpdump when there are URPs visible
+#
+
+   - name: Creates /home/tcpdump directory
+     ansible.builtin.file:
+       path: /home/tcpdump
+       state: directory
+       mode: '0755'
+     tags:
+      - tcpdump_when_urps
+
+   - name: Copy run_tcpdump.sh to /home/tcpdump
+     ansible.builtin.copy:
+       src: ~/scripto/ansible/files/run_tcpdump.sh
+       dest: /home/tcpdump/run_tcpdump.sh
+       backup: no
+     tags:
+      - tcpdump_when_urps
+
+   - name: Make /home/tcpdump/run_tcpdump.sh 755
+     ansible.builtin.file:
+       path: /home/tcpdump/run_tcpdump.sh
+       state: file
+       owner: root
+       group: root
+       mode: '0755'
+     tags:
+      - tcpdump_when_urps
+
+
+   - name: Run schema registry as a service
+     copy:
+       dest: /etc/systemd/system/tcpdump_when_urps.service
+       backup: no
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
+
+         [Service]
+         Type=simple
+         User=root
+         WorkingDirectory=/home/tcpdump
+         ExecStart=/bin/sh -c '/home/tcpdump/run_tcpdump.sh >> /var/log/tcpdump_when_urps.log 2>&1'
+         Restart=on-failure
+         RestartSec=60s
+
+         [Install]
+         WantedBy=multi-user.target
+     register: tcpdump_when_urps
+     tags:
+      - tcpdump_when_urps
+
+   - name: Start tcpdump_when_urps
+     service:
+       name: tcpdump_when_urps.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: tcpdump_when_urps.changed
+     tags:
+      - tcpdump_when_urps
+
+   - name: Stop and disable tcpdump_when_urps
+     service:
+       name: tcpdump_when_urps.service
+       state: stopped
+       enabled: no
+       daemon_reload: yes
+     tags:
+      - tcpdump_when_urps_stop
+
+
 
 #
 # debug

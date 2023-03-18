@@ -9,7 +9,7 @@
   tasks:
    - name: Install required packages
      apt:
-       name: vim,subversion
+       name: vim,subversion,openjdk-11-jre-headless
        state: present
      tags:
       - update
