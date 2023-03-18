@@ -529,7 +529,25 @@
 
 
 
+#
+# --- zookeeper
+# WIP
 
+   - name: Creates /opt/zk-data directory
+     file:
+       path: /opt/zk-data
+       state: directory
+     tags:
+      - zookeeper
+
+   - name: Modify /opt/kafka/config/zookeeper.properties dataDir
+     replace:
+       path: /opt/kafka/config/zookeeper.properties
+       regexp: '^dataDir=/tmp/zookeeper'
+       replace: 'dataDir=/opt/zk-data'
+     register: zookeeper
+     tags:
+      - zookeeper
 
    - name: Run Zookeeper from Kafka binaries as a service
      copy:
@@ -565,7 +583,9 @@
      when: zookeeper.changed
      tags:
       - zookeeper
-
+#
+# /zookeeper
+#
 
    - name: Creates /opt/kafka-1.1.1-data directory
      file:
