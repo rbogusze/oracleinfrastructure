@@ -1118,6 +1118,42 @@
      tags:
       - prometheus_server
 
+   - name: Prometheus config for kafka_red0123
+     ansible.builtin.blockinfile:
+       path: /opt/prometheus/prometheus/prometheus.yml
+       marker: "# {mark} ANSIBLE MANAGED BLOCK for kafka_red0123"
+       block: |
+         # this is a comment to make the identation work
+           - job_name: "kafka_red0123"
+             static_configs:
+               - targets:
+                   - "red01:8080"
+                   - "red02:8080"
+                   - "red03:8080"
+                   - "producer2:8080"
+                 labels:
+                   env: "kafka"
+     register: prometheus
+     tags:
+      - prometheus_server
+
+   - name: Prometheus config for kafka_monitoring
+     ansible.builtin.blockinfile:
+       path: /opt/prometheus/prometheus/prometheus.yml
+       marker: "# {mark} ANSIBLE MANAGED BLOCK for kafka_monitoring "
+       block: |
+         # this is a comment to make the identation work
+           - job_name: "kafka_monitoring"
+             static_configs:
+               - targets:
+                   - "monitoring:8080"
+                 labels:
+                   env: "kafka"
+     register: prometheus
+     tags:
+      - prometheus_server
+
+
    - name: Restart Prometheus server if some configuration has changed
      service:
        name: prometheus.service
