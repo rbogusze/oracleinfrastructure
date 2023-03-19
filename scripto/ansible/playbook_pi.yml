@@ -996,7 +996,6 @@
 
    - name: Checkout say-that-i-am-up git repo
      git:
-       repo: 'https://github.com/adafruit/Adafruit_Python_DHT.git'
        repo: 'https://github.com/rbogusze/say-that-i-am-up.git'
        dest: /opt/say-that-i-am-up
        update: yes
@@ -1058,3 +1057,77 @@
       - say-that-i-am-up
       - say-that-i-am-up_service
 
+#
+# Prometheus server installation
+# WIP
+
+   - name: Prometheus server installation, download binaries
+     unarchive:
+       src: https://github.com/prometheus/prometheus/releases/download/v2.42.0/prometheus-2.42.0.linux-armv7.tar.gz
+       dest: /opt/prometheus
+       remote_src: yes
+       creates : /opt/prometheus/prometheus-2.42.0.linux-armv7
+     tags:
+      - prometheus_server
+
+   - name: Prometheus server installation, chown root:root
+     ansible.builtin.file:
+       path: /opt/prometheus/prometheus-2.42.0.linux-armv7
+       owner: root
+       group: root
+       recurse: yes
+     tags:
+      - prometheus_server
+
+   - name: Prometheus server installation, create link
+     ansible.builtin.file:
+       src: /opt/prometheus/prometheus-2.42.0.linux-armv7
+       dest: /opt/prometheus/prometheus
+       state: link
+       force: yes
+     tags:
+      - prometheus_server
+
+   - name: Prometheus server installation, systemd service
+     copy:
+       dest: /etc/systemd/system/prometheus.service
+       backup: yes
+       content: |
+         [Unit]
+         [Unit]
+         Description=Prometheus server
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/opt/prometheus/prometheus
+         ExecStart=/opt/prometheus/prometheus/prometheus
+         Restart=on-failure
+
+         [Install]
+         WantedBy=multi-user.target
+     register: prometheus
+     tags:
+      - prometheus_server
+
+   - name: Start Prometheus server
+     service:
+       name: prometheus.service
+       state: started
+       enabled: yes
+     tags:
+      - prometheus_server
+
+   - name: Restart Prometheus server if some configuration has changed
+     service:
+       name: prometheus.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: prometheus.changed
+     tags:
+      - prometheus_server
+
+#
+# /Prometheus server installation
+#
