@@ -1319,7 +1319,59 @@
      tags:
       - node_exporter
 
-
 #
 # /node_exporter installation to provide some basic node metrics
+#
+
+#
+# CC cruise-control autostart
+#
+
+   - name: Run CC as a service
+     copy:
+       dest: /etc/systemd/system/cruise_control.service
+       backup: no
+       content: |
+         [Unit]
+         Requires=network.target remote-fs.target
+         After=network.target remote-fs.target
+         StartLimitIntervalSec=600
+         StartLimitBurst=10
+
+         [Service]
+         Type=simple
+         User=root
+         Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-armhf"
+         Environment="PATH=$JAVA_HOME/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+         WorkingDirectory=/opt/cc/cruise-control-2.5.42
+         ExecStart=/bin/sh -c '/opt/cc/cruise-control-2.5.42/kafka-cruise-control-start.sh /opt/cc/cruise-control-2.5.42/config/cruisecontrol.properties 9091 > /var/log/cruise-control.log 2>&1'
+         Restart=on-failure
+         RestartSec=60s
+
+         [Install]
+         WantedBy=multi-user.target
+     register: cruise_control
+     tags:
+      - cruise_control
+
+   - name: Start CC
+     service:
+       name: cruise_control.service
+       state: started
+       enabled: yes
+     tags:
+      - cruise_control
+
+   - name: Restart CC if some configuration has changed
+     service:
+       name: cruise_control.service
+       state: restarted
+       enabled: yes
+       daemon_reload: yes
+     when: cruise_control.changed
+     tags:
+      - cruise_control
+
+#
+# CC cruise-control autostart
 #
