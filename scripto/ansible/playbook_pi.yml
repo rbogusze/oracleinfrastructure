@@ -1118,21 +1118,20 @@
      tags:
       - prometheus_server
 
-   - name: Prometheus config for kafka_red0123
+   - name: Prometheus config for kafka brokers
      ansible.builtin.blockinfile:
        path: /opt/prometheus/prometheus/prometheus.yml
        marker: "# {mark} ANSIBLE MANAGED BLOCK for kafka_red0123"
        block: |
          # this is a comment to make the identation work
-           - job_name: "kafka_red0123"
+           - job_name: "kafka-broker"
              static_configs:
-               - targets:
-                   - "red01:8080"
-                   - "red02:8080"
-                   - "red03:8080"
-                   - "producer2:8080"
+               - targets: ["red01:8080", "red02:8080", "red03:8080", "producer2:8080"]
                  labels:
-                   env: "kafka"
+                   env: "red0123"
+               - targets: ["monitoring:8080"]
+                 labels:
+                   env: "monitoring"
      register: prometheus
      tags:
       - prometheus_server
@@ -1143,12 +1142,32 @@
        marker: "# {mark} ANSIBLE MANAGED BLOCK for kafka_monitoring "
        block: |
          # this is a comment to make the identation work
-           - job_name: "kafka_monitoring"
+         #  - job_name: "kafka_monitoring"
+         #    static_configs:
+         #      - targets:
+         #          - "monitoring:8080"
+         #        labels:
+         #          env: "dev"
+     register: prometheus
+     tags:
+      - prometheus_server
+
+   - name: Prometheus config for kafka_monitoring, node_exporter
+     ansible.builtin.blockinfile:
+       path: /opt/prometheus/prometheus/prometheus.yml
+       marker: "# {mark} ANSIBLE MANAGED BLOCK for node_exporter "
+       block: |
+         # this is a comment to make the identation work
+           - job_name: "node_exporter"
              static_configs:
                - targets:
-                   - "monitoring:8080"
+                   - "monitoring:9100"
+                   - "red01:9100"
+                   - "red02:9100"
+                   - "red03:9100"
+                   - "producer2:9100"
                  labels:
-                   env: "kafka"
+                   env: "dev"
      register: prometheus
      tags:
       - prometheus_server
