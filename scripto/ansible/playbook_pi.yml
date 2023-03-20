@@ -1059,7 +1059,7 @@
 
 #
 # Prometheus server installation
-# WIP
+# 
 
    - name: Prometheus server installation, download binaries
      unarchive:
@@ -1166,4 +1166,79 @@
 
 #
 # /Prometheus server installation
+#
+
+#
+# Grafana server installation
+# WIP
+
+   - name: Grafana server, download deb
+     get_url: 
+       url: https://dl.grafana.com/oss/release/grafana_9.4.3_armhf.deb
+       dest: /opt/grafana_9.4.3_armhf.deb
+       checksum: sha256:7e93e6d24439cec65b369e6ebb856a5aaeb151392b26c0d8970cd6a4e44b1bf6
+     tags:
+      - grafana_server
+
+   - name: Grafana server, install deb
+     apt:
+       deb: /opt/grafana_9.4.3_armhf.deb
+     tags:
+      - grafana_server
+
+   - name: Start Grafana server
+     service:
+       name: grafana-server.service
+       state: started
+       enabled: yes
+     tags:
+      - grafana_server
+
+
+
+
+#
+# /Grafana server installation
+#
+
+
+#
+# Schema registry server installation
+#
+   - name: Schema registry server, create dir
+     ansible.builtin.file:
+       path: /opt/confluent
+       state: directory
+       mode: '0755'
+     tags:
+      - schema_registry
+
+   - name: Schema registry server, download and unarchive
+     unarchive:
+       src: https://packages.confluent.io/archive/5.3/confluent-community-5.3.8-2.12.tar.gz
+       dest: /opt/confluent
+       remote_src: yes
+       creates : /opt/confluent/confluent-5.3.8
+     tags:
+      - schema_registry
+
+   - name: Schema registry server, modify conf
+     replace:
+       path: /opt/confluent/confluent-5.3.8/etc/schema-registry/schema-registry.properties
+       regexp: '^kafkastore.connection.url=localhost:2181'
+       replace: '#kafkastore.connection.url=localhost:2181'
+     tags:
+      - schema_registry
+
+   - name: Schema registry server, modify conf
+     replace:
+       path: /opt/confluent/confluent-5.3.8/etc/schema-registry/schema-registry.properties
+       regexp: '^#kafkastore.bootstrap.servers=PLAINTEXT://localhost:9092'
+       replace: 'kafkastore.bootstrap.servers=PLAINTEXT://192.168.1.104:9092'
+     tags:
+      - schema_registry
+
+
+#
+# /Schema registry server installation
 #
