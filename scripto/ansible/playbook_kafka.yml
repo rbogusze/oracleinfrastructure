@@ -893,7 +893,7 @@
          Type=simple
          User=root
          Environment="JAVA_HOME=/usr/lib/jvm/java-11-openjdk-armhf"
-         ExecStart=/opt/cmak-3.0.0.5/bin/cmak -Dhttp.port=9100
+         ExecStart=/opt/cmak-3.0.0.5/bin/cmak -Dhttp.port=9111
          Restart=on-failure
          RestartSec=60s
 

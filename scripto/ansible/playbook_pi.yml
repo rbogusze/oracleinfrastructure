@@ -1238,7 +1238,69 @@
      tags:
       - schema_registry
 
-
 #
 # /Schema registry server installation
+#
+
+#
+# node_exporter installation to provide some basic node metrics
+#
+   - name: node_exporter, download and unarchive
+     unarchive:
+       src: https://github.com/prometheus/node_exporter/releases/download/v1.5.0/node_exporter-1.5.0.linux-armv7.tar.gz
+       dest: /opt
+       remote_src: yes
+       creates : /opt/node_exporter-1.5.0.linux-armv7
+     tags:
+      - node_exporter
+
+   - name: node_exporter, chown root:root
+     ansible.builtin.file:
+       path: /opt/node_exporter-1.5.0.linux-armv7
+       owner: root
+       group: root
+       recurse: yes
+     tags:
+      - node_exporter
+
+   - name: node_exporter, create link
+     ansible.builtin.file:
+       src: /opt/node_exporter-1.5.0.linux-armv7
+       dest: /opt/node_exporter
+       state: link
+       force: yes
+     tags:
+      - node_exporter
+
+   - name: node_exporter, systemd service
+     copy:
+       dest: /etc/systemd/system/node_exporter.service
+       backup: yes
+       content: |
+         [Unit]
+         Description=Prometheus Node Exporter
+         After=multi-user.target
+
+         [Service]
+         Type=idle
+         WorkingDirectory=/opt/node_exporter
+         ExecStart=/opt/node_exporter/node_exporter
+         Restart=on-failure
+
+         [Install]
+         WantedBy=multi-user.target
+     tags:
+      - node_exporter
+
+   - name: Start node_exporter server
+     service:
+       name: node_exporter.service
+       state: started
+       enabled: yes
+     tags:
+      - node_exporter
+
+
+#
+# /node_exporter installation to provide some basic node metrics
 #
