@@ -1125,6 +1125,8 @@
        block: |
          # this is a comment to make the identation work
            - job_name: "kafka-broker"
+             scrape_interval: 15s # Override the default global interval for this job
+             scrape_timeout: 15s # Override the default global timeout for this job
              static_configs:
                - targets: ["red01:8080", "red02:8080", "red03:8080", "producer2:8080"]
                  labels:
